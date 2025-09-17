@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title><%= title %></title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+  <!-- Sidebar DPA -->
+  <%- include('../partials/sidebarHMSI', { user: user, activeNav: 'Evaluasi' }) %>
+
+  <!-- Wrapper -->
+  <div class="lg:ml-80 opacity-0 animate-fade-in" style="animation-delay:150ms;">
+
+    <!-- Header -->
+    <div class="bg-white border-b border-gray-200">
+      <div class="max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
+        <h1 class="text-2xl font-bold text-gray-800 opacity-0 animate-slide-down" style="animation-delay:300ms;">
+          Kelola Evaluasi
+        </h1>
+      </div>
+    </div>
+
+    <!-- Main -->
+    <div class="px-6 py-8">
+      <div class="max-w-7xl mx-auto bg-white rounded-2xl border border-orange-200 shadow-sm p-6">
+
+        <!-- Search -->
+        <div class="mb-6">
+          <div class="relative">
+            <input id="searchInput" type="text" placeholder="Cari evaluasi..."
+              class="w-full pl-10 pr-4 py-3 border rounded-xl text-sm
+                     border-gray-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-500
+                     focus:bg-orange-50 focus:text-orange-700 
+                     placeholder-gray-400 focus:placeholder-orange-400
+                     transition-all duration-300">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+          </div>
+        </div>
+
+        <!-- Tabel Evaluasi -->
+        <div class="overflow-x-auto bg-white-50 p-2 shadow-sm rounded-xl">
+          <table class="min-w-full text-sm text-center border border-orange-200 rounded-xl overflow-hidden border-separate border-spacing-0">
+            <thead class="bg-orange-100 text-gray-700">
+              <tr>
+                <th class="py-3 px-4 font-semibold border border-orange-200">No</th>
+                <th class="py-3 px-4 font-semibold border border-orange-200 text-left">Judul Laporan</th>
+                <th class="py-3 px-4 font-semibold border border-orange-200">Program</th>
+                <th class="py-3 px-4 font-semibold border border-orange-200">Komentar</th>
+                <th class="py-3 px-4 font-semibold border border-orange-200">Status</th>
+                <th class="py-3 px-4 font-semibold border border-orange-200">Tanggal</th>
+                <th class="py-3 px-4 font-semibold border border-orange-200">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="evaluasiTable">
+              <% if (evaluasi && evaluasi.length > 0) { %>
+                <% evaluasi.forEach((e, index) => { %>
+                  <tr class="hover:bg-orange-50 transition">
+                    <td class="py-3 px-4 border border-orange-100"><%= index + 1 %></td>
+                    <td class="py-3 px-4 text-gray-800 font-medium border border-orange-100 text-left"><%= e.judul_laporan %></td>
+                    <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= e.Nama_ProgramKerja %></td>
+                    <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= e.komentar %></td>
+                    <td class="py-3 px-4 border border-orange-100">
+                      <% if (e.status_konfirmasi === "Revisi") { %>
+                        <span class="px-3 py-1 text-xs rounded-full bg-red-100 text-red-700 font-medium"><%= e.status_konfirmasi %></span>
+                      <% } else if (e.status_konfirmasi === "Selesai") { %>
+                        <span class="px-3 py-1 text-xs rounded-full bg-green-100 text-green-700 font-medium"><%= e.status_konfirmasi %></span>
+                      <% } else { %>
+                        <span class="px-3 py-1 text-xs rounded-full bg-gray-100 text-gray-600 font-medium"><%= e.status_konfirmasi %></span>
+                      <% } %>
+                    </td>
+                    <td class="py-3 px-4 text-gray-500 border border-orange-100"><%= e.tanggalFormatted %></td>
+                    <td class="py-3 px-4 border border-orange-100">
+                      <a href="/dpa/laporan/<%= e.id_laporan %>" 
+                         class="text-orange-500 hover:text-orange-700 transition transform hover:scale-110" 
+                         title="Lihat Laporan">
+                        <i class="fa-solid fa-eye text-lg"></i>
+                      </a>
+                    </td>
+                  </tr>
+                <% }) %>
+              <% } else { %>
+                <tr>
+                  <td colspan="7" class="py-6 text-center text-gray-500 border border-orange-100">Belum ada evaluasi dibuat.</td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="flex justify-center items-center gap-2 mt-6" id="pagination">
+          <button id="prevPage" class="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 disabled:opacity-50">Prev</button>
+          <span id="pageInfo" class="text-gray-700"></span>
+          <button id="nextPage" class="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 disabled:opacity-50">Next</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Animasi -->
+  <style>
+    @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
+    .animate-fade-in { animation: fadeIn 0.7s ease-out forwards; }
+    @keyframes slideDown { from {opacity:0; transform:translateY(-20px);} to {opacity:1; transform:translateY(0);} }
+    .animate-slide-down { animation: slideDown 0.5s ease-out forwards; }
+
+    /* Custom search focus */
+    #searchInput:focus {
+      outline: none !important;
+      box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.4);
+    }
+  </style>
+
+  <!-- Script -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const searchInput = document.getElementById("searchInput");
+      const tbody = document.getElementById("evaluasiTable");
+      let rows = Array.from(tbody.querySelectorAll("tr"));
+
+      const rowsPerPage = 10;
+      let currentPage = 1;
+
+      function filterRows() {
+        rows = Array.from(tbody.querySelectorAll("tr"));
+        const searchValue = searchInput.value.toLowerCase();
+
+        rows.forEach(row => {
+          const judul = row.cells[1]?.innerText.toLowerCase() || "";
+          const program = row.cells[2]?.innerText.toLowerCase() || "";
+          const komentar = row.cells[3]?.innerText.toLowerCase() || "";
+          const status = row.cells[4]?.innerText.toLowerCase() || "";
+
+          let matchSearch = judul.includes(searchValue) || program.includes(searchValue) || komentar.includes(searchValue) || status.includes(searchValue);
+
+          row.dataset.visible = matchSearch ? "true" : "false";
+        });
+
+        paginate();
+      }
+
+      function paginate() {
+        let visibleRows = rows.filter(row => row.dataset.visible === "true");
+        let totalPages = Math.ceil(visibleRows.length / rowsPerPage);
+        if (currentPage > totalPages) currentPage = totalPages || 1;
+
+        rows.forEach(row => row.style.display = "none");
+        visibleRows.forEach((row, index) => {
+          if (index >= (currentPage-1)*rowsPerPage && index < currentPage*rowsPerPage) {
+            row.style.display = "";
+          }
+        });
+
+        document.getElementById("pageInfo").textContent = `Halaman ${currentPage} dari ${totalPages || 1}`;
+        document.getElementById("prevPage").disabled = currentPage === 1;
+        document.getElementById("nextPage").disabled = currentPage === totalPages || totalPages === 0;
+      }
+
+      document.getElementById("prevPage").addEventListener("click", () => { currentPage--; paginate(); });
+      document.getElementById("nextPage").addEventListener("click", () => { currentPage++; paginate(); });
+
+      searchInput.addEventListener("input", filterRows);
+
+      filterRows();
+    });
+  </script>
+
+</body>
+</html>

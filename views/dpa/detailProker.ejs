@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title><%= title %></title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+  <!-- Sidebar -->
+  <%- include('../partials/sidebarDPA', { activeNav: 'Daftar Program Kerja', user: user }) %>
+
+  <!-- Wrapper -->
+  <div class="lg:ml-80 opacity-0 animate-fade-in" style="animation-delay:150ms;">
+
+    <!-- Header -->
+    <div class="bg-white border-b border-gray-200">
+      <div class="max-w-5xl mx-auto px-6 py-6 flex items-center justify-between">
+        <!-- Judul -->
+        <h1 class="text-2xl font-bold text-gray-800">Detail Program Kerja</h1>
+        <a href="/dpa/lihatProker"
+          class="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-all duration-200 transform hover:scale-105 active:scale-95 hover:shadow-md">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+          </svg>
+          <span class="font-medium">Kembali</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Main -->
+    <div class="px-6 py-10">
+      <div id="prokerContent" class="max-w-5xl mx-auto bg-white rounded-2xl border border-gray-200 shadow-sm p-8">
+
+        <!-- Card Header -->
+        <div class="mb-8 border-b border-gray-100 pb-6">
+          <h3 class="text-2xl font-bold text-gray-800 mb-2">Informasi Program Kerja</h3>
+          <p class="text-base text-gray-600 m-0">Detail lengkap program kerja</p>
+        </div>
+
+        <!-- ALERT POPUP -->
+        <%- include('../partials/alert', { errorMsg: errorMsg, successMsg: successMsg }) %>
+
+        <!-- Konten -->
+        <div class="space-y-8">
+
+          <!-- Informasi Dasar -->
+          <div>
+            <h4 class="text-lg font-semibold text-orange-600 mb-4">Informasi Dasar</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+              <div>
+                <p class="font-medium text-gray-700">Nama Program Kerja</p>
+                <p class="text-gray-800"><%= proker.namaProker || '-' %></p>
+              </div>
+              <div>
+                <p class="font-medium text-gray-700">Divisi</p>
+                <p class="text-gray-800"><%= proker.divisi || '-' %></p>
+              </div>
+              <div>
+                <p class="font-medium text-gray-700">Tanggal Mulai</p>
+                <p class="text-gray-800"><%= proker.tanggalMulaiFormatted || '-' %></p>
+              </div>
+              <div>
+                <p class="font-medium text-gray-700">Tanggal Selesai</p>
+                <p class="text-gray-800"><%= proker.tanggalSelesaiFormatted || '-' %></p>
+              </div>
+              <div>
+                <p class="font-medium text-gray-700">Penanggung Jawab</p>
+                <p class="text-gray-800"><%= proker.penanggungJawab || '-' %></p>
+              </div>
+              <div class="md:col-span-2">
+                <p class="font-medium text-gray-700">Deskripsi</p>
+                <p class="text-gray-800 whitespace-pre-line"><%= proker.deskripsi || '-' %></p>
+              </div>
+              <div>
+                <p class="font-medium text-gray-700">Status</p>
+                <% if (proker.status === "Belum Dimulai") { %>
+                  <span class="px-3 py-1 text-sm rounded-full bg-yellow-100 text-yellow-700 font-medium"><%= proker.status %></span>
+                <% } else if (proker.status === "Sedang Berjalan") { %>
+                  <span class="px-3 py-1 text-sm rounded-full bg-blue-100 text-blue-700 font-medium"><%= proker.status %></span>
+                <% } else if (proker.status === "Selesai") { %>
+                  <span class="px-3 py-1 text-sm rounded-full bg-green-100 text-green-700 font-medium"><%= proker.status %></span>
+                <% } else { %>
+                  <span class="px-3 py-1 text-sm rounded-full bg-gray-100 text-gray-600 font-medium"><%= proker.status %></span>
+                <% } %>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dokumen Pendukung -->
+          <div>
+            <h4 class="text-lg font-semibold text-orange-600 mb-4">Dokumen Pendukung</h4>
+            <% if (proker.dokumen_pendukung) { %>
+              <div class="p-4 bg-gray-50 border rounded-xl">
+                <% if (/\.(jpg|jpeg|png)$/i.test(proker.dokumen_pendukung)) { %>
+                  <img src="/uploads/<%= proker.dokumen_pendukung %>" alt="Dokumen Pendukung"
+                       class="max-h-80 rounded-lg shadow mx-auto">
+                <% } else if (/\.pdf$/i.test(proker.dokumen_pendukung)) { %>
+                  <a href="/uploads/<%= proker.dokumen_pendukung %>" target="_blank"
+                     class="text-orange-600 underline font-medium">
+                    📄 <%= proker.dokumen_pendukung %>
+                  </a>
+                <% } else { %>
+                  <p class="text-gray-600">Tidak dapat menampilkan dokumen. <a href="/uploads/<%= proker.dokumen_pendukung %>" class="text-orange-600 underline">Unduh file</a></p>
+                <% } %>
+              </div>
+            <% } else { %>
+              <p class="text-gray-500">Tidak ada dokumen pendukung.</p>
+            <% } %>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Animasi -->
+  <style>
+    @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
+    .animate-fade-in { animation: fadeIn 0.7s ease-out forwards; }
+
+    @media print {
+      body { background: white; }
+      .no-print, .lg\:ml-80, .animate-fade-in { display: none !important; }
+      #prokerContent { box-shadow: none; border: none; }
+    }
+  </style>
+
+</body>
+</html>

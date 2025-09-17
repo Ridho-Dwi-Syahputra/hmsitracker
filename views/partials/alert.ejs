@@ -1,0 +1,71 @@
+<% if (typeof errorMsg !== 'undefined' && errorMsg) { %>
+    <!-- ALERT ERROR -->
+    <div id="alertBox"
+         class="mb-6 flex items-center justify-between gap-3 p-4 rounded-xl bg-orange-50 border border-orange-200 text-orange-700 text-sm font-medium animate-fade-in">
+      <div class="flex items-center gap-2">
+        <!-- Ikon Warning -->
+        <svg xmlns="http://www.w3.org/2000/svg"
+             class="w-5 h-5 flex-shrink-0 text-orange-600"
+             fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 9v2m0 4h.01M4.93 19h14.14c1.54 0 2.5-1.67 1.73-3L13.73 5c-.77-1.33-2.69-1.33-3.46 0L3.2 16c-.77 1.33.19 3 1.73 3z"/>
+        </svg>
+        <span><%= errorMsg %></span>
+      </div>
+      <button onclick="closeAlert()"
+              class="px-3 py-1 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition">
+        OK
+      </button>
+    </div>
+  <% } %>
+  
+  <% if (typeof successMsg !== 'undefined' && successMsg) { %>
+    <!-- ALERT SUCCESS -->
+    <div id="alertBox"
+         class="mb-6 flex items-center justify-between gap-3 p-4 rounded-xl bg-green-50 border border-green-200 text-green-700 text-sm font-medium animate-fade-in">
+      <div class="flex items-center gap-2">
+        <!-- Ikon Check -->
+        <svg xmlns="http://www.w3.org/2000/svg"
+             class="w-5 h-5 flex-shrink-0 text-green-600"
+             fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M5 13l4 4L19 7"/>
+        </svg>
+        <span><%= successMsg %></span>
+      </div>
+      <button onclick="closeAlert()"
+              class="px-3 py-1 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition">
+        OK
+      </button>
+    </div>
+  <% } %>
+  
+  <style>
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in {
+      animation: fadeIn 0.3s ease-out forwards;
+    }
+  </style>
+  
+  <script>
+    function closeAlert() {
+      const alertBox = document.getElementById("alertBox");
+      if (alertBox) {
+        alertBox.style.display = "none";
+      }
+    }
+  
+    // Auto-close setelah 4 detik
+    window.addEventListener("DOMContentLoaded", () => {
+      const alertBox = document.getElementById("alertBox");
+      if (alertBox) {
+        setTimeout(() => {
+          closeAlert();
+        }, 4000);
+      }
+    });
+  </script>
+  

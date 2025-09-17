@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title><%= title %></title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+  <!-- Sidebar -->
+  <%- include('../partials/sidebarHMSI', { activeNav: 'Program Kerja', user: user }) %>
+
+  <!-- Wrapper -->
+  <div class="lg:ml-80 opacity-0 animate-fade-in" style="animation-delay:150ms;">
+
+    <!-- Header -->
+    <div class="bg-white border-b border-gray-200">
+      <div class="max-w-5xl mx-auto px-6 py-6 flex items-center justify-between">
+        <h1 class="text-2xl font-bold text-gray-800 opacity-0 animate-slide-down" style="animation-delay:350ms;">
+          Tambah Program Kerja
+        </h1>
+      </div>
+    </div>
+
+    <!-- Main -->
+    <div class="px-6 py-10 opacity-0 animate-slide-up" style="animation-delay:650ms;">
+      <div class="max-w-5xl mx-auto bg-white rounded-2xl border border-gray-200 shadow-sm p-8">
+
+        <!-- Card Header -->
+        <div class="mb-8 border-b border-gray-100 pb-6">
+          <h3 class="text-2xl font-bold text-gray-800 mb-2">Form Tambah Program Kerja</h3>
+          <p class="text-base text-gray-600 m-0">Lengkapi detail program kerja di bawah</p>
+        </div>
+
+        <!-- ALERT POPUP -->
+        <%- include('../partials/alert', { errorMsg: errorMsg, successMsg: successMsg }) %>
+
+        <!-- Form -->
+        <form action="/hmsi/tambah-proker" method="POST" enctype="multipart/form-data" class="space-y-10">
+
+          <!-- Informasi Dasar -->
+          <div>
+            <h4 class="text-lg font-semibold text-orange-600 mb-4">Informasi Dasar</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+              <!-- Nama Program Kerja -->
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Nama Program Kerja</label>
+                <input type="text" name="namaProker"
+                  value="<%= old?.namaProker || '' %>" required
+                  placeholder="Masukkan nama program kerja..."
+                  class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100">
+              </div>
+
+              <!-- Divisi -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Divisi</label>
+                <select name="divisi" required
+                  class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100">
+                  <option value="">-- Pilih Divisi --</option>
+                  <% ["Internal","Medkraf","Eksternal","Bikraf","PSI","PSDM","RTK"].forEach(d => { %>
+                    <option value="<%= d %>" <%= old?.divisi === d ? "selected" : "" %>><%= d %></option>
+                  <% }) %>
+                </select>
+              </div>
+
+              <!-- Tanggal Mulai -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Mulai</label>
+                <input type="date" name="tanggal_mulai"
+                  value="<%= old?.tanggal_mulai || '' %>" required
+                  class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100">
+              </div>
+
+              <!-- Tanggal Selesai -->
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Selesai</label>
+                <input type="date" name="tanggal_selesai"
+                  value="<%= old?.tanggal_selesai || '' %>" required
+                  class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100">
+              </div>
+
+              <!-- Penanggung Jawab -->
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Penanggung Jawab</label>
+                <input type="text" name="penanggungJawab"
+                  value="<%= old?.penanggungJawab || '' %>" required
+                  placeholder="Masukkan nama penanggung jawab..."
+                  class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100">
+              </div>
+
+              <!-- Deskripsi -->
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Deskripsi Program</label>
+                <textarea name="deskripsi" rows="4" required
+                  placeholder="Tuliskan deskripsi program kerja..."
+                  class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm resize-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100"><%= old?.deskripsi || '' %></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dokumen Pendukung -->
+          <div>
+            <h4 class="text-lg font-semibold text-orange-600 mb-1">Dokumen Pendukung</h4>
+            <p class="text-sm text-gray-500 mb-4">Upload file pendukung (PDF, JPG, PNG, maks 5MB)</p>
+
+            <div id="dropzone"
+              class="border-2 border-dashed border-orange-300 rounded-xl p-10 bg-orange-50/30 text-center cursor-pointer 
+                    transition duration-200 hover:border-orange-500 hover:bg-orange-100/50 flex flex-col items-center gap-4">
+
+              <!-- Hidden file input -->
+              <input type="file" name="dokumen_pendukung" id="fileUpload" class="hidden"
+                accept=".pdf,.jpg,.jpeg,.png" />
+
+              <!-- Icon -->
+              <div class="text-4xl text-gray-400">📎</div>
+
+              <!-- Button -->
+              <label for="fileUpload" class="cursor-pointer">
+                <span 
+                  class="px-6 py-3 bg-orange-500 text-white rounded-lg text-sm font-medium 
+                         transition duration-200 hover:bg-orange-600 hover:shadow-md active:scale-95">
+                  Pilih File atau Drag & Drop
+                </span>
+              </label>
+
+              <!-- Info -->
+              <p class="text-sm text-gray-600">
+                Format yang didukung: <span class="font-medium">PDF, JPG, JPEG, PNG</span><br>
+                Maksimal ukuran file: <span class="font-medium">5MB</span>
+              </p>
+            </div>
+
+            <p id="fileName" class="text-sm text-gray-600 mt-3"></p>
+          </div>
+
+          <!-- Tombol Simpan -->
+          <div class="flex justify-end gap-3 pt-6 border-t border-gray-100">
+            <button type="submit" id="submitBtn"
+              class="px-6 py-3 bg-orange-500 text-white rounded-xl text-sm font-semibold hover:bg-orange-600 transition transform hover:scale-105 active:scale-95">
+              Simpan Program Kerja
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Animasi -->
+  <style>
+    @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
+    @keyframes slideDown { from {opacity:0; transform:translateY(-20px);} to {opacity:1; transform:translateY(0);} }
+    @keyframes slideUp { from {opacity:0; transform:translateY(20px);} to {opacity:1; transform:translateY(0);} }
+    .animate-fade-in { animation: fadeIn 0.7s ease-out forwards; }
+    .animate-slide-down { animation: slideDown 0.8s ease-out forwards; }
+    .animate-slide-up { animation: slideUp 0.6s ease-out forwards; }
+  </style>
+
+  <!-- script eksternal untuk form & upload -->
+  <script src="/javascripts/proker.js"></script>
+
+</body>
+</html>

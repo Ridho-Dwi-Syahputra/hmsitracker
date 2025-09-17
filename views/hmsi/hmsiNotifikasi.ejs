@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title><%= title %></title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+  <!-- Sidebar HMSI -->
+  <%- include('../partials/sidebarHMSI', { user: user, activeNav: 'Notifikasi' }) %>
+
+  <!-- Wrapper -->
+  <div class="lg:ml-80 px-6 py-8">
+
+    <!-- Header -->
+    <div class="max-w-4xl mx-auto mb-8">
+      <h1 class="text-2xl font-bold text-gray-800 mb-2">Notifikasi</h1>
+      <p class="text-gray-600 text-sm">Lihat update evaluasi laporan oleh DPA.</p>
+    </div>
+
+    <!-- List Notifikasi -->
+    <div class="max-w-4xl mx-auto space-y-4">
+      <% if (notifikasi && notifikasi.length > 0) { %>
+        <% notifikasi.forEach((n) => { %>
+          <div class="flex items-start gap-4 p-4 bg-white border border-orange-200 rounded-xl shadow-sm hover:shadow-md transition">
+            <!-- Icon -->
+            <div class="flex-shrink-0">
+              <i class="fa-solid fa-bell text-orange-500 text-lg"></i>
+            </div>
+
+            <!-- Isi -->
+            <div class="flex-1">
+              <p class="text-gray-800 text-sm">
+                <%= n.pesan %>
+              </p>
+              <div class="flex items-center justify-between mt-2">
+                <span class="text-xs text-gray-500"><%= n.tanggalFormatted %></span>
+                <a href="/hmsi/laporan/<%= n.id_laporan %>" 
+                   class="text-orange-500 text-xs font-medium hover:underline">Lihat Laporan</a>
+              </div>
+            </div>
+
+            <!-- Status -->
+            <% if (!n.status_baca) { %>
+              <span class="text-[10px] px-2 py-1 bg-orange-100 text-orange-700 rounded-full">Baru</span>
+            <% } %>
+          </div>
+        <% }) %>
+      <% } else { %>
+        <div class="p-6 text-center text-gray-500 bg-white border rounded-xl">
+          Belum ada notifikasi untuk divisi Anda.
+        </div>
+      <% } %>
+    </div>
+  </div>
+
+</body>
+</html>
