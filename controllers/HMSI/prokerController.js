@@ -63,19 +63,31 @@ function formatTanggal(dateValue) {
 // =====================================================
 exports.getAllProker = async (req, res) => {
   try {
-    const [rows] = await db.query(`
+    const user = req.session.user;
+    let query = `
       SELECT 
-        id_ProgramKerja AS id, 
-        Nama_ProgramKerja AS namaProker, 
-        Divisi AS divisi,
-        Deskripsi AS deskripsi,
-        Tanggal_mulai AS tanggal_mulai,
-        Tanggal_selesai AS tanggal_selesai,
-        Penanggung_jawab AS penanggungJawab,
-        Dokumen_pendukung AS dokumen_pendukung
-      FROM Program_kerja
-      ORDER BY Tanggal_mulai DESC
-    `);
+        p.id_ProgramKerja AS id, 
+        p.Nama_ProgramKerja AS namaProker, 
+        u.divisi AS divisi,
+        p.Deskripsi AS deskripsi,
+        p.Tanggal_mulai AS tanggal_mulai,
+        p.Tanggal_selesai AS tanggal_selesai,
+        p.Penanggung_jawab AS penanggungJawab,
+        p.Dokumen_pendukung AS dokumen_pendukung
+      FROM Program_kerja p
+      LEFT JOIN User u ON p.id_anggota = u.id_anggota
+    `;
+    let params = [];
+
+    // 🔹 HMSI hanya bisa lihat proker sesuai divisi
+    if (user && user.role === "HMSI") {
+      query += " WHERE u.divisi = ?";
+      params.push(user.divisi);
+    }
+
+    query += " ORDER BY p.Tanggal_mulai DESC";
+
+    const [rows] = await db.query(query, params);
 
     // Tambahkan status otomatis berdasarkan tanggal
     const programs = rows.map(r => {
@@ -99,7 +111,7 @@ exports.getAllProker = async (req, res) => {
 
     res.render("hmsi/kelolaProker", {
       title: "Kelola Program Kerja",
-      user: req.session.user || { name: "Dummy User" },
+      user: user || { name: "Dummy User" },
       activeNav: "Program Kerja",
       programs,
     });
@@ -121,15 +133,17 @@ exports.getDetailProker = async (req, res) => {
   try {
     const [rows] = await db.query(
       `SELECT 
-        id_ProgramKerja AS id,
-        Nama_ProgramKerja AS namaProker,
-        Divisi AS divisi,
-        Deskripsi AS deskripsi,
-        Tanggal_mulai AS tanggal_mulai,
-        Tanggal_selesai AS tanggal_selesai,
-        Penanggung_jawab AS penanggungJawab,
-        Dokumen_pendukung AS dokumen_pendukung
-      FROM Program_kerja WHERE id_ProgramKerja = ?`,
+        p.id_ProgramKerja AS id,
+        p.Nama_ProgramKerja AS namaProker,
+        u.divisi AS divisi,
+        p.Deskripsi AS deskripsi,
+        p.Tanggal_mulai AS tanggal_mulai,
+        p.Tanggal_selesai AS tanggal_selesai,
+        p.Penanggung_jawab AS penanggungJawab,
+        p.Dokumen_pendukung AS dokumen_pendukung
+      FROM Program_kerja p
+      LEFT JOIN User u ON p.id_anggota = u.id_anggota
+      WHERE p.id_ProgramKerja = ?`,
       [req.params.id]
     );
 
@@ -173,12 +187,13 @@ exports.getDetailProker = async (req, res) => {
 // =====================================================
 exports.createProker = async (req, res) => {
   try {
-    const { namaProker, divisi, deskripsi, tanggal_mulai, tanggal_selesai, penanggungJawab, id_anggota } = req.body;
+    const user = req.session.user;
+    const { namaProker, deskripsi, tanggal_mulai, tanggal_selesai, penanggungJawab, id_anggota } = req.body;
 
-    if (!namaProker || !divisi || !penanggungJawab || !tanggal_mulai || !tanggal_selesai) {
+    if (!namaProker || !penanggungJawab || !tanggal_mulai || !tanggal_selesai) {
       return res.render("hmsi/tambahProker", {
         title: "Tambah Proker",
-        user: req.session.user || { name: "Dummy User" },
+        user: user,
         activeNav: "Program Kerja",
         old: req.body,
         errorMsg: "Semua field wajib diisi!",
@@ -190,9 +205,9 @@ exports.createProker = async (req, res) => {
 
     await db.query(
       `INSERT INTO Program_kerja 
-        (id_ProgramKerja, Nama_ProgramKerja, Divisi, Deskripsi, Tanggal_mulai, Tanggal_selesai, Penanggung_jawab, id_anggota, Dokumen_pendukung)
-       VALUES (UUID(), ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [namaProker, divisi, deskripsi, tanggal_mulai, tanggal_selesai, penanggungJawab, id_anggota || null, dokumen]
+        (id_ProgramKerja, Nama_ProgramKerja, Deskripsi, Tanggal_mulai, Tanggal_selesai, Penanggung_jawab, id_anggota, Dokumen_pendukung)
+       VALUES (UUID(), ?, ?, ?, ?, ?, ?, ?)`,
+      [namaProker, deskripsi, tanggal_mulai, tanggal_selesai, penanggungJawab, id_anggota || user.id, dokumen]
     );
 
     res.redirect("/hmsi/kelola-proker?success=Program Kerja berhasil ditambahkan");
@@ -252,8 +267,9 @@ exports.getEditProker = async (req, res) => {
 // =====================================================
 exports.updateProker = async (req, res) => {
   try {
+    const user = req.session.user;
     const { id } = req.params;
-    const { namaProker, divisi, deskripsi, tanggal_mulai, tanggal_selesai, penanggungJawab, id_anggota } = req.body;
+    const { namaProker, deskripsi, tanggal_mulai, tanggal_selesai, penanggungJawab, id_anggota } = req.body;
 
     const newFile = req.file ? req.file.filename : null;
 
@@ -261,18 +277,19 @@ exports.updateProker = async (req, res) => {
       "SELECT Dokumen_pendukung FROM Program_kerja WHERE id_ProgramKerja = ?",
       [id]
     );
-    const oldFile = existingRows.length ? existingRows[0].Dokumen_pendukung : null;
+    if (!existingRows.length) return res.status(404).send("Proker tidak ditemukan");
+
+    const oldFile = existingRows[0].Dokumen_pendukung;
 
     let query = `
       UPDATE Program_kerja SET 
         Nama_ProgramKerja=?, 
-        Divisi=?, 
         Deskripsi=?, 
         Tanggal_mulai=?, 
         Tanggal_selesai=?, 
         Penanggung_jawab=?, 
         id_anggota=?`;
-    const params = [namaProker, divisi, deskripsi, tanggal_mulai, tanggal_selesai, penanggungJawab, id_anggota || null];
+    const params = [namaProker, deskripsi, tanggal_mulai, tanggal_selesai, penanggungJawab, id_anggota || user.id];
 
     if (newFile) {
       query += `, Dokumen_pendukung=?`;

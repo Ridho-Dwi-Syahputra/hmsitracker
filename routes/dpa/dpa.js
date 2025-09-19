@@ -5,7 +5,9 @@
 
 const express = require("express");
 const router = express.Router();
-const { requireRole } = require("../../middleware/auth");
+
+// 🔑 ganti import auth (pakai auth.js)
+const { requireLogin, requireRole } = require("../../middleware/auth");
 
 // Import controller untuk DPA (Program Kerja & Laporan)
 const dpaProkerController = require("../../controllers/DPA/prokerController");
@@ -14,7 +16,7 @@ const dpaLaporanController = require("../../controllers/DPA/laporanController");
 // =====================================================
 // 🏠 Dashboard DPA
 // =====================================================
-router.get("/dashboard", requireRole("DPA"), (req, res) => {
+router.get("/dashboard", requireLogin, requireRole(["DPA"]), (req, res) => {
   res.render("dpa/dpaDashboard", {
     title: "Dashboard DPA",
     user: req.session.user || { name: "Dummy User" },
@@ -27,7 +29,8 @@ router.get("/dashboard", requireRole("DPA"), (req, res) => {
 // =====================================================
 router.get(
   "/lihatProker",
-  requireRole("DPA"),
+  requireLogin,
+  requireRole(["DPA"]),
   dpaProkerController.getAllProkerDPA
 );
 
@@ -36,7 +39,8 @@ router.get(
 // =====================================================
 router.get(
   "/proker/:id/detail",
-  requireRole("DPA"),
+  requireLogin,
+  requireRole(["DPA"]),
   dpaProkerController.getDetailProkerDPA
 );
 
@@ -45,7 +49,8 @@ router.get(
 // =====================================================
 router.get(
   "/kelolaLaporan",
-  requireRole("DPA"),
+  requireLogin,
+  requireRole(["DPA"]),
   dpaLaporanController.getAllLaporanDPA
 );
 
@@ -54,7 +59,8 @@ router.get(
 // =====================================================
 router.get(
   "/laporan/:id",
-  requireRole("DPA"),
+  requireLogin,
+  requireRole(["DPA"]),
   dpaLaporanController.getDetailLaporanDPA
 );
 
@@ -64,14 +70,16 @@ router.get(
 // Form evaluasi
 router.get(
   "/laporan/:id/evaluasi",
-  requireRole("DPA"),
+  requireLogin,
+  requireRole(["DPA"]),
   dpaLaporanController.getFormEvaluasi
 );
 
 // Simpan evaluasi
 router.post(
   "/laporan/:id/evaluasi",
-  requireRole("DPA"),
+  requireLogin,
+  requireRole(["DPA"]),
   dpaLaporanController.postEvaluasi
 );
 
@@ -80,13 +88,14 @@ router.post(
 // =====================================================
 router.get(
   "/kelolaEvaluasi",
-  requireRole("DPA"),
+  requireLogin,
+  requireRole(["DPA"]),
   dpaLaporanController.getAllEvaluasiDPA
 );
 
 // =====================================================
 // 🔔 Notifikasi DPA (opsional, nanti buat controller terpisah)
 // =====================================================
-// router.get("/notifikasi", requireRole("DPA"), dpaNotifikasiController.getAllNotifikasi);
+// router.get("/notifikasi", requireLogin, requireRole(["DPA"]), dpaNotifikasiController.getAllNotifikasi);
 
 module.exports = router;

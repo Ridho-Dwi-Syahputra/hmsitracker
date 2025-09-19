@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 16, 2025 at 11:07 PM
+-- Generation Time: Sep 18, 2025 at 01:25 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -35,6 +35,17 @@ CREATE TABLE `evaluasi` (
   `tanggal_evaluasi` date DEFAULT NULL,
   `id_laporan` varchar(50) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `evaluasi`
+--
+
+INSERT INTO `evaluasi` (`id_evaluasi`, `komentar`, `pemberi_evaluasi`, `status_konfirmasi`, `tanggal_evaluasi`, `id_laporan`) VALUES
+('c3314f73-946a-11f0-981a-442e1c01b37c', 'Laporan baik, detail dan lengkap.', NULL, 'Disetujui', '2025-01-14', 'bb59a410-946a-11f0-981a-442e1c01b37c'),
+('c3329f00-946a-11f0-981a-442e1c01b37c', 'Perlu tambahan sesi praktek.', NULL, 'Perlu Revisi', '2025-02-05', 'bb59c8fb-946a-11f0-981a-442e1c01b37c'),
+('c332a1d2-946a-11f0-981a-442e1c01b37c', 'Keputusan raker jelas.', NULL, 'Disetujui', '2025-01-18', 'bb59cca7-946a-11f0-981a-442e1c01b37c'),
+('c332a56c-946a-11f0-981a-442e1c01b37c', 'Bagus, tapi kendala cuaca perlu diantisipasi.', NULL, 'Disetujui', '2025-03-06', 'bb59ce13-946a-11f0-981a-442e1c01b37c'),
+('c3332584-946a-11f0-981a-442e1c01b37c', 'Peserta aktif, laporan cukup.', NULL, 'Disetujui', '2025-04-05', 'bb59cf29-946a-11f0-981a-442e1c01b37c');
 
 -- --------------------------------------------------------
 
@@ -68,13 +79,18 @@ INSERT INTO `laporan` (`id_laporan`, `judul_laporan`, `deskripsi_kegiatan`, `sas
 ('21eea0d9-921a-11f0-981a-442e1c01b37c', 'AAAAAAAAAAAAAA', 'xxvccv', 'mm', '09:00-12:00 WIB, gedung C', '2333', 'pinjol', '45', '23', '4343', 'gddg', 'dokumentasi-1757930130113-687954416.pdf', 'PK003', '2025-09-14', NULL),
 ('57ce7e88-917e-11f0-981a-442e1c01b37c', 'pdf test', 'xxxzxz', 'sfsf', '09', '2344', 'pinjol', '25', '34', 'sfsf', 'ssf', NULL, NULL, '2025-09-15', NULL),
 ('638c489b-92b1-11f0-981a-442e1c01b37c', 'BBBBBBBBBBBBBBBBBBBBBB', 'knkn', 'saadssda', '08-000', '324', 'pinjol', '12', '32', 'sdasdasd', 'saasd', 'dokumentasi-1757995093216-729181579.jpg', 'PK003', '2025-09-17', NULL),
-('6e633aaa-9188-11f0-981a-442e1c01b37c', 'test ', 'da', 'mkkkm', '09', '324231', 'pinjol', '32', '23', 'sfsfs', 'dsdad', 'dokumentasi-1757868769137-916318174.pdf', '4f5b27a6-907c-11f0-981a-442e1c01b37c', '2025-09-10', NULL),
+('6e633aaa-9188-11f0-981a-442e1c01b37c', 'test ', 'da', 'mkkkm', '09', '324231', 'pinjol', '32', '23', 'sfsfs', 'dsdad', 'dokumentasi-1757868769137-916318174.pdf', NULL, '2025-09-10', NULL),
 ('79e5b8ec-92b1-11f0-981a-442e1c01b37c', 'ccccccccc', 'saasd', 'asddas', 'sacsd', '32424', 'pinjol', '31', '23', 'ssikkdfja', 'saknaskdf', NULL, '0f04c882-925d-11f0-981a-442e1c01b37c', '2025-09-17', NULL),
-('7a7927ed-9168-11f0-981a-442e1c01b37c', 'png', 'xx', 'cscscs', '09', '456', 'pinjol', '13', '14', 'cddc', 'cscscs', 'dokumentasi-1757853830692-250857329.png', '4f5b27a6-907c-11f0-981a-442e1c01b37c', '2025-09-16', NULL),
-('83cfb96b-92b1-11f0-981a-442e1c01b37c', 'adadada', 'caad', '', '08-000', '', 'pinjol', '', '', '', '', NULL, '1c507e2c-929b-11f0-981a-442e1c01b37c', '2025-09-17', NULL),
+('7a7927ed-9168-11f0-981a-442e1c01b37c', 'png', 'xx', 'cscscs', '09', '456', 'pinjol', '13', '14', 'cddc', 'cscscs', 'dokumentasi-1757853830692-250857329.png', NULL, '2025-09-16', NULL),
+('83cfb96b-92b1-11f0-981a-442e1c01b37c', 'adadada', 'caad', '', '08-000', '', 'pinjol', '', '', '', '', NULL, NULL, '2025-09-17', NULL),
 ('8c9cfb22-92b1-11f0-981a-442e1c01b37c', 'caadad', 'caadca', '', '08-000', '', '', '', '', '', '', NULL, NULL, '2025-09-18', NULL),
 ('9a06e5ac-9168-11f0-981a-442e1c01b37c', 'pdf', 'dcsfdgh', 'ccc', '09', '34546', 'pinjol', '1', '1', 'dd', 'cc', 'dokumentasi-1757853883640-487151459.pdf', 'PK003', '2025-09-11', NULL),
 ('aeb43cd6-9251-11f0-981a-442e1c01b37c', 'cccccccccccc', 'knn', 'm', '09:00 - 10:00 WIB, gedung C', '2333', 'pinjol', '67', '67', 'n', ',', 'dokumentasi-1757953988645-704461363.jpg', NULL, '2025-09-18', NULL),
+('bb59a410-946a-11f0-981a-442e1c01b37c', 'Laporan Seminar Nasional', 'Seminar berjalan lancar dengan 200 peserta', 'Mahasiswa Unand', 'Aula FTI', 'Rp5.000.000', 'Sponsor', '80%', '90%', 'Keterbatasan tempat', 'Cari tempat lebih luas', NULL, 'a52f81e4-946a-11f0-981a-442e1c01b37c', '2025-01-13', 'application/pdf'),
+('bb59c8fb-946a-11f0-981a-442e1c01b37c', 'Laporan Pelatihan Desain', 'Peserta memahami dasar Photoshop', 'Anggota HMSI', 'Lab Komputer FTI', 'Rp2.000.000', 'Dana HMSI', '85%', '95%', 'Kurang waktu praktek', 'Tambah sesi praktek', NULL, 'a52fa384-946a-11f0-981a-442e1c01b37c', '2025-02-03', 'application/pdf'),
+('bb59cca7-946a-11f0-981a-442e1c01b37c', 'Laporan Rapat Kerja HMSI', 'Raker menghasilkan 10 keputusan strategis', 'Pengurus HMSI', 'Ruang Sidang FTI', 'Rp1.000.000', 'Dana HMSI', '100%', '100%', 'Tidak ada', 'Tidak perlu', NULL, 'a52fa5e3-946a-11f0-981a-442e1c01b37c', '2025-01-17', 'application/pdf'),
+('bb59ce13-946a-11f0-981a-442e1c01b37c', 'Laporan Bakti Sosial', '50 mahasiswa ikut baksos di desa binaan', 'Masyarakat desa', 'Nagari Pauh', 'Rp3.000.000', 'Donasi', '90%', '80%', 'Cuaca hujan', 'Tenda tambahan', NULL, 'a52fa84c-946a-11f0-981a-442e1c01b37c', '2025-03-04', 'application/pdf'),
+('bb59cf29-946a-11f0-981a-442e1c01b37c', 'Laporan Pelatihan Kepemimpinan', 'Peserta aktif dalam diskusi', 'Pengurus HMSI', 'Aula FTI', 'Rp1.500.000', 'Dana HMSI', '85%', '85%', 'Kurang konsumsi', 'Tambah dana konsumsi', NULL, 'a52fa9bd-946a-11f0-981a-442e1c01b37c', '2025-04-03', 'application/pdf'),
 ('ed6a75ea-917c-11f0-981a-442e1c01b37c', 'pdf', 'ssfsf', 'ccc', '09', '2233', 'pinjol', '23', '33', 'ccc', 'ccccc', 'dokumentasi-1757862613470-931200449.pdf', '0f04c882-925d-11f0-981a-442e1c01b37c', '2025-09-09', NULL);
 
 -- --------------------------------------------------------
@@ -86,21 +102,13 @@ INSERT INTO `laporan` (`id_laporan`, `judul_laporan`, `deskripsi_kegiatan`, `sas
 CREATE TABLE `notifikasi` (
   `id_notifikasi` varchar(50) NOT NULL,
   `pesan` varchar(200) DEFAULT NULL,
+  `divisi` enum('Internal','Medkraf','Eksternal','Bikraf','PSI','PSDM','RTK') DEFAULT NULL,
   `status_baca` tinyint(1) DEFAULT NULL,
   `id_anggota` varchar(50) DEFAULT NULL,
   `id_evaluasi` varchar(50) DEFAULT NULL,
   `id_ProgramKerja` varchar(50) DEFAULT NULL,
   `id_laporan` varchar(50) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `notifikasi`
---
-
-INSERT INTO `notifikasi` (`id_notifikasi`, `pesan`, `status_baca`, `id_anggota`, `id_evaluasi`, `id_ProgramKerja`, `id_laporan`) VALUES
-('N001', 'Evaluasi baru untuk Laporan Webinar Teknologi', 0, 'U001', NULL, NULL, NULL),
-('N002', 'Evaluasi baru untuk Laporan Workshop AI', 0, 'U001', NULL, NULL, NULL),
-('N003', 'Evaluasi final untuk Laporan TechnoFest 2025', 1, 'U001', NULL, 'PK003', NULL);
 
 -- --------------------------------------------------------
 
@@ -126,15 +134,15 @@ CREATE TABLE `program_kerja` (
 
 INSERT INTO `program_kerja` (`id_ProgramKerja`, `Nama_ProgramKerja`, `Divisi`, `Deskripsi`, `Tanggal_mulai`, `Tanggal_selesai`, `Penanggung_jawab`, `id_anggota`, `Dokumen_pendukung`) VALUES
 ('0f04c882-925d-11f0-981a-442e1c01b37c', 'HMSI FEST', 'Medkraf', 'xx', '2025-09-19', '2025-09-01', 'xcx', NULL, NULL),
-('1c507e2c-929b-11f0-981a-442e1c01b37c', 'fhvjbkn', 'Eksternal', 'hgjbknl', '2025-09-17', '2025-09-18', 'vghbjknl', NULL, NULL),
 ('44a1059b-92b7-11f0-981a-442e1c01b37c', 'HMSI FEST', 'Medkraf', 'kjiji', '2025-09-15', '2025-09-19', 'jjjj', NULL, 'dokumen_pendukung-1757997618231-7341680.pdf'),
-('4f5b27a6-907c-11f0-981a-442e1c01b37c', 'mmm', NULL, '   kk', NULL, NULL, 'mm', NULL, NULL),
 ('6925fb54-92b7-11f0-981a-442e1c01b37c', 'webinar', 'Internal', 'caadxaxd', '2025-09-09', '2025-09-20', 'xasdasd', NULL, 'dokumen_pendukung-1757997679569-950525043.pdf'),
-('8830855f-929a-11f0-981a-442e1c01b37c', 'jjojjoo', 'Eksternal', 'knlknl', '2025-09-16', '2025-09-20', 'hihhi', NULL, 'dokumen_pendukung-1757985276261-690230660.png'),
-('eb5e3d6b-9219-11f0-981a-442e1c01b37c', 'ww', 'Medkraf', 'cscss', '2025-09-10', '2025-09-17', 'xx', NULL, 'dokumen_pendukung-1757930038548-853056450.pdf'),
-('fd7748ee-925c-11f0-981a-442e1c01b37c', 'apalah', 'Medkraf', 'dssd', '2025-09-27', '2025-09-07', 'xx', NULL, 'dokumen_pendukung-1758016752763-372236524.pdf'),
+('a52f81e4-946a-11f0-981a-442e1c01b37c', 'Seminar Nasional', 'Eksternal', 'Menghadirkan pembicara nasional', '2025-01-10', '2025-01-12', 'Ketua Divisi Eksternal', NULL, NULL),
+('a52fa384-946a-11f0-981a-442e1c01b37c', 'Pelatihan Desain', 'Medkraf', 'Workshop desain grafis untuk anggota HMSI', '2025-02-01', '2025-02-02', 'Ketua Divisi Medkraf', NULL, NULL),
+('a52fa5e3-946a-11f0-981a-442e1c01b37c', 'Rapat Kerja HMSI', 'Internal', 'Rapat kerja awal periode HMSI', '2025-01-15', '2025-01-16', 'Ketua Divisi Internal', '3581d577-946a-11f0-981a-442e1c01b37c', NULL),
+('a52fa84c-946a-11f0-981a-442e1c01b37c', 'Bakti Sosial', 'Eksternal', 'Kegiatan sosial di desa binaan', '2025-03-01', '2025-03-03', 'Ketua Divisi Eksternal', NULL, NULL),
+('a52fa9bd-946a-11f0-981a-442e1c01b37c', 'Pelatihan Kepemimpinan', 'Internal', 'Pengembangan soft skill pengurus HMSI', '2025-04-01', '2025-04-02', 'Ketua Divisi Internal', '3581d577-946a-11f0-981a-442e1c01b37c', NULL),
 ('fdd06680-91a5-11f0-981a-442e1c01b37c', 'HMSI FEST', 'Medkraf', 'lmm', '2025-10-01', '2025-09-07', 'ffhgjbk', NULL, 'dokumen_pendukung-1757930999719-112014362.png'),
-('PK003', 'TechnoFest 2025', NULL, 'Festival teknologi tahunan HMSI', NULL, NULL, 'Ridho Syahputra', 'U001', NULL);
+('PK003', 'TechnoFest 2025', NULL, 'Festival teknologi tahunan HMSI', NULL, NULL, 'Ridho Syahputra', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -147,26 +155,19 @@ CREATE TABLE `user` (
   `nama` varchar(50) DEFAULT NULL,
   `email` varchar(50) DEFAULT NULL,
   `password` varchar(255) DEFAULT NULL,
-  `role` enum('Admin','HMSI','DPA') DEFAULT NULL
+  `role` enum('Admin','HMSI','DPA') DEFAULT NULL,
+  `divisi` enum('Internal','Medkraf','Eksternal','Bikraf','PSI','PSDM','RTK') DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `user`
 --
 
-INSERT INTO `user` (`id_anggota`, `nama`, `email`, `password`, `role`) VALUES
-('U001', 'Admin HMSI', 'admin@hmsi.local', 'admin123', 'Admin'),
-('U002', 'Ketua HMSI', 'hmsi@unand.ac.id', 'hmsi123', 'HMSI'),
-('U003', 'Dosen Pembimbing', 'dpa@unand.ac.id', 'dpa123', 'DPA'),
-('U004', 'Ridho Syahputra', 'ridho@example.com', 'hashed_password', 'HMSI'),
-('U005', 'Budi Santoso', 'budi@example.com', 'hashed_password', 'DPA'),
-('U006', 'Admin Satu', 'admin@example.com', 'hashed_password', 'Admin'),
-('U008', 'Ridho Syahputra', 'ridho@example.com', 'hashed_password', 'HMSI'),
-('U009', 'Budi Santoso', 'budi@example.com', 'hashed_password', 'DPA'),
-('U010', 'Admin Satu', 'admin@example.com', 'hashed_password', 'Admin'),
-('U1', 'Admin One', 'admin@hmsi.com', 'admin123', 'Admin'),
-('U2', 'HMSI One', 'hmsi@hmsi.com', 'hmsi123', 'HMSI'),
-('U3', 'DPA One', 'dpa@hmsi.com', 'dpa123', 'DPA');
+INSERT INTO `user` (`id_anggota`, `nama`, `email`, `password`, `role`, `divisi`) VALUES
+('3581d577-946a-11f0-981a-442e1c01b37c', 'Ketua Divisi Internal', 'internal@hmsi.com', 'hmsi123', 'HMSI', 'Internal'),
+('8d43d10d-9464-11f0-981a-442e1c01b37c', 'Admin User', 'admin', 'admin123', 'Admin', NULL),
+('8d477929-9464-11f0-981a-442e1c01b37c', 'DPA User', 'dpa', 'dpa123', 'DPA', NULL),
+('8d488fd7-9464-11f0-981a-442e1c01b37c', 'HMSI Eksternal', 'hmsi', 'hmsi123', 'HMSI', 'Eksternal');
 
 --
 -- Indexes for dumped tables

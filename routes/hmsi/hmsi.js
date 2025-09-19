@@ -1,12 +1,18 @@
 // =====================================================
 // routes/hmsi/hmsi.js
-// Routing khusus untuk HMSI (Program Kerja, Laporan, Evaluasi)
+// Routing khusus untuk HMSI (Dashboard, Proker, Laporan, Evaluasi, Notifikasi, Profile)
 // =====================================================
 
 const express = require("express");
 const router = express.Router();
+const path = require("path");
+const multer = require("multer");
 
-const { requireRole } = require("../../middleware/auth");
+// =====================================================
+// IMPORT AUTH & MIDDLEWARE
+// =====================================================
+const { requireLogin, requireRole } = require("../../middleware/auth");
+const validateUpload = require("../../middleware/validateUpload");
 
 // =====================================================
 // IMPORT CONTROLLERS
@@ -14,25 +20,34 @@ const { requireRole } = require("../../middleware/auth");
 const prokerCtrl = require("../../controllers/HMSI/prokerController");
 const laporanCtrl = require("../../controllers/HMSI/laporanController");
 const evaluasiCtrl = require("../../controllers/HMSI/evaluasiController");
-const notifikasiController = require("../../controllers/HMSI/notifikasiController");
+const notifikasiCtrl = require("../../controllers/HMSI/notifikasiController");
+const profileCtrl = require("../../controllers/HMSI/profileController");
 
 // =====================================================
-// IMPORT MIDDLEWARE
+// MIDDLEWARE: Semua route di sini harus login + role HMSI
 // =====================================================
-const validateUpload = require("../../middleware/validateUpload");
+router.use(requireLogin, requireRole(["HMSI"]));
+
+// =====================================================
+// DASHBOARD HMSI
+// =====================================================
+router.get("/dashboard", (req, res) => {
+  res.render("hmsi/hmsiDashboard", {
+    title: "Dashboard HMSI",
+    user: req.session.user,
+    activeNav: "Dashboard",
+  });
+});
 
 // =====================================================
 // PROGRAM KERJA (PROKER)
 // =====================================================
-
-// 📄 Daftar semua proker
 router.get("/kelola-proker", prokerCtrl.getAllProker);
 
-// ➕ Form tambah proker
 router.get("/tambah-proker", (req, res) => {
   res.render("hmsi/tambahProker", {
     title: "Tambah Proker",
-    user: req.session.user || { name: "Ridho Dwi Syhaputra" },
+    user: req.session.user,
     activeNav: "Program Kerja",
     old: {},
     errorMsg: null,
@@ -40,80 +55,68 @@ router.get("/tambah-proker", (req, res) => {
   });
 });
 
-// 💾 Simpan proker baru
 router.post("/tambah-proker", validateUpload("create", "proker"), prokerCtrl.createProker);
-
-// 📄 Detail proker
 router.get("/proker/:id", prokerCtrl.getDetailProker);
-
-// ✏️ Form edit proker
 router.get("/proker/:id/edit", prokerCtrl.getEditProker);
-
-// 💾 Simpan edit proker
 router.post("/proker/:id/edit", validateUpload("edit", "proker"), prokerCtrl.updateProker);
-
-
 router.post("/proker/:id/delete", prokerCtrl.deleteProker);
-
-// ⬇️ Download dokumen pendukung
 router.get("/proker/download/:id", prokerCtrl.downloadDokumenPendukung);
 
 // =====================================================
 // LAPORAN
 // =====================================================
-
-// 📄 Daftar semua laporan
 router.get("/laporan", laporanCtrl.getAllLaporan);
-
-// ➕ Form tambah laporan
 router.get("/laporan/tambah", laporanCtrl.getFormLaporan);
-
-// 💾 Simpan laporan baru
 router.post("/laporan/tambah", validateUpload("create", "laporan"), laporanCtrl.createLaporan);
-
-// 📄 Detail laporan
 router.get("/laporan/:id", laporanCtrl.getDetailLaporan);
-
-// ✏️ Form edit laporan
 router.get("/laporan/edit/:id", laporanCtrl.getEditLaporan);
-
-// 💾 Simpan edit laporan
 router.post("/laporan/edit/:id", validateUpload("edit", "laporan"), laporanCtrl.updateLaporan);
-
-// ❌ Hapus laporan
 router.post("/laporan/delete/:id", laporanCtrl.deleteLaporan);
-
-// ⬇️ Download Dokumentasi
 router.get("/laporan/download/:id", laporanCtrl.downloadDokumentasi);
 
 // =====================================================
 // EVALUASI
 // =====================================================
-
-// 📄 Daftar semua evaluasi
 router.get("/evaluasi", evaluasiCtrl.getAllEvaluasi);
-
-// 📄 Detail evaluasi
 router.get("/evaluasi/:id", evaluasiCtrl.getDetailEvaluasi);
-
-// 💾 Tambah evaluasi
 router.post("/evaluasi/create", evaluasiCtrl.createEvaluasi);
-
-// 💾 Update evaluasi
 router.post("/evaluasi/update/:id", evaluasiCtrl.updateEvaluasi);
-
-// ❌ Hapus evaluasi
 router.post("/evaluasi/delete/:id", evaluasiCtrl.deleteEvaluasi);
 
 // =====================================================
-// Notifikasi
+// NOTIFIKASI
+// =====================================================
+router.get("/notifikasi", notifikasiCtrl.getAllNotifikasi);
+
+// =====================================================
+// PROFILE
 // =====================================================
 
-router.get(
-  "/notifikasi",
-  requireRole("HMSI"),
-  notifikasiController.getAllNotifikasi
-);
+// ⚡ Setup multer untuk foto profil
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join(__dirname, "../../public/uploads/profile"));
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    const unique = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, unique + ext);
+  },
+});
+
+const upload = multer({
+  storage,
+  limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
+});
+
+// 📄 Tampilkan halaman profil
+router.get("/profile", profileCtrl.getProfile);
+
+// ✏️ Update nama & password
+router.post("/profile/update", profileCtrl.updateProfile);
+
+// 🖼️ Upload foto profil
+router.post("/profile/upload-foto", upload.single("foto"), profileCtrl.uploadFoto);
 
 // =====================================================
 // EXPORT ROUTER

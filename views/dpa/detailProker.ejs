@@ -91,17 +91,26 @@
           <div>
             <h4 class="text-lg font-semibold text-orange-600 mb-4">Dokumen Pendukung</h4>
             <% if (proker.dokumen_pendukung) { %>
-              <div class="p-4 bg-gray-50 border rounded-xl">
+              <div class="p-4 bg-gray-50 border rounded-xl space-y-3">
                 <% if (/\.(jpg|jpeg|png)$/i.test(proker.dokumen_pendukung)) { %>
                   <img src="/uploads/<%= proker.dokumen_pendukung %>" alt="Dokumen Pendukung"
                        class="max-h-80 rounded-lg shadow mx-auto">
                 <% } else if (/\.pdf$/i.test(proker.dokumen_pendukung)) { %>
+                  <!-- Preview PDF -->
+                  <iframe src="/uploads/<%= proker.dokumen_pendukung %>#toolbar=0"
+                          class="w-full h-96 border rounded-lg shadow"
+                          frameborder="0"></iframe>
+                  <!-- Tombol buka di tab baru -->
                   <a href="/uploads/<%= proker.dokumen_pendukung %>" target="_blank"
-                     class="text-orange-600 underline font-medium">
-                    📄 <%= proker.dokumen_pendukung %>
+                     class="inline-block px-4 py-2 bg-orange-500 text-white text-sm font-medium rounded-lg shadow hover:bg-orange-600 transition">
+                    📄 Buka PDF di tab baru
                   </a>
                 <% } else { %>
-                  <p class="text-gray-600">Tidak dapat menampilkan dokumen. <a href="/uploads/<%= proker.dokumen_pendukung %>" class="text-orange-600 underline">Unduh file</a></p>
+                  <p class="text-gray-600">
+                    Tidak dapat menampilkan dokumen.
+                    <a href="/uploads/<%= proker.dokumen_pendukung %>" 
+                       class="text-orange-600 underline">Unduh file</a>
+                  </p>
                 <% } %>
               </div>
             <% } else { %>

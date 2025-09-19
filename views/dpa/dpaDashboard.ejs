@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard DPA</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+  <!-- Sidebar -->
+  <%- include('../partials/sidebarDPA', { user: user, activeNav: activeNav }) %>
+
+<body class="min-h-screen flex items-center justify-center bg-green-100">
+  <div class="text-center p-10 bg-white rounded-2xl shadow-lg">
+    <h1 class="text-3xl font-bold text-green-600 mb-4">
+      Selamat Datang, <%= user.name %> 👋
+    </h1>
+    <p class="text-gray-600">
+      Anda login sebagai <span class="font-semibold">DPA</span>.
+    </p>
+  </div>
+</body>
+</html>

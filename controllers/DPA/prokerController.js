@@ -27,16 +27,17 @@ exports.getAllProkerDPA = async (req, res) => {
   try {
     const [rows] = await db.query(`
       SELECT 
-        id_ProgramKerja AS id,
-        Nama_ProgramKerja AS namaProker,
-        Divisi AS divisi,
-        Deskripsi AS deskripsi,
-        Tanggal_mulai AS tanggal_mulai,
-        Tanggal_selesai AS tanggal_selesai,
-        Penanggung_jawab AS penanggungJawab,
-        Dokumen_pendukung AS dokumen_pendukung
-      FROM Program_kerja
-      ORDER BY Tanggal_mulai DESC
+        p.id_ProgramKerja AS id,
+        p.Nama_ProgramKerja AS namaProker,
+        u.divisi AS divisi,
+        p.Deskripsi AS deskripsi,
+        p.Tanggal_mulai AS tanggal_mulai,
+        p.Tanggal_selesai AS tanggal_selesai,
+        p.Penanggung_jawab AS penanggungJawab,
+        p.Dokumen_pendukung AS dokumen_pendukung
+      FROM Program_kerja p
+      LEFT JOIN User u ON p.id_anggota = u.id_anggota
+      ORDER BY p.Tanggal_mulai DESC
     `);
 
     // Tambahkan status otomatis berdasarkan tanggal
@@ -63,7 +64,7 @@ exports.getAllProkerDPA = async (req, res) => {
         dokumen_pendukung: r.dokumen_pendukung,
         tanggalMulaiFormatted: formatTanggal(r.tanggal_mulai),
         tanggalSelesaiFormatted: formatTanggal(r.tanggal_selesai),
-        status: status
+        status
       };
     });
 
@@ -95,16 +96,17 @@ exports.getDetailProkerDPA = async (req, res) => {
   try {
     const [rows] = await db.query(
       `SELECT 
-        id_ProgramKerja AS id,
-        Nama_ProgramKerja AS namaProker,
-        Divisi AS divisi,
-        Deskripsi AS deskripsi,
-        Tanggal_mulai AS tanggal_mulai,
-        Tanggal_selesai AS tanggal_selesai,
-        Penanggung_jawab AS penanggungJawab,
-        Dokumen_pendukung AS dokumen_pendukung
-      FROM Program_kerja
-      WHERE id_ProgramKerja = ?`,
+        p.id_ProgramKerja AS id,
+        p.Nama_ProgramKerja AS namaProker,
+        u.divisi AS divisi,
+        p.Deskripsi AS deskripsi,
+        p.Tanggal_mulai AS tanggal_mulai,
+        p.Tanggal_selesai AS tanggal_selesai,
+        p.Penanggung_jawab AS penanggungJawab,
+        p.Dokumen_pendukung AS dokumen_pendukung
+      FROM Program_kerja p
+      LEFT JOIN User u ON p.id_anggota = u.id_anggota
+      WHERE p.id_ProgramKerja = ?`,
       [req.params.id]
     );
 

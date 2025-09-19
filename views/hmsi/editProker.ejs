@@ -54,32 +54,14 @@
                   class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100">
               </div>
 
-              <!-- Divisi -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Divisi HMSI</label>
-                <select name="divisi" required
-                  class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100">
-                  <option value="">-- Pilih Divisi --</option>
-                  <% ['Internal','Medkraf','Eksternal','Bikraf','PSI','PSDM','RTK'].forEach(d => { %>
-                    <% 
-                      let selected = false;
-                      if (old.divisi) {
-                        selected = (old.divisi === d);
-                      } else {
-                        selected = (proker.Divisi === d);
-                      }
-                    %>
-                    <option value="<%= d %>" <%= selected ? "selected" : "" %>><%= d %></option>
-                  <% }) %>
-                </select>
-              </div>
-
               <!-- Penanggung Jawab -->
-            <input type="text" name="penanggungJawab"
-              value="<%= (old.penanggungJawab) || proker.Penanggung_jawab || '' %>" required
-              placeholder="Masukkan nama penanggung jawab..."
-              class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100">
-
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Penanggung Jawab</label>
+                <input type="text" name="penanggungJawab"
+                  value="<%= old?.penanggungJawab || proker.Penanggung_jawab || '' %>" required
+                  placeholder="Masukkan nama penanggung jawab..."
+                  class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100">
+              </div>
 
               <!-- Tanggal Mulai -->
               <div>

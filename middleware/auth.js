@@ -1,32 +1,25 @@
 // middleware/auth.js
+// Middleware untuk autentikasi & otorisasi
 
-// Cek apakah user sudah login
-function isLoggedIn(req, res, next) {
-  if (req.session && req.session.user) {
-    return next();
+// ==========================
+// Middleware requireLogin
+// ==========================
+exports.requireLogin = (req, res, next) => {
+  if (!req.session.user) {
+    return res.redirect("/auth/login"); // jika belum login, redirect ke login
   }
-  return res.redirect('/auth/login');
-}
+  next();
+};
 
-// // Cek role tertentu
-// function requireRole(role) {
-//   return function (req, res, next) {
-//     if (req.session && req.session.user && req.session.user.role === role) {
-//       return next();
-//     }
-//     return res.status(403).send('Forbidden: Anda tidak punya akses');
-//   };
-// }
-
-function requireRole(role) {
+// ==========================
+// Middleware requireRole
+// ==========================
+// roles = array, contoh: ["HMSI"] atau ["Admin", "DPA"]
+exports.requireRole = (roles) => {
   return (req, res, next) => {
-    // 🔴 OFF AUTH: langsung bypass
-    req.session.user = { id: 1, name: "Dummy User", role: role };
-    return next();
+    if (!req.session.user || !roles.includes(req.session.user.role)) {
+      return res.status(403).send("❌ Akses ditolak!");
+    }
+    next();
   };
-}
-
-module.exports = {
-  isLoggedIn,
-  requireRole
 };

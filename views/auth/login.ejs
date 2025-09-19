@@ -37,16 +37,23 @@
         <p class="text-gray-600">Sistem Monitoring Program Kerja</p>
       </div>
 
+      <!-- Error Message -->
+      <% if (typeof errorMsg !== "undefined" && errorMsg) { %>
+        <div class="mb-4 p-3 text-sm text-red-700 bg-red-100 rounded-lg">
+          <%= errorMsg %>
+        </div>
+      <% } %>
+
       <!-- Form -->
       <form action="/auth/login" method="POST" class="space-y-6">
 
-        <!-- Email -->
+        <!-- Username -->
         <div>
-          <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
-          <input type="email" id="email" name="email"
+          <label for="email" class="block text-sm font-semibold text-gray-700 mb-2">Username</label>
+          <input type="text" id="email" name="email"
                  class="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white text-sm font-normal
                         focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-100"
-                 placeholder="Masukkan email Anda" required>
+                 placeholder="Masukkan username Anda (hmsi/dpa/admin)" required>
         </div>
 
         <!-- Password -->
@@ -58,25 +65,12 @@
                  placeholder="Masukkan password Anda" required>
         </div>
 
-        <!-- Role
-        <div>
-          <label for="role" class="block text-sm font-semibold text-gray-700 mb-2">Login Sebagai</label>
-          <select name="role" id="role"
-                  class="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white text-sm font-normal
-                         focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-100">
-            <option value="HMSI">HMSI</option>
-            <option value="DPA">DPA</option>
-            <option value="Admin">Admin</option>
-          </select>
-        </div> -->
-
-        <!-- Remember me & Forgot password -->
+        <!-- Remember me -->
         <div class="flex items-center justify-between">
           <label class="flex items-center cursor-pointer">
             <input type="checkbox" name="rememberMe" class="w-4 h-4 text-orange-500 border-gray-300 rounded focus:ring-orange-200 focus:ring-2">
             <span class="ml-2 text-sm text-gray-600">Remember Me</span>
           </label>
-          <a href="#" class="text-sm text-orange-500 hover:text-orange-600 font-medium">Lupa Password?</a>
         </div>
 
         <!-- Submit -->

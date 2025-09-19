@@ -13,6 +13,8 @@
   "dependencies": {
     "autoprefixer": "^10.4.21",
     "bcrypt": "^6.0.0",
+    "bcryptjs": "^3.0.2",
+    "connect-flash": "^0.1.1",
     "dotenv": "^17.2.2",
     "ejs": "^3.1.10",
     "express": "^5.1.0",
