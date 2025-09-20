@@ -12,7 +12,7 @@
 <body class="bg-gray-50 min-h-screen">
 
   <!-- Sidebar -->
-  <%- include('../partials/sidebarDPA', { user: user, activeNav: activeNav }) %>
+  <%- include('../partials/sidebarDPA', { activeNav: 'Daftar Laporan', user: user }) %>
 
   <!-- Wrapper -->
   <div class="lg:ml-80 opacity-0 animate-fade-in" style="animation-delay:150ms;">
@@ -30,8 +30,9 @@
     <div class="px-6 py-8">
       <div class="max-w-7xl mx-auto bg-white rounded-2xl border border-orange-200 shadow-sm p-6">
 
-        <!-- Search -->
+        <!-- Search & Filter -->
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+          <!-- Search -->
           <div class="flex-1">
             <div class="relative">
               <input id="searchInput" type="text" placeholder="Cari laporan..."
@@ -41,6 +42,48 @@
                        placeholder-gray-400 focus:placeholder-orange-400
                        transition-all duration-300">
               <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            </div>
+          </div>
+
+          <!-- Filter Status -->
+          <div class="relative">
+            <button id="statusDropdownBtn"
+              class="flex items-center justify-between gap-2 px-4 py-3 border border-gray-300 rounded-xl text-sm bg-white
+                     hover:border-orange-500 hover:shadow-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200">
+              <span id="statusDropdownLabel">Semua Status</span>
+              <i class="fa-solid fa-chevron-down text-orange-500"></i>
+            </button>
+            <div id="statusDropdownMenu"
+              class="hidden absolute right-0 mt-2 w-48 bg-white border border-orange-200 rounded-lg shadow-lg z-10">
+              <ul class="text-sm text-gray-700">
+                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="all">Semua Status</button></li>
+                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="Belum Dievaluasi">Belum Dievaluasi</button></li>
+                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="Revisi">Revisi</button></li>
+                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="Approved">Disetujui</button></li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Filter Divisi -->
+          <div class="relative">
+            <button id="divisiDropdownBtn"
+              class="flex items-center justify-between gap-2 px-4 py-3 border border-gray-300 rounded-xl text-sm bg-white
+                     hover:border-orange-500 hover:shadow-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200">
+              <span id="divisiDropdownLabel">Semua Divisi</span>
+              <i class="fa-solid fa-chevron-down text-orange-500"></i>
+            </button>
+            <div id="divisiDropdownMenu"
+              class="hidden absolute right-0 mt-2 w-48 bg-white border border-orange-200 rounded-lg shadow-lg z-10">
+              <ul class="text-sm text-gray-700">
+                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="all">Semua Divisi</button></li>
+                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="Internal">Internal</button></li>
+                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="Medkraf">Medkraf</button></li>
+                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="Eksternal">Eksternal</button></li>
+                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="Bikraf">Bikraf</button></li>
+                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="PSI">PSI</button></li>
+                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="PSDM">PSDM</button></li>
+                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="RTK">RTK</button></li>
+              </ul>
             </div>
           </div>
         </div>
@@ -78,9 +121,9 @@
                     <td class="py-3 px-4 border border-orange-100"><%= i + 1 %></td>
                     <td class="py-3 px-4 font-medium text-gray-800 border border-orange-100 text-left"><%= l.judul_laporan %></td>
                     <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= l.namaProker || "-" %></td>
-                    <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= l.divisi || "-" %></td>
+                    <td class="py-3 px-4 text-gray-600 border border-orange-100" data-col="divisi"><%= l.divisi || "-" %></td>
                     <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= l.tanggalFormatted %></td>
-                    <td class="py-3 px-4 border border-orange-100">
+                    <td class="py-3 px-4 border border-orange-100" data-col="status">
                       <% if (l.status === "Revisi") { %>
                         <span class="px-3 py-1 bg-red-100 text-red-700 rounded-lg text-xs font-semibold">Revisi</span>
                       <% } else if (l.status === "Approved") { %>
@@ -90,7 +133,6 @@
                       <% } %>
                     </td>
                     <td class="py-3 px-4 flex justify-center gap-4 border border-orange-100">
-                      <!-- Hanya detail -->
                       <a href="/dpa/laporan/<%= l.id_laporan %>" 
                         class="text-orange-500 hover:text-orange-700 transition transform hover:scale-110" title="Detail">
                         <i class="fa-solid fa-eye text-lg"></i>
@@ -114,7 +156,7 @@
     </div>
   </div>
 
-  <!-- Animasi & Custom Style -->
+  <!-- Style -->
   <style>
     @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
     .animate-fade-in { animation: fadeIn 0.7s ease-out forwards; }
@@ -136,16 +178,53 @@
       const tbody = document.getElementById("laporanTable");
       let rows = Array.from(tbody.querySelectorAll("tr"));
 
+      const statusBtn = document.getElementById("statusDropdownBtn");
+      const statusMenu = document.getElementById("statusDropdownMenu");
+      const statusLabel = document.getElementById("statusDropdownLabel");
+
+      const divisiBtn = document.getElementById("divisiDropdownBtn");
+      const divisiMenu = document.getElementById("divisiDropdownMenu");
+      const divisiLabel = document.getElementById("divisiDropdownLabel");
+
       const rowsPerPage = 10;
       let currentPage = 1;
 
+      // toggle dropdowns
+      statusBtn.addEventListener("click", () => statusMenu.classList.toggle("hidden"));
+      divisiBtn.addEventListener("click", () => divisiMenu.classList.toggle("hidden"));
+
+      statusMenu.querySelectorAll("button").forEach(btn => {
+        btn.addEventListener("click", () => {
+          statusLabel.textContent = btn.dataset.value === "all" ? "Semua Status" : btn.dataset.value;
+          statusMenu.classList.add("hidden");
+          filterRows();
+        });
+      });
+
+      divisiMenu.querySelectorAll("button").forEach(btn => {
+        btn.addEventListener("click", () => {
+          divisiLabel.textContent = btn.dataset.value === "all" ? "Semua Divisi" : btn.dataset.value;
+          divisiMenu.classList.add("hidden");
+          filterRows();
+        });
+      });
+
       function filterRows() {
         const searchValue = searchInput.value.toLowerCase();
+        const selectedStatus = statusLabel.textContent.trim();
+        const selectedDivisi = divisiLabel.textContent.trim();
+
         rows.forEach(row => {
           const judul = row.cells[1]?.innerText.toLowerCase() || "";
           const program = row.cells[2]?.innerText.toLowerCase() || "";
+          const status = row.querySelector("td[data-col='status']")?.innerText.trim() || "";
+          const divisi = row.querySelector("td[data-col='divisi']")?.innerText.trim() || "";
+
           let matchSearch = judul.includes(searchValue) || program.includes(searchValue);
-          row.dataset.visible = matchSearch ? "true" : "false";
+          let matchStatus = selectedStatus === "Semua Status" || status === selectedStatus;
+          let matchDivisi = selectedDivisi === "Semua Divisi" || divisi === selectedDivisi;
+
+          row.dataset.visible = (matchSearch && matchStatus && matchDivisi) ? "true" : "false";
         });
         paginate();
       }

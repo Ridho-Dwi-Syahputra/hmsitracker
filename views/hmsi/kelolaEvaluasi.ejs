@@ -11,7 +11,7 @@
 <body class="bg-gray-50 min-h-screen">
 
   <!-- Sidebar HMSI -->
-  <%- include('../partials/sidebarHMSI', { user: user, activeNav: 'Evaluasi' }) %>
+  <%- include('../partials/sidebarHMSI', { user: user, activeNav: 'Evaluasi DPA' }) %>
 
   <!-- Wrapper -->
   <div class="lg:ml-80 opacity-0 animate-fade-in" style="animation-delay:150ms;">
@@ -29,9 +29,10 @@
     <div class="px-6 py-8">
       <div class="max-w-7xl mx-auto bg-white rounded-2xl border border-orange-200 shadow-sm p-6">
 
-        <!-- Search -->
-        <div class="mb-6">
-          <div class="relative">
+        <!-- Search & Filter -->
+        <div class="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
+          <!-- Search -->
+          <div class="relative w-full md:w-1/2">
             <input id="searchInput" type="text" placeholder="Cari evaluasi..."
               class="w-full pl-10 pr-4 py-3 border rounded-xl text-sm
                      border-gray-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-500
@@ -39,6 +40,24 @@
                      placeholder-gray-400 focus:placeholder-orange-400
                      transition-all duration-300">
             <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+          </div>
+
+          <!-- Filter Status -->
+          <div class="relative">
+            <button id="statusDropdownBtn"
+              class="flex items-center justify-between gap-2 px-4 py-3 border border-gray-300 rounded-xl text-sm bg-white
+                     hover:border-orange-500 hover:shadow-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200">
+              <span id="statusDropdownLabel">Semua Status</span>
+              <i class="fa-solid fa-chevron-down text-orange-500"></i>
+            </button>
+            <div id="statusDropdownMenu"
+              class="hidden absolute right-0 mt-2 w-48 bg-white border border-orange-200 rounded-lg shadow-lg z-10">
+              <ul class="text-sm text-gray-700">
+                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="all">Semua Status</button></li>
+                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="Revisi">Revisi</button></li>
+                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="Selesai">Disetujui</button></li>
+              </ul>
+            </div>
           </div>
         </div>
 
@@ -59,16 +78,16 @@
             <tbody id="evaluasiTable">
               <% if (evaluasi && evaluasi.length > 0) { %>
                 <% evaluasi.forEach((e, index) => { %>
-                  <tr class="hover:bg-orange-50 transition">
+                  <tr class="hover:bg-orange-50 transition" data-status="<%= e.status_konfirmasi %>">
                     <td class="py-3 px-4 border border-orange-100"><%= index + 1 %></td>
                     <td class="py-3 px-4 text-gray-800 font-medium border border-orange-100 text-left"><%= e.judul_laporan %></td>
                     <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= e.Nama_ProgramKerja %></td>
                     <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= e.evaluator || '-' %></td>
                     <td class="py-3 px-4 border border-orange-100">
                       <% if (e.status_konfirmasi === "Revisi") { %>
-                        <span class="px-3 py-1 text-xs rounded-full bg-red-100 text-red-700 font-medium"><%= e.status_konfirmasi %></span>
+                        <span class="px-3 py-1 text-xs rounded-full bg-red-100 text-red-700 font-medium">Revisi</span>
                       <% } else if (e.status_konfirmasi === "Selesai") { %>
-                        <span class="px-3 py-1 text-xs rounded-full bg-green-100 text-green-700 font-medium"><%= e.status_konfirmasi %></span>
+                        <span class="px-3 py-1 text-xs rounded-full bg-green-100 text-green-700 font-medium">Disetujui</span>
                       <% } else { %>
                         <span class="px-3 py-1 text-xs rounded-full bg-gray-100 text-gray-600 font-medium"><%= e.status_konfirmasi %></span>
                       <% } %>
@@ -122,32 +141,51 @@
     document.addEventListener("DOMContentLoaded", () => {
       const searchInput = document.getElementById("searchInput");
       const tbody = document.getElementById("evaluasiTable");
-      let rows = Array.from(tbody.querySelectorAll("tr"));
-
+      const rows = Array.from(tbody.querySelectorAll("tr[data-status]"));
       const rowsPerPage = 10;
       let currentPage = 1;
+      let currentFilter = "all";
+
+      const statusBtn = document.getElementById("statusDropdownBtn");
+      const statusMenu = document.getElementById("statusDropdownMenu");
+      const statusLabel = document.getElementById("statusDropdownLabel");
+
+      // toggle dropdown
+      statusBtn.addEventListener("click", () => {
+        statusMenu.classList.toggle("hidden");
+      });
+
+      // pilih filter status
+      statusMenu.querySelectorAll("button").forEach(btn => {
+        btn.addEventListener("click", () => {
+          currentFilter = btn.dataset.value;
+          statusLabel.textContent = btn.textContent;
+          statusMenu.classList.add("hidden");
+          filterRows();
+        });
+      });
 
       function filterRows() {
-        rows = Array.from(tbody.querySelectorAll("tr"));
         const searchValue = searchInput.value.toLowerCase();
 
         rows.forEach(row => {
           const judul = row.cells[1]?.innerText.toLowerCase() || "";
           const program = row.cells[2]?.innerText.toLowerCase() || "";
           const evaluator = row.cells[3]?.innerText.toLowerCase() || "";
-          const status = row.cells[4]?.innerText.toLowerCase() || "";
+          const status = row.dataset.status;
 
-          let matchSearch = judul.includes(searchValue) || program.includes(searchValue) || evaluator.includes(searchValue) || status.includes(searchValue);
+          let matchSearch = judul.includes(searchValue) || program.includes(searchValue) || evaluator.includes(searchValue) || status.toLowerCase().includes(searchValue);
+          let matchFilter = currentFilter === "all" || status === currentFilter;
 
-          row.dataset.visible = matchSearch ? "true" : "false";
+          row.dataset.visible = matchSearch && matchFilter ? "true" : "false";
         });
 
         paginate();
       }
 
       function paginate() {
-        let visibleRows = rows.filter(row => row.dataset.visible === "true");
-        let totalPages = Math.ceil(visibleRows.length / rowsPerPage);
+        const visibleRows = rows.filter(row => row.dataset.visible === "true");
+        const totalPages = Math.ceil(visibleRows.length / rowsPerPage);
         if (currentPage > totalPages) currentPage = totalPages || 1;
 
         rows.forEach(row => row.style.display = "none");
@@ -164,7 +202,6 @@
 
       document.getElementById("prevPage").addEventListener("click", () => { currentPage--; paginate(); });
       document.getElementById("nextPage").addEventListener("click", () => { currentPage++; paginate(); });
-
       searchInput.addEventListener("input", filterRows);
 
       filterRows();

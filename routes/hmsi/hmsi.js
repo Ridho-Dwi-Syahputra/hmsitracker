@@ -84,11 +84,10 @@ router.post("/evaluasi/update/:id", evaluasiCtrl.updateEvaluasi);
 router.post("/evaluasi/delete/:id", evaluasiCtrl.deleteEvaluasi);
 
 // =====================================================
-// NOTIFIKASI
+// NOTIFIKASI (klik bubble → tandai terbaca + redirect evaluasi)
 // =====================================================
 router.get("/notifikasi", notifikasiCtrl.getAllNotifikasi);
-router.post("/notifikasi/read/:id", notifikasiCtrl.markAsRead);   // ✅ Tandai sudah dibaca
-router.post("/notifikasi/delete/:id", notifikasiCtrl.deleteNotifikasi); // ✅ Hapus notifikasi
+router.get("/notifikasi/read/:id", notifikasiCtrl.readAndRedirect);
 
 // =====================================================
 // PROFILE

@@ -25,50 +25,59 @@
     <!-- List Notifikasi -->
     <div class="max-w-4xl mx-auto space-y-4">
       <% if (notifikasi && notifikasi.length > 0) { %>
-        <% notifikasi.forEach((n) => { %>
-          <div class="flex items-start gap-4 p-4 bg-white border border-orange-200 rounded-xl shadow-sm hover:shadow-md transition">
-            
-            <!-- Icon -->
-            <div class="flex-shrink-0 mt-1">
-              <i class="fa-solid fa-bell text-orange-500 text-lg"></i>
-            </div>
+        <% notifikasi.forEach(function(n) {
+             const isLaporan = !!n.id_laporan;
+             const isProker  = !!(n.id_ProgramKerja || n.Nama_ProgramKerja);
+             // short label (tampilkan Evaluasi untuk laporan)
+             const rightLabel = isLaporan ? 'Lihat Evaluasi' : (isProker ? 'Lihat Program Kerja' : 'Lihat');
+         %>
 
-            <!-- Isi -->
-            <div class="flex-1">
-              <p class="text-gray-800 text-sm font-medium"><%= n.pesan %></p>
-              <p class="text-gray-600 text-xs mt-1">
-                <span class="font-semibold">Judul:</span> <%= n.judul_laporan || '-' %><br>
-                <span class="font-semibold">Program:</span> <%= n.Nama_ProgramKerja || '-' %>
-              </p>
-              <div class="flex items-center justify-between mt-3">
-                <span class="text-xs text-gray-500"><%= n.tanggalFormatted %></span>
-                <a href="/hmsi/laporan/<%= n.id_laporan %>" 
-                   class="text-orange-500 text-xs font-medium hover:underline">Lihat Laporan</a>
+          <!-- whole card clickable: hits /hmsi/notifikasi/read/:id (controller harus update status_baca dan redirect) -->
+          <a href="/hmsi/notifikasi/read/<%= n.id_notifikasi %>" class="block">
+            <div class="flex items-start gap-4 p-4 bg-white border border-orange-200 rounded-xl shadow-sm hover:shadow-md transition cursor-pointer <%= !n.status_baca ? 'border-2 border-orange-300' : '' %>">
+              
+              <!-- Icon -->
+              <div class="flex-shrink-0 mt-1">
+                <i class="fa-solid fa-bell text-orange-500 text-lg"></i>
+              </div>
+
+              <!-- Isi -->
+              <div class="flex-1">
+                <!-- tampilkan pesan singkat (jika pesan panjang, tetap tampil) -->
+                <p class="text-gray-800 text-sm font-medium">
+                  <%= n.pesan || (isLaporan ? 'Ada evaluasi pada laporan Anda' : 'Notifikasi') %>
+                </p>
+
+                <p class="text-gray-600 text-xs mt-1">
+                  <% if (isLaporan) { %>
+                    <!-- Untuk notifikasi laporan: hanya tampilkan Judul + Divisi (sesuai permintaan) -->
+                    <span class="font-semibold">Judul:</span> <%= n.judul_laporan || '-' %><br>
+                    <span class="font-semibold">Divisi:</span> <%= n.divisi || '-' %>
+                  <% } else if (isProker) { %>
+                    <!-- Untuk notifikasi proker: tampilkan nama program kerja dan divisi -->
+                    <span class="font-semibold">Program Kerja:</span> <%= n.Nama_ProgramKerja || '-' %><br>
+                    <span class="font-semibold">Divisi:</span> <%= n.divisi || '-' %>
+                  <% } else { %>
+                    <span class="font-semibold">Divisi:</span> <%= n.divisi || '-' %>
+                  <% } %>
+                </p>
+
+                <div class="flex items-center justify-between mt-3">
+                  <span class="text-xs text-gray-500"><%= n.tanggalFormatted || '-' %></span>
+                  <span class="text-orange-500 text-xs font-medium"><%= rightLabel %></span>
+                </div>
+              </div>
+
+              <!-- Status -->
+              <div class="flex flex-col items-end gap-2">
+                <% if (!n.status_baca) { %>
+                  <span class="text-[10px] px-2 py-1 bg-orange-100 text-orange-700 rounded-full">Baru</span>
+                <% } %>
               </div>
             </div>
+          </a>
 
-            <!-- Status + Aksi -->
-            <div class="flex flex-col items-end gap-2">
-              <% if (!n.status_baca) { %>
-                <span class="text-[10px] px-2 py-1 bg-orange-100 text-orange-700 rounded-full">Baru</span>
-                <form action="/hmsi/notifikasi/read/<%= n.id_notifikasi %>" method="POST">
-                  <button type="submit" 
-                    class="text-[10px] px-3 py-1 bg-green-100 text-green-700 rounded-full hover:bg-green-200 transition">
-                    Tandai Dibaca
-                  </button>
-                </form>
-              <% } %>
-
-              <!-- Tombol Hapus (opsional) -->
-              <form action="/hmsi/notifikasi/delete/<%= n.id_notifikasi %>" method="POST" onsubmit="return confirm('Yakin hapus notifikasi ini?')">
-                <button type="submit" 
-                  class="text-[10px] px-3 py-1 bg-red-100 text-red-700 rounded-full hover:bg-red-200 transition">
-                  Hapus
-                </button>
-              </form>
-            </div>
-          </div>
-        <% }) %>
+        <% }); %>
       <% } else { %>
         <div class="p-6 text-center text-gray-500 bg-white border rounded-xl">
           Belum ada notifikasi untuk divisi Anda.
