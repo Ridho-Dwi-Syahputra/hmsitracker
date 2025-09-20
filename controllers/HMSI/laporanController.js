@@ -1,11 +1,13 @@
 // =====================================================
 // controllers/HMSI/laporanController.js
 // CRUD Laporan HMSI (simpan file ke /public/uploads) + role-based access
+// + Notifikasi otomatis untuk DPA
 // =====================================================
 
 const db = require("../../config/db");
 const path = require("path");
 const fs = require("fs");
+const { v4: uuidv4 } = require("uuid"); // ✅ untuk id_laporan & id_notifikasi
 
 const UPLOAD_DIR = path.join(__dirname, "../../public/uploads");
 
@@ -71,7 +73,6 @@ exports.getAllLaporan = async (req, res) => {
     `;
     const params = [];
 
-    // 🔒 Jika HMSI, filter berdasarkan divisi user
     if (user && user.role === "HMSI" && user.divisi) {
       query += " WHERE l.divisi = ? ";
       params.push(user.divisi);
@@ -102,7 +103,7 @@ exports.getAllLaporan = async (req, res) => {
 };
 
 // =====================================================
-// ➕ Form tambah laporan (pakai divisi dari user penanggung jawab)
+// ➕ Form tambah laporan
 // =====================================================
 exports.getFormLaporan = async (req, res) => {
   try {
@@ -132,7 +133,7 @@ exports.getFormLaporan = async (req, res) => {
 };
 
 // =====================================================
-// 💾 Simpan laporan baru (divisi otomatis dari user)
+// 💾 Simpan laporan baru + notifikasi
 // =====================================================
 exports.createLaporan = async (req, res) => {
   try {
@@ -156,13 +157,15 @@ exports.createLaporan = async (req, res) => {
     }
 
     const dokumentasi = req.file ? req.file.filename : null;
+    const idLaporan = uuidv4();
 
     await db.query(
       `INSERT INTO Laporan 
         (id_laporan, judul_laporan, deskripsi_kegiatan, sasaran, waktu_tempat, dana_digunakan, sumber_dana, 
          persentase_kualitatif, persentase_kuantitatif, kendala, solusi, dokumentasi, id_ProgramKerja, divisi, tanggal)
-       VALUES (UUID(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURDATE())`,
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURDATE())`,
       [
+        idLaporan,
         judul_laporan,
         deskripsi_kegiatan,
         sasaran,
@@ -175,8 +178,16 @@ exports.createLaporan = async (req, res) => {
         solusi,
         dokumentasi,
         id_ProgramKerja || null,
-        user.divisi || null, 
+        user.divisi || null,
       ]
+    );
+
+    // ✅ Notifikasi ke DPA
+    const pesanNotif = `Divisi ${user.divisi} telah menambahkan laporan baru: ${judul_laporan}`;
+    await db.query(
+      `INSERT INTO Notifikasi (id_notifikasi, pesan, id_laporan, created_at, status_baca)
+       VALUES (?, ?, ?, NOW(), 0)`,
+      [uuidv4(), pesanNotif, idLaporan]
     );
 
     res.redirect("/hmsi/laporan?success=Laporan berhasil ditambahkan");
@@ -226,13 +237,12 @@ exports.getDetailLaporan = async (req, res) => {
 };
 
 // =====================================================
-// ✏️ Form edit laporan (pakai divisi dari penanggung jawab user)
+// ✏️ Form edit laporan
 // =====================================================
 exports.getEditLaporan = async (req, res) => {
   try {
     const user = req.session.user;
 
-    // Ambil laporan berdasarkan id
     const [rows] = await db.query(
       `SELECT l.*, p.Nama_ProgramKerja AS namaProker
        FROM Laporan l
@@ -245,12 +255,10 @@ exports.getEditLaporan = async (req, res) => {
 
     const laporan = rows[0];
 
-    // Batasi akses hanya untuk divisi yang sama
     if (user && user.role === "HMSI" && user.divisi !== laporan.divisi) {
       return res.status(403).send("Tidak boleh edit laporan divisi lain");
     }
 
-    // Ambil daftar program kerja sesuai divisi user login
     const [programs] = await db.query(
       `SELECT p.id_ProgramKerja AS id, p.Nama_ProgramKerja AS namaProker
        FROM Program_kerja p
@@ -278,7 +286,7 @@ exports.getEditLaporan = async (req, res) => {
 };
 
 // =====================================================
-// 💾 Update laporan (divisi otomatis dari user)
+// 💾 Update laporan + notifikasi
 // =====================================================
 exports.updateLaporan = async (req, res) => {
   try {
@@ -299,7 +307,6 @@ exports.updateLaporan = async (req, res) => {
 
     const newFile = req.file ? req.file.filename : null;
 
-    // Ambil laporan lama untuk cek divisi & file
     const [existingRows] = await db.query(
       `SELECT dokumentasi, divisi
        FROM Laporan
@@ -311,7 +318,6 @@ exports.updateLaporan = async (req, res) => {
     const oldFile = existingRows[0].dokumentasi;
     const divisiLaporan = existingRows[0].divisi;
 
-    // Batasi hanya divisi yang sama
     if (user && user.role === "HMSI" && user.divisi !== divisiLaporan) {
       return res.status(403).send("Tidak boleh update laporan divisi lain");
     }
@@ -342,7 +348,7 @@ exports.updateLaporan = async (req, res) => {
       kendala,
       solusi,
       id_ProgramKerja || null,
-      user.divisi || null, // ✅ divisi dari user login
+      user.divisi || null,
     ];
 
     if (newFile) {
@@ -355,10 +361,17 @@ exports.updateLaporan = async (req, res) => {
 
     await db.query(query, params);
 
-    // Hapus file lama kalau ada yang baru
     if (newFile && oldFile) {
       safeRemoveFile(oldFile);
     }
+
+    // ✅ Notifikasi update
+    const pesanNotif = `Divisi ${user.divisi} telah mengupdate laporan: ${judul_laporan}`;
+    await db.query(
+      `INSERT INTO Notifikasi (id_notifikasi, pesan, id_laporan, created_at, status_baca)
+       VALUES (?, ?, ?, NOW(), 0)`,
+      [uuidv4(), pesanNotif, req.params.id]
+    );
 
     res.redirect("/hmsi/laporan?success=Laporan berhasil diperbarui");
   } catch (err) {
@@ -368,21 +381,20 @@ exports.updateLaporan = async (req, res) => {
 };
 
 // =====================================================
-// ❌ Hapus laporan
+// ❌ Hapus laporan + notifikasi
 // =====================================================
 exports.deleteLaporan = async (req, res) => {
   try {
     const user = req.session.user;
     const [rows] = await db.query(
-      `SELECT dokumentasi, divisi
+      `SELECT judul_laporan, dokumentasi, divisi
        FROM Laporan
        WHERE id_laporan = ?`,
       [req.params.id]
     );
     if (!rows.length) return res.status(404).send("Laporan tidak ditemukan");
 
-    const file = rows[0].dokumentasi;
-    const divisiLaporan = rows[0].divisi;
+    const { judul_laporan, dokumentasi: file, divisi: divisiLaporan } = rows[0];
 
     if (user && user.role === "HMSI" && user.divisi !== divisiLaporan) {
       return res.status(403).send("Tidak boleh hapus laporan divisi lain");
@@ -391,6 +403,14 @@ exports.deleteLaporan = async (req, res) => {
     await db.query("DELETE FROM Laporan WHERE id_laporan = ?", [req.params.id]);
 
     if (file) safeRemoveFile(file);
+
+    // ✅ Notifikasi delete
+    const pesanNotif = `Divisi ${user.divisi} telah menghapus laporan: ${judul_laporan}`;
+    await db.query(
+      `INSERT INTO Notifikasi (id_notifikasi, pesan, created_at, status_baca)
+       VALUES (?, ?, NOW(), 0)`,
+      [uuidv4(), pesanNotif]
+    );
 
     res.redirect("/hmsi/laporan?success=Laporan berhasil dihapus");
   } catch (err) {

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title><%= title %></title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+  <!-- Sidebar DPA -->
+  <%- include('../partials/sidebarDPA', { user: user, activeNav: 'Notifikasi' }) %>
+
+  <!-- Wrapper -->
+  <div class="lg:ml-80 px-6 py-8">
+
+    <!-- Header -->
+    <div class="max-w-4xl mx-auto mb-8">
+      <h1 class="text-2xl font-bold text-gray-800 mb-2">Notifikasi</h1>
+      <p class="text-gray-600 text-sm">Lihat semua update laporan & program kerja dari HMSI.</p>
+    </div>
+
+    <!-- List Notifikasi -->
+    <div class="max-w-4xl mx-auto space-y-4">
+      <% if (notifikasi && notifikasi.length > 0) { %>
+        <% notifikasi.forEach(function(n) { 
+             const isProker = !!n.proker_id;
+             const isLaporan = !!n.id_laporan;
+             const pesanLower = (n.pesan || '').toLowerCase();
+
+             // short message
+             const divisiText = (n.divisi && n.divisi !== '-') ? n.divisi : 'Divisi';
+             const shortMsg = isProker
+               ? `${divisiText} telah membuat Program Kerja baru`
+               : `${divisiText} telah menambahkan Laporan baru`;
+
+             // link label
+             let displayLinkLabel = 'Lihat';
+             if (isProker) {
+               displayLinkLabel = 'Lihat Program Kerja';
+             } else if (isLaporan) {
+               if (/menambah|menambahkan|ditambahkan|baru/.test(pesanLower)) {
+                 displayLinkLabel = 'Lihat Laporan Baru';
+               } else {
+                 displayLinkLabel = 'Lihat Laporan';
+               }
+             }
+
+             // target url
+             const targetUrl = n.linkUrl || '#';
+        %>
+          <a href="/dpa/notifikasi/read/<%= n.id_notifikasi %>?to=<%= encodeURIComponent(targetUrl) %>" class="block">
+            <div class="flex items-start gap-4 p-4 bg-white border border-orange-200 rounded-xl shadow-sm hover:shadow-md transition cursor-pointer <%= !n.status_baca ? 'border-2 border-orange-300' : '' %>">
+              
+              <!-- Icon -->
+              <div class="flex-shrink-0 mt-1">
+                <i class="fa-solid fa-bell text-orange-500 text-lg"></i>
+              </div>
+
+              <!-- Isi -->
+              <div class="flex-1">
+                <p class="text-gray-800 text-sm font-medium"><%= shortMsg %></p>
+
+                <p class="text-gray-600 text-xs mt-1">
+                  <% if (isLaporan) { %>
+                    <!-- untuk Laporan: hanya Judul -->
+                    <span class="font-semibold">Judul:</span> <%= n.judul_laporan || '-' %><br>
+                  <% } else if (isProker) { %>
+                    <!-- untuk Proker: Program Kerja -->
+                    <span class="font-semibold">Program Kerja:</span> <%= n.Nama_ProgramKerja || '-' %><br>
+                  <% } %>
+                  <span class="font-semibold">Divisi:</span> <%= n.divisi || '-' %>
+                </p>
+
+                <div class="flex items-center justify-between mt-3">
+                  <span class="text-xs text-gray-500"><%= n.tanggalFormatted %></span>
+                  <span class="text-orange-500 text-xs font-medium hover:underline"><%= displayLinkLabel %></span>
+                </div>
+              </div>
+
+              <!-- Status -->
+              <div class="flex flex-col items-end gap-2">
+                <% if (!n.status_baca) { %>
+                  <span class="text-[10px] px-2 py-1 bg-orange-100 text-orange-700 rounded-full">Baru</span>
+                <% } %>
+              </div>
+            </div>
+          </a>
+        <% }) %>
+      <% } else { %>
+        <div class="p-6 text-center text-gray-500 bg-white border rounded-xl">
+          Belum ada notifikasi dari HMSI.
+        </div>
+      <% } %>
+    </div>
+  </div>
+
+</body>
+</html>

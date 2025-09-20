@@ -6,6 +6,7 @@
 const db = require("../../config/db");
 const path = require("path");
 const fs = require("fs");
+const { v4: uuidv4 } = require("uuid"); // ✅ untuk id notifikasi
 
 // direktori upload (harus sama dengan middleware)
 const UPLOAD_DIR = path.join(__dirname, "../../public/uploads");
@@ -203,11 +204,21 @@ exports.createProker = async (req, res) => {
 
     const dokumen = req.file ? req.file.filename : null;
 
-    await db.query(
+    // Insert Proker
+    const [result] = await db.query(
       `INSERT INTO Program_kerja 
         (id_ProgramKerja, Nama_ProgramKerja, Deskripsi, Tanggal_mulai, Tanggal_selesai, Penanggung_jawab, id_anggota, Dokumen_pendukung)
        VALUES (UUID(), ?, ?, ?, ?, ?, ?, ?)`,
       [namaProker, deskripsi, tanggal_mulai, tanggal_selesai, penanggungJawab, id_anggota || user.id, dokumen]
+    );
+
+    // 🟠 Tambahkan notifikasi
+    const idNotifikasi = uuidv4();
+    const pesan = `HMSI (${user.divisi}) telah membuat Program Kerja baru: "${namaProker}"`;
+    await db.query(
+      `INSERT INTO Notifikasi (id_notifikasi, pesan, status_baca, divisi, id_ProgramKerja, created_at)
+       VALUES (?, ?, 0, ?, (SELECT id_ProgramKerja FROM Program_kerja WHERE Nama_ProgramKerja=? ORDER BY Tanggal_mulai DESC LIMIT 1), NOW())`,
+      [idNotifikasi, pesan, user.divisi, namaProker]
     );
 
     res.redirect("/hmsi/kelola-proker?success=Program Kerja berhasil ditambahkan");
@@ -304,6 +315,15 @@ exports.updateProker = async (req, res) => {
     if (newFile && oldFile) {
       safeRemoveFile(oldFile);
     }
+
+    // 🟠 Tambahkan notifikasi update
+    const idNotifikasi = uuidv4();
+    const pesan = `HMSI (${user.divisi}) telah memperbarui Program Kerja: "${namaProker}"`;
+    await db.query(
+      `INSERT INTO Notifikasi (id_notifikasi, pesan, status_baca, divisi, id_ProgramKerja, created_at)
+       VALUES (?, ?, 0, ?, ?, NOW())`,
+      [idNotifikasi, pesan, user.divisi, id]
+    );
 
     res.redirect("/hmsi/kelola-proker?success=Program Kerja berhasil diperbarui");
   } catch (err) {

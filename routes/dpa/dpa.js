@@ -1,31 +1,37 @@
 // =====================================================
 // routes/dpa/dpa.js
-// Routing untuk DPA (Dashboard DPA, Proker, Laporan, Evaluasi, Notifikasi)
+// Routing untuk DPA (Dashboard, Proker, Laporan, Evaluasi, Notifikasi)
 // =====================================================
 
 const express = require("express");
 const router = express.Router();
 
-// 🔑 ganti import auth (pakai auth.js)
+// 🔑 Middleware auth
 const { requireLogin, requireRole } = require("../../middleware/auth");
 
-// Import controller untuk DPA (Program Kerja & Laporan)
+// 📂 Controllers
 const dpaProkerController = require("../../controllers/DPA/prokerController");
 const dpaLaporanController = require("../../controllers/DPA/laporanController");
+const dpaNotifikasiController = require("../../controllers/DPA/notifikasiController");
 
 // =====================================================
 // 🏠 Dashboard DPA
 // =====================================================
-router.get("/dashboard", requireLogin, requireRole(["DPA"]), (req, res) => {
-  res.render("dpa/dpaDashboard", {
-    title: "Dashboard DPA",
-    user: req.session.user || { name: "Dummy User" },
-    activeNav: "Dashboard",
-  });
-});
+router.get(
+  "/dashboard",
+  requireLogin,
+  requireRole(["DPA"]),
+  (req, res) => {
+    res.render("dpa/dpaDashboard", {
+      title: "Dashboard DPA",
+      user: req.session.user || { name: "Dummy User" },
+      activeNav: "Dashboard",
+    });
+  }
+);
 
 // =====================================================
-// 📋 Daftar Program Kerja (Read-only)
+// 📋 Program Kerja
 // =====================================================
 router.get(
   "/lihatProker",
@@ -34,9 +40,14 @@ router.get(
   dpaProkerController.getAllProkerDPA
 );
 
-// =====================================================
-// 📄 Detail Program Kerja (Read-only)
-// =====================================================
+router.get(
+  "/lihatProker/:id/detail",
+  requireLogin,
+  requireRole(["DPA"]),
+  dpaProkerController.getDetailProkerDPA
+);
+
+// 📌 Alias route untuk konsistensi (Notifikasi / View)
 router.get(
   "/proker/:id/detail",
   requireLogin,
@@ -45,7 +56,7 @@ router.get(
 );
 
 // =====================================================
-// 📑 Daftar Laporan (Read-only untuk DPA)
+// 📑 Laporan
 // =====================================================
 router.get(
   "/kelolaLaporan",
@@ -54,9 +65,14 @@ router.get(
   dpaLaporanController.getAllLaporanDPA
 );
 
-// =====================================================
-// 📄 Detail Laporan (Read-only + lihat evaluasi)
-// =====================================================
+router.get(
+  "/kelolaLaporan/:id",
+  requireLogin,
+  requireRole(["DPA"]),
+  dpaLaporanController.getDetailLaporanDPA
+);
+
+// 📌 Alias route: /dpa/laporan/:id
 router.get(
   "/laporan/:id",
   requireLogin,
@@ -64,27 +80,23 @@ router.get(
   dpaLaporanController.getDetailLaporanDPA
 );
 
-// =====================================================
-// 📝 Evaluasi Laporan
-// =====================================================
-// Form evaluasi
+// ➕ Evaluasi Laporan
 router.get(
-  "/laporan/:id/evaluasi",
+  "/kelolaLaporan/:id/evaluasi",
   requireLogin,
   requireRole(["DPA"]),
   dpaLaporanController.getFormEvaluasi
 );
 
-// Simpan evaluasi
 router.post(
-  "/laporan/:id/evaluasi",
+  "/kelolaLaporan/:id/evaluasi",
   requireLogin,
   requireRole(["DPA"]),
   dpaLaporanController.postEvaluasi
 );
 
 // =====================================================
-// 📋 Kelola Evaluasi (list semua evaluasi yang sudah dibuat)
+// 📝 Kelola Evaluasi
 // =====================================================
 router.get(
   "/kelolaEvaluasi",
@@ -94,8 +106,21 @@ router.get(
 );
 
 // =====================================================
-// 🔔 Notifikasi DPA (opsional, nanti buat controller terpisah)
+// 🔔 Notifikasi DPA
 // =====================================================
-// router.get("/notifikasi", requireLogin, requireRole(["DPA"]), dpaNotifikasiController.getAllNotifikasi);
+router.get(
+  "/dpaNotifikasi",
+  requireLogin,
+  requireRole(["DPA"]),
+  dpaNotifikasiController.getAllNotifikasi
+);
+
+// 📌 Klik notifikasi = otomatis tandai sudah dibaca + redirect
+router.get(
+  "/notifikasi/read/:id",
+  requireLogin,
+  requireRole(["DPA"]),
+  dpaNotifikasiController.readAndRedirect
+);
 
 module.exports = router;
