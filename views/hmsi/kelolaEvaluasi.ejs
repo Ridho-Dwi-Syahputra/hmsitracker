@@ -10,7 +10,7 @@
 </head>
 <body class="bg-gray-50 min-h-screen">
 
-  <!-- Sidebar DPA -->
+  <!-- Sidebar HMSI -->
   <%- include('../partials/sidebarHMSI', { user: user, activeNav: 'Evaluasi' }) %>
 
   <!-- Wrapper -->
@@ -49,10 +49,10 @@
               <tr>
                 <th class="py-3 px-4 font-semibold border border-orange-200">No</th>
                 <th class="py-3 px-4 font-semibold border border-orange-200 text-left">Judul Laporan</th>
-                <th class="py-3 px-4 font-semibold border border-orange-200">Program</th>
-                <th class="py-3 px-4 font-semibold border border-orange-200">Komentar</th>
+                <th class="py-3 px-4 font-semibold border border-orange-200">Program Kerja</th>
+                <th class="py-3 px-4 font-semibold border border-orange-200">Evaluator</th>
                 <th class="py-3 px-4 font-semibold border border-orange-200">Status</th>
-                <th class="py-3 px-4 font-semibold border border-orange-200">Tanggal</th>
+                <th class="py-3 px-4 font-semibold border border-orange-200">Tanggal Evaluasi</th>
                 <th class="py-3 px-4 font-semibold border border-orange-200">Aksi</th>
               </tr>
             </thead>
@@ -63,7 +63,7 @@
                     <td class="py-3 px-4 border border-orange-100"><%= index + 1 %></td>
                     <td class="py-3 px-4 text-gray-800 font-medium border border-orange-100 text-left"><%= e.judul_laporan %></td>
                     <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= e.Nama_ProgramKerja %></td>
-                    <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= e.komentar %></td>
+                    <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= e.evaluator || '-' %></td>
                     <td class="py-3 px-4 border border-orange-100">
                       <% if (e.status_konfirmasi === "Revisi") { %>
                         <span class="px-3 py-1 text-xs rounded-full bg-red-100 text-red-700 font-medium"><%= e.status_konfirmasi %></span>
@@ -75,9 +75,9 @@
                     </td>
                     <td class="py-3 px-4 text-gray-500 border border-orange-100"><%= e.tanggalFormatted %></td>
                     <td class="py-3 px-4 border border-orange-100">
-                      <a href="/dpa/laporan/<%= e.id_laporan %>" 
+                      <a href="/hmsi/evaluasi/<%= e.id_evaluasi %>" 
                          class="text-orange-500 hover:text-orange-700 transition transform hover:scale-110" 
-                         title="Lihat Laporan">
+                         title="Lihat Detail Evaluasi">
                         <i class="fa-solid fa-eye text-lg"></i>
                       </a>
                     </td>
@@ -134,10 +134,10 @@
         rows.forEach(row => {
           const judul = row.cells[1]?.innerText.toLowerCase() || "";
           const program = row.cells[2]?.innerText.toLowerCase() || "";
-          const komentar = row.cells[3]?.innerText.toLowerCase() || "";
+          const evaluator = row.cells[3]?.innerText.toLowerCase() || "";
           const status = row.cells[4]?.innerText.toLowerCase() || "";
 
-          let matchSearch = judul.includes(searchValue) || program.includes(searchValue) || komentar.includes(searchValue) || status.includes(searchValue);
+          let matchSearch = judul.includes(searchValue) || program.includes(searchValue) || evaluator.includes(searchValue) || status.includes(searchValue);
 
           row.dataset.visible = matchSearch ? "true" : "false";
         });

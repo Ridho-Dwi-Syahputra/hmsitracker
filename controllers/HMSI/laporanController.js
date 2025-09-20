@@ -58,21 +58,22 @@ function formatTanggal(dateValue) {
 }
 
 // =====================================================
-// 📄 Daftar semua laporan (role-based)
+// 📄 Daftar semua laporan (role-based, divisi dari user)
 // =====================================================
 exports.getAllLaporan = async (req, res) => {
   try {
     const user = req.session.user;
+
     let query = `
-      SELECT l.*, p.Nama_ProgramKerja AS namaProker, u.divisi AS divisiProker
+      SELECT l.*, p.Nama_ProgramKerja AS namaProker
       FROM Laporan l
       LEFT JOIN Program_kerja p ON l.id_ProgramKerja = p.id_ProgramKerja
-      LEFT JOIN User u ON p.id_anggota = u.id_anggota
     `;
-    let params = [];
+    const params = [];
 
+    // 🔒 Jika HMSI, filter berdasarkan divisi user
     if (user && user.role === "HMSI" && user.divisi) {
-      query += " WHERE u.divisi = ? ";
+      query += " WHERE l.divisi = ? ";
       params.push(user.divisi);
     }
 
@@ -83,6 +84,7 @@ exports.getAllLaporan = async (req, res) => {
     const laporan = rows.map(r => ({
       ...r,
       tanggalFormatted: formatTanggal(r.tanggal),
+      dokumentasi_mime: getMimeFromFile(r.dokumentasi),
     }));
 
     res.render("hmsi/laporan", {
@@ -100,24 +102,19 @@ exports.getAllLaporan = async (req, res) => {
 };
 
 // =====================================================
-// ➕ Form tambah laporan
+// ➕ Form tambah laporan (pakai divisi dari user penanggung jawab)
 // =====================================================
 exports.getFormLaporan = async (req, res) => {
   try {
     const user = req.session.user;
-    let query = `
-      SELECT p.id_ProgramKerja AS id, p.Nama_ProgramKerja AS namaProker
-      FROM Program_kerja p
-      LEFT JOIN User u ON p.id_anggota = u.id_anggota
-    `;
-    let params = [];
 
-    if (user && user.role === "HMSI" && user.divisi) {
-      query += " WHERE u.divisi = ?";
-      params.push(user.divisi);
-    }
-
-    const [programs] = await db.query(query, params);
+    const [programs] = await db.query(
+      `SELECT p.id_ProgramKerja AS id, p.Nama_ProgramKerja AS namaProker
+       FROM Program_kerja p
+       LEFT JOIN user u ON p.id_anggota = u.id_anggota
+       WHERE u.divisi = ?`,
+      [user.divisi]
+    );
 
     res.render("hmsi/laporanForm", {
       title: "Tambah Laporan",
@@ -135,10 +132,11 @@ exports.getFormLaporan = async (req, res) => {
 };
 
 // =====================================================
-// 💾 Simpan laporan baru
+// 💾 Simpan laporan baru (divisi otomatis dari user)
 // =====================================================
 exports.createLaporan = async (req, res) => {
   try {
+    const user = req.session.user;
     const {
       judul_laporan,
       deskripsi_kegiatan,
@@ -162,9 +160,8 @@ exports.createLaporan = async (req, res) => {
     await db.query(
       `INSERT INTO Laporan 
         (id_laporan, judul_laporan, deskripsi_kegiatan, sasaran, waktu_tempat, dana_digunakan, sumber_dana, 
-         persentase_kualitatif, persentase_kuantitatif, kendala, solusi, dokumentasi, id_ProgramKerja, tanggal)
-       VALUES (UUID(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURDATE())`,
-
+         persentase_kualitatif, persentase_kuantitatif, kendala, solusi, dokumentasi, id_ProgramKerja, divisi, tanggal)
+       VALUES (UUID(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURDATE())`,
       [
         judul_laporan,
         deskripsi_kegiatan,
@@ -178,6 +175,7 @@ exports.createLaporan = async (req, res) => {
         solusi,
         dokumentasi,
         id_ProgramKerja || null,
+        user.divisi || null, 
       ]
     );
 
@@ -194,22 +192,19 @@ exports.createLaporan = async (req, res) => {
 exports.getDetailLaporan = async (req, res) => {
   try {
     const user = req.session.user;
-    let query = `
-      SELECT l.*, p.Nama_ProgramKerja AS namaProker, u.divisi AS divisiProker
-      FROM Laporan l
-      LEFT JOIN Program_kerja p ON l.id_ProgramKerja = p.id_ProgramKerja
-      LEFT JOIN User u ON p.id_anggota = u.id_anggota
-      WHERE l.id_laporan = ?
-    `;
-    let params = [req.params.id];
+    const [rows] = await db.query(
+      `SELECT l.*, p.Nama_ProgramKerja AS namaProker
+       FROM Laporan l
+       LEFT JOIN Program_kerja p ON l.id_ProgramKerja = p.id_ProgramKerja
+       WHERE l.id_laporan = ?`,
+      [req.params.id]
+    );
 
-    const [rows] = await db.query(query, params);
     if (!rows.length) return res.status(404).send("Laporan tidak ditemukan");
 
     const laporan = rows[0];
 
-    // restrict HMSI divisi
-    if (user && user.role === "HMSI" && user.divisi !== laporan.divisiProker) {
+    if (user && user.role === "HMSI" && user.divisi !== laporan.divisi) {
       return res.status(403).send("Tidak boleh akses laporan divisi lain");
     }
 
@@ -231,16 +226,17 @@ exports.getDetailLaporan = async (req, res) => {
 };
 
 // =====================================================
-// ✏️ Form edit laporan
+// ✏️ Form edit laporan (pakai divisi dari penanggung jawab user)
 // =====================================================
 exports.getEditLaporan = async (req, res) => {
   try {
     const user = req.session.user;
+
+    // Ambil laporan berdasarkan id
     const [rows] = await db.query(
-      `SELECT l.*, p.Nama_ProgramKerja AS namaProker, u.divisi AS divisiProker
+      `SELECT l.*, p.Nama_ProgramKerja AS namaProker
        FROM Laporan l
        LEFT JOIN Program_kerja p ON l.id_ProgramKerja = p.id_ProgramKerja
-       LEFT JOIN User u ON p.id_anggota = u.id_anggota
        WHERE l.id_laporan = ?`,
       [req.params.id]
     );
@@ -249,22 +245,19 @@ exports.getEditLaporan = async (req, res) => {
 
     const laporan = rows[0];
 
-    if (user && user.role === "HMSI" && user.divisi !== laporan.divisiProker) {
+    // Batasi akses hanya untuk divisi yang sama
+    if (user && user.role === "HMSI" && user.divisi !== laporan.divisi) {
       return res.status(403).send("Tidak boleh edit laporan divisi lain");
     }
 
-    let query = `
-      SELECT p.id_ProgramKerja AS id, p.Nama_ProgramKerja AS namaProker
-      FROM Program_kerja p
-      LEFT JOIN User u ON p.id_anggota = u.id_anggota
-    `;
-    let params = [];
-
-    if (user && user.role === "HMSI" && user.divisi) {
-      query += " WHERE u.divisi = ?";
-      params.push(user.divisi);
-    }
-    const [programs] = await db.query(query, params);
+    // Ambil daftar program kerja sesuai divisi user login
+    const [programs] = await db.query(
+      `SELECT p.id_ProgramKerja AS id, p.Nama_ProgramKerja AS namaProker
+       FROM Program_kerja p
+       LEFT JOIN user u ON p.id_anggota = u.id_anggota
+       WHERE u.divisi = ?`,
+      [user.divisi]
+    );
 
     laporan.dokumentasi_mime = getMimeFromFile(laporan.dokumentasi);
 
@@ -285,7 +278,7 @@ exports.getEditLaporan = async (req, res) => {
 };
 
 // =====================================================
-// 💾 Update laporan
+// 💾 Update laporan (divisi otomatis dari user)
 // =====================================================
 exports.updateLaporan = async (req, res) => {
   try {
@@ -306,20 +299,20 @@ exports.updateLaporan = async (req, res) => {
 
     const newFile = req.file ? req.file.filename : null;
 
+    // Ambil laporan lama untuk cek divisi & file
     const [existingRows] = await db.query(
-      `SELECT l.dokumentasi, u.divisi AS divisiProker
-       FROM Laporan l
-       LEFT JOIN Program_kerja p ON l.id_ProgramKerja = p.id_ProgramKerja
-       LEFT JOIN User u ON p.id_anggota = u.id_anggota
-       WHERE l.id_laporan = ?`,
+      `SELECT dokumentasi, divisi
+       FROM Laporan
+       WHERE id_laporan = ?`,
       [req.params.id]
     );
     if (!existingRows.length) return res.status(404).send("Laporan tidak ditemukan");
 
     const oldFile = existingRows[0].dokumentasi;
-    const divisiProker = existingRows[0].divisiProker;
+    const divisiLaporan = existingRows[0].divisi;
 
-    if (user && user.role === "HMSI" && user.divisi !== divisiProker) {
+    // Batasi hanya divisi yang sama
+    if (user && user.role === "HMSI" && user.divisi !== divisiLaporan) {
       return res.status(403).send("Tidak boleh update laporan divisi lain");
     }
 
@@ -335,7 +328,8 @@ exports.updateLaporan = async (req, res) => {
         persentase_kuantitatif=?, 
         kendala=?, 
         solusi=?, 
-        id_ProgramKerja=?`;
+        id_ProgramKerja=?, 
+        divisi=?`;
     const params = [
       judul_laporan,
       deskripsi_kegiatan,
@@ -348,6 +342,7 @@ exports.updateLaporan = async (req, res) => {
       kendala,
       solusi,
       id_ProgramKerja || null,
+      user.divisi || null, // ✅ divisi dari user login
     ];
 
     if (newFile) {
@@ -360,6 +355,7 @@ exports.updateLaporan = async (req, res) => {
 
     await db.query(query, params);
 
+    // Hapus file lama kalau ada yang baru
     if (newFile && oldFile) {
       safeRemoveFile(oldFile);
     }
@@ -378,19 +374,17 @@ exports.deleteLaporan = async (req, res) => {
   try {
     const user = req.session.user;
     const [rows] = await db.query(
-      `SELECT l.dokumentasi, u.divisi AS divisiProker
-       FROM Laporan l
-       LEFT JOIN Program_kerja p ON l.id_ProgramKerja = p.id_ProgramKerja
-       LEFT JOIN User u ON p.id_anggota = u.id_anggota
-       WHERE l.id_laporan = ?`,
+      `SELECT dokumentasi, divisi
+       FROM Laporan
+       WHERE id_laporan = ?`,
       [req.params.id]
     );
     if (!rows.length) return res.status(404).send("Laporan tidak ditemukan");
 
     const file = rows[0].dokumentasi;
-    const divisiProker = rows[0].divisiProker;
+    const divisiLaporan = rows[0].divisi;
 
-    if (user && user.role === "HMSI" && user.divisi !== divisiProker) {
+    if (user && user.role === "HMSI" && user.divisi !== divisiLaporan) {
       return res.status(403).send("Tidak boleh hapus laporan divisi lain");
     }
 

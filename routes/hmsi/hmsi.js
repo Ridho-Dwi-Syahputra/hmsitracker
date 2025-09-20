@@ -87,6 +87,8 @@ router.post("/evaluasi/delete/:id", evaluasiCtrl.deleteEvaluasi);
 // NOTIFIKASI
 // =====================================================
 router.get("/notifikasi", notifikasiCtrl.getAllNotifikasi);
+router.post("/notifikasi/read/:id", notifikasiCtrl.markAsRead);   // ✅ Tandai sudah dibaca
+router.post("/notifikasi/delete/:id", notifikasiCtrl.deleteNotifikasi); // ✅ Hapus notifikasi
 
 // =====================================================
 // PROFILE

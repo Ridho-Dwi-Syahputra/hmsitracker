@@ -65,8 +65,10 @@
                 <tr>
                   <th class="py-3 px-4 font-semibold border border-orange-200">No</th>
                   <th class="py-3 px-4 font-semibold border border-orange-200 text-left">Judul Laporan</th>
-                  <th class="py-3 px-4 font-semibold border border-orange-200">Program</th>
-                  <th class="py-3 px-4 font-semibold border border-orange-200">Tanggal</th>
+                  <th class="py-3 px-4 font-semibold border border-orange-200">Program Kerja</th>
+                  <th class="py-3 px-4 font-semibold border border-orange-200">Divisi</th>
+                  <th class="py-3 px-4 font-semibold border border-orange-200">Tanggal Upload</th>
+                  <th class="py-3 px-4 font-semibold border border-orange-200">Status</th>
                   <th class="py-3 px-4 font-semibold border border-orange-200">Aksi</th>
                 </tr>
               </thead>
@@ -75,8 +77,18 @@
                   <tr class="hover:bg-orange-50 transition">
                     <td class="py-3 px-4 border border-orange-100"><%= i + 1 %></td>
                     <td class="py-3 px-4 font-medium text-gray-800 border border-orange-100 text-left"><%= l.judul_laporan %></td>
-                    <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= l.namaProker %></td>
+                    <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= l.namaProker || "-" %></td>
+                    <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= l.divisi || "-" %></td>
                     <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= l.tanggalFormatted %></td>
+                    <td class="py-3 px-4 border border-orange-100">
+                      <% if (l.status === "Revisi") { %>
+                        <span class="px-3 py-1 bg-red-100 text-red-700 rounded-lg text-xs font-semibold">Revisi</span>
+                      <% } else if (l.status === "Approved") { %>
+                        <span class="px-3 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-semibold">Disetujui</span>
+                      <% } else { %>
+                        <span class="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg text-xs font-semibold">Belum Dievaluasi</span>
+                      <% } %>
+                    </td>
                     <td class="py-3 px-4 flex justify-center gap-4 border border-orange-100">
                       <!-- Hanya detail -->
                       <a href="/dpa/laporan/<%= l.id_laporan %>" 

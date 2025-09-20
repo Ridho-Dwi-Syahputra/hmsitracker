@@ -19,7 +19,7 @@
     <!-- Header -->
     <div class="max-w-4xl mx-auto mb-8">
       <h1 class="text-2xl font-bold text-gray-800 mb-2">Notifikasi</h1>
-      <p class="text-gray-600 text-sm">Lihat update evaluasi laporan oleh DPA.</p>
+      <p class="text-gray-600 text-sm">Lihat update evaluasi laporan oleh DPA untuk divisi Anda.</p>
     </div>
 
     <!-- List Notifikasi -->
@@ -27,27 +27,46 @@
       <% if (notifikasi && notifikasi.length > 0) { %>
         <% notifikasi.forEach((n) => { %>
           <div class="flex items-start gap-4 p-4 bg-white border border-orange-200 rounded-xl shadow-sm hover:shadow-md transition">
+            
             <!-- Icon -->
-            <div class="flex-shrink-0">
+            <div class="flex-shrink-0 mt-1">
               <i class="fa-solid fa-bell text-orange-500 text-lg"></i>
             </div>
 
             <!-- Isi -->
             <div class="flex-1">
-              <p class="text-gray-800 text-sm">
-                <%= n.pesan %>
+              <p class="text-gray-800 text-sm font-medium"><%= n.pesan %></p>
+              <p class="text-gray-600 text-xs mt-1">
+                <span class="font-semibold">Judul:</span> <%= n.judul_laporan || '-' %><br>
+                <span class="font-semibold">Program:</span> <%= n.Nama_ProgramKerja || '-' %>
               </p>
-              <div class="flex items-center justify-between mt-2">
+              <div class="flex items-center justify-between mt-3">
                 <span class="text-xs text-gray-500"><%= n.tanggalFormatted %></span>
                 <a href="/hmsi/laporan/<%= n.id_laporan %>" 
                    class="text-orange-500 text-xs font-medium hover:underline">Lihat Laporan</a>
               </div>
             </div>
 
-            <!-- Status -->
-            <% if (!n.status_baca) { %>
-              <span class="text-[10px] px-2 py-1 bg-orange-100 text-orange-700 rounded-full">Baru</span>
-            <% } %>
+            <!-- Status + Aksi -->
+            <div class="flex flex-col items-end gap-2">
+              <% if (!n.status_baca) { %>
+                <span class="text-[10px] px-2 py-1 bg-orange-100 text-orange-700 rounded-full">Baru</span>
+                <form action="/hmsi/notifikasi/read/<%= n.id_notifikasi %>" method="POST">
+                  <button type="submit" 
+                    class="text-[10px] px-3 py-1 bg-green-100 text-green-700 rounded-full hover:bg-green-200 transition">
+                    Tandai Dibaca
+                  </button>
+                </form>
+              <% } %>
+
+              <!-- Tombol Hapus (opsional) -->
+              <form action="/hmsi/notifikasi/delete/<%= n.id_notifikasi %>" method="POST" onsubmit="return confirm('Yakin hapus notifikasi ini?')">
+                <button type="submit" 
+                  class="text-[10px] px-3 py-1 bg-red-100 text-red-700 rounded-full hover:bg-red-200 transition">
+                  Hapus
+                </button>
+              </form>
+            </div>
           </div>
         <% }) %>
       <% } else { %>

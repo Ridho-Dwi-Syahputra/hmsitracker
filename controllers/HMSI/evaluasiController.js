@@ -1,13 +1,26 @@
 // controllers/HMSI/evaluasiController.js
 const db = require("../../config/db");
 
-// 📄 List Evaluasi
+// =====================================================
+// 📄 List Evaluasi (Hanya evaluasi terbaru per laporan)
+// =====================================================
 exports.getAllEvaluasi = async (req, res) => {
   try {
     const [rows] = await db.query(`
-      SELECT e.*, l.deskripsi_kegiatan AS namaLaporan
+      SELECT e.id_evaluasi, e.komentar, e.status_konfirmasi, e.tanggal_evaluasi,
+             l.id_laporan, l.judul_laporan, 
+             p.Nama_ProgramKerja,
+             u.nama AS evaluator
       FROM Evaluasi e
-      LEFT JOIN Laporan l ON e.id_laporan = l.id_laporan
+      JOIN Laporan l ON e.id_laporan = l.id_laporan
+      LEFT JOIN Program_kerja p ON l.id_ProgramKerja = p.id_ProgramKerja
+      LEFT JOIN User u ON e.pemberi_evaluasi = u.id_anggota
+      INNER JOIN (
+        SELECT id_laporan, MAX(tanggal_evaluasi) AS last_eval
+        FROM Evaluasi
+        GROUP BY id_laporan
+      ) latest 
+      ON e.id_laporan = latest.id_laporan AND e.tanggal_evaluasi = latest.last_eval
       ORDER BY e.tanggal_evaluasi DESC
     `);
 
@@ -25,9 +38,9 @@ exports.getAllEvaluasi = async (req, res) => {
     });
 
     res.render("hmsi/kelolaEvaluasi", {
-      title: "Kelola Evaluasi DPA",
+      title: "Kelola Evaluasi",
       user: req.session.user || { name: "Dummy User" },
-      activeNav: "Evaluasi DPA",
+      activeNav: "Evaluasi",
       evaluasi
     });
   } catch (err) {
@@ -36,13 +49,19 @@ exports.getAllEvaluasi = async (req, res) => {
   }
 };
 
+// =====================================================
 // 📄 Detail Evaluasi
+// =====================================================
 exports.getDetailEvaluasi = async (req, res) => {
   try {
     const [rows] = await db.query(`
-      SELECT e.*, l.deskripsi_kegiatan AS namaLaporan
+      SELECT e.id_evaluasi, e.komentar, e.status_konfirmasi, e.tanggal_evaluasi,
+             l.judul_laporan, p.Nama_ProgramKerja,
+             u.nama AS evaluator
       FROM Evaluasi e
-      LEFT JOIN Laporan l ON e.id_laporan = l.id_laporan
+      JOIN Laporan l ON e.id_laporan = l.id_laporan
+      LEFT JOIN Program_kerja p ON l.id_ProgramKerja = p.id_ProgramKerja
+      LEFT JOIN User u ON e.pemberi_evaluasi = u.id_anggota
       WHERE e.id_evaluasi = ?
     `, [req.params.id]);
 
@@ -63,7 +82,7 @@ exports.getDetailEvaluasi = async (req, res) => {
     res.render("hmsi/detailEvaluasi", {
       title: "Detail Evaluasi",
       user: req.session.user || { name: "Dummy User" },
-      activeNav: "Evaluasi DPA",
+      activeNav: "Evaluasi",
       evaluasi: ev
     });
   } catch (err) {
@@ -72,14 +91,18 @@ exports.getDetailEvaluasi = async (req, res) => {
   }
 };
 
+// =====================================================
 // 💾 Tambah Evaluasi
+// =====================================================
 exports.createEvaluasi = async (req, res) => {
   try {
     const { komentar, status_konfirmasi, id_laporan } = req.body;
+    const id_anggota = req.session.user?.id || null;
+
     await db.query(`
-      INSERT INTO Evaluasi (id_evaluasi, komentar, status_konfirmasi, tanggal_evaluasi, id_laporan)
-      VALUES (UUID(), ?, ?, CURDATE(), ?)
-    `, [komentar, status_konfirmasi, id_laporan]);
+      INSERT INTO Evaluasi (id_evaluasi, komentar, status_konfirmasi, tanggal_evaluasi, id_laporan, pemberi_evaluasi)
+      VALUES (UUID(), ?, ?, NOW(), ?, ?)
+    `, [komentar, status_konfirmasi, id_laporan, id_anggota]);
 
     res.redirect("/hmsi/evaluasi");
   } catch (err) {
@@ -88,12 +111,15 @@ exports.createEvaluasi = async (req, res) => {
   }
 };
 
+// =====================================================
 // ✏️ Update Evaluasi
+// =====================================================
 exports.updateEvaluasi = async (req, res) => {
   try {
     const { komentar, status_konfirmasi } = req.body;
     await db.query(`
-      UPDATE Evaluasi SET komentar=?, status_konfirmasi=?, tanggal_evaluasi=CURDATE()
+      UPDATE Evaluasi 
+      SET komentar=?, status_konfirmasi=?, tanggal_evaluasi=NOW()
       WHERE id_evaluasi=?
     `, [komentar, status_konfirmasi, req.params.id]);
 
@@ -104,7 +130,9 @@ exports.updateEvaluasi = async (req, res) => {
   }
 };
 
+// =====================================================
 // ❌ Hapus Evaluasi
+// =====================================================
 exports.deleteEvaluasi = async (req, res) => {
   try {
     await db.query("DELETE FROM Evaluasi WHERE id_evaluasi=?", [req.params.id]);
