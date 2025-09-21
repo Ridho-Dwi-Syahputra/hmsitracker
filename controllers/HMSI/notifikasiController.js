@@ -5,10 +5,11 @@
 // - Klik notifikasi = otomatis tandai sudah dibaca + redirect ke detail evaluasi laporan
 // =====================================================
 
+// controllers/HMSI/notifikasiController.js
 const db = require("../../config/db");
 
 // =====================================================
-// 📄 Ambil semua notifikasi untuk user HMSI sesuai divisi
+// 📄 Ambil semua notifikasi untuk HMSI sesuai divisi
 // =====================================================
 exports.getAllNotifikasi = async (req, res) => {
   try {
@@ -17,41 +18,48 @@ exports.getAllNotifikasi = async (req, res) => {
       return res.status(401).send("Unauthorized");
     }
 
-    // Ambil semua notifikasi sesuai divisi HMSI
     const [rows] = await db.query(
-      `SELECT 
-         n.*,
-         l.judul_laporan,
-         l.divisi,
-         p.Nama_ProgramKerja
+      `SELECT n.*, l.judul_laporan, p.Nama_ProgramKerja
        FROM Notifikasi n
        LEFT JOIN Laporan l ON n.id_laporan = l.id_laporan
        LEFT JOIN Program_kerja p ON l.id_ProgramKerja = p.id_ProgramKerja
-       WHERE l.divisi = ?
-         AND n.id_evaluasi IS NOT NULL
-         AND LOWER(COALESCE(n.pesan, '')) LIKE '%evaluasi%'
+       WHERE n.divisi = ?
        ORDER BY n.created_at DESC`,
-      [user.divisi] // hanya notifikasi sesuai divisi user HMSI
+      [user.divisi]
     );
 
-    // Format tanggal + siapkan data
-    const notifikasi = rows.map((n) => {
+    const notifikasi = rows.map(n => {
+      // format tanggal
       let tanggalFormatted = "-";
       if (n.created_at) {
         const d = new Date(n.created_at);
         if (!isNaN(d.getTime())) {
           tanggalFormatted = d.toLocaleDateString("id-ID", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric",
+            day: "2-digit", month: "short", year: "numeric"
           });
         }
+      }
+
+      // tentukan link & label
+      let linkUrl = "#";
+      let linkLabel = "Lihat";
+
+      if (n.id_evaluasi) {
+        linkUrl = `/hmsi/evaluasi/${n.id_evaluasi}`;
+        linkLabel = "Lihat Evaluasi";
+      } else if (n.id_laporan) {
+        linkUrl = `/hmsi/laporan/${n.id_laporan}`;
+        linkLabel = "Lihat Laporan";
+      } else if (n.id_ProgramKerja) {
+        linkUrl = `/hmsi/proker/${n.id_ProgramKerja}`;
+        linkLabel = "Lihat Program Kerja";
       }
 
       return {
         ...n,
         tanggalFormatted,
-        linkUrl: `/hmsi/notifikasi/read/${n.id_notifikasi}`, // bubble klik → tandai terbaca + redirect
+        linkUrl,
+        linkLabel
       };
     });
 
@@ -68,37 +76,41 @@ exports.getAllNotifikasi = async (req, res) => {
 };
 
 // =====================================================
-// 🚀 Klik notifikasi = tandai sudah dibaca + redirect ke evaluasi
+// ✅ Tandai notifikasi sebagai sudah dibaca (simple)
+// =====================================================
+exports.markAsRead = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await db.query(
+      "UPDATE Notifikasi SET status_baca = 1 WHERE id_notifikasi = ?",
+      [id]
+    );
+    return res.redirect("/hmsi/notifikasi");
+  } catch (err) {
+    console.error("❌ Error markAsRead HMSI:", err.message);
+    res.status(500).send("Gagal update notifikasi");
+  }
+};
+
+// =====================================================
+// 🚀 Klik notifikasi = tandai sudah dibaca + redirect ke tujuan
 // =====================================================
 exports.readAndRedirect = async (req, res) => {
   try {
     const { id } = req.params;
+    let redirectUrl = req.query.to ? decodeURIComponent(req.query.to) : "/hmsi/notifikasi";
 
-    // Ambil data notifikasi
-    const [rows] = await db.query(
-      `SELECT id_laporan FROM Notifikasi WHERE id_notifikasi=?`,
-      [id]
-    );
-
-    if (!rows || rows.length === 0) {
-      return res.redirect("/hmsi/notifikasi");
+    // hanya izinkan redirect ke /hmsi/*
+    if (!(typeof redirectUrl === "string" && redirectUrl.startsWith("/hmsi"))) {
+      redirectUrl = "/hmsi/notifikasi";
     }
 
-    const notif = rows[0];
-
-    // Update status → terbaca
     await db.query(
-      "UPDATE Notifikasi SET status_baca=1 WHERE id_notifikasi=?",
+      "UPDATE Notifikasi SET status_baca = 1 WHERE id_notifikasi = ?",
       [id]
     );
 
-    // Redirect ke detail evaluasi laporan
-    if (notif.id_laporan) {
-      return res.redirect(`/hmsi/evaluasi/${notif.id_laporan}`);
-    }
-
-    // Fallback → kembali ke daftar notifikasi
-    return res.redirect("/hmsi/notifikasi");
+    return res.redirect(redirectUrl);
   } catch (err) {
     console.error("❌ Error readAndRedirect HMSI:", err.message);
     res.status(500).send("Gagal membaca notifikasi");
