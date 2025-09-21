@@ -55,10 +55,18 @@ router.get("/tambah-proker", (req, res) => {
   });
 });
 
-router.post("/tambah-proker", validateUpload("create", "proker"), prokerCtrl.createProker);
+router.post(
+  "/tambah-proker",
+  validateUpload("create", "proker"),
+  prokerCtrl.createProker
+);
 router.get("/proker/:id", prokerCtrl.getDetailProker);
 router.get("/proker/:id/edit", prokerCtrl.getEditProker);
-router.post("/proker/:id/edit", validateUpload("edit", "proker"), prokerCtrl.updateProker);
+router.post(
+  "/proker/:id/edit",
+  validateUpload("edit", "proker"),
+  prokerCtrl.updateProker
+);
 router.post("/proker/:id/delete", prokerCtrl.deleteProker);
 router.get("/proker/download/:id", prokerCtrl.downloadDokumenPendukung);
 
@@ -67,10 +75,18 @@ router.get("/proker/download/:id", prokerCtrl.downloadDokumenPendukung);
 // =====================================================
 router.get("/laporan", laporanCtrl.getAllLaporan);
 router.get("/laporan/tambah", laporanCtrl.getFormLaporan);
-router.post("/laporan/tambah", validateUpload("create", "laporan"), laporanCtrl.createLaporan);
+router.post(
+  "/laporan/tambah",
+  validateUpload("create", "laporan"),
+  laporanCtrl.createLaporan
+);
 router.get("/laporan/:id", laporanCtrl.getDetailLaporan);
 router.get("/laporan/edit/:id", laporanCtrl.getEditLaporan);
-router.post("/laporan/edit/:id", validateUpload("edit", "laporan"), laporanCtrl.updateLaporan);
+router.post(
+  "/laporan/edit/:id",
+  validateUpload("edit", "laporan"),
+  laporanCtrl.updateLaporan
+);
 router.post("/laporan/delete/:id", laporanCtrl.deleteLaporan);
 router.get("/laporan/download/:id", laporanCtrl.downloadDokumentasi);
 
@@ -79,9 +95,9 @@ router.get("/laporan/download/:id", laporanCtrl.downloadDokumentasi);
 // =====================================================
 router.get("/evaluasi", evaluasiCtrl.getAllEvaluasi);
 router.get("/evaluasi/:id", evaluasiCtrl.getDetailEvaluasi);
-router.post("/evaluasi/create", evaluasiCtrl.createEvaluasi);
-router.post("/evaluasi/update/:id", evaluasiCtrl.updateEvaluasi);
-router.post("/evaluasi/delete/:id", evaluasiCtrl.deleteEvaluasi);
+
+// ⚡ route baru: komentar HMSI → replace komentar lama
+router.post("/evaluasi/:id/komentar", evaluasiCtrl.addKomentar);
 
 // =====================================================
 // NOTIFIKASI (klik bubble → tandai terbaca + redirect evaluasi)

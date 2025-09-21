@@ -19,7 +19,7 @@
     <!-- Header -->
     <div class="max-w-4xl mx-auto mb-8">
       <h1 class="text-2xl font-bold text-gray-800 mb-2">Notifikasi</h1>
-      <p class="text-gray-600 text-sm">Lihat semua update laporan & program kerja dari HMSI.</p>
+      <p class="text-gray-600 text-sm">Lihat semua update laporan, program kerja, dan komentar evaluasi dari HMSI.</p>
     </div>
 
     <!-- List Notifikasi -->
@@ -27,14 +27,21 @@
       <% if (notifikasi && notifikasi.length > 0) { %>
         <% notifikasi.forEach(function(n) { 
              const isProker = !!n.proker_id;
-             const isLaporan = !!n.id_laporan;
+             const isLaporan = !!n.id_laporan && !n.id_evaluasi;
+             const isEvaluasi = !!n.id_evaluasi;
+
              const pesanLower = (n.pesan || '').toLowerCase();
+             const divisiText = (n.divisi && n.divisi !== '-') ? n.divisi : 'Divisi';
 
              // short message
-             const divisiText = (n.divisi && n.divisi !== '-') ? n.divisi : 'Divisi';
-             const shortMsg = isProker
-               ? `${divisiText} telah membuat Program Kerja baru`
-               : `${divisiText} telah menambahkan Laporan baru`;
+             let shortMsg = '';
+             if (isProker) {
+               shortMsg = `${divisiText} telah membuat Program Kerja baru`;
+             } else if (isLaporan) {
+               shortMsg = `${divisiText} telah menambahkan Laporan baru`;
+             } else if (isEvaluasi) {
+               shortMsg = `${divisiText} menambahkan komentar pada evaluasi laporan`;
+             }
 
              // link label
              let displayLinkLabel = 'Lihat';
@@ -46,17 +53,30 @@
                } else {
                  displayLinkLabel = 'Lihat Laporan';
                }
+             } else if (isEvaluasi) {
+               displayLinkLabel = 'Lihat Komentar';
              }
 
              // target url
-             const targetUrl = n.linkUrl || '#';
+             let targetUrl = '#';
+             if (isProker) {
+               targetUrl = `/dpa/lihatProker/${n.proker_id || n.id_ProgramKerja}/detail`;
+             } else if (isLaporan) {
+               targetUrl = `/dpa/kelolaLaporan/${n.id_laporan}`;
+             } else if (isEvaluasi) {
+               targetUrl = `/dpa/detailLaporan/${n.id_laporan}`;
+             }
         %>
           <a href="/dpa/notifikasi/read/<%= n.id_notifikasi %>?to=<%= encodeURIComponent(targetUrl) %>" class="block">
             <div class="flex items-start gap-4 p-4 bg-white border border-orange-200 rounded-xl shadow-sm hover:shadow-md transition cursor-pointer <%= !n.status_baca ? 'border-2 border-orange-300' : '' %>">
               
               <!-- Icon -->
               <div class="flex-shrink-0 mt-1">
-                <i class="fa-solid fa-bell text-orange-500 text-lg"></i>
+                <% if (isEvaluasi) { %>
+                  <i class="fa-solid fa-comments text-orange-500 text-lg"></i>
+                <% } else { %>
+                  <i class="fa-solid fa-bell text-orange-500 text-lg"></i>
+                <% } %>
               </div>
 
               <!-- Isi -->
@@ -65,13 +85,14 @@
 
                 <p class="text-gray-600 text-xs mt-1">
                   <% if (isLaporan) { %>
-                    <!-- untuk Laporan: hanya Judul -->
                     <span class="font-semibold">Judul:</span> <%= n.judul_laporan || '-' %><br>
                   <% } else if (isProker) { %>
-                    <!-- untuk Proker: Program Kerja -->
+                    <span class="font-semibold">Program Kerja:</span> <%= n.Nama_ProgramKerja || '-' %><br>
+                  <% } else if (isEvaluasi) { %>
+                    <span class="font-semibold">Laporan:</span> <%= n.judul_laporan || '-' %><br>
                     <span class="font-semibold">Program Kerja:</span> <%= n.Nama_ProgramKerja || '-' %><br>
                   <% } %>
-                  <span class="font-semibold">Divisi:</span> <%= n.divisi || '-' %>
+                  <span class="font-semibold">Divisi:</span> <%= divisiText %>
                 </p>
 
                 <div class="flex items-center justify-between mt-3">

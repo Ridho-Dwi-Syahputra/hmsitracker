@@ -2,6 +2,7 @@
 // controllers/DPA/laporanController.js
 // Controller untuk DPA dalam mengelola laporan
 // DPA hanya bisa melihat laporan & memberi evaluasi
+// + menampilkan komentar HMSI bila ada
 // =====================================================
 
 const db = require("../../config/db");
@@ -118,7 +119,7 @@ exports.getDetailLaporanDPA = async (req, res) => {
     // deteksi mime file dokumentasi
     laporan.dokumentasi_mime = getMimeFromFile(laporan.dokumentasi);
 
-    // ambil evaluasi terbaru
+    // ambil evaluasi terbaru (termasuk komentar HMSI kalau ada)
     const [evaluasiRows] = await db.query(
       `SELECT e.*, u.nama AS namaEvaluator
        FROM Evaluasi e
@@ -129,12 +130,14 @@ exports.getDetailLaporanDPA = async (req, res) => {
       [req.params.id]
     );
 
+    const evaluasi = evaluasiRows.length ? evaluasiRows[0] : null;
+
     res.render("dpa/detailLaporan", {
       title: "Detail Laporan",
       user: req.session.user || { name: "Dummy User" },
       activeNav: "Laporan",
       laporan,
-      evaluasi: evaluasiRows.length ? evaluasiRows[0] : null,
+      evaluasi,
       errorMsg: null,
       successMsg: req.query.success || null,
     });
@@ -147,7 +150,6 @@ exports.getDetailLaporanDPA = async (req, res) => {
 // =====================================================
 // 📝 Form evaluasi laporan
 // =====================================================
-// 📝 Form evaluasi laporan
 exports.getFormEvaluasi = async (req, res) => {
   try {
     const [rows] = await db.query(
@@ -178,11 +180,25 @@ exports.getFormEvaluasi = async (req, res) => {
     laporan.tanggalFormatted = tanggalFormatted;
     laporan.dokumentasi_mime = getMimeFromFile(laporan.dokumentasi);
 
+    // ambil evaluasi (termasuk komentar HMSI jika ada)
+    const [evaluasiRows] = await db.query(
+      `SELECT e.*, u.nama AS namaEvaluator
+       FROM Evaluasi e
+       LEFT JOIN User u ON e.pemberi_evaluasi = u.id_anggota
+       WHERE e.id_laporan = ?
+       ORDER BY e.tanggal_evaluasi DESC
+       LIMIT 1`,
+      [req.params.id]
+    );
+
+    const evaluasi = evaluasiRows.length ? evaluasiRows[0] : null;
+
     res.render("dpa/formEvaluasi", {
       title: "Evaluasi Laporan",
       user: req.session.user || { name: "Dummy User" },
       activeNav: "Laporan",
       laporan,
+      evaluasi,
       errorMsg: req.query.error || null,
       successMsg: null,
       oldData: req.query.oldData ? JSON.parse(req.query.oldData) : null,
@@ -192,7 +208,6 @@ exports.getFormEvaluasi = async (req, res) => {
     res.status(500).send("Gagal membuka form evaluasi");
   }
 };
-
 
 // =====================================================
 // 💾 Simpan evaluasi + notifikasi HMSI
@@ -233,7 +248,7 @@ exports.postEvaluasi = async (req, res) => {
       idEvaluasi = uuidv4();
       await db.query(
         `INSERT INTO Evaluasi (id_evaluasi, komentar, status_konfirmasi, tanggal_evaluasi, id_laporan, pemberi_evaluasi)
-         VALUES (?, ?, ?, NOW(), ?, ?)`,
+         VALUES (?, ?, ?, NOW(), ?, ?)` ,
         [idEvaluasi, komentar, status_konfirmasi, laporanId, evaluatorId]
       );
     }
@@ -249,8 +264,8 @@ exports.postEvaluasi = async (req, res) => {
     const pesan = `DPA memberi evaluasi pada laporan "${laporan.judul_laporan}"`;
     const idNotifikasi = uuidv4();
     await db.query(
-      `INSERT INTO Notifikasi (id_notifikasi, pesan, status_baca, divisi, id_laporan, id_evaluasi)
-       VALUES (?, ?, 0, ?, ?, ?)`,
+      `INSERT INTO Notifikasi (id_notifikasi, pesan, role, status_baca, divisi, id_laporan, id_evaluasi, created_at)
+       VALUES (?, ?, 'HMSI', 0, ?, ?, ?, NOW())` ,
       [idNotifikasi, pesan, laporan.divisi, laporanId, idEvaluasi]
     );
 

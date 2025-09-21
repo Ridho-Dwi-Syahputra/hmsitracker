@@ -1,15 +1,17 @@
 // controllers/DPA/notifikasiController.js
 // =====================================================
 // Controller untuk Notifikasi DPA
-// - Hanya menampilkan notifikasi yang dibuat oleh HMSI (tambah/edit laporan atau proker)
-// - Mengabaikan notifikasi evaluasi (id_evaluasi IS NOT NULL atau teks evaluasi)
-// - Klik notifikasi = otomatis tandai sudah dibaca + redirect ke detail
+// =====================================================
+// - getAllNotifikasi: notifikasi laporan/proker dari HMSI
+// - getAllNotifikasiEvaluasi: notifikasi komentar HMSI pada evaluasi
+// - markAsRead: tandai notifikasi sudah dibaca
+// - readAndRedirect: tandai & redirect
 // =====================================================
 
 const db = require("../../config/db");
 
 /**
- * Helper sederhana untuk mengecek apakah teks pesan sepertinya
+ * Helper sederhana untuk mengecek apakah teks pesan
  * mengindikasikan "penambahan laporan baru".
  */
 function isNewLaporanText(pesan = "") {
@@ -18,18 +20,15 @@ function isNewLaporanText(pesan = "") {
 }
 
 // =====================================================
-// 📄 Ambil semua notifikasi untuk DPA (hanya notifikasi HMSI)
+// 📄 Ambil semua notifikasi untuk DPA (laporan/proker HMSI)
 // =====================================================
 exports.getAllNotifikasi = async (req, res) => {
   try {
     const user = req.session.user;
-
-    // 🔒 hanya DPA boleh akses
     if (!user || user.role !== "DPA") {
       return res.status(401).send("Unauthorized");
     }
 
-    // Ambil notifikasi dari HMSI (exclude evaluasi)
     const [rows] = await db.query(
       `SELECT 
          n.*, 
@@ -39,21 +38,14 @@ exports.getAllNotifikasi = async (req, res) => {
          p.Nama_ProgramKerja
        FROM Notifikasi n
        LEFT JOIN Laporan l ON n.id_laporan = l.id_laporan
-       LEFT JOIN Program_kerja p 
-         ON n.id_ProgramKerja = p.id_ProgramKerja
+       LEFT JOIN Program_kerja p ON n.id_ProgramKerja = p.id_ProgramKerja
        WHERE (n.id_evaluasi IS NULL OR n.id_evaluasi = '')
+         AND (n.role IS NULL OR n.role = 'DPA') -- pastikan bukan notif komentar HMSI
          AND LOWER(COALESCE(n.pesan, '')) NOT LIKE '%evaluasi%'
-         AND (
-           n.id_laporan IS NOT NULL
-           OR n.id_ProgramKerja IS NOT NULL
-           OR LOWER(COALESCE(n.pesan, '')) LIKE '%program kerja%'
-           OR LOWER(COALESCE(n.pesan, '')) LIKE '%laporan%'
-         )
        ORDER BY n.created_at DESC`
     );
 
     const notifikasi = rows.map(n => {
-      // format tanggal
       let tanggalFormatted = "-";
       if (n.created_at) {
         const d = new Date(n.created_at);
@@ -64,12 +56,10 @@ exports.getAllNotifikasi = async (req, res) => {
         }
       }
 
-      // 🔑 Prioritas: Laporan > Proker
       const isLaporan = !!n.id_laporan;
       const prokerId = !isLaporan ? (n.proker_id || n.id_ProgramKerja || null) : null;
       const isProker = !!prokerId;
 
-      // tentukan link & label
       let linkUrl = "#";
       let linkLabel = "Lihat";
 
@@ -81,13 +71,7 @@ exports.getAllNotifikasi = async (req, res) => {
         linkLabel = "Lihat Program Kerja";
       }
 
-      // short message
-      const divisiText =
-        (n.divisi && n.divisi !== "-")
-          ? n.divisi
-          : (n.laporan_divisi && n.laporan_divisi !== "-")
-          ? n.laporan_divisi
-          : "Divisi";
+      const divisiText = n.divisi || n.laporan_divisi || "Divisi";
 
       const shortMsg = isLaporan
         ? `${divisiText} telah menambahkan Laporan baru`
@@ -101,7 +85,7 @@ exports.getAllNotifikasi = async (req, res) => {
         linkUrl,
         linkLabel,
         shortMsg,
-        divisi: n.divisi || n.laporan_divisi || "-",
+        divisi: divisiText,
       };
     });
 
@@ -118,7 +102,67 @@ exports.getAllNotifikasi = async (req, res) => {
 };
 
 // =====================================================
-// ✅ Tandai notifikasi sebagai sudah dibaca (simple)
+// 📄 Ambil notifikasi komentar evaluasi dari HMSI
+// =====================================================
+exports.getAllNotifikasiEvaluasi = async (req, res) => {
+  try {
+    const user = req.session.user;
+    if (!user || user.role !== "DPA") {
+      return res.status(401).send("Unauthorized");
+    }
+
+    const [rows] = await db.query(
+      `SELECT 
+         n.*,
+         e.id_evaluasi,
+         e.komentar_hmsi,
+         l.id_laporan,
+         l.judul_laporan,
+         l.divisi,
+         p.Nama_ProgramKerja
+       FROM Notifikasi n
+       JOIN Evaluasi e ON n.id_evaluasi = e.id_evaluasi
+       JOIN Laporan l ON e.id_laporan = l.id_laporan
+       JOIN Program_kerja p ON l.id_ProgramKerja = p.id_ProgramKerja
+       WHERE n.id_evaluasi IS NOT NULL
+         AND n.role = 'DPA'  -- khusus notif dari HMSI untuk DPA
+       ORDER BY n.created_at DESC`
+    );
+
+    const notifikasi = rows.map(n => {
+      let tanggalFormatted = "-";
+      if (n.created_at) {
+        const d = new Date(n.created_at);
+        if (!isNaN(d.getTime())) {
+          tanggalFormatted = d.toLocaleDateString("id-ID", {
+            day: "2-digit", month: "short", year: "numeric"
+          });
+        }
+      }
+
+      return {
+        ...n,
+        tanggalFormatted,
+        linkUrl: `/dpa/detailLaporan/${n.id_laporan}`,
+        linkLabel: "Lihat Komentar HMSI",
+        shortMsg: `${n.divisi} menambahkan komentar pada evaluasi proker "${n.Nama_ProgramKerja}"`,
+      };
+    });
+
+    res.render("dpa/dpaNotifikasiEvaluasi", {
+      title: "Notifikasi Evaluasi",
+      user,
+      activeNav: "Notifikasi Evaluasi",
+      notifikasi,
+    });
+  } catch (err) {
+    console.error("❌ Error getAllNotifikasiEvaluasi DPA:", err.message);
+    res.status(500).send("Gagal mengambil notifikasi evaluasi");
+  }
+};
+
+// =====================================================
+// ✅ Tandai notifikasi sebagai sudah dibaca
 // =====================================================
 exports.markAsRead = async (req, res) => {
   try {
@@ -135,14 +179,13 @@ exports.markAsRead = async (req, res) => {
 };
 
 // =====================================================
-// 🚀 Klik notifikasi = tandai sudah dibaca + redirect ke tujuan (readAndRedirect)
+// 🚀 Klik notifikasi = tandai sudah dibaca + redirect
 // =====================================================
 exports.readAndRedirect = async (req, res) => {
   try {
     const { id } = req.params;
     let redirectUrl = req.query.to ? decodeURIComponent(req.query.to) : "/dpa/dpaNotifikasi";
 
-    // hanya izinkan redirect ke /dpa/*
     if (!(typeof redirectUrl === "string" && redirectUrl.startsWith("/dpa"))) {
       redirectUrl = "/dpa/dpaNotifikasi";
     }
@@ -158,17 +201,3 @@ exports.readAndRedirect = async (req, res) => {
     res.status(500).send("Gagal membaca notifikasi");
   }
 };
-
-// =====================================================
-// ❌ Hapus notifikasi (opsional)
-// =====================================================
-// exports.deleteNotifikasi = async (req, res) => {
-//   try {
-//     const { id } = req.params;
-//     await db.query("DELETE FROM Notifikasi WHERE id_notifikasi = ?", [id]);
-//     return res.redirect("/dpa/dpaNotifikasi");
-//   } catch (err) {
-//     console.error("❌ Error deleteNotifikasi DPA:", err.message);
-//     res.status(500).send("Gagal menghapus notifikasi");
-//   }
-// };

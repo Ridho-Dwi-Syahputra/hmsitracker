@@ -8,7 +8,7 @@
 <body class="bg-gray-50 min-h-screen">
 
   <!-- Sidebar -->
-  <%- include('../partials/sidebarDPA', { activeNav: 'Laporan', user: user }) %>
+  <%- include('../partials/sidebarDPA', { activeNav: 'Daftar Laporan', user: user }) %>
 
   <!-- Wrapper -->
   <div class="lg:ml-80 opacity-0 animate-fade-in" style="animation-delay:150ms;">
@@ -163,13 +163,23 @@
             <% } %>
           </div>
 
-         <!-- Tombol Evaluasi -->
-<div class="mt-6 flex justify-end">
-  <a href="/dpa/kelolaLaporan/<%= laporan.id_laporan %>/evaluasi"
-    class="px-6 py-3 bg-orange-500 text-white rounded-xl text-sm font-semibold hover:bg-orange-600 transition transform hover:scale-105 active:scale-95">
-    Evaluasi Laporan
-  </a>
-</div>
+          <!-- Komentar HMSI -->
+          <% if (evaluasi && evaluasi.komentar_hmsi) { %>
+          <div>
+            <h4 class="text-lg font-semibold text-teal-600 mb-4">Komentar HMSI</h4>
+            <div class="p-4 bg-teal-50 border border-teal-200 rounded-lg space-y-2">
+              <p class="text-gray-800 whitespace-pre-line"><%= evaluasi.komentar_hmsi %></p>
+            </div>
+          </div>
+          <% } %>
+
+          <!-- Tombol Evaluasi -->
+          <div class="mt-6 flex justify-end">
+            <a href="/dpa/kelolaLaporan/<%= laporan.id_laporan %>/evaluasi"
+              class="px-6 py-3 bg-orange-500 text-white rounded-xl text-sm font-semibold hover:bg-orange-600 transition transform hover:scale-105 active:scale-95">
+              Evaluasi Laporan
+            </a>
+          </div>
 
         </div>
       </div>

@@ -47,7 +47,7 @@ router.get(
   dpaProkerController.getDetailProkerDPA
 );
 
-// 📌 Alias route untuk konsistensi (misal dari notifikasi / view langsung)
+// 📌 Alias untuk konsistensi
 router.get(
   "/proker/:id/detail",
   requireLogin,
@@ -84,7 +84,7 @@ router.get(
 // 📝 Evaluasi Laporan
 // =====================================================
 
-// versi kelolaLaporan
+// versi dari kelolaLaporan
 router.get(
   "/kelolaLaporan/:id/evaluasi",
   requireLogin,
@@ -115,7 +115,7 @@ router.post(
 );
 
 // =====================================================
-// 📊 Kelola Evaluasi
+// 📊 Kelola Evaluasi (list semua evaluasi yang pernah dibuat DPA)
 // =====================================================
 router.get(
   "/kelolaEvaluasi",
@@ -140,6 +140,14 @@ router.get(
   requireLogin,
   requireRole(["DPA"]),
   dpaNotifikasiController.readAndRedirect
+);
+
+// (opsional) tandai dibaca manual
+router.get(
+  "/notifikasi/mark/:id",
+  requireLogin,
+  requireRole(["DPA"]),
+  dpaNotifikasiController.markAsRead
 );
 
 module.exports = router;

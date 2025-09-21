@@ -25,70 +25,48 @@
     <!-- List Notifikasi -->
     <div class="max-w-4xl mx-auto space-y-4">
       <% if (notifikasi && notifikasi.length > 0) { %>
-        <% notifikasi.forEach(function(n) { 
-             const isEvaluasi = !!n.id_evaluasi;
-             const isLaporan = !!n.id_laporan;
-             const isProker  = !!(n.id_ProgramKerja || n.Nama_ProgramKerja);
+        <% notifikasi.forEach(function(n) { %>
+          <% const targetUrl = '/hmsi/evaluasi/' + n.id_evaluasi; %>
 
-             // tentukan target redirect
-             let targetUrl = '/hmsi/notifikasi';
-             if (isEvaluasi) targetUrl = '/hmsi/evaluasi/' + n.id_evaluasi;
-             else if (isLaporan) targetUrl = '/hmsi/laporan/' + n.id_laporan;
-             else if (isProker) targetUrl = '/hmsi/proker/' + n.id_ProgramKerja;
+          <!-- Card -->
+          <a href="/hmsi/notifikasi/read/<%= n.id_notifikasi %>?to=<%= encodeURIComponent(targetUrl) %>"
+             class="block" aria-label="Buka notifikasi">
+            <div class="flex items-start gap-4 p-4 bg-white border rounded-xl shadow-sm hover:shadow-md transition cursor-pointer
+                        <%= !n.status_baca ? 'border-2 border-orange-300' : 'border-orange-200' %>">
+              
+              <!-- Icon -->
+              <div class="flex-shrink-0 mt-1">
+                <i class="fa-solid fa-bell text-orange-500 text-lg"></i>
+              </div>
 
-             // label kanan
-             const rightLabel = isEvaluasi ? 'Lihat Evaluasi' : (isLaporan ? 'Lihat Laporan' : (isProker ? 'Lihat Program Kerja' : 'Lihat'));
-        %>
+              <!-- Isi -->
+              <div class="flex-1">
+                <!-- Pesan -->
+                <p class="text-gray-800 text-sm font-medium">
+                  <%= n.pesan || 'Ada evaluasi pada laporan Anda' %>
+                </p>
 
-        <!-- Card -->
-        <a href="/hmsi/notifikasi/read/<%= n.id_notifikasi %>?to=<%= encodeURIComponent(targetUrl) %>"
-           class="block" aria-label="Buka notifikasi">
-          <div class="flex items-start gap-4 p-4 bg-white border rounded-xl shadow-sm hover:shadow-md transition cursor-pointer
-                      <%= !n.status_baca ? 'border-2 border-orange-300' : 'border-orange-200' %>">
-            
-            <!-- Icon -->
-            <div class="flex-shrink-0 mt-1">
-              <i class="fa-solid fa-bell text-orange-500 text-lg"></i>
-            </div>
-
-            <!-- Isi -->
-            <div class="flex-1">
-              <!-- Pesan -->
-              <p class="text-gray-800 text-sm font-medium">
-                <%= n.pesan || (isEvaluasi ? 'Ada evaluasi pada laporan Anda' : 'Notifikasi') %>
-              </p>
-
-              <!-- Detail -->
-              <p class="text-gray-600 text-xs mt-1">
-                <% if (isEvaluasi) { %>
+                <!-- Detail -->
+                <p class="text-gray-600 text-xs mt-1">
                   <span class="font-semibold">Judul Laporan:</span> <%= n.judul_laporan || '-' %><br>
                   <span class="font-semibold">Evaluator:</span> <%= n.evaluator || 'DPA' %>
-                <% } else if (isLaporan) { %>
-                  <span class="font-semibold">Judul:</span> <%= n.judul_laporan || '-' %><br>
-                  <span class="font-semibold">Divisi:</span> <%= n.divisi || '-' %>
-                <% } else if (isProker) { %>
-                  <span class="font-semibold">Program Kerja:</span> <%= n.Nama_ProgramKerja || '-' %><br>
-                  <span class="font-semibold">Divisi:</span> <%= n.divisi || '-' %>
-                <% } else { %>
-                  <span class="font-semibold">Divisi:</span> <%= n.divisi || '-' %>
-                <% } %>
-              </p>
+                </p>
 
-              <!-- Footer -->
-              <div class="flex items-center justify-between mt-3">
-                <span class="text-xs text-gray-500"><%= n.tanggalFormatted || '-' %></span>
-                <span class="text-orange-500 text-xs font-medium hover:underline"><%= rightLabel %></span>
+                <!-- Footer -->
+                <div class="flex items-center justify-between mt-3">
+                  <span class="text-xs text-gray-500"><%= n.tanggalFormatted || '-' %></span>
+                  <span class="text-orange-500 text-xs font-medium hover:underline">Lihat Evaluasi</span>
+                </div>
+              </div>
+
+              <!-- Status -->
+              <div class="flex flex-col items-end gap-2">
+                <% if (!n.status_baca) { %>
+                  <span class="text-[10px] px-2 py-1 bg-orange-100 text-orange-700 rounded-full">Baru</span>
+                <% } %>
               </div>
             </div>
-
-            <!-- Status -->
-            <div class="flex flex-col items-end gap-2">
-              <% if (!n.status_baca) { %>
-                <span class="text-[10px] px-2 py-1 bg-orange-100 text-orange-700 rounded-full">Baru</span>
-              <% } %>
-            </div>
-          </div>
-        </a>
+          </a>
 
         <% }) %>
       <% } else { %>

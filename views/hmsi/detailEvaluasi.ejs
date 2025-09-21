@@ -2,123 +2,95 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title><%= title %></title>
+  <title>Detail Evaluasi</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="bg-orange-50 min-h-screen">
 
   <!-- Sidebar -->
   <%- include('../partials/sidebarHMSI', { activeNav: 'Evaluasi DPA', user: user }) %>
 
   <!-- Wrapper -->
-  <div class="lg:ml-80 opacity-0 animate-fade-in" style="animation-delay:150ms;">
-    
-    <!-- Header -->
-    <div class="bg-white border-b border-gray-200">
-      <div class="max-w-4xl mx-auto px-6 py-6 flex items-center justify-between">
-        <h1 class="text-2xl font-bold text-gray-800 opacity-0 animate-slide-down" style="animation-delay:350ms;">
-          Detail Evaluasi
-        </h1>
-        <a href="/hmsi/evaluasi"
-          class="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg 
-                 transition-all duration-200 transform hover:scale-105 active:scale-95 hover:shadow-md opacity-0 animate-slide-in-right"
-          style="animation-delay:600ms;">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-          </svg>
-          <span class="font-medium">Kembali</span>
-        </a>
+  <div class="lg:ml-80 px-4 sm:px-6 py-8">
+    <div class="max-w-3xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-orange-200">
+
+      <!-- Header Card -->
+      <div class="bg-orange-500 text-white px-6 py-6">
+        <h1 class="text-2xl font-bold">Form Evaluasi Program Kerja</h1>
+        <p class="text-sm text-orange-100">Detail Evaluasi & Komentar</p>
       </div>
-    </div>
 
-    <!-- Main -->
-    <div class="px-6 py-10 opacity-0 animate-slide-up" style="animation-delay:650ms;">
-      <div class="max-w-4xl mx-auto bg-white rounded-2xl border border-gray-200 shadow-sm p-8">
-
-        <!-- Card Header -->
-        <div class="mb-8 border-b border-gray-100 pb-6">
-          <h3 class="text-xl font-bold text-gray-800 mb-2">Evaluasi Program Kerja</h3>
-          <p class="text-sm text-gray-600">Detail hasil evaluasi dari DPA terhadap laporan kegiatan.</p>
+      <!-- Body -->
+      <div class="p-6 sm:p-8 space-y-6">
+        <!-- Nama Program Kerja -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Nama Program Kerja</label>
+          <input type="text" readonly class="w-full px-4 py-3 border rounded-xl bg-gray-50" value="<%= evaluasi.Nama_ProgramKerja || '-' %>">
         </div>
 
-        <!-- Detail Evaluasi -->
-        <div class="space-y-6">
-          <!-- Judul Laporan -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Judul Laporan</label>
-            <div class="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 text-sm">
-              <%= evaluasi.judul_laporan || '-' %>
-            </div>
-          </div>
+        <!-- Tanggal Evaluasi -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Tanggal Evaluasi</label>
+          <input type="text" readonly class="w-full px-4 py-3 border rounded-xl bg-gray-50" value="<%= evaluasi.tanggalFormatted || '-' %>">
+        </div>
 
-          <!-- Program Kerja -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Program Kerja</label>
-            <div class="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 text-sm">
-              <%= evaluasi.Nama_ProgramKerja || '-' %>
-            </div>
-          </div>
+        <!-- Evaluator -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Evaluator</label>
+          <input type="text" readonly class="w-full px-4 py-3 border rounded-xl bg-gray-50" value="<%= evaluasi.evaluator || 'DPA' %>">
+        </div>
 
-          <!-- Evaluator -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Evaluator</label>
-            <div class="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 text-sm">
-              <%= evaluasi.evaluator || 'DPA' %>
-            </div>
+        <!-- Status -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Status</label>
+          <div class="px-4 py-3 border rounded-xl bg-gray-50 flex items-center gap-2">
+            <% if (evaluasi.status_konfirmasi === 'Selesai') { %>
+              <span class="px-3 py-1 text-xs rounded-full bg-green-100 text-green-700">Selesai</span>
+            <% } else if (evaluasi.status_konfirmasi === 'Revisi') { %>
+              <span class="px-3 py-1 text-xs rounded-full bg-red-100 text-red-700">Revisi</span>
+            <% } else { %>
+              <span class="px-3 py-1 text-xs rounded-full bg-gray-100 text-gray-600"><%= evaluasi.status_konfirmasi %></span>
+            <% } %>
           </div>
+        </div>
 
-          <!-- Tanggal Evaluasi -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Evaluasi</label>
-            <div class="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 text-sm">
-              <%= evaluasi.tanggalFormatted || '-' %>
-            </div>
-          </div>
+        <!-- Evaluasi dari DPA -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Evaluasi dari DPA</label>
+          <textarea readonly rows="3" class="w-full px-4 py-3 border rounded-xl bg-gray-50"><%= evaluasi.komentar || 'Belum ada komentar dari DPA.' %></textarea>
+        </div>
 
-          <!-- Status -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
-            <div class="flex items-center gap-2 px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 text-sm">
-              <% if (evaluasi.status_konfirmasi === 'Selesai') { %>
-                <span class="px-3 py-1 text-xs rounded-full bg-green-100 text-green-700 font-medium">
-                  Selesai
-                </span>
-              <% } else if (evaluasi.status_konfirmasi === 'Revisi') { %>
-                <span class="px-3 py-1 text-xs rounded-full bg-red-100 text-red-700 font-medium">
-                  Revisi
-                </span>
-              <% } else { %>
-                <span class="px-3 py-1 text-xs rounded-full bg-gray-100 text-gray-600 font-medium">
-                  <%= evaluasi.status_konfirmasi || '-' %>
-                </span>
-              <% } %>
-            </div>
-          </div>
+        <!-- Komentar HMSI -->
+        <div>
+          <h3 class="text-base font-semibold text-gray-700 flex items-center gap-2">
+            <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 14h.01M16 10h.01M21 16a2 2 0 0 1-2 2H7l-4 4V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+            Komentar Tambahan
+          </h3>
 
-          <!-- Komentar -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Komentar</label>
-            <div class="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 text-sm whitespace-pre-line">
-              <%= evaluasi.komentar || 'Tidak ada komentar.' %>
+          <% if (evaluasi.komentar_hmsi) { %>
+            <div class="mt-2 px-4 py-3 border rounded-xl bg-orange-50 text-gray-700">
+              <%= evaluasi.komentar_hmsi %>
             </div>
-          </div>
+          <% } else { %>
+            <p class="text-gray-400 text-sm mt-2">Belum ada komentar tambahan.</p>
+          <% } %>
+
+          <!-- Form komentar -->
+          <form action="/hmsi/evaluasi/<%= evaluasi.id_evaluasi %>/komentar" method="POST" class="mt-4 space-y-3">
+            <textarea name="komentar_hmsi" rows="3" class="w-full border rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400"><%= evaluasi.komentar_hmsi || '' %></textarea>
+            
+            <div class="flex justify-between items-center gap-3 pt-4 border-t">
+              <a href="/hmsi/evaluasi" class="px-4 py-2 border border-gray-400 text-gray-600 rounded-xl hover:bg-gray-100">Kembali</a>
+              <button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-xl font-medium">
+                Tambahkan Komentar
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
   </div>
-
-  <!-- Animasi -->
-  <style>
-    @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
-    @keyframes slideDown { from {opacity:0; transform:translateY(-20px);} to {opacity:1; transform:translateY(0);} }
-    @keyframes slideUp { from {opacity:0; transform:translateY(20px);} to {opacity:1; transform:translateY(0);} }
-    @keyframes slideInRight { from {opacity:0; transform:translateX(30px);} to {opacity:1; transform:translateX(0);} }
-
-    .animate-fade-in { animation: fadeIn 0.7s ease-out forwards; }
-    .animate-slide-down { animation: slideDown 0.8s ease-out forwards; }
-    .animate-slide-up { animation: slideUp 0.6s ease-out forwards; }
-    .animate-slide-in-right { animation: slideInRight 0.8s ease-out forwards; }
-  </style>
-
 </body>
 </html>

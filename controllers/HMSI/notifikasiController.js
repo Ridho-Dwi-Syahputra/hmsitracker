@@ -5,11 +5,10 @@
 // - Klik notifikasi = otomatis tandai sudah dibaca + redirect ke detail evaluasi laporan
 // =====================================================
 
-// controllers/HMSI/notifikasiController.js
 const db = require("../../config/db");
 
 // =====================================================
-// 📄 Ambil semua notifikasi untuk HMSI sesuai divisi
+// 📄 Ambil semua notifikasi evaluasi untuk HMSI sesuai divisi
 // =====================================================
 exports.getAllNotifikasi = async (req, res) => {
   try {
@@ -19,47 +18,37 @@ exports.getAllNotifikasi = async (req, res) => {
     }
 
     const [rows] = await db.query(
-      `SELECT n.*, l.judul_laporan, p.Nama_ProgramKerja
+      `SELECT n.*, l.judul_laporan, p.Nama_ProgramKerja, u.nama AS evaluator
        FROM Notifikasi n
        LEFT JOIN Laporan l ON n.id_laporan = l.id_laporan
        LEFT JOIN Program_kerja p ON l.id_ProgramKerja = p.id_ProgramKerja
+       LEFT JOIN Evaluasi e ON n.id_evaluasi = e.id_evaluasi
+       LEFT JOIN User u ON e.pemberi_evaluasi = u.id_anggota
        WHERE n.divisi = ?
+         AND n.id_evaluasi IS NOT NULL
+         AND (n.role IS NULL OR n.role = 'HMSI')   -- ✅ hanya notif untuk HMSI
        ORDER BY n.created_at DESC`,
       [user.divisi]
     );
 
     const notifikasi = rows.map(n => {
-      // format tanggal
       let tanggalFormatted = "-";
       if (n.created_at) {
         const d = new Date(n.created_at);
         if (!isNaN(d.getTime())) {
           tanggalFormatted = d.toLocaleDateString("id-ID", {
-            day: "2-digit", month: "short", year: "numeric"
+            day: "2-digit",
+            month: "short",
+            year: "numeric"
           });
         }
-      }
-
-      // tentukan link & label
-      let linkUrl = "#";
-      let linkLabel = "Lihat";
-
-      if (n.id_evaluasi) {
-        linkUrl = `/hmsi/evaluasi/${n.id_evaluasi}`;
-        linkLabel = "Lihat Evaluasi";
-      } else if (n.id_laporan) {
-        linkUrl = `/hmsi/laporan/${n.id_laporan}`;
-        linkLabel = "Lihat Laporan";
-      } else if (n.id_ProgramKerja) {
-        linkUrl = `/hmsi/proker/${n.id_ProgramKerja}`;
-        linkLabel = "Lihat Program Kerja";
       }
 
       return {
         ...n,
         tanggalFormatted,
-        linkUrl,
-        linkLabel
+        linkUrl: `/hmsi/evaluasi/${n.id_evaluasi}`,
+        linkLabel: "Lihat Evaluasi"
       };
     });
 

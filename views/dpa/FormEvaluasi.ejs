@@ -45,21 +45,20 @@
         <%- include('../partials/alert', { errorMsg: errorMsg, successMsg: successMsg }) %>
 
         <!-- Info laporan singkat -->
-<div class="mb-6 bg-orange-50 border border-orange-200 rounded-lg p-4 space-y-1">
-  <p class="text-sm text-gray-700">
-    <span class="font-medium">Judul Laporan   :</span> <%= laporan.judul_laporan || '-' %>
-  </p>
-  <p class="text-sm text-gray-700">
-    <span class="font-medium">Program Kerja   :</span> <%= laporan.namaProker || '-' %>
-  </p>
-  <p class="text-sm text-gray-700">
-    <span class="font-medium">Divisi HMSI     :</span> <%= laporan.divisi || '-' %>
-  </p>
-  <p class="text-sm text-gray-700">
-    <span class="font-medium">Tanggal Upload  :</span> <%= laporan.tanggalFormatted || '-' %>
-  </p>
-</div>
-
+        <div class="mb-6 bg-orange-50 border border-orange-200 rounded-lg p-4 space-y-1">
+          <p class="text-sm text-gray-700">
+            <span class="font-medium">Judul Laporan   :</span> <%= laporan.judul_laporan || '-' %>
+          </p>
+          <p class="text-sm text-gray-700">
+            <span class="font-medium">Program Kerja   :</span> <%= laporan.namaProker || '-' %>
+          </p>
+          <p class="text-sm text-gray-700">
+            <span class="font-medium">Divisi HMSI     :</span> <%= laporan.divisi || '-' %>
+          </p>
+          <p class="text-sm text-gray-700">
+            <span class="font-medium">Tanggal Upload  :</span> <%= laporan.tanggalFormatted || '-' %>
+          </p>
+        </div>
 
         <!-- Preview Dokumentasi -->
         <div class="mb-8">
@@ -87,6 +86,16 @@
             <p class="text-gray-600 text-sm">Tidak ada dokumentasi diunggah.</p>
           <% } %>
         </div>
+
+        <!-- Komentar HMSI -->
+        <% if (laporan.komentar_hmsi) { %>
+        <div class="mb-8">
+          <h4 class="text-lg font-semibold text-teal-600 mb-4">Komentar HMSI</h4>
+          <div class="p-4 bg-teal-50 border border-teal-200 rounded-lg space-y-2">
+            <p class="text-gray-800 whitespace-pre-line"><%= laporan.komentar_hmsi %></p>
+          </div>
+        </div>
+        <% } %>
 
         <!-- Form Evaluasi -->
         <form action="/dpa/laporan/<%= laporan.id_laporan %>/evaluasi" method="POST" class="space-y-6">
