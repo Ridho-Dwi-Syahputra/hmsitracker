@@ -89,19 +89,22 @@
 
           <!-- Dokumen Pendukung -->
           <div>
-            <h4 class="text-lg font-semibold text-orange-600 mb-1">Dokumen Pendukung</h4>
-            <p class="text-sm text-gray-500 mb-4">Upload file pendukung (PDF, JPG, PNG, maks 5MB)</p>
+            <h4 class="text-lg font-semibold text-orange-600 mb-1">File Dokumen Pendukung</h4>
+            <p class="text-sm text-gray-500 mb-4">Upload file pendukung program kerja</p>
 
+            <!-- Dropzone -->
             <div id="dropzone"
               class="border-2 border-dashed border-orange-300 rounded-xl p-10 bg-orange-50/30 text-center cursor-pointer 
-                    transition duration-200 hover:border-orange-500 hover:bg-orange-100/50 flex flex-col items-center gap-4">
-
+                     transition duration-200 hover:border-orange-500 hover:bg-orange-100/50 flex flex-col items-center gap-4">
+              
               <!-- Hidden file input -->
               <input type="file" name="dokumen_pendukung" id="fileUpload" class="hidden"
                 accept=".pdf,.jpg,.jpeg,.png" />
 
               <!-- Icon -->
-              <div class="text-4xl text-gray-400">📎</div>
+              <div class="text-4xl text-gray-400">
+                📄
+              </div>
 
               <!-- Button -->
               <label for="fileUpload" class="cursor-pointer">
@@ -112,7 +115,7 @@
                 </span>
               </label>
 
-              <!-- Info -->
+              <!-- File info -->
               <p class="text-sm text-gray-600">
                 Format yang didukung: <span class="font-medium">PDF, JPG, JPEG, PNG</span><br>
                 Maksimal ukuran file: <span class="font-medium">5MB</span>
@@ -122,11 +125,16 @@
             <p id="fileName" class="text-sm text-gray-600 mt-3"></p>
           </div>
 
-          <!-- Tombol Simpan -->
-          <div class="flex justify-end gap-3 pt-6 border-t border-gray-100">
+          <!-- Tombol -->
+          <div class="mt-8 pt-6 border-t border-gray-100 flex gap-4 justify-end">
+            <a href="/hmsi/kelola-proker"
+              class="px-8 py-4 border border-gray-300 rounded-xl text-sm font-medium bg-white text-gray-700 transition-all duration-200 hover:shadow-md">
+              Batal
+            </a>
             <button type="submit" id="submitBtn"
-              class="px-6 py-3 bg-orange-500 text-white rounded-xl text-sm font-semibold hover:bg-orange-600 transition transform hover:scale-105 active:scale-95">
-              Simpan Program Kerja
+              class="flex items-center justify-center gap-2 px-8 py-4 text-white bg-orange-500 rounded-xl text-sm font-semibold transition-all duration-200 hover:bg-orange-600">
+              <span id="btnText">Simpan</span>
+              <div id="btnSpinner" class="hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
             </button>
           </div>
         </form>
