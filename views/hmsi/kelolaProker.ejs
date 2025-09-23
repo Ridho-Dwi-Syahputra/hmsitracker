@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id">\
+<html lang="id">
 <head>
   <meta charset="UTF-8">
   <title><%= title %></title>
@@ -9,38 +9,34 @@
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
         crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="bg-orange-50 min-h-screen flex flex-col">
 
-  <!-- Sidebar -->
+  <!-- ✅ Navbar -->
+  <%- include('../partials/navbarHMSI', { user: user, unreadCount: unreadCount }) %>
+
+  <!-- ✅ Sidebar -->
   <%- include('../partials/sidebarHMSI', { user: user, activeNav: 'Program Kerja' }) %>
 
   <!-- Wrapper -->
-  <div class="lg:ml-80 opacity-0 animate-fade-in" style="animation-delay:150ms;">
+  <main class="lg:ml-80 px-6 pt-20 pb-8 flex-grow">
+    <div class="max-w-6xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-orange-200">
 
-    <!-- Header -->
-    <div class="bg-white border-b border-gray-200">
-      <div class="max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
-        <!-- Judul -->
-        <h1 class="text-2xl font-bold text-gray-800 opacity-0 animate-slide-down" style="animation-delay:300ms;">
-          Kelola Program Kerja
-        </h1>
-        <!-- Button Tambah Proker -->
+      <!-- Header Card -->
+      <div class="bg-orange-500 text-white px-6 py-6 flex items-center justify-between">
+        <div>
+          <h1 class="text-2xl font-bold">Kelola Program Kerja</h1>
+          <p class="text-sm text-orange-100">Daftar proker & status pelaksanaan</p>
+        </div>
         <a href="/hmsi/tambah-proker" 
-          class="flex items-center space-x-2 px-4 py-2 bg-orange-500 text-white rounded-lg font-semibold 
-                 opacity-0 animate-slide-down transition-all duration-200 
-                 hover:bg-orange-600 hover:scale-105 active:scale-95" style="animation-delay:400ms;">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-          </svg>
+          class="flex items-center space-x-2 px-4 py-2 bg-white text-orange-600 rounded-lg font-semibold
+                 transition-all duration-200 hover:bg-orange-100 hover:scale-105 active:scale-95">
+          <i class="fa-solid fa-plus"></i>
           <span>Tambah Proker</span>
         </a>
       </div>
-    </div>
 
-
-    <!-- Main -->
-    <div class="px-6 py-8">
-      <div class="max-w-7xl mx-auto bg-white rounded-2xl border border-orange-200 shadow-sm p-6">
+      <!-- Body Card -->
+      <div class="p-6 sm:p-8">
 
         <!-- Search & Filter -->
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
@@ -57,7 +53,7 @@
             </div>
           </div>
 
-          <!-- Custom Dropdown Status -->
+          <!-- Dropdown Status -->
           <div class="relative">
             <button id="dropdownButton" 
               class="flex items-center justify-between gap-2 px-4 py-3 border border-gray-300 rounded-xl text-sm bg-white
@@ -77,23 +73,34 @@
           </div>
         </div>
 
-        <!-- Tabel -->
-        <div class="overflow-x-auto bg-white-50 p-2 shadow-sm rounded-xl">
-          <table class="min-w-full text-sm text-center border border-orange-200 rounded-xl overflow-hidden border-separate border-spacing-0">
-            <thead class="bg-orange-100 text-gray-700">
-              <tr>
-                <th class="py-3 px-4 font-semibold border border-orange-200">No</th>
-                <th class="py-3 px-4 font-semibold border border-orange-200 text-left">Nama Program</th>
-                <th class="py-3 px-4 font-semibold border border-orange-200">Divisi</th>
-                <th class="py-3 px-4 font-semibold border border-orange-200">Penanggung Jawab</th>
-                <th class="py-3 px-4 font-semibold border border-orange-200">Status</th>
-                <th class="py-3 px-4 font-semibold border border-orange-200">Aksi</th>
-              </tr>
-            </thead>
-            <tbody id="programTable">
-              <% if (programs && programs.length > 0) { %>
+        <% if (!programs || programs.length === 0) { %>
+          <!-- Empty State -->
+          <div class="flex flex-col items-center space-y-4 py-20">
+            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+              <i class="fa-solid fa-folder-open text-2xl text-gray-400"></i>
+            </div>
+            <div class="text-center">
+              <div class="text-xl font-semibold text-gray-800 mb-2">Belum ada program kerja</div>
+              <div class="text-gray-500">Klik "Tambah Proker" untuk mulai membuat program kerja baru</div>
+            </div>
+          </div>
+        <% } else { %>
+          <!-- Tabel -->
+          <div class="overflow-x-auto bg-white-50 p-2 shadow-sm rounded-xl">
+            <table class="min-w-full text-sm text-center border border-orange-200 rounded-xl overflow-hidden border-separate border-spacing-0">
+              <thead class="bg-orange-100 text-gray-700">
+                <tr>
+                  <th class="py-3 px-4 font-semibold border border-orange-200">No</th>
+                  <th class="py-3 px-4 font-semibold border border-orange-200 text-left">Nama Program</th>
+                  <th class="py-3 px-4 font-semibold border border-orange-200">Divisi</th>
+                  <th class="py-3 px-4 font-semibold border border-orange-200">Penanggung Jawab</th>
+                  <th class="py-3 px-4 font-semibold border border-orange-200">Status</th>
+                  <th class="py-3 px-4 font-semibold border border-orange-200">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="programTable">
                 <% programs.forEach((proker, index) => { %>
-                  <tr class="hover:bg-orange-50 transition">
+                  <tr class="hover:bg-orange-50 transition" data-visible="true">
                     <td class="py-3 px-4 border border-orange-100"><%= index + 1 %></td>
                     <td class="py-3 px-4 font-medium text-gray-800 border border-orange-100 text-left"><%= proker.namaProker %></td>
                     <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= proker.divisi %></td>
@@ -110,67 +117,40 @@
                       <% } %>
                     </td>
                     <td class="py-3 px-4 flex justify-center gap-4 border border-orange-100">
-                      <!-- Detail -->
-                      <a href="/hmsi/proker/<%= proker.id %>" 
-                         class="text-orange-500 hover:text-orange-700 transition transform hover:scale-110" 
-                         title="Detail">
+                      <a href="/hmsi/proker/<%= proker.id %>" class="text-orange-500 hover:text-orange-700 transition transform hover:scale-110" title="Detail">
                         <i class="fa-solid fa-eye text-lg"></i>
                       </a>
-
-                      <!-- Edit -->
-                      <a href="/hmsi/proker/<%= proker.id %>/edit" 
-                         class="text-orange-500 hover:text-orange-700 transition transform hover:scale-110" 
-                         title="Edit">
+                      <a href="/hmsi/proker/<%= proker.id %>/edit" class="text-orange-500 hover:text-orange-700 transition transform hover:scale-110" title="Edit">
                         <i class="fa-solid fa-pen-to-square text-lg"></i>
                       </a>
-
-                      <!-- Delete -->
-                      <form action="/hmsi/proker/<%= proker.id %>/delete" method="POST" class="inline" 
-                            onsubmit="return confirm('Yakin hapus proker ini?')">
-                        <button type="submit" 
-                                class="text-orange-500 hover:text-orange-700 transition transform hover:scale-110" 
-                                title="Hapus">
+                      <form action="/hmsi/proker/<%= proker.id %>/delete" method="POST" class="inline" onsubmit="return confirm('Yakin hapus proker ini?')">
+                        <button type="submit" class="text-orange-500 hover:text-orange-700 transition transform hover:scale-110" title="Hapus">
                           <i class="fa-solid fa-trash text-lg"></i>
                         </button>
                       </form>
                     </td>
                   </tr>
                 <% }) %>
-              <% } else { %>
-                <tr>
-                  <td colspan="6" class="py-6 text-center text-gray-500 border border-orange-100">Tidak ada program kerja ditemukan.</td>
-                </tr>
-              <% } %>
-            </tbody>
-          </table>
-        </div>
-        
-        <!-- Pagination -->
-        <div class="flex justify-center items-center gap-2 mt-6" id="pagination">
-          <button id="prevPage" class="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 disabled:opacity-50">Prev</button>
-          <span id="pageInfo" class="text-gray-700"></span>
-          <button id="nextPage" class="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 disabled:opacity-50">Next</button>
-        </div>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          <div class="flex justify-center items-center gap-2 mt-6" id="pagination">
+            <button id="prevPage" class="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 disabled:opacity-50">Prev</button>
+            <span id="pageInfo" class="text-gray-700"></span>
+            <button id="nextPage" class="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 disabled:opacity-50">Next</button>
+          </div>
+        <% } %>
 
       </div>
     </div>
-  </div>
+  </main>
 
-  <!-- Animasi & Custom Style -->
-  <style>
-    @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
-    .animate-fade-in { animation: fadeIn 0.7s ease-out forwards; }
-    @keyframes slideDown { from {opacity:0; transform:translateY(-20px);} to {opacity:1; transform:translateY(0);} }
-    .animate-slide-down { animation: slideDown 0.5s ease-out forwards; }
+  <!-- Footer -->
+  <%- include('../partials/footer') %>
 
-    /* Hilangkan outline hitam pada search */
-    #searchInput:focus {
-      outline: none !important;
-      box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.4);
-    }
-  </style>
-
-  <!-- Script -->
+  <!-- Script Filter & Pagination -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const searchInput = document.getElementById("searchInput");
@@ -178,19 +158,17 @@
       const dropdownMenu = document.getElementById("dropdownMenu");
       const dropdownLabel = document.getElementById("dropdownLabel");
       const tbody = document.getElementById("programTable");
-      let rows = Array.from(tbody.querySelectorAll("tr"));
+      let rows = tbody ? Array.from(tbody.querySelectorAll("tr")) : [];
 
       let statusValue = "all";
       const rowsPerPage = 10;
       let currentPage = 1;
 
-      // Toggle dropdown
-      dropdownButton.addEventListener("click", () => {
+      dropdownButton?.addEventListener("click", () => {
         dropdownMenu.classList.toggle("hidden");
       });
 
-      // Klik pilihan status
-      dropdownMenu.querySelectorAll("button").forEach(btn => {
+      dropdownMenu?.querySelectorAll("button").forEach(btn => {
         btn.addEventListener("click", () => {
           statusValue = btn.dataset.value;
           dropdownLabel.textContent = btn.textContent;
@@ -200,9 +178,7 @@
       });
 
       function filterRows() {
-        rows = Array.from(tbody.querySelectorAll("tr"));
         const searchValue = searchInput.value.toLowerCase();
-
         rows.forEach(row => {
           const namaProker = row.cells[1]?.innerText.toLowerCase() || "";
           const divisi = row.cells[2]?.innerText.toLowerCase() || "";
@@ -214,7 +190,6 @@
 
           row.dataset.visible = (matchSearch && matchStatus) ? "true" : "false";
         });
-
         paginate();
       }
 
@@ -235,14 +210,12 @@
         document.getElementById("nextPage").disabled = currentPage === totalPages || totalPages === 0;
       }
 
-      document.getElementById("prevPage").addEventListener("click", () => { currentPage--; paginate(); });
-      document.getElementById("nextPage").addEventListener("click", () => { currentPage++; paginate(); });
+      document.getElementById("prevPage")?.addEventListener("click", () => { currentPage--; paginate(); });
+      document.getElementById("nextPage")?.addEventListener("click", () => { currentPage++; paginate(); });
+      searchInput?.addEventListener("input", filterRows);
 
-      searchInput.addEventListener("input", filterRows);
-
-      filterRows();
+      if (rows.length > 0) filterRows();
     });
   </script>
-
 </body>
 </html>

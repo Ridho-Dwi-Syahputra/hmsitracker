@@ -14,20 +14,6 @@
 %>
 
 <div id="hmsi-sidebar-root">
-
-  <!-- 🔹 Mobile top bar -->
-  <div class="lg:hidden fixed top-0 left-0 w-full h-14 bg-gradient-to-r from-orange-500 to-orange-600 flex items-center justify-between px-4 z-40">
-    <!-- Hamburger -->
-    <button id="hmsi-sidebar-toggle" class="hamburger p-2 rounded-lg bg-white shadow-md flex flex-col justify-between w-8 h-8">
-      <span class="bar"></span>
-      <span class="bar"></span>
-      <span class="bar"></span>
-    </button>
-    <h1 class="text-white font-semibold text-lg">HMSI Tracker</h1>
-  </div>
-
-  
-
   <!-- 🔹 Overlay -->
   <div id="hmsi-sidebar-overlay"
     class="hidden fixed inset-0 bg-black bg-opacity-40 z-40 lg:hidden transition-opacity duration-300"></div>
@@ -46,7 +32,6 @@
     <!-- Profile -->
     <div class="p-6 border-b border-gray-100 bg-white">
       <div class="flex items-center gap-4">
-        <!-- Foto Profil (dengan fallback & anti-cache) -->
         <img src="<%= fotoProfile %>?v=<%= Date.now() %>"
              alt="Foto Profil"
              class="w-12 h-12 rounded-full border object-cover shadow-md"
@@ -57,7 +42,6 @@
           <p class="text-xs text-gray-500 mt-0.5"><%= user.divisi || 'Pengurus HMSI' %></p>
         </div>
 
-        <!-- Gear -->
         <a href="/hmsi/profile" title="Profile"
            class="gear-btn p-2 text-gray-400 hover:text-gray-600 rounded-lg transition-transform duration-300">
           <svg class="gear-icon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -116,33 +100,12 @@
   </aside>
 </div>
 
-<!-- Styles (unchanged) -->
+<!-- Styles -->
 <style>
-  /* Drawer animation */
   #hmsi-sidebar { will-change: transform; }
   .slide-in { transform: translateX(0) !important; }
   .slide-out { transform: translateX(-100%) !important; }
 
-  /* Hamburger */
-  .hamburger .bar {
-    display: block;
-    width: 100%;
-    height: 3px;
-    background-color: #374151;
-    border-radius: 4px;
-    transition: all 0.3s ease;
-  }
-  .hamburger.active .bar:nth-child(1) {
-    transform: rotate(45deg) translate(5px, 5px);
-  }
-  .hamburger.active .bar:nth-child(2) {
-    opacity: 0;
-  }
-  .hamburger.active .bar:nth-child(3) {
-    transform: rotate(-45deg) translate(5px, -5px);
-  }
-
-  /* Nav-item */
   .nav-item {
     opacity: 0;
     transform: translateX(-20px);
@@ -171,18 +134,13 @@
     to   { box-shadow: inset 6px 0 0 #f97316, 0 0 10px rgba(249,115,22,0.28); }
   }
 
-  /* Gear icon */
-  .gear-icon {
-    transition: transform 0.4s ease, color 0.3s ease, filter 0.3s ease;
-  }
+  .gear-icon { transition: transform 0.4s ease, color 0.3s ease, filter 0.3s ease; }
   .gear-btn:hover .gear-icon {
     transform: rotate(90deg) scale(1.2);
     color: #ea580c;
     filter: drop-shadow(0 0 6px rgba(234,88,12,0.5));
   }
-  .gear-btn:active .gear-icon {
-    animation: gearShake 0.3s ease;
-  }
+  .gear-btn:active .gear-icon { animation: gearShake 0.3s ease; }
   @keyframes gearShake {
     0% { transform: rotate(0deg) scale(1); }
     25% { transform: rotate(12deg) scale(1.05); }
@@ -197,29 +155,31 @@
   document.addEventListener("DOMContentLoaded", () => {
     const sidebar = document.getElementById("hmsi-sidebar");
     const overlay = document.getElementById("hmsi-sidebar-overlay");
-    const toggle = document.getElementById("hmsi-sidebar-toggle");
+    const toggle = document.getElementById("hmsi-sidebar-toggle"); // tombol dari navbar
 
     if (window.innerWidth >= 1024) {
       sidebar.classList.add("slide-in");
     }
 
-    toggle.addEventListener("click", () => {
-      const isActive = toggle.classList.toggle("active");
-      if (isActive) {
-        sidebar.classList.add("slide-in");
-        sidebar.classList.remove("slide-out");
-        overlay.classList.remove("hidden");
-      } else {
-        sidebar.classList.remove("slide-in");
-        sidebar.classList.add("slide-out");
-        overlay.classList.add("hidden");
-      }
-    });
+    if (toggle) {
+      toggle.addEventListener("click", () => {
+        const isActive = toggle.classList.toggle("active");
+        if (isActive) {
+          sidebar.classList.add("slide-in");
+          sidebar.classList.remove("slide-out");
+          overlay.classList.remove("hidden");
+        } else {
+          sidebar.classList.remove("slide-in");
+          sidebar.classList.add("slide-out");
+          overlay.classList.add("hidden");
+        }
+      });
+    }
 
     overlay.addEventListener("click", () => {
       sidebar.classList.remove("slide-in");
       sidebar.classList.add("slide-out");
-      toggle.classList.remove("active");
+      if (toggle) toggle.classList.remove("active");
       overlay.classList.add("hidden");
     });
 

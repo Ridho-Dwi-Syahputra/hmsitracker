@@ -5,34 +5,28 @@
   <title><%= title %></title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="bg-orange-50 min-h-screen flex flex-col">
+
+  <!-- Navbar -->
+  <%- include('../partials/navbarHMSI', { user: user, unreadCount: unreadCount }) %>
 
   <!-- Sidebar -->
   <%- include('../partials/sidebarHMSI', { activeNav: 'Program Kerja', user: user }) %>
 
   <!-- Wrapper -->
-  <div class="lg:ml-80 opacity-0 animate-fade-in" style="animation-delay:150ms;">
+  <main class="lg:ml-80 px-6 pt-20 pb-8 flex-grow">
+    <div class="max-w-5xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-orange-200">
 
-    <!-- Header -->
-    <div class="bg-white border-b border-gray-200">
-      <div class="max-w-5xl mx-auto px-6 py-6 flex items-center justify-between">
-        <h1 class="text-2xl font-bold text-gray-800 opacity-0 animate-slide-down" style="animation-delay:350ms;">
-          Tambah Program Kerja
-        </h1>
+      <!-- Header Card -->
+      <div class="bg-orange-500 text-white px-6 py-10">
+        <h1 class="text-2xl font-bold">Tambah Program Kerja</h1>
+        <p class="text-sm text-orange-100">Lengkapi detail program kerja di bawah</p>
       </div>
-    </div>
 
-    <!-- Main -->
-    <div class="px-6 py-10 opacity-0 animate-slide-up" style="animation-delay:650ms;">
-      <div class="max-w-5xl mx-auto bg-white rounded-2xl border border-gray-200 shadow-sm p-8">
+      <!-- Body Card -->
+      <div class="p-6 sm:p-8 space-y-0">
 
-        <!-- Card Header -->
-        <div class="mb-8 border-b border-gray-100 pb-6">
-          <h3 class="text-2xl font-bold text-gray-800 mb-2">Form Tambah Program Kerja</h3>
-          <p class="text-base text-gray-600 m-0">Lengkapi detail program kerja di bawah</p>
-        </div>
-
-        <!-- ALERT POPUP -->
+        <!-- Alert -->
         <%- include('../partials/alert', { errorMsg: errorMsg, successMsg: successMsg }) %>
 
         <!-- Form -->
@@ -44,45 +38,45 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
               <!-- Nama Program Kerja -->
-              <div class="md:col-span-2">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Nama Program Kerja</label>
+              <div class="md:col-span-2 bg-orange-50 border border-orange-200 rounded-xl p-4">
+                <label class="block text-sm font-medium text-orange-700 mb-2">Nama Program Kerja</label>
                 <input type="text" name="namaProker"
                   value="<%= old?.namaProker || '' %>" required
                   placeholder="Masukkan nama program kerja..."
-                  class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100">
+                  class="w-full px-4 py-3 border border-orange-200 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-200">
               </div>
 
               <!-- Tanggal Mulai -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Mulai</label>
+              <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
+                <label class="block text-sm font-medium text-orange-700 mb-2">Tanggal Mulai</label>
                 <input type="date" name="tanggal_mulai"
                   value="<%= old?.tanggal_mulai || '' %>" required
-                  class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100">
+                  class="w-full px-4 py-3 border border-orange-200 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-200">
               </div>
 
               <!-- Tanggal Selesai -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Selesai</label>
+              <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
+                <label class="block text-sm font-medium text-orange-700 mb-2">Tanggal Selesai</label>
                 <input type="date" name="tanggal_selesai"
                   value="<%= old?.tanggal_selesai || '' %>" required
-                  class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100">
+                  class="w-full px-4 py-3 border border-orange-200 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-200">
               </div>
 
               <!-- Penanggung Jawab -->
-              <div class="md:col-span-2">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Penanggung Jawab</label>
+              <div class="md:col-span-2 bg-orange-50 border border-orange-200 rounded-xl p-4">
+                <label class="block text-sm font-medium text-orange-700 mb-2">Penanggung Jawab</label>
                 <input type="text" name="penanggungJawab"
                   value="<%= old?.penanggungJawab || '' %>" required
                   placeholder="Masukkan nama penanggung jawab..."
-                  class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100">
+                  class="w-full px-4 py-3 border border-orange-200 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-200">
               </div>
 
               <!-- Deskripsi -->
-              <div class="md:col-span-2">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Deskripsi Program</label>
+              <div class="md:col-span-2 bg-orange-50 border border-orange-200 rounded-xl p-4">
+                <label class="block text-sm font-medium text-orange-700 mb-2">Deskripsi Program</label>
                 <textarea name="deskripsi" rows="4" required
                   placeholder="Tuliskan deskripsi program kerja..."
-                  class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm resize-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100"><%= old?.deskripsi || '' %></textarea>
+                  class="w-full px-4 py-3 border border-orange-200 rounded-lg text-sm resize-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200"><%= old?.deskripsi || '' %></textarea>
               </div>
             </div>
           </div>
@@ -126,13 +120,16 @@
           </div>
 
           <!-- Tombol -->
-          <div class="mt-8 pt-6 border-t border-gray-100 flex gap-4 justify-end">
+          <div class="pt-6 border-t border-gray-100 flex gap-4 justify-end">
+            <!-- Batal -->
             <a href="/hmsi/kelola-proker"
-              class="px-8 py-4 border border-gray-300 rounded-xl text-sm font-medium bg-white text-gray-700 transition-all duration-200 hover:shadow-md">
+              class="px-8 py-3 border border-gray-300 rounded-xl text-sm font-medium bg-white text-gray-700 transition-all duration-200 hover:shadow-md">
               Batal
             </a>
+
+            <!-- Simpan -->
             <button type="submit" id="submitBtn"
-              class="flex items-center justify-center gap-2 px-8 py-4 text-white bg-orange-500 rounded-xl text-sm font-semibold transition-all duration-200 hover:bg-orange-600">
+              class="flex items-center justify-center gap-2 px-8 py-3 text-white bg-orange-500 rounded-xl text-sm font-semibold transition-all duration-200 hover:bg-orange-600">
               <span id="btnText">Simpan</span>
               <div id="btnSpinner" class="hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
             </button>
@@ -140,20 +137,22 @@
         </form>
       </div>
     </div>
-  </div>
+  </main>
 
-  <!-- Animasi -->
-  <style>
-    @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
-    @keyframes slideDown { from {opacity:0; transform:translateY(-20px);} to {opacity:1; transform:translateY(0);} }
-    @keyframes slideUp { from {opacity:0; transform:translateY(20px);} to {opacity:1; transform:translateY(0);} }
-    .animate-fade-in { animation: fadeIn 0.7s ease-out forwards; }
-    .animate-slide-down { animation: slideDown 0.8s ease-out forwards; }
-    .animate-slide-up { animation: slideUp 0.6s ease-out forwards; }
-  </style>
+   <!-- Footer -->
+   <%- include('../partials/footer') %>
 
-  <!-- script eksternal untuk form & upload -->
+  <!-- Script eksternal -->
   <script src="/javascripts/proker.js"></script>
+
+  <!-- Print-friendly -->
+  <style>
+    @media print {
+      body { background: white; }
+      .no-print, .lg\:ml-80 { display: none !important; }
+      #laporanContent { box-shadow: none; border: none; }
+    }
+  </style>
 
 </body>
 </html>

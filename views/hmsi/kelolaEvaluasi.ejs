@@ -8,29 +8,31 @@
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
         crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="bg-orange-50 min-h-screen flex flex-col">
 
-  <!-- Sidebar HMSI -->
+  <!-- ✅ Navbar -->
+  <%- include('../partials/navbarHMSI', { user: user, unreadCount: unreadCount }) %>
+
+  <!-- ✅ Sidebar -->
   <%- include('../partials/sidebarHMSI', { user: user, activeNav: 'Evaluasi DPA' }) %>
 
   <!-- Wrapper -->
-  <div class="lg:ml-80 opacity-0 animate-fade-in" style="animation-delay:150ms;">
+  <main class="lg:ml-80 px-6 pt-20 pb-8 flex-grow">
+    <div class="max-w-6xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-orange-200">
 
-    <!-- Header -->
-    <div class="bg-white border-b border-gray-200">
-      <div class="max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
-        <h1 class="text-2xl font-bold text-gray-800 opacity-0 animate-slide-down" style="animation-delay:300ms;">
-          Kelola Evaluasi
-        </h1>
+      <!-- Header Card -->
+      <div class="bg-orange-500 text-white px-6 py-6 flex items-center justify-between">
+        <div>
+          <h1 class="text-2xl font-bold">Kelola Evaluasi Laporan Program Kerja</h1>
+          <p class="text-sm text-orange-100">Daftar evaluasi laporan oleh DPA</p>
+        </div>
       </div>
-    </div>
 
-    <!-- Main -->
-    <div class="px-6 py-8">
-      <div class="max-w-7xl mx-auto bg-white rounded-2xl border border-orange-200 shadow-sm p-6">
+      <!-- Body Card -->
+      <div class="p-6 sm:p-8">
 
         <!-- Search & Filter -->
-        <div class="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
           <!-- Search -->
           <div class="relative w-full md:w-1/2">
             <input id="searchInput" type="text" placeholder="Cari evaluasi..."
@@ -61,22 +63,33 @@
           </div>
         </div>
 
-        <!-- Tabel Evaluasi -->
-        <div class="overflow-x-auto bg-white-50 p-2 shadow-sm rounded-xl">
-          <table class="min-w-full text-sm text-center border border-orange-200 rounded-xl overflow-hidden border-separate border-spacing-0">
-            <thead class="bg-orange-100 text-gray-700">
-              <tr>
-                <th class="py-3 px-4 font-semibold border border-orange-200">No</th>
-                <th class="py-3 px-4 font-semibold border border-orange-200 text-left">Judul Laporan</th>
-                <th class="py-3 px-4 font-semibold border border-orange-200">Program Kerja</th>
-                <th class="py-3 px-4 font-semibold border border-orange-200">Evaluator</th>
-                <th class="py-3 px-4 font-semibold border border-orange-200">Status</th>
-                <th class="py-3 px-4 font-semibold border border-orange-200">Tanggal Evaluasi</th>
-                <th class="py-3 px-4 font-semibold border border-orange-200">Aksi</th>
-              </tr>
-            </thead>
-            <tbody id="evaluasiTable">
-              <% if (evaluasi && evaluasi.length > 0) { %>
+        <% if (!evaluasi || evaluasi.length === 0) { %>
+          <!-- Empty State -->
+          <div class="flex flex-col items-center space-y-4 py-20">
+            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+              <i class="fa-solid fa-clipboard-check text-2xl text-gray-400"></i>
+            </div>
+            <div class="text-center">
+              <div class="text-xl font-semibold text-gray-800 mb-2">Belum ada evaluasi</div>
+              <div class="text-gray-500">Evaluasi laporan oleh DPA akan muncul di sini</div>
+            </div>
+          </div>
+        <% } else { %>
+          <!-- Tabel Evaluasi -->
+          <div class="overflow-x-auto bg-white-50 p-2 shadow-sm rounded-xl">
+            <table class="min-w-full text-sm text-center border border-orange-200 rounded-xl overflow-hidden border-separate border-spacing-0">
+              <thead class="bg-orange-100 text-gray-700">
+                <tr>
+                  <th class="py-3 px-4 font-semibold border border-orange-200">No</th>
+                  <th class="py-3 px-4 font-semibold border border-orange-200 text-left">Judul Laporan</th>
+                  <th class="py-3 px-4 font-semibold border border-orange-200">Program Kerja</th>
+                  <th class="py-3 px-4 font-semibold border border-orange-200">Evaluator</th>
+                  <th class="py-3 px-4 font-semibold border border-orange-200">Status</th>
+                  <th class="py-3 px-4 font-semibold border border-orange-200">Tanggal Evaluasi</th>
+                  <th class="py-3 px-4 font-semibold border border-orange-200">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="evaluasiTable">
                 <% evaluasi.forEach((e, index) => { %>
                   <tr class="hover:bg-orange-50 transition" data-status="<%= e.status_konfirmasi %>">
                     <td class="py-3 px-4 border border-orange-100"><%= index + 1 %></td>
@@ -94,14 +107,11 @@
                     </td>
                     <td class="py-3 px-4 text-gray-500 border border-orange-100"><%= e.tanggalFormatted %></td>
                     <td class="py-3 px-4 border border-orange-100 flex items-center justify-center gap-3">
-                      <!-- Tombol Lihat Detail -->
                       <a href="/hmsi/evaluasi/<%= e.id_evaluasi %>" 
                          class="text-orange-500 hover:text-orange-700 transition transform hover:scale-110" 
                          title="Lihat Detail Evaluasi">
                         <i class="fa-solid fa-eye text-lg"></i>
                       </a>
-
-                      <!-- Tombol Edit Laporan -->
                       <% if (e.status_konfirmasi === "Revisi") { %>
                         <a href="/hmsi/laporan/edit/<%= e.id_laporan %>"
                            class="text-orange-500 hover:text-orange-700 transition transform hover:scale-110"
@@ -109,55 +119,38 @@
                           <i class="fa-solid fa-pen-to-square text-lg"></i>
                         </a>
                       <% } else { %>
-                        <button disabled
-                          class="text-gray-400 cursor-not-allowed"
-                          title="Laporan sudah disetujui, tidak bisa diedit">
+                        <button disabled class="text-gray-400 cursor-not-allowed" title="Laporan sudah disetujui">
                           <i class="fa-solid fa-pen-to-square text-lg"></i>
                         </button>
                       <% } %>
                     </td>
                   </tr>
                 <% }) %>
-              <% } else { %>
-                <tr>
-                  <td colspan="7" class="py-6 text-center text-gray-500 border border-orange-100">Belum ada evaluasi dibuat.</td>
-                </tr>
-              <% } %>
-            </tbody>
-          </table>
-        </div>
+              </tbody>
+            </table>
+          </div>
 
-        <!-- Pagination -->
-        <div class="flex justify-center items-center gap-2 mt-6" id="pagination">
-          <button id="prevPage" class="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 disabled:opacity-50">Prev</button>
-          <span id="pageInfo" class="text-gray-700"></span>
-          <button id="nextPage" class="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 disabled:opacity-50">Next</button>
-        </div>
+          <!-- Pagination -->
+          <div class="flex justify-center items-center gap-2 mt-6" id="pagination">
+            <button id="prevPage" class="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 disabled:opacity-50">Prev</button>
+            <span id="pageInfo" class="text-gray-700"></span>
+            <button id="nextPage" class="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 disabled:opacity-50">Next</button>
+          </div>
+        <% } %>
 
       </div>
     </div>
-  </div>
+  </main>
 
-  <!-- Animasi -->
-  <style>
-    @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
-    .animate-fade-in { animation: fadeIn 0.7s ease-out forwards; }
-    @keyframes slideDown { from {opacity:0; transform:translateY(-20px);} to {opacity:1; transform:translateY(0);} }
-    .animate-slide-down { animation: slideDown 0.5s ease-out forwards; }
+  <!-- Footer -->
+  <%- include('../partials/footer') %>
 
-    /* Custom search focus */
-    #searchInput:focus {
-      outline: none !important;
-      box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.4);
-    }
-  </style>
-
-  <!-- Script -->
+  <!-- Script Filter + Pagination -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const searchInput = document.getElementById("searchInput");
       const tbody = document.getElementById("evaluasiTable");
-      const rows = Array.from(tbody.querySelectorAll("tr[data-status]"));
+      const rows = tbody ? Array.from(tbody.querySelectorAll("tr[data-status]")) : [];
       const rowsPerPage = 10;
       let currentPage = 1;
       let currentFilter = "all";
@@ -166,13 +159,11 @@
       const statusMenu = document.getElementById("statusDropdownMenu");
       const statusLabel = document.getElementById("statusDropdownLabel");
 
-      // toggle dropdown
-      statusBtn.addEventListener("click", () => {
+      statusBtn?.addEventListener("click", () => {
         statusMenu.classList.toggle("hidden");
       });
 
-      // pilih filter status
-      statusMenu.querySelectorAll("button").forEach(btn => {
+      statusMenu?.querySelectorAll("button").forEach(btn => {
         btn.addEventListener("click", () => {
           currentFilter = btn.dataset.value;
           statusLabel.textContent = btn.textContent;
@@ -183,7 +174,6 @@
 
       function filterRows() {
         const searchValue = searchInput.value.toLowerCase();
-
         rows.forEach(row => {
           const judul = row.cells[1]?.innerText.toLowerCase() || "";
           const program = row.cells[2]?.innerText.toLowerCase() || "";
@@ -193,9 +183,8 @@
           let matchSearch = judul.includes(searchValue) || program.includes(searchValue) || evaluator.includes(searchValue) || status.toLowerCase().includes(searchValue);
           let matchFilter = currentFilter === "all" || status === currentFilter;
 
-          row.dataset.visible = matchSearch && matchFilter ? "true" : "false";
+          row.dataset.visible = (matchSearch && matchFilter) ? "true" : "false";
         });
-
         paginate();
       }
 
@@ -216,13 +205,12 @@
         document.getElementById("nextPage").disabled = currentPage === totalPages || totalPages === 0;
       }
 
-      document.getElementById("prevPage").addEventListener("click", () => { currentPage--; paginate(); });
-      document.getElementById("nextPage").addEventListener("click", () => { currentPage++; paginate(); });
-      searchInput.addEventListener("input", filterRows);
+      document.getElementById("prevPage")?.addEventListener("click", () => { currentPage--; paginate(); });
+      document.getElementById("nextPage")?.addEventListener("click", () => { currentPage++; paginate(); });
+      searchInput?.addEventListener("input", filterRows);
 
-      filterRows();
+      if (rows.length > 0) filterRows();
     });
   </script>
-
 </body>
 </html>

@@ -8,34 +8,36 @@
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
         crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="bg-orange-50 min-h-screen flex flex-col">
 
+  <!-- Navbar -->
+  <%- include('../partials/navbarHMSI', { user: user, unreadCount: unreadCount }) %>
+
+  <!-- Sidebar -->
   <%- include('../partials/sidebarHMSI', { user: user, activeNav: 'Dashboard' }) %>
 
-  <div class="lg:ml-80 px-6 py-8">
-    
-    <div class="max-w-6xl mx-auto mb-8">
-      <div class="bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl p-8 text-white shadow-lg">
-        <div class="flex items-center justify-between">
-          <div>
-            <h1 class="text-3xl font-bold mb-2">
-              Selamat Datang, <%= user.name %> 👋
-            </h1>
-            <p class="text-orange-100 text-lg">
-              Dashboard HMSI - Kelola program kerja divisi Anda
-            </p>
-          </div>
-          <div class="hidden md:block">
-            <i class="fa-solid fa-chart-line text-6xl text-orange-200"></i>
-          </div>
+  <!-- Wrapper -->
+  <main class="lg:ml-80 px-6 pt-20 pb-8 flex-grow">
+
+    <!-- Card Header Utama -->
+    <div class="max-w-6xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-orange-200 mb-8">
+      <div class="bg-orange-500 text-white px-6 py-8 flex items-center justify-between">
+        <div>
+          <h1 class="text-3xl font-bold mb-2">Selamat Datang, <%= user.name %> 👋</h1>
+          <p class="text-orange-100 text-lg">Dashboard HMSI - Kelola program kerja divisi Anda</p>
+        </div>
+        <div class="hidden md:block">
+          <i class="fa-solid fa-chart-line text-6xl text-orange-200"></i>
         </div>
       </div>
     </div>
 
+    <!-- Statistik -->
     <div class="max-w-6xl mx-auto mb-8">
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+        <!-- Total Proker -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-orange-200">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-sm text-gray-600 mb-1">Total Program Kerja</p>
@@ -43,13 +45,14 @@
                 <%= typeof totalProker !== 'undefined' ? totalProker : 0 %>
               </p>
             </div>
-            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
               <i class="fa-solid fa-tasks text-blue-600 text-xl"></i>
             </div>
           </div>
         </div>
 
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+        <!-- Proker Selesai -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-orange-200">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-sm text-gray-600 mb-1">Program Selesai</p>
@@ -57,13 +60,14 @@
                 <%= typeof prokerSelesai !== 'undefined' ? prokerSelesai : 0 %>
               </p>
             </div>
-            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
               <i class="fa-solid fa-check-circle text-green-600 text-xl"></i>
             </div>
           </div>
         </div>
 
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+        <!-- Proker Berjalan -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-orange-200">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-sm text-gray-600 mb-1">Program Berjalan</p>
@@ -71,13 +75,14 @@
                 <%= typeof prokerBerjalan !== 'undefined' ? prokerBerjalan : 0 %>
               </p>
             </div>
-            <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+            <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
               <i class="fa-solid fa-clock text-orange-600 text-xl"></i>
             </div>
           </div>
         </div>
 
-        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+        <!-- Total Laporan -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-orange-200">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-sm text-gray-600 mb-1">Total Laporan</p>
@@ -85,22 +90,23 @@
                 <%= typeof totalLaporan !== 'undefined' ? totalLaporan : 0 %>
               </p>
             </div>
-            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+            <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
               <i class="fa-solid fa-file-alt text-purple-600 text-xl"></i>
             </div>
           </div>
         </div>
+
       </div>
     </div>
 
-    <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
-      
-      <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-        <h3 class="text-lg font-semibold text-gray-800 mb-4">
+    <!-- Aksi Cepat -->
+    <div class="max-w-6xl mx-auto">
+      <div class="bg-white rounded-2xl border border-orange-200 shadow-sm p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
           <i class="fa-solid fa-bolt text-orange-500 mr-2"></i>
           Aksi Cepat
         </h3>
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
           <a href="/hmsi/kelola-proker" 
              class="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:border-orange-300 hover:bg-orange-50 transition">
             <i class="fa-solid fa-plus text-orange-500"></i>
@@ -125,11 +131,10 @@
       </div>
     </div>
 
-          </div>
-        </div>
-      </div>
-    </div>
+  </main>
 
-  </div>
+  <!-- Footer -->
+  <%- include('../partials/footer') %>
+
 </body>
 </html>

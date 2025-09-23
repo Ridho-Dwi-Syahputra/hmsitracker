@@ -5,205 +5,169 @@
   <title><%= title %></title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="bg-orange-50 min-h-screen flex flex-col">
+
+  <!-- Navbar -->
+  <%- include('../partials/navbarHMSI', { user: user, unreadCount: unreadCount }) %>
 
   <!-- Sidebar -->
-  <%- include('../partials/sidebarHMSI', { activeNav: 'Detail Laporan', user: user }) %>
+  <%- include('../partials/sidebarHMSI', { activeNav: 'Laporan', user: user }) %>
 
   <!-- Wrapper -->
-  <div class="lg:ml-80 opacity-0 animate-fade-in" style="animation-delay:150ms;">
+  <main class="lg:ml-80 px-6 pt-20 pb-8 flex-grow">
+    <div id="laporanContent" class="max-w-5xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-orange-200">
 
-    <!-- Header -->
-    <div class="bg-white border-b border-gray-200">
-      <div class="max-w-5xl mx-auto px-6 py-6 flex items-center justify-between">
-        <!-- Judul -->
-        <h1 class="text-2xl font-bold text-gray-800 opacity-0 animate-slide-down" style="animation-delay:350ms;">
-          Detail Laporan
-        </h1>
-        <div class="flex items-center gap-3">
-         
-          <!-- Tombol Kembali -->
-          <a href="/hmsi/laporan"
-            class="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-all duration-200 transform hover:scale-105 active:scale-95 hover:shadow-md opacity-0 animate-slide-in-right"
-            style="animation-delay:600ms;">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-            </svg>
-            <span class="font-medium">Kembali</span>
-          </a>
-        </div>
+      <!-- Header Card -->
+      <div class="bg-orange-500 text-white px-6 py-10">
+        <h1 class="text-2xl font-bold">Detail Laporan</h1>
+        <p class="text-sm text-orange-100">Detail lengkap laporan kegiatan</p>
       </div>
-    </div>
 
-    <!-- Main -->
-    <div class="px-6 py-10 opacity-0 animate-slide-up" style="animation-delay:650ms;">
-      <div id="laporanContent" class="max-w-5xl mx-auto bg-white rounded-2xl border border-gray-200 shadow-sm p-8">
+      <!-- Body Card -->
+      <div class="p-6 sm:p-8 space-y-0">
 
-        <!-- Card Header -->
-        <div class="mb-8 border-b border-gray-100 pb-6">
-          <h3 class="text-2xl font-bold text-gray-800 mb-2">Informasi Laporan</h3>
-          <p class="text-base text-gray-600 m-0">Detail lengkap laporan kegiatan yang dipilih</p>
-        </div>
-
-        <!-- ALERT POPUP -->
+        <!-- Alert -->
         <%- include('../partials/alert', { errorMsg: errorMsg, successMsg: successMsg }) %>
 
+        <!-- Informasi Dasar -->
+        <div>
+          <h4 class="text-lg font-semibold text-orange-600 mb-4">Informasi Dasar</h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+            
+            <!-- Judul Laporan -->
+            <div class="col-span-2 bg-orange-50 border border-orange-200 rounded-xl p-4">
+              <p class="font-medium text-orange-700">Judul Laporan</p>
+              <p class="text-gray-800"><%= laporan.judul_laporan || '-' %></p>
+            </div>
 
-        <!-- Konten -->
-        <div class="space-y-8">
+            <!-- Program Kerja -->
+            <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
+              <p class="font-medium text-orange-700">Program Kerja</p>
+              <p class="text-gray-800"><%= laporan.namaProker || '-' %></p>
+            </div>
 
-          <!-- Informasi Dasar -->
-          <div>
-            <h4 class="text-lg font-semibold text-orange-600 mb-4">Informasi Dasar</h4>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-              <div>
-                <p class="font-medium text-gray-700">Program Kerja</p>
-                <p class="text-gray-800"><%= laporan.namaProker || '-' %></p>
-              </div>
-              <div>
-                <p class="font-medium text-gray-700">Tanggal Pelaksanaan</p>
-                <p class="text-gray-800"><%= laporan.tanggalFormatted || '-' %></p>
-              </div>
-              <div>
-                <p class="font-medium text-gray-700">Waktu & Tempat</p>
-                <p class="text-gray-800"><%= laporan.waktu_tempat || '-' %></p>
-              </div>
-              <div class="md:col-span-2">
-                <p class="font-medium text-gray-700">Deskripsi Kegiatan</p>
-                <p class="text-gray-800 whitespace-pre-line"><%= laporan.deskripsi_kegiatan || '-' %></p>
-              </div>
+            <!-- Tanggal Upload -->
+            <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
+              <p class="font-medium text-orange-700">Tanggal Upload</p>
+              <p class="text-gray-800"><%= laporan.tanggalFormatted || '-' %></p>
+            </div>
+
+            <!-- Waktu & Tempat -->
+            <div class="col-span-2 bg-orange-50 border border-orange-200 rounded-xl p-4">
+              <p class="font-medium text-orange-700">Waktu & Tempat</p>
+              <p class="text-gray-800"><%= laporan.waktu_tempat || '-' %></p>
+            </div>
+
+            <!-- Deskripsi -->
+            <div class="col-span-2 bg-orange-50 border border-orange-200 rounded-xl p-4">
+              <p class="font-medium text-orange-700">Deskripsi Kegiatan</p>
+              <p class="text-gray-800 whitespace-pre-line"><%= laporan.deskripsi_kegiatan || '-' %></p>
             </div>
           </div>
-
-          <!-- Informasi Keuangan -->
-          <div>
-            <h4 class="text-lg font-semibold text-green-600 mb-4">Informasi Keuangan</h4>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-              <div>
-                <p class="font-medium text-gray-700">Sumber Dana</p>
-                <p class="text-gray-800"><%= laporan.sumber_dana || '-' %></p>
-              </div>
-              <div>
-                <p class="font-medium text-gray-700">Dana Terpakai (Rp)</p>
-                <p class="text-gray-800"><%= laporan.dana_digunakan || '-' %></p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Target Pencapaian -->
-          <div>
-            <h4 class="text-lg font-semibold text-blue-600 mb-4">Target Pencapaian</h4>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-              <div>
-                <p class="font-medium text-gray-700">Target Kuantitatif (%)</p>
-                <p class="text-gray-800"><%= laporan.persentase_kuantitatif || '-' %></p>
-              </div>
-              <div>
-                <p class="font-medium text-gray-700">Target Kualitatif (%)</p>
-                <p class="text-gray-800"><%= laporan.persentase_kualitatif || '-' %></p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Kendala dan Solusi -->
-          <div>
-            <h4 class="text-lg font-semibold text-purple-600 mb-4">Kendala dan Solusi</h4>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-              <div>
-                <p class="font-medium text-gray-700">Kendala</p>
-                <p class="text-gray-800 whitespace-pre-line"><%= laporan.kendala || '-' %></p>
-              </div>
-              <div>
-                <p class="font-medium text-gray-700">Solusi</p>
-                <p class="text-gray-800 whitespace-pre-line"><%= laporan.solusi || '-' %></p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Sasaran Kegiatan -->
-          <div>
-            <h4 class="text-lg font-semibold text-indigo-600 mb-4">Sasaran Kegiatan</h4>
-            <p class="text-gray-800"><%= laporan.sasaran || '-' %></p>
-          </div>
-
-        <!-- Dokumentasi -->
-<div>
-  <h4 class="text-lg font-semibold text-orange-600 mb-4">Dokumentasi</h4>
-  <% if (laporan.dokumentasi) { %>
-    <div class="mt-2 space-y-3">
-      <p class="text-gray-600 text-sm">Dokumentasi tersedia:</p>
-
-      <!-- Preview sesuai mime type -->
-      <% if (laporan.dokumentasi_mime === 'application/pdf') { %>
-        <!-- PDF Preview -->
-        <embed src="/uploads/<%= laporan.dokumentasi %>" type="application/pdf" width="100%" height="500px"/>
-
-      <% } else if (laporan.dokumentasi_mime === 'image/jpeg' || laporan.dokumentasi_mime === 'image/png') { %>
-        <!-- Image Preview -->
-        <img src="/uploads/<%= laporan.dokumentasi %>" alt="Dokumentasi" 
-             class="rounded-lg border max-h-96 object-contain mx-auto"/>
-
-      <% } else { %>
-        <!-- Fallback -->
-        <p class="text-sm text-gray-500">
-          Preview tidak tersedia untuk file ini. Silakan unduh untuk melihat isinya.
-        </p>
-      <% } %>
-
-      <!-- Tombol download -->
-      <a href="/uploads/<%= laporan.dokumentasi %>"
-        class="inline-block px-4 py-2 bg-orange-100 text-orange-700 rounded-lg text-sm font-medium hover:bg-orange-200 transition">
-        Download Dokumentasi
-      </a>
-    </div>
-  <% } else { %>
-    <p class="text-gray-500 text-sm">Belum ada dokumentasi diunggah</p>
-  <% } %>
-</div>
-
-
-        <!-- Tombol Aksi -->
-        <div class="mt-10 pt-6 border-t border-gray-100 flex gap-3 justify-end no-print">
-          <a href="/hmsi/laporan/edit/<%= laporan.id_laporan %>"
-            class="px-6 py-3 bg-blue-500 text-white rounded-xl text-sm font-semibold hover:bg-blue-600 transition transform hover:scale-105 active:scale-95">
-            Edit
-          </a>
-          <form action="/hmsi/laporan/delete/<%= laporan.id_laporan %>" method="POST"
-            onsubmit="return confirm('Yakin hapus laporan ini?')">
-            <button type="submit"
-              class="px-6 py-3 bg-red-500 text-white rounded-xl text-sm font-semibold hover:bg-red-600 transition transform hover:scale-105 active:scale-95">
-              Hapus
-            </button>
-          </form>
         </div>
 
-       
-  <!-- Animasi -->
+        <!-- Informasi Keuangan -->
+        <div>
+          <h4 class="text-lg font-semibold text-orange-600 mb-4">Informasi Keuangan</h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+            <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
+              <p class="font-medium text-orange-700">Sumber Dana</p>
+              <p class="text-gray-800"><%= laporan.sumber_dana || '-' %></p>
+            </div>
+            <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
+              <p class="font-medium text-orange-700">Dana Terpakai (Rp)</p>
+              <p class="text-gray-800"><%= laporan.dana_digunakan || '-' %></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Target Pencapaian -->
+        <div>
+          <h4 class="text-lg font-semibold text-orange-600 mb-4">Target Pencapaian</h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+            <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
+              <p class="font-medium text-orange-700">Target Kuantitatif (%)</p>
+              <p class="text-gray-800"><%= laporan.persentase_kuantitatif || '-' %></p>
+            </div>
+            <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
+              <p class="font-medium text-orange-700">Target Kualitatif (%)</p>
+              <p class="text-gray-800"><%= laporan.persentase_kualitatif || '-' %></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Kendala & Solusi -->
+        <div>
+          <h4 class="text-lg font-semibold text-orange-600 mb-4">Kendala dan Solusi</h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+            <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
+              <p class="font-medium text-orange-700">Kendala</p>
+              <p class="text-gray-800 whitespace-pre-line"><%= laporan.kendala || '-' %></p>
+            </div>
+            <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
+              <p class="font-medium text-orange-700">Solusi</p>
+              <p class="text-gray-800 whitespace-pre-line"><%= laporan.solusi || '-' %></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sasaran -->
+        <div>
+          <h4 class="text-lg font-semibold text-orange-600 mb-4">Sasaran Kegiatan</h4>
+          <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
+            <p class="text-gray-800"><%= laporan.sasaran || '-' %></p>
+          </div>
+        </div>
+
+        <!-- Dokumentasi -->
+        <div>
+          <h4 class="text-lg font-semibold text-orange-600 mb-4">Dokumentasi</h4>
+          <% if (laporan.dokumentasi) { %>
+            <div class="space-y-4 bg-orange-50 border border-orange-200 rounded-xl p-4">
+              <% if (laporan.dokumentasi_mime === 'application/pdf') { %>
+                <embed src="/uploads/<%= laporan.dokumentasi %>" type="application/pdf" width="100%" height="420px" class="rounded-lg border"/>
+              <% } else if (laporan.dokumentasi_mime === 'image/jpeg' || laporan.dokumentasi_mime === 'image/png') { %>
+                <img src="/uploads/<%= laporan.dokumentasi %>" alt="Dokumentasi" class="rounded-lg border max-h-96 object-contain mx-auto"/>
+              <% } else { %>
+                <p class="text-sm text-gray-500">Preview tidak tersedia, silakan unduh.</p>
+              <% } %>
+              <a href="/uploads/<%= laporan.dokumentasi %>"
+                 class="inline-block px-4 py-2 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600 transition">
+                Download Dokumentasi
+              </a>
+            </div>
+          <% } else { %>
+            <p class="text-gray-500 text-sm">Belum ada dokumentasi diunggah</p>
+          <% } %>
+        </div>
+
+        <!-- Tombol Aksi -->
+        <div class="pt-6 border-t border-gray-100 flex justify-between items-center no-print">
+          <a href="/hmsi/laporan" 
+             class="px-4 py-2 border border-gray-400 text-gray-600 rounded-xl hover:bg-gray-100">
+            Kembali
+          </a>
+          <a href="/hmsi/laporan/edit/<%= laporan.id_laporan %>"
+             class="px-6 py-3 bg-orange-500 text-white rounded-xl text-sm font-semibold hover:bg-orange-600 transition transform hover:scale-105 active:scale-95">
+            Edit Laporan
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <%- include('../partials/footer') %>
+
+  <!-- Print-friendly -->
   <style>
-    @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
-    @keyframes slideDown { from {opacity:0; transform:translateY(-20px);} to {opacity:1; transform:translateY(0);} }
-    @keyframes slideUp { from {opacity:0; transform:translateY(20px);} to {opacity:1; transform:translateY(0);} }
-    @keyframes slideInRight { from {opacity:0; transform:translateX(30px);} to {opacity:1; transform:translateX(0);} }
-
-    .animate-fade-in { animation: fadeIn 0.7s ease-out forwards; }
-    .animate-slide-down { animation: slideDown 0.8s ease-out forwards; }
-    .animate-slide-up { animation: slideUp 0.6s ease-out forwards; }
-    .animate-slide-in-right { animation: slideInRight 0.8s ease-out forwards; }
-
-    /* Print-friendly */
     @media print {
       body { background: white; }
-      .no-print, .lg\:ml-80, .animate-fade-in { display: none !important; }
+      .no-print, .lg\:ml-80 { display: none !important; }
       #laporanContent { box-shadow: none; border: none; }
     }
   </style>
-
-  <!-- Script Print -->
-  <script>
-    function printLaporan() {
-      window.print();
-    }
-  </script>
 
 </body>
 </html>

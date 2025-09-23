@@ -4,23 +4,29 @@
   <meta charset="UTF-8">
   <title>Edit Profil</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
-<body class="bg-orange-50 min-h-screen">
+<body class="bg-orange-50 min-h-screen flex flex-col">
+
+  <!-- Navbar -->
+  <%- include('../partials/navbarHMSI', { user: user, unreadCount: unreadCount }) %>
 
   <!-- Sidebar -->
   <%- include('../partials/sidebarHMSI', { activeNav: 'Profil', user: user }) %>
 
   <!-- Wrapper -->
-  <div class="lg:ml-80 px-4 sm:px-6 py-8">
+  <main class="lg:ml-80 px-6 pt-20 pb-8 flex-grow">
     <div class="max-w-2xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-orange-200">
 
-      <!-- Header -->
+      <!-- Header Card -->
       <div class="bg-orange-500 text-white px-6 py-6">
-        <h1 class="text-xl sm:text-2xl font-bold">Edit Profil</h1>
+        <h1 class="text-2xl font-bold">Edit Profil</h1>
         <p class="text-sm text-orange-100">Perbarui informasi akun HMSI Anda</p>
       </div>
 
-      <!-- Body -->
+      <!-- Body Card -->
       <div class="p-6 sm:p-8 space-y-6">
 
         <!-- Flash Messages -->
@@ -35,46 +41,48 @@
           <% }) %>
         <% } %>
 
-        <!-- Form Update Profil -->
+        <!-- Form -->
         <form id="editProfileForm" action="/hmsi/profile/update" method="POST" enctype="multipart/form-data" class="space-y-6">
 
           <!-- Foto Profil -->
           <div class="flex flex-col items-center gap-4">
-            <div class="w-40 h-40 rounded-full overflow-hidden border shadow-md">
-              <img id="previewFoto" 
-                   src="/<%= user.foto_profile || 'default-profile.png' %>"
-                   class="w-full h-full object-cover"
-                   alt="Foto Profil">
-            </div>
-
-            <!-- input file -->
+            <img id="previewFoto" 
+                 src="/<%= user.foto_profile || 'default-profile.png' %>?v=<%= Date.now() %>"
+                 class="w-28 h-28 rounded-full border-4 border-orange-200 shadow-md object-cover"
+                 alt="Foto Profil"
+                 onerror="this.onerror=null;this.src='/default-profile.png?v=<%= Date.now() %>'">
+            
             <input type="file" id="fotoInput" name="foto_profile" accept="image/*" class="hidden">
             <label for="fotoInput"
-                   class="cursor-pointer bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-xl text-sm">
-              Pilih Foto
+                   class="cursor-pointer px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-sm font-medium transition">
+              Ganti Foto
             </label>
           </div>
 
           <!-- NIM -->
           <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-1">NIM</label>
+            <label class="block text-sm font-medium text-orange-700 mb-2">
+              NIM <span class="text-red-500">*</span>
+            </label>
             <input type="text" name="id_anggota" value="<%= user.id_anggota %>" required
-                   class="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-orange-400">
+                   class="w-full px-4 py-3 border border-orange-200 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-200">
           </div>
 
           <!-- Nama -->
           <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-1">Nama</label>
+            <label class="block text-sm font-medium text-orange-700 mb-2">
+              Nama <span class="text-red-500">*</span>
+            </label>
             <input type="text" name="nama" value="<%= user.nama %>" required
-                   class="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-orange-400">
+                   class="w-full px-4 py-3 border border-orange-200 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-200">
           </div>
 
-          <!-- Password -->
+          <!-- Password Baru -->
           <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-1">Password Baru</label>
+            <label class="block text-sm font-medium text-orange-700 mb-2">Password Baru</label>
             <div class="relative">
               <input type="password" id="password" name="password"
-                     class="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-orange-400 pr-10">
+                     class="w-full px-4 py-3 border border-orange-200 rounded-lg text-sm pr-10 focus:border-orange-500 focus:ring-2 focus:ring-orange-200">
               <button type="button" onclick="togglePassword('password','eye1')" 
                       class="absolute inset-y-0 right-3 flex items-center text-gray-500">
                 <svg id="eye1" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -89,10 +97,10 @@
 
           <!-- Konfirmasi Password -->
           <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-1">Konfirmasi Password</label>
+            <label class="block text-sm font-medium text-orange-700 mb-2">Konfirmasi Password</label>
             <div class="relative">
               <input type="password" id="confirm_password" name="confirm_password"
-                     class="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-orange-400 pr-10">
+                     class="w-full px-4 py-3 border border-orange-200 rounded-lg text-sm pr-10 focus:border-orange-500 focus:ring-2 focus:ring-orange-200">
               <button type="button" onclick="togglePassword('confirm_password','eye2')" 
                       class="absolute inset-y-0 right-3 flex items-center text-gray-500">
                 <svg id="eye2" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -105,23 +113,30 @@
             </div>
           </div>
 
-          <!-- Buttons -->
-          <div class="flex flex-col sm:flex-row justify-between gap-3 pt-4 border-t">
+          <!-- Catatan field wajib -->
+          <p class="text-xs text-red-500">Field dengan tanda (<span class="font-bold">*</span>) wajib diisi</p>
+
+          <!-- Tombol -->
+          <div class="pt-6 border-t border-gray-100 flex gap-4 justify-end">
             <a href="/hmsi/profile"
-               class="w-full sm:w-auto px-4 py-2 border border-gray-400 text-gray-600 rounded-xl text-center hover:bg-gray-100">
+               class="px-8 py-3 border border-gray-300 rounded-xl text-sm font-medium bg-white text-gray-700 transition-all duration-200 hover:shadow-md">
               Kembali
             </a>
             <button type="submit"
-                    class="w-full sm:w-auto bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-xl font-medium">
+                    class="flex items-center justify-center gap-2 px-8 py-3 text-white bg-orange-500 rounded-xl text-sm font-semibold transition-all duration-200 hover:bg-orange-600">
               Simpan Perubahan
             </button>
           </div>
+
         </form>
       </div>
     </div>
-  </div>
+  </main>
 
-  <!-- JS Toggle Password -->
+  <!-- Footer -->
+  <%- include('../partials/footer') %>
+
+  <!-- JS -->
   <script>
     function togglePassword(inputId, eyeId) {
       const input = document.getElementById(inputId);

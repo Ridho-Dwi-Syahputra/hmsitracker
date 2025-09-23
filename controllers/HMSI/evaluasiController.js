@@ -24,6 +24,25 @@ function formatTanggal(dateValue) {
 }
 
 // =====================================================
+// Helper: ambil jumlah notifikasi belum dibaca
+// =====================================================
+async function getUnreadCount(divisi) {
+  try {
+    const [rows] = await db.query(
+      `SELECT COUNT(*) AS count
+       FROM Notifikasi n
+       JOIN Laporan l ON n.id_laporan = l.id_laporan
+       WHERE n.role = 'HMSI' AND n.status_baca = 0 AND l.divisi = ?`,
+      [divisi]
+    );
+    return rows[0]?.count || 0;
+  } catch (err) {
+    console.error("❌ Error getUnreadCount:", err.message);
+    return 0;
+  }
+}
+
+// =====================================================
 // 📄 Ambil semua evaluasi (khusus laporan divisi HMSI)
 // =====================================================
 exports.getAllEvaluasi = async (req, res) => {
@@ -46,6 +65,8 @@ exports.getAllEvaluasi = async (req, res) => {
       tanggalFormatted: formatTanggal(r.tanggal_evaluasi),
     }));
 
+    const unreadCount = await getUnreadCount(user.divisi);
+
     res.render("hmsi/kelolaEvaluasi", {
       title: "Kelola Evaluasi",
       user,
@@ -53,6 +74,7 @@ exports.getAllEvaluasi = async (req, res) => {
       evaluasi,
       successMsg: req.query.success || null,
       errorMsg: req.query.error || null,
+      unreadCount,
     });
   } catch (err) {
     console.error("❌ Error getAllEvaluasi:", err.message);
@@ -89,11 +111,14 @@ exports.getDetailEvaluasi = async (req, res) => {
 
     evaluasi.tanggalFormatted = formatTanggal(evaluasi.tanggal_evaluasi);
 
+    const unreadCount = await getUnreadCount(user.divisi);
+
     res.render("hmsi/detailEvaluasi", {
       title: "Detail Evaluasi",
       user,
       activeNav: "Evaluasi DPA",
       evaluasi,
+      unreadCount,
     });
   } catch (err) {
     console.error("❌ Error getDetailEvaluasi:", err.message);
@@ -103,9 +128,6 @@ exports.getDetailEvaluasi = async (req, res) => {
 
 // =====================================================
 // 📝 Tambah / Update komentar HMSI
-// - Komentar lama akan diganti dengan komentar baru
-// - Setelah submit, HMSI diarahkan kembali ke kelolaEvaluasi.ejs
-// - Saat HMSI komentar, DPA dapat notifikasi baru
 // =====================================================
 exports.addKomentar = async (req, res) => {
   try {

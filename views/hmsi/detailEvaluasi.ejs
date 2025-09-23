@@ -10,8 +10,11 @@
   <!-- Sidebar -->
   <%- include('../partials/sidebarHMSI', { activeNav: 'Evaluasi DPA', user: user }) %>
 
-  <!-- Wrapper -->
-  <div class="lg:ml-80 px-4 sm:px-6 py-8">
+  <%- include('../partials/navbarHMSI', { user: user, unreadCount: unreadCount }) %>
+
+   <!-- Wrapper -->
+<div class="lg:ml-80 px-6 pt-20 pb-8 px-6">
+
     <div class="max-w-3xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-orange-200">
 
       <!-- Header Card -->
@@ -92,5 +95,8 @@
       </div>
     </div>
   </div>
+  <!-- Footer -->
+  <%- include('../partials/footer') %>
+
 </body>
 </html>

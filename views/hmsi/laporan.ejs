@@ -4,40 +4,38 @@
   <meta charset="UTF-8" />
   <title><%= title %></title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- FontAwesome -->
   <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
         crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="bg-orange-50 min-h-screen flex flex-col">
 
-  <!-- Sidebar -->
+  <!-- ✅ Navbar harus duluan (agar tombol burger ada di DOM) -->
+  <%- include('../partials/navbarHMSI', { user: user, unreadCount: unreadCount }) %>
+
+  <!-- ✅ Sidebar -->
   <%- include('../partials/sidebarHMSI', { user: user, activeNav: activeNav }) %>
 
-  <!-- Wrapper -->
-  <div class="lg:ml-80 opacity-0 animate-fade-in" style="animation-delay:150ms;">
+  <!-- Wrapper (Konten Utama) -->
+  <main class="lg:ml-80 px-6 pt-20 pb-8 flex-grow">
+    <div class="max-w-6xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-orange-200">
 
-    <!-- Header -->
-    <div class="bg-white border-b border-gray-200">
-      <div class="max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
-        <h1 class="text-2xl font-bold text-gray-800 opacity-0 animate-slide-down" style="animation-delay:300ms;">
-          <%= title %>
-        </h1>
+      <!-- Header Card -->
+      <div class="bg-orange-500 text-white px-6 py-6 flex items-center justify-between">
+        <div>
+          <h1 class="text-2xl font-bold"><%= title %></h1>
+          <p class="text-sm text-orange-100">Daftar laporan kegiatan & dokumentasi proker</p>
+        </div>
         <a href="/hmsi/laporan/tambah" 
-          class="flex items-center space-x-2 px-4 py-2 bg-orange-500 text-white rounded-lg font-semibold 
-                 opacity-0 animate-slide-down transition-all duration-200 
-                 hover:bg-orange-600 hover:scale-105 active:scale-95" style="animation-delay:400ms;">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-          </svg>
+          class="flex items-center space-x-2 px-4 py-2 bg-white text-orange-600 rounded-lg font-semibold
+                 transition-all duration-200 hover:bg-orange-100 hover:scale-105 active:scale-95">
+          <i class="fa-solid fa-plus"></i>
           <span>Tambah Laporan</span>
         </a>
       </div>
-    </div>
 
-    <!-- Main -->
-    <div class="px-6 py-8">
-      <div class="max-w-7xl mx-auto bg-white rounded-2xl border border-orange-200 shadow-sm p-6">
+      <!-- Body Card -->
+      <div class="p-6 sm:p-8">
 
         <!-- Search -->
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
@@ -55,7 +53,8 @@
         </div>
 
         <% if (!laporan || laporan.length === 0) { %>
-          <div class="flex flex-col items-center space-y-4 py-20 opacity-0 animate-slide-up" style="animation-delay:800ms;">
+          <!-- Empty State -->
+          <div class="flex flex-col items-center space-y-4 py-20">
             <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
               <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -69,7 +68,7 @@
         <% } else { %>
           <!-- Tabel -->
           <div class="overflow-x-auto bg-white-50 p-2 shadow-sm rounded-xl">
-            <table class="min-w-full text-sm text-center border border-orange-200 rounded-xl overflow-hidden border-separate border-spacing-0 divide-x divide-gray-200">
+            <table class="min-w-full text-sm text-center border border-orange-200 rounded-xl overflow-hidden border-separate border-spacing-0">
               <thead class="bg-orange-100 text-gray-700">
                 <tr>
                   <th class="py-3 px-4 font-semibold border border-orange-200">No</th>
@@ -115,30 +114,17 @@
 
       </div>
     </div>
-  </div>
+  </main>
 
-  <!-- Animasi & Custom Style -->
-  <style>
-    @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
-    .animate-fade-in { animation: fadeIn 0.7s ease-out forwards; }
-    @keyframes slideDown { from {opacity:0; transform:translateY(-20px);} to {opacity:1; transform:translateY(0);} }
-    .animate-slide-down { animation: slideDown 0.5s ease-out forwards; }
-    @keyframes slideUp { from {opacity:0; transform:translateY(20px);} to {opacity:1; transform:translateY(0);} }
-    .animate-slide-up { animation: slideUp 0.6s ease-out forwards; }
+  <!-- Footer -->
+  <%- include('../partials/footer') %>
 
-    /* Hilangkan outline hitam pada search */
-    #searchInput:focus {
-      outline: none !important;
-      box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.4);
-    }
-  </style>
-
-  <!-- Script -->
+  <!-- Script Pagination + Search -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const searchInput = document.getElementById("searchInput");
       const tbody = document.getElementById("laporanTable");
-      let rows = Array.from(tbody.querySelectorAll("tr"));
+      let rows = tbody ? Array.from(tbody.querySelectorAll("tr")) : [];
 
       const rowsPerPage = 10;
       let currentPage = 1;
@@ -171,14 +157,13 @@
         document.getElementById("nextPage").disabled = currentPage === totalPages || totalPages === 0;
       }
 
-      document.getElementById("prevPage").addEventListener("click", () => { currentPage--; paginate(); });
-      document.getElementById("nextPage").addEventListener("click", () => { currentPage++; paginate(); });
+      document.getElementById("prevPage")?.addEventListener("click", () => { currentPage--; paginate(); });
+      document.getElementById("nextPage")?.addEventListener("click", () => { currentPage++; paginate(); });
 
-      searchInput.addEventListener("input", filterRows);
+      searchInput?.addEventListener("input", filterRows);
 
-      filterRows();
+      if (rows.length > 0) filterRows();
     });
   </script>
-
 </body>
 </html>

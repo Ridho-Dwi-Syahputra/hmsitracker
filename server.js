@@ -6,7 +6,9 @@ const path = require("path");
 const dotenv = require("dotenv");
 const session = require("express-session");
 const flash = require("connect-flash");
-const expressLayouts = require("express-ejs-layouts"); // ⬅️ Tambahan
+
+// Middleware custom
+const unreadNotif = require("./middleware/unreadNotif"); // ⬅️ Tambahan
 
 // =====================================================
 // 2. Konfigurasi Dasar
@@ -16,11 +18,10 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // =====================================================
-// 3. Setup View Engine (EJS) + Layouts
+// 3. Setup View Engine (EJS)
 // =====================================================
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
-
 
 // =====================================================
 // 4. Middleware Umum
@@ -30,6 +31,7 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 // Static files
 app.use(express.static(path.join(__dirname, "public")));
+app.use("/uploads", express.static(path.join(__dirname, "public/uploads")));
 
 // Session Middleware
 app.use(
@@ -37,23 +39,23 @@ app.use(
     secret: process.env.SESSION_SECRET || "hmsi_secret_key",
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false },
+    cookie: { secure: false }, // ⚠️ kalau sudah pakai https set true
   })
 );
 
 // Flash middleware
 app.use(flash());
 
-// Inject flash ke locals (biar bisa langsung dipakai di EJS)
+// Inject flash + user ke locals (biar bisa langsung dipakai di EJS)
 app.use((req, res, next) => {
   res.locals.errorMsg = req.flash("error");
   res.locals.successMsg = req.flash("success");
-  res.locals.user = req.session.user || null; // ⬅️ user global (optional, berguna)
+  res.locals.user = req.session.user || null;
   next();
 });
 
-// Uploads folder
-app.use("/uploads", express.static(path.join(__dirname, "public/uploads")));
+// Middleware global notifikasi HMSI
+app.use(unreadNotif); // ⬅️ Sekarang unreadCount otomatis ada di semua view
 
 // =====================================================
 // 5. Routing

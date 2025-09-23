@@ -1,38 +1,36 @@
+<% var old = typeof old !== 'undefined' ? old : {}; %>
 <!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
   <title><%= title %></title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="bg-orange-50 min-h-screen flex flex-col">
+
+  <!-- Navbar -->
+  <%- include('../partials/navbarHMSI', { user: user, unreadCount: unreadCount }) %>
 
   <!-- Sidebar -->
   <%- include('../partials/sidebarHMSI', { activeNav: 'Laporan', user: user }) %>
 
   <!-- Wrapper -->
-  <div class="lg:ml-80 opacity-0 animate-fade-in" style="animation-delay:150ms;">
+  <main class="lg:ml-80 px-6 pt-20 pb-8 flex-grow">
+    <div class="max-w-5xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-orange-200">
 
-    <!-- Header -->
-    <div class="bg-white border-b border-gray-200">
-      <div class="max-w-5xl mx-auto px-6 py-6 flex items-center justify-between">
-        <h1 class="text-2xl font-bold text-gray-800 opacity-0 animate-slide-down" style="animation-delay:350ms;">
-          Edit Laporan
-        </h1>
+      <!-- Header Card -->
+      <div class="bg-orange-500 text-white px-6 py-6">
+        <h1 class="text-2xl font-bold">Edit Laporan</h1>
+        <p class="text-sm text-orange-100">Perbarui detail laporan kegiatan Anda</p>
       </div>
-    </div>
 
-    <!-- Main -->
-    <div class="px-6 py-10 opacity-0 animate-slide-up" style="animation-delay:650ms;">
-      <div class="max-w-5xl mx-auto bg-white rounded-2xl border border-gray-200 shadow-sm p-8">
+      <!-- Body Card -->
+      <div class="p-6 sm:p-8">
 
-        <!-- Card Header -->
-        <div class="mb-8 border-b border-gray-100 pb-6">
-          <h3 class="text-2xl font-bold text-gray-800 mb-2">Form Edit Laporan</h3>
-          <p class="text-base text-gray-600 m-0">Perbarui detail laporan kegiatan di bawah</p>
-        </div>
-
-        <!-- ALERT POPUP -->
+        <!-- Alert -->
         <%- include('../partials/alert', { errorMsg: errorMsg, successMsg: successMsg }) %>
 
         <!-- Form -->
@@ -47,26 +45,21 @@
               <div class="md:col-span-2">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Judul Laporan</label>
                 <input type="text" name="judul_laporan"
-                  value="<%= (old && old.judul_laporan) || laporan.judul_laporan || '' %>" required
+                  value="<%= old.judul_laporan || laporan.judul_laporan || '' %>" required
                   placeholder="Masukkan judul laporan..."
-                  class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100">
+                  class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500">
               </div>
 
               <!-- Program Kerja -->
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Program Kerja</label>
                 <select name="id_ProgramKerja" required
-                  class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100">
+                  class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500">
                   <option value="">-- Pilih Program Kerja --</option>
-                  <% (programs || []).forEach(p => { %>
-                    <% 
-                      let selected = false;
-                      if (old && old.id_ProgramKerja) {
-                        selected = (old.id_ProgramKerja == p.id);
-                      } else {
-                        selected = (laporan.id_ProgramKerja == p.id);
-                      }
-                    %>
+                  <% (programs || []).forEach(p => { 
+                       let selected = old.id_ProgramKerja 
+                          ? (old.id_ProgramKerja == p.id) 
+                          : (laporan.id_ProgramKerja == p.id); %>
                     <option value="<%= p.id %>" <%= selected ? "selected" : "" %>>
                       <%= p.namaProker %>
                     </option>
@@ -74,14 +67,13 @@
                 </select>
               </div>
 
-             
               <!-- Waktu & Tempat -->
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Waktu & Tempat</label>
                 <input type="text" name="waktu_tempat"
-                  value="<%= (old && old.waktu_tempat) || laporan.waktu_tempat || '' %>"
+                  value="<%= old.waktu_tempat || laporan.waktu_tempat || '' %>"
                   placeholder="Contoh: 09:00 - 12:00 WIB, Gedung A"
-                  class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100">
+                  class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500">
               </div>
 
               <!-- Deskripsi -->
@@ -89,102 +81,101 @@
                 <label class="block text-sm font-medium text-gray-700 mb-2">Deskripsi Kegiatan</label>
                 <textarea name="deskripsi_kegiatan" rows="4" required
                   placeholder="Tuliskan deskripsi kegiatan..."
-                  class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm resize-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100"><%= (old && old.deskripsi_kegiatan) || laporan.deskripsi_kegiatan || '' %></textarea>
+                  class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm resize-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500"><%= old.deskripsi_kegiatan || laporan.deskripsi_kegiatan || '' %></textarea>
               </div>
             </div>
           </div>
 
           <!-- Informasi Keuangan -->
           <div>
-            <h4 class="text-lg font-semibold text-green-600 mb-4">Informasi Keuangan</h4>
+            <h4 class="text-lg font-semibold text-orange-600 mb-4">Informasi Keuangan</h4>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Sumber Dana</label>
                 <input type="text" name="sumber_dana"
-                  value="<%= (old && old.sumber_dana) || laporan.sumber_dana || '' %>"
+                  value="<%= old.sumber_dana || laporan.sumber_dana || '' %>"
                   placeholder="Contoh: HMSI Fakultas Teknik"
-                  class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100">
+                  class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500">
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Dana Terpakai (Rp)</label>
                 <input type="number" name="dana_digunakan"
-                  value="<%= (old && old.dana_digunakan) || laporan.dana_digunakan || '' %>"
+                  value="<%= old.dana_digunakan || laporan.dana_digunakan || '' %>"
                   placeholder="Contoh: 2500000"
-                  class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100">
+                  class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500">
               </div>
             </div>
           </div>
 
           <!-- Target -->
           <div>
-            <h4 class="text-lg font-semibold text-blue-600 mb-4">Target Pencapaian</h4>
+            <h4 class="text-lg font-semibold text-orange-600 mb-4">Target Pencapaian</h4>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Target Kuantitatif (%)</label>
                 <input type="number" name="persentase_kuantitatif"
-                  value="<%= (old && old.persentase_kuantitatif) || laporan.persentase_kuantitatif || '' %>"
+                  value="<%= old.persentase_kuantitatif || laporan.persentase_kuantitatif || '' %>"
                   min="0" max="100"
-                  class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100">
+                  class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500">
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Target Kualitatif (%)</label>
                 <input type="number" name="persentase_kualitatif"
-                  value="<%= (old && old.persentase_kualitatif) || laporan.persentase_kualitatif || '' %>"
+                  value="<%= old.persentase_kualitatif || laporan.persentase_kualitatif || '' %>"
                   min="0" max="100"
-                  class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100">
+                  class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500">
               </div>
             </div>
           </div>
 
           <!-- Kendala & Solusi -->
           <div>
-            <h4 class="text-lg font-semibold text-purple-600 mb-4">Kendala dan Solusi</h4>
+            <h4 class="text-lg font-semibold text-orange-600 mb-4">Kendala dan Solusi</h4>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Kendala</label>
                 <textarea name="kendala" rows="3"
-                  class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm resize-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100"><%= (old && old.kendala) || laporan.kendala || '' %></textarea>
+                  class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm resize-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500"><%= old.kendala || laporan.kendala || '' %></textarea>
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Solusi</label>
                 <textarea name="solusi" rows="3"
-                  class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm resize-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100"><%= (old && old.solusi) || laporan.solusi || '' %></textarea>
+                  class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm resize-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500"><%= old.solusi || laporan.solusi || '' %></textarea>
               </div>
             </div>
           </div>
 
           <!-- Sasaran -->
           <div>
-            <h4 class="text-lg font-semibold text-indigo-600 mb-4">Sasaran Kegiatan</h4>
+            <h4 class="text-lg font-semibold text-orange-600 mb-4">Sasaran Kegiatan</h4>
             <input type="text" name="sasaran"
-              value="<%= (old && old.sasaran) || laporan.sasaran || '' %>"
-              class="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
+              value="<%= old.sasaran || laporan.sasaran || '' %>"
+              class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500">
           </div>
 
           <!-- Dokumentasi -->
           <div>
-            <h4 class="text-lg font-semibold text-orange-600 mb-1">File Dokumentasi</h4>
+            <h4 class="text-lg font-semibold text-orange-600 mb-2">File Dokumentasi</h4>
             <p class="text-sm text-gray-500 mb-4">Upload file pendukung laporan kegiatan</p>
 
             <div id="dropzone"
-              class="border-2 border-dashed border-orange-300 rounded-xl p-10 bg-orange-50/30 text-center cursor-pointer 
+              class="border-2 border-dashed border-orange-300 rounded-xl p-8 bg-orange-50/30 text-center cursor-pointer 
                      transition duration-200 hover:border-orange-500 hover:bg-orange-100/50 flex flex-col items-center gap-4">
 
               <!-- Hidden file input -->
-              <input type="file" name="dokumentasi" id="fileUpload" class="hidden"
-                accept=".pdf,.jpg,.jpeg,.png"/>
+              <input type="file" name="dokumentasi" id="fileUpload" class="hidden" accept=".pdf,.jpg,.jpeg,.png"/>
 
               <div class="text-4xl text-gray-400">📄</div>
 
               <label for="fileUpload" class="cursor-pointer">
-                <span class="px-6 py-3 bg-orange-500 text-white rounded-lg text-sm font-medium transition duration-200 hover:bg-orange-600 hover:shadow-md active:scale-95">
+                <span class="px-6 py-3 bg-orange-500 text-white rounded-lg text-sm font-medium transition hover:bg-orange-600 hover:shadow-md active:scale-95">
                   Pilih File atau Drag & Drop
                 </span>
               </label>
 
               <p class="text-sm text-gray-600">
-                Format yang didukung: <span class="font-medium">PDF, JPG, JPEG, PNG</span><br>
-                Maksimal ukuran file: <span class="font-medium">5MB</span>
+                Format didukung: <span class="font-medium">PDF, JPG, JPEG, PNG</span><br>
+                Maksimal ukuran: <span class="font-medium">5MB</span>
               </p>
             </div>
 
@@ -206,38 +197,38 @@
 
           <!-- Tombol -->
           <div class="mt-8 pt-6 border-t border-gray-100 flex gap-4 justify-end">
-            <a href="/hmsi/laporan" class="px-8 py-4 border border-gray-300 rounded-xl text-sm font-medium bg-white text-gray-700 transition-all duration-200 hover:shadow-md">
+            <a href="/hmsi/laporan" class="px-8 py-3 border border-gray-300 rounded-xl text-sm font-medium bg-white text-gray-700 transition hover:shadow-md">
               Batal
             </a>
-            <button type="submit" id="submitBtn" class="flex items-center justify-center gap-2 px-8 py-4 text-white bg-orange-500 rounded-xl text-sm font-semibold transition-all duration-200 hover:bg-orange-600">
+            <button type="submit" id="submitBtn" class="flex items-center justify-center gap-2 px-8 py-3 text-white bg-orange-500 rounded-xl text-sm font-semibold transition hover:bg-orange-600">
               <span id="btnText">Update</span>
               <div id="btnSpinner" class="hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
             </button>
           </div>
 
         </form>
-
       </div>
     </div>
-  </div>
+  </main>
 
-  <!-- Animasi -->
-  <style>
-    @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
-    @keyframes slideDown { from {opacity:0; transform:translateY(-20px);} to {opacity:1; transform:translateY(0);} }
-    @keyframes slideUp { from {opacity:0; transform:translateY(20px);} to {opacity:1; transform:translateY(0);} }
-    @keyframes slideInRight { from {opacity:0; transform:translateX(30px);} to {opacity:1; transform:translateX(0);} }
-    @keyframes slideInLeft { from {opacity:0; transform:translateX(-30px);} to {opacity:1; transform:translateX(0);} }
+  <!-- Footer -->
+  <%- include('../partials/footer') %>
 
-    .animate-fade-in { animation: fadeIn 0.7s ease-out forwards; }
-    .animate-slide-down { animation: slideDown 0.8s ease-out forwards; }
-    .animate-slide-up { animation: slideUp 0.6s ease-out forwards; }
-    .animate-slide-in-right { animation: slideInRight 0.8s ease-out forwards; }
-    .animate-slide-in-left { animation: slideInLeft 0.8s ease-out forwards; }
-  </style>
+  <!-- Script -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const input = document.getElementById("fileUpload");
+      const fileName = document.getElementById("fileName");
 
-  <!-- Script eksternal -->
-  <script src="/javascripts/laporan.js"></script>
+      input.addEventListener("change", () => {
+        if (input.files.length > 0) {
+          fileName.textContent = "File dipilih: " + input.files[0].name;
+        } else {
+          fileName.textContent = "";
+        }
+      });
+    });
+  </script>
 
 </body>
 </html>
