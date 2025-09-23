@@ -2,10 +2,10 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Profil Pengurus</title>
+  <title>Profil HMSI</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="bg-orange-50 min-h-screen">
 
   <!-- Sidebar -->
   <%- include('../partials/sidebarHMSI', { user: user, activeNav: 'Profil' }) %>
@@ -16,8 +16,8 @@
 
       <!-- Header -->
       <div class="bg-orange-500 text-white px-6 py-6">
-        <h1 class="text-xl sm:text-2xl font-bold">Profil Pengurus</h1>
-        <p class="text-sm text-orange-100">Informasi akun & pengaturan</p>
+        <h1 class="text-xl sm:text-2xl font-bold">Profil Pengurus HMSI</h1>
+        <p class="text-sm text-orange-100">Informasi akun & pengaturan profil</p>
       </div>
 
       <!-- Body -->
@@ -25,10 +25,14 @@
 
         <!-- Flash Messages -->
         <% if (errorMsg && errorMsg.length > 0) { %>
-          <div class="p-4 bg-red-100 text-red-700 rounded-xl text-sm"><%= errorMsg %></div>
+          <% errorMsg.forEach(msg => { %>
+            <div class="p-4 bg-red-100 text-red-700 rounded-xl text-sm mb-2"><%= msg %></div>
+          <% }) %>
         <% } %>
         <% if (successMsg && successMsg.length > 0) { %>
-          <div class="p-4 bg-green-100 text-green-700 rounded-xl text-sm"><%= successMsg %></div>
+          <% successMsg.forEach(msg => { %>
+            <div class="p-4 bg-green-100 text-green-700 rounded-xl text-sm mb-2"><%= msg %></div>
+          <% }) %>
         <% } %>
 
         <!-- Foto + Info -->
@@ -45,17 +49,16 @@
         </div>
 
         <!-- Info Grid -->
-<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-  <div class="p-4 bg-orange-50 rounded-xl border">
-    <p class="text-xs text-gray-500">Email</p>
-    <p class="text-sm font-medium text-gray-800 break-all"><%= user.email %></p>
-  </div>
-  <div class="p-4 bg-orange-50 rounded-xl border">
-    <p class="text-xs text-gray-500">Divisi</p>
-    <p class="text-sm font-medium text-gray-800"><%= user.divisi %></p>
-  </div>
-</div>
-
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="p-4 bg-orange-50 rounded-xl border">
+            <p class="text-xs text-gray-500">Email</p>
+            <p class="text-sm font-medium text-gray-800 break-all"><%= user.email %></p>
+          </div>
+          <div class="p-4 bg-orange-50 rounded-xl border">
+            <p class="text-xs text-gray-500">Divisi</p>
+            <p class="text-sm font-medium text-gray-800"><%= user.divisi %></p>
+          </div>
+        </div>
 
         <!-- Action Buttons -->
         <div class="flex flex-col sm:flex-row justify-between gap-3 pt-6 border-t">
