@@ -93,12 +93,28 @@
                       <% } %>
                     </td>
                     <td class="py-3 px-4 text-gray-500 border border-orange-100"><%= e.tanggalFormatted %></td>
-                    <td class="py-3 px-4 border border-orange-100">
+                    <td class="py-3 px-4 border border-orange-100 flex items-center justify-center gap-3">
+                      <!-- Tombol Lihat Detail -->
                       <a href="/hmsi/evaluasi/<%= e.id_evaluasi %>" 
                          class="text-orange-500 hover:text-orange-700 transition transform hover:scale-110" 
                          title="Lihat Detail Evaluasi">
                         <i class="fa-solid fa-eye text-lg"></i>
                       </a>
+
+                      <!-- Tombol Edit Laporan -->
+                      <% if (e.status_konfirmasi === "Revisi") { %>
+                        <a href="/hmsi/laporan/edit/<%= e.id_laporan %>"
+                           class="text-orange-500 hover:text-orange-700 transition transform hover:scale-110"
+                           title="Edit Laporan">
+                          <i class="fa-solid fa-pen-to-square text-lg"></i>
+                        </a>
+                      <% } else { %>
+                        <button disabled
+                          class="text-gray-400 cursor-not-allowed"
+                          title="Laporan sudah disetujui, tidak bisa diedit">
+                          <i class="fa-solid fa-pen-to-square text-lg"></i>
+                        </button>
+                      <% } %>
                     </td>
                   </tr>
                 <% }) %>
