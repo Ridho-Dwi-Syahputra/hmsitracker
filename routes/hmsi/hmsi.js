@@ -22,6 +22,7 @@ const laporanCtrl = require("../../controllers/HMSI/laporanController");
 const evaluasiCtrl = require("../../controllers/HMSI/evaluasiController");
 const notifikasiCtrl = require("../../controllers/HMSI/notifikasiController");
 const profileCtrl = require("../../controllers/HMSI/profileController");
+const dashboardCtrl = require("../../controllers/HMSI/dashboardController");
 
 // =====================================================
 // MIDDLEWARE: Semua route di sini harus login + role HMSI
@@ -31,13 +32,7 @@ router.use(requireLogin, requireRole(["HMSI"]));
 // =====================================================
 // DASHBOARD HMSI
 // =====================================================
-router.get("/dashboard", (req, res) => {
-  res.render("hmsi/hmsiDashboard", {
-    title: "Dashboard HMSI",
-    user: req.session.user,
-    activeNav: "Dashboard",
-  });
-});
+router.get("/dashboard", dashboardCtrl.getDashboardStats);
 
 // =====================================================
 // PROGRAM KERJA (PROKER)
