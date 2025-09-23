@@ -61,7 +61,7 @@ exports.getAllLaporanDPA = async (req, res) => {
 
       let status = "Belum Dievaluasi";
       if (r.status_konfirmasi === "Revisi") status = "Revisi";
-      else if (r.status_konfirmasi === "Selesai") status = "Approved";
+      else if (r.status_konfirmasi === "Selesai") status = "Disetujui"; // ✅ ganti Approved → Disetujui
 
       return {
         ...r,
@@ -248,7 +248,7 @@ exports.postEvaluasi = async (req, res) => {
       idEvaluasi = uuidv4();
       await db.query(
         `INSERT INTO Evaluasi (id_evaluasi, komentar, status_konfirmasi, tanggal_evaluasi, id_laporan, pemberi_evaluasi)
-         VALUES (?, ?, ?, NOW(), ?, ?)` ,
+         VALUES (?, ?, ?, NOW(), ?, ?)`,
         [idEvaluasi, komentar, status_konfirmasi, laporanId, evaluatorId]
       );
     }
@@ -265,7 +265,7 @@ exports.postEvaluasi = async (req, res) => {
     const idNotifikasi = uuidv4();
     await db.query(
       `INSERT INTO Notifikasi (id_notifikasi, pesan, role, status_baca, divisi, id_laporan, id_evaluasi, created_at)
-       VALUES (?, ?, 'HMSI', 0, ?, ?, ?, NOW())` ,
+       VALUES (?, ?, 'HMSI', 0, ?, ?, ?, NOW())`,
       [idNotifikasi, pesan, laporan.divisi, laporanId, idEvaluasi]
     );
 

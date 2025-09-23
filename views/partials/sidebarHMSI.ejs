@@ -1,6 +1,8 @@
 <%
-  var displayName = (typeof user !== 'undefined' && (user.name || user.nama)) ? (user.name || user.nama) : 'Admin HMSI';
-  var initial = (displayName && displayName.length) ? String(displayName).charAt(0).toUpperCase() : 'A';
+  // ✅ Ambil nama langsung dari session user
+  var displayName = (user && (user.nama || user.name)) ? (user.nama || user.name) : 'Admin HMSI';
+  var initial = displayName ? displayName.charAt(0).toUpperCase() : 'A';
+  var fotoProfile = (user && user.foto_profile) ? ("/" + user.foto_profile) : '/default-profile.png';
 
   var navItems = [
     { name: 'Dashboard', path: '/hmsi/dashboard' },
@@ -24,6 +26,8 @@
     <h1 class="text-white font-semibold text-lg">HMSI Tracker</h1>
   </div>
 
+  
+
   <!-- 🔹 Overlay -->
   <div id="hmsi-sidebar-overlay"
     class="hidden fixed inset-0 bg-black bg-opacity-40 z-40 lg:hidden transition-opacity duration-300"></div>
@@ -42,34 +46,36 @@
     <!-- Profile -->
     <div class="p-6 border-b border-gray-100 bg-white">
       <div class="flex items-center gap-4">
-        <div
-          class="w-12 h-12 bg-gradient-to-br from-orange-400 to-orange-500 rounded-full flex items-center justify-center text-white font-semibold shadow-md">
-          <%= initial %>
-        </div>
+        <!-- Foto Profil (dengan fallback & anti-cache) -->
+        <img src="<%= fotoProfile %>?v=<%= Date.now() %>"
+             alt="Foto Profil"
+             class="w-12 h-12 rounded-full border object-cover shadow-md"
+             onerror="this.onerror=null;this.src='/default-profile.png?v=<%= Date.now() %>'">
+
         <div class="flex-1">
           <h3 class="text-sm font-semibold text-gray-800"><%= displayName %></h3>
-          <p class="text-xs text-gray-500 mt-0.5">Pengurus Inti</p>
+          <p class="text-xs text-gray-500 mt-0.5"><%= user.divisi || 'Pengurus HMSI' %></p>
         </div>
-        <!-- Gear -->
-<a href="/hmsi/profile" title="Profile"
-class="gear-btn p-2 text-gray-400 hover:text-gray-600 rounded-lg transition-transform duration-300">
-<svg class="gear-icon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 
-    002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 
-    1.724 0 001.065 2.572c1.756.426 1.756 
-    2.924 0 3.35a1.724 1.724 0 00-1.066 
-    2.573c.94 1.543-.826 3.31-2.37 
-    2.37a1.724 1.724 0 00-2.572 
-    1.065c-.426 1.756-2.924 
-    1.756-3.35 0a1.724 1.724 
-    0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 
-    1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 
-    0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 
-    2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-</svg>
-</a>
 
+        <!-- Gear -->
+        <a href="/hmsi/profile" title="Profile"
+           class="gear-btn p-2 text-gray-400 hover:text-gray-600 rounded-lg transition-transform duration-300">
+          <svg class="gear-icon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 
+              0 002.573 1.066c1.543-.94 3.31.826 2.37 
+              2.37a1.724 1.724 0 001.065 2.572c1.756.426 
+              1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 
+              2.573c.94 1.543-.826 3.31-2.37 
+              2.37a1.724 1.724 0 00-2.572 
+              1.065c-.426 1.756-2.924 
+              1.756-3.35 0a1.724 1.724 
+              0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 
+              1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 
+              0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 
+              2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+          </svg>
+        </a>
       </div>
     </div>
 
@@ -110,7 +116,7 @@ class="gear-btn p-2 text-gray-400 hover:text-gray-600 rounded-lg transition-tran
   </aside>
 </div>
 
-<!-- Styles -->
+<!-- Styles (unchanged) -->
 <style>
   /* Drawer animation */
   #hmsi-sidebar { will-change: transform; }

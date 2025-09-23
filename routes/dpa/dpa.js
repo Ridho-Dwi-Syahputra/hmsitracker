@@ -1,10 +1,12 @@
 // =====================================================
 // routes/dpa/dpa.js
-// Routing untuk DPA (Dashboard, Proker, Laporan, Evaluasi, Notifikasi)
+// Routing untuk DPA (Dashboard, Proker, Laporan, Evaluasi, Notifikasi, Profile)
 // =====================================================
 
 const express = require("express");
 const router = express.Router();
+const path = require("path");
+const multer = require("multer");
 
 // 🔑 Middleware auth
 const { requireLogin, requireRole } = require("../../middleware/auth");
@@ -13,6 +15,7 @@ const { requireLogin, requireRole } = require("../../middleware/auth");
 const dpaProkerController = require("../../controllers/DPA/prokerController");
 const dpaLaporanController = require("../../controllers/DPA/laporanController");
 const dpaNotifikasiController = require("../../controllers/DPA/notifikasiController");
+const dpaProfileController = require("../../controllers/DPA/profileController");
 
 // =====================================================
 // 🏠 Dashboard DPA
@@ -24,7 +27,7 @@ router.get(
   (req, res) => {
     res.render("dpa/dpaDashboard", {
       title: "Dashboard DPA",
-      user: req.session.user || { name: "Dummy User" },
+      user: req.session.user,
       activeNav: "Dashboard",
     });
   }
@@ -148,6 +151,47 @@ router.get(
   requireLogin,
   requireRole(["DPA"]),
   dpaNotifikasiController.markAsRead
+);
+
+// =====================================================
+// 👤 Profile DPA
+// =====================================================
+
+// 📄 Lihat profil
+router.get(
+  "/profile",
+  requireLogin,
+  requireRole(["DPA"]),
+  dpaProfileController.getProfile
+);
+
+// ✏️ Form edit profil
+router.get(
+  "/profile/edit",
+  requireLogin,
+  requireRole(["DPA"]),
+  dpaProfileController.getEditProfile
+);
+
+// ⚡ Konfigurasi Multer untuk upload foto profil
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "public/uploads/profile");
+  },
+  filename: function (req, file, cb) {
+    const ext = path.extname(file.originalname);
+    cb(null, Date.now() + "-" + Math.round(Math.random() * 1e9) + ext);
+  },
+});
+const upload = multer({ storage: storage });
+
+// 💾 Update profil (nama wajib, password & foto opsional via file upload)
+router.post(
+  "/profile/update",
+  requireLogin,
+  requireRole(["DPA"]),
+  upload.single("foto_profile"),
+  dpaProfileController.postEditProfile
 );
 
 module.exports = router;

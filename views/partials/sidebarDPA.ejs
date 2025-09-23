@@ -1,7 +1,8 @@
 <%
-  // Ambil nama user dengan fallback aman
-  var displayName = (typeof user !== 'undefined' && (user.name || user.nama)) ? (user.name || user.nama) : 'Admin DPA';
-  var initial = (displayName && displayName.length) ? String(displayName).charAt(0).toUpperCase() : 'A';
+  // ✅ Ambil nama + foto profil
+  var displayName = (user && (user.nama || user.name)) ? (user.nama || user.name) : 'Admin DPA';
+  var initial = displayName ? displayName.charAt(0).toUpperCase() : 'A';
+  var fotoProfile = (user && user.foto_profile) ? ("/" + user.foto_profile) : '/default-profile.png';
 
   // Navigation untuk DPA
   var navItems = [
@@ -13,23 +14,29 @@
 %>
 
 <div id="dpa-sidebar-root">
-  <!-- mobile toggle -->
-  <button id="dpa-sidebar-toggle"
-    class="lg:hidden fixed top-5 left-5 z-50 p-3 bg-white border border-gray-200 rounded-xl shadow-lg"
-    aria-label="Toggle sidebar">
-    <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-    </svg>
-  </button>
 
-  <div id="dpa-sidebar-overlay" class="hidden fixed inset-0 bg-black bg-opacity-30 z-40 lg:hidden"></div>
+  <!-- 🔹 Mobile top bar -->
+  <div class="lg:hidden fixed top-0 left-0 w-full h-14 bg-gradient-to-r from-orange-500 to-orange-600 flex items-center justify-between px-4 z-40">
+    <!-- Hamburger -->
+    <button id="dpa-sidebar-toggle" class="hamburger p-2 rounded-lg bg-white shadow-md flex flex-col justify-between w-8 h-8">
+      <span class="bar"></span>
+      <span class="bar"></span>
+      <span class="bar"></span>
+    </button>
+    <h1 class="text-white font-semibold text-lg">HMSI Tracker</h1>
+  </div>
 
-  <!-- Sidebar -->
+  <!-- 🔹 Overlay -->
+  <div id="dpa-sidebar-overlay"
+    class="hidden fixed inset-0 bg-black bg-opacity-40 z-40 lg:hidden transition-opacity duration-300"></div>
+
+  <!-- 🔹 Sidebar -->
   <aside id="dpa-sidebar"
-    class="fixed inset-y-0 left-0 w-80 bg-white border-r border-gray-200 flex flex-col transform -translate-x-full lg:translate-x-0 z-50 opacity-0">
+    class="fixed inset-y-0 left-0 w-80 bg-white border-r border-gray-200 flex flex-col 
+           transform -translate-x-full lg:translate-x-0 z-50 transition-transform duration-300 ease-in-out">
 
-    <!-- Header -->
-    <div class="p-6 border-b border-gray-100 bg-gradient-to-br from-orange-500 to-orange-600">
+    <!-- Header (desktop only) -->
+    <div class="hidden lg:block p-6 border-b border-gray-100 bg-gradient-to-br from-orange-500 to-orange-600">
       <h1 class="text-xl font-bold text-white tracking-wide">HMSI TRACKER</h1>
       <p class="text-sm text-orange-100 mt-1">Monitoring System</p>
     </div>
@@ -37,20 +44,34 @@
     <!-- Profile -->
     <div class="p-6 border-b border-gray-100 bg-white">
       <div class="flex items-center gap-4">
-        <div
-          class="w-12 h-12 bg-gradient-to-br from-orange-400 to-orange-500 rounded-full flex items-center justify-center text-white font-semibold shadow-md">
-          <%= initial %>
-        </div>
+        <!-- Foto Profil -->
+        <img src="<%= fotoProfile %>?v=<%= Date.now() %>"
+             alt="Foto Profil"
+             class="w-12 h-12 rounded-full border object-cover shadow-md"
+             onerror="this.onerror=null;this.src='/default-profile.png?v=<%= Date.now() %>'">
+
         <div class="flex-1">
           <h3 class="text-sm font-semibold text-gray-800"><%= displayName %></h3>
-          <p class="text-xs text-gray-500 mt-0.5">Dewan Pembina Akademik</p>
+          <p class="text-xs text-gray-500 mt-0.5">Pengurus DPA</p>
         </div>
-        <a href="/auth/settings" title="Settings"
-          class="p-2 text-gray-400 hover:text-gray-600 rounded-lg transition-transform duration-300">
-          <!-- gear icon -->
+
+        <!-- Gear menuju profile -->
+        <a href="/dpa/profile" title="Profile"
+           class="gear-btn p-2 text-gray-400 hover:text-gray-600 rounded-lg transition-transform duration-300">
           <svg class="gear-icon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 
+              0 002.573 1.066c1.543-.94 3.31.826 2.37 
+              2.37a1.724 1.724 0 001.065 2.572c1.756.426 
+              1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 
+              2.573c.94 1.543-.826 3.31-2.37 
+              2.37a1.724 1.724 0 00-2.572 
+              1.065c-.426 1.756-2.924 
+              1.756-3.35 0a1.724 1.724 
+              0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 
+              1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 
+              0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 
+              2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
           </svg>
         </a>
       </div>
@@ -82,7 +103,9 @@
           class="w-full flex items-center justify-center gap-3 px-4 py-3 text-gray-600 border border-gray-200 rounded-xl bg-white transition-all duration-300 hover:bg-red-50 hover:text-red-600 hover:scale-105 active:scale-95">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 
+              01-3 3H6a3 3 0 01-3-3V7a3 
+              3 0 013-3h4a3 3 0 013 3v1"/>
           </svg>
           Keluar
         </button>
@@ -91,50 +114,48 @@
   </aside>
 </div>
 
-<!-- Animations & Styles -->
+<!-- Styles -->
 <style>
-  /* Sidebar show/hide */
-  .slide-in {
-    animation: slideIn 0.9s ease forwards;
+  #dpa-sidebar { will-change: transform; }
+  .slide-in { transform: translateX(0) !important; }
+  .slide-out { transform: translateX(-100%) !important; }
+
+  /* Hamburger */
+  .hamburger .bar {
+    display: block;
+    width: 100%;
+    height: 3px;
+    background-color: #374151;
+    border-radius: 4px;
+    transition: all 0.3s ease;
   }
-  .slide-out {
-    animation: slideOut 0.5s ease forwards;
+  .hamburger.active .bar:nth-child(1) {
+    transform: rotate(45deg) translate(5px, 5px);
   }
-  @keyframes slideIn {
-    from { transform: translateX(-100%); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
+  .hamburger.active .bar:nth-child(2) {
+    opacity: 0;
   }
-  @keyframes slideOut {
-    from { transform: translateX(0); opacity: 1; }
-    to { transform: translateX(-100%); opacity: 0; }
+  .hamburger.active .bar:nth-child(3) {
+    transform: rotate(-45deg) translate(5px, -5px);
   }
 
-  /* Staggered nav-item */
+  /* Nav-item */
   .nav-item {
     opacity: 0;
     transform: translateX(-20px);
     animation: fadeSlideIn 0.5s ease forwards;
-    color: #374151; /* text-gray-700 */
+    color: #374151;
+    transition: all 0.3s ease, transform 0.2s ease;
   }
   @keyframes fadeSlideIn {
     from { opacity: 0; transform: translateX(-20px); }
     to { opacity: 1; transform: translateX(0); }
-  }
-
-  /* Hover / base transitions */
-  .nav-item {
-    transition: all 0.3s ease, transform 0.2s ease;
   }
   .nav-item:hover {
     transform: translateX(6px) scale(1.02);
     background: linear-gradient(to right, #fff7ed, #fff3e0);
     box-shadow: inset 4px 0 0 #f97316;
   }
-  .nav-item:active {
-    transform: scale(0.96);
-  }
-
-  /* Active state */
   .nav-item.active {
     animation: fadeSlideIn 0.5s ease forwards, pulseOrange 1.5s ease-in-out infinite alternate;
     background: linear-gradient(to right, #fff7ed, #ffedd5);
@@ -142,56 +163,64 @@
     font-weight: 600;
     border-right: 3px solid #f97316;
   }
-
   @keyframes pulseOrange {
     from { box-shadow: inset 4px 0 0 #f97316, 0 0 0 rgba(249,115,22,0.15); }
     to   { box-shadow: inset 6px 0 0 #f97316, 0 0 10px rgba(249,115,22,0.28); }
   }
 
-  /* Gear icon */
+  /* Gear */
   .gear-icon {
-    transition: transform 0.4s ease, color 0.3s ease;
+    transition: transform 0.4s ease, color 0.3s ease, filter 0.3s ease;
   }
-  .gear-icon:hover {
+  .gear-btn:hover .gear-icon {
     transform: rotate(90deg) scale(1.2);
     color: #ea580c;
+    filter: drop-shadow(0 0 6px rgba(234,88,12,0.5));
   }
-  .gear-icon:active {
+  .gear-btn:active .gear-icon {
     animation: gearShake 0.3s ease;
   }
   @keyframes gearShake {
     0% { transform: rotate(0deg) scale(1); }
-    25% { transform: rotate(10deg) scale(1.05); }
-    50% { transform: rotate(-10deg) scale(1.05); }
-    75% { transform: rotate(5deg) scale(1.05); }
+    25% { transform: rotate(12deg) scale(1.05); }
+    50% { transform: rotate(-12deg) scale(1.05); }
+    75% { transform: rotate(6deg) scale(1.05); }
     100% { transform: rotate(0deg) scale(1); }
   }
 </style>
 
+<!-- Script -->
 <script>
   document.addEventListener("DOMContentLoaded", () => {
     const sidebar = document.getElementById("dpa-sidebar");
     const overlay = document.getElementById("dpa-sidebar-overlay");
     const toggle = document.getElementById("dpa-sidebar-toggle");
 
-    // slide in awal
-    sidebar.classList.add("slide-in");
+    if (window.innerWidth >= 1024) {
+      sidebar.classList.add("slide-in");
+    }
 
-    // toggle sidebar mobile
     toggle.addEventListener("click", () => {
-      if (sidebar.classList.contains("slide-in")) {
+      const isActive = toggle.classList.toggle("active");
+      if (isActive) {
+        sidebar.classList.add("slide-in");
+        sidebar.classList.remove("slide-out");
+        overlay.classList.remove("hidden");
+      } else {
         sidebar.classList.remove("slide-in");
         sidebar.classList.add("slide-out");
         overlay.classList.add("hidden");
-      } else {
-        sidebar.classList.remove("slide-out");
-        sidebar.classList.add("slide-in");
-        overlay.classList.remove("hidden");
       }
     });
 
-    // stagger nav-item delay
-    document.querySelectorAll("#dpa-nav .nav-item").forEach((el, i) => {
+    overlay.addEventListener("click", () => {
+      sidebar.classList.remove("slide-in");
+      sidebar.classList.add("slide-out");
+      toggle.classList.remove("active");
+      overlay.classList.add("hidden");
+    });
+
+    document.querySelectorAll(".nav-item").forEach((el, i) => {
       el.style.animationDelay = (i * 100 + 300) + "ms";
     });
   });

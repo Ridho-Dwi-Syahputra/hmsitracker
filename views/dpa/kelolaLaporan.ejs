@@ -12,7 +12,7 @@
 <body class="bg-gray-50 min-h-screen">
 
   <!-- Sidebar -->
-  <%- include('../partials/sidebarDPA', { activeNav: 'Daftar Laporan', user: user }) %>
+  <%- include('../partials/sidebarDPA', { activeNav: 'Laporan', user: user }) %>
 
   <!-- Wrapper -->
   <div class="lg:ml-80 opacity-0 animate-fade-in" style="animation-delay:150ms;">
@@ -59,7 +59,7 @@
                 <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="all">Semua Status</button></li>
                 <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="Belum Dievaluasi">Belum Dievaluasi</button></li>
                 <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="Revisi">Revisi</button></li>
-                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="Approved">Disetujui</button></li>
+                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="Disetujui">Disetujui</button></li>
               </ul>
             </div>
           </div>
@@ -126,7 +126,7 @@
                     <td class="py-3 px-4 border border-orange-100" data-col="status">
                       <% if (l.status === "Revisi") { %>
                         <span class="px-3 py-1 bg-red-100 text-red-700 rounded-lg text-xs font-semibold">Revisi</span>
-                      <% } else if (l.status === "Approved") { %>
+                      <% } else if (l.status === "Disetujui") { %>
                         <span class="px-3 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-semibold">Disetujui</span>
                       <% } else { %>
                         <span class="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg text-xs font-semibold">Belum Dievaluasi</span>

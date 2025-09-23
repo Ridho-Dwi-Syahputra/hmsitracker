@@ -5,6 +5,8 @@ const express = require("express");
 const path = require("path");
 const dotenv = require("dotenv");
 const session = require("express-session");
+const flash = require("connect-flash");
+const expressLayouts = require("express-ejs-layouts"); // ⬅️ Tambahan
 
 // =====================================================
 // 2. Konfigurasi Dasar
@@ -14,16 +16,17 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // =====================================================
-// 3. Setup View Engine (EJS)
+// 3. Setup View Engine (EJS) + Layouts
 // =====================================================
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
+
 // =====================================================
 // 4. Middleware Umum
 // =====================================================
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 // Static files
 app.use(express.static(path.join(__dirname, "public")));
@@ -38,6 +41,17 @@ app.use(
   })
 );
 
+// Flash middleware
+app.use(flash());
+
+// Inject flash ke locals (biar bisa langsung dipakai di EJS)
+app.use((req, res, next) => {
+  res.locals.errorMsg = req.flash("error");
+  res.locals.successMsg = req.flash("success");
+  res.locals.user = req.session.user || null; // ⬅️ user global (optional, berguna)
+  next();
+});
+
 // Uploads folder
 app.use("/uploads", express.static(path.join(__dirname, "public/uploads")));
 
@@ -46,7 +60,7 @@ app.use("/uploads", express.static(path.join(__dirname, "public/uploads")));
 // =====================================================
 
 // Auth routes (login/logout)
-const authRouter = require("./routes/auth"); // ✅ sudah benar
+const authRouter = require("./routes/auth");
 app.use("/auth", authRouter);
 
 // Default / Home

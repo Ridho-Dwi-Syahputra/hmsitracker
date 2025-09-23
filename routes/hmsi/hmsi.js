@@ -1,5 +1,5 @@
-// =====================================================
 // routes/hmsi/hmsi.js
+// =====================================================
 // Routing khusus untuk HMSI (Dashboard, Proker, Laporan, Evaluasi, Notifikasi, Profile)
 // =====================================================
 
@@ -60,6 +60,7 @@ router.post(
   validateUpload("create", "proker"),
   prokerCtrl.createProker
 );
+
 router.get("/proker/:id", prokerCtrl.getDetailProker);
 router.get("/proker/:id/edit", prokerCtrl.getEditProker);
 router.post(
@@ -80,6 +81,7 @@ router.post(
   validateUpload("create", "laporan"),
   laporanCtrl.createLaporan
 );
+
 router.get("/laporan/:id", laporanCtrl.getDetailLaporan);
 router.get("/laporan/edit/:id", laporanCtrl.getEditLaporan);
 router.post(
@@ -96,11 +98,11 @@ router.get("/laporan/download/:id", laporanCtrl.downloadDokumentasi);
 router.get("/evaluasi", evaluasiCtrl.getAllEvaluasi);
 router.get("/evaluasi/:id", evaluasiCtrl.getDetailEvaluasi);
 
-// ⚡ route baru: komentar HMSI → replace komentar lama
+// ⚡ HMSI menambahkan komentar evaluasi
 router.post("/evaluasi/:id/komentar", evaluasiCtrl.addKomentar);
 
 // =====================================================
-// NOTIFIKASI (klik bubble → tandai terbaca + redirect evaluasi)
+// NOTIFIKASI
 // =====================================================
 router.get("/notifikasi", notifikasiCtrl.getAllNotifikasi);
 router.get("/notifikasi/read/:id", notifikasiCtrl.readAndRedirect);
@@ -109,31 +111,34 @@ router.get("/notifikasi/read/:id", notifikasiCtrl.readAndRedirect);
 // PROFILE
 // =====================================================
 
-// ⚡ Setup multer untuk foto profil
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, "../../public/uploads/profile"));
-  },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    const unique = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, unique + ext);
-  },
-});
-
-const upload = multer({
-  storage,
-  limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
-});
-
-// 📄 Tampilkan halaman profil
+// 📄 Lihat profil
 router.get("/profile", profileCtrl.getProfile);
 
-// ✏️ Update nama & password
-router.post("/profile/update", profileCtrl.updateProfile);
+// ✏️ Form edit profil
+router.get("/profile/edit", profileCtrl.getEditProfile);
 
-// 🖼️ Upload foto profil
-router.post("/profile/upload-foto", upload.single("foto"), profileCtrl.uploadFoto);
+// ⚡ Konfigurasi Multer untuk upload foto profil
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "public/uploads/profile");
+  },
+  filename: function (req, file, cb) {
+    const ext = path.extname(file.originalname);
+    cb(null, Date.now() + "-" + Math.round(Math.random() * 1e9) + ext);
+  },
+});
+const upload = multer({ storage: storage });
+
+// 💾 Update profil (nama wajib, password & foto opsional via file upload)
+router.post(
+  "/profile/update",
+  upload.single("foto_profile"),
+  profileCtrl.postEditProfile
+);
+
+// 🌙 Toggle Dark/Light Mode
+router.post("/profile/toggle-theme", profileCtrl.toggleTheme);
+
 
 // =====================================================
 // EXPORT ROUTER

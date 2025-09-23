@@ -1,28 +1,23 @@
 // controllers/HMSI/profileController.js
+// =====================================================
+// Controller untuk Profil HMSI (lihat & edit profil)
+// =====================================================
+
 const db = require("../../config/db");
-const bcrypt = require("bcryptjs");
 const path = require("path");
 const fs = require("fs");
-const { v4: uuidv4 } = require("uuid");
-
-// Direktori simpan foto profil
-const UPLOAD_DIR = path.join(__dirname, "../../public/uploads/profile");
-
-// Pastikan folder ada
-if (!fs.existsSync(UPLOAD_DIR)) {
-  fs.mkdirSync(UPLOAD_DIR, { recursive: true });
-}
+const bcrypt = require("bcryptjs");
 
 // =====================================================
-// 📌 GET: Halaman profil user
+// 📄 GET: Halaman profil
 // =====================================================
 exports.getProfile = async (req, res) => {
   try {
-    const userId = req.session.user?.id; // simpan saat login
+    const userId = req.session.user?.id_anggota;
     if (!userId) return res.redirect("/auth/login");
 
     const [rows] = await db.query(
-      "SELECT id_anggota, nama, email, divisi, role, foto_profile FROM user WHERE id_anggota = ?",
+      "SELECT id_anggota, nama, email, divisi, role, foto_profile, theme FROM user WHERE id_anggota = ?",
       [userId]
     );
 
@@ -31,82 +26,139 @@ exports.getProfile = async (req, res) => {
     res.render("hmsi/profile", {
       title: "Profil Pengurus",
       user: rows[0],
-      activeNav: "Profile",
-      errorMsg: req.query.error || null,
-      successMsg: req.query.success || null,
+      activeNav: "Profil",
+      errorMsg: req.flash("error"),
+      successMsg: req.flash("success"),
     });
   } catch (err) {
-    console.error("❌ Error getProfile:", err.message);
     res.status(500).send("Gagal mengambil profil");
   }
 };
 
 // =====================================================
-// 📌 POST: Update profil (nama + password opsional)
+// 📄 GET: Halaman form edit profil
 // =====================================================
-exports.updateProfile = async (req, res) => {
+exports.getEditProfile = async (req, res) => {
   try {
-    const userId = req.session.user?.id;
+    const userId = req.session.user?.id_anggota;
     if (!userId) return res.redirect("/auth/login");
 
-    const { nama, password, confirmPassword } = req.body;
+    const [rows] = await db.query(
+      "SELECT id_anggota, nama, email, divisi, role, foto_profile, theme FROM user WHERE id_anggota = ?",
+      [userId]
+    );
 
-    if (password && password !== confirmPassword) {
-      return res.redirect("/hmsi/profile?error=Password tidak sama");
-    }
+    if (!rows.length) return res.status(404).send("User tidak ditemukan");
 
-    let query = "UPDATE user SET nama = ? WHERE id_anggota = ?";
-    let values = [nama, userId];
-
-    if (password && password.trim() !== "") {
-      const hashed = await bcrypt.hash(password, 10);
-      query = "UPDATE user SET nama = ?, password = ? WHERE id_anggota = ?";
-      values = [nama, hashed, userId];
-    }
-
-    await db.query(query, values);
-
-    // Update juga session
-    req.session.user.name = nama;
-
-    res.redirect("/hmsi/profile?success=Profil berhasil diperbarui");
+    res.render("hmsi/editProfile", {
+      title: "Edit Profil",
+      user: rows[0],
+      errorMsg: req.flash("error"),
+      successMsg: req.flash("success"),
+    });
   } catch (err) {
-    console.error("❌ Error updateProfile:", err.message);
-    res.status(500).send("Gagal update profil");
+    res.status(500).send("Gagal memuat halaman edit profil");
   }
 };
 
 // =====================================================
-// 📌 POST: Upload foto profil
+// 💾 POST: Simpan perubahan profil (pakai multer)
 // =====================================================
-exports.uploadFoto = async (req, res) => {
+exports.postEditProfile = async (req, res) => {
   try {
-    const userId = req.session.user?.id;
-    if (!userId) return res.redirect("/auth/login");
+    const oldId = req.session.user?.id_anggota;
+    if (!oldId) return res.redirect("/auth/login");
 
-    if (!req.file) {
-      return res.redirect("/hmsi/profile?error=File tidak ditemukan");
+    const { id_anggota, nama, password, confirm_password } = req.body;
+
+    if (!nama || nama.trim() === "") {
+      req.flash("error", "Nama wajib diisi");
+      return res.redirect("/hmsi/profile/edit");
     }
 
-    // Nama file unik
-    const filename = uuidv4() + path.extname(req.file.originalname);
-    const filepath = path.join(UPLOAD_DIR, filename);
+    if (!id_anggota || id_anggota.trim() === "") {
+      req.flash("error", "NIM wajib diisi");
+      return res.redirect("/hmsi/profile/edit");
+    }
 
-    // Pindahkan file dari tmp ke folder upload
-    fs.renameSync(req.file.path, filepath);
+    let foto_profile = req.session.user.foto_profile;
 
-    // Simpan ke database
-    await db.query("UPDATE user SET foto_profile = ? WHERE id_anggota = ?", [
-      "profile/" + filename,
+    if (req.file) {
+      const fileName = req.file.filename;
+      const newPath = "uploads/profile/" + fileName;
+
+      if (req.session.user.foto_profile) {
+        const oldPath = path.join("public", req.session.user.foto_profile);
+        if (fs.existsSync(oldPath)) {
+          try {
+            fs.unlinkSync(oldPath);
+          } catch {}
+        }
+      }
+
+      foto_profile = newPath;
+    }
+
+    if (password && password.trim() !== "" && password !== confirm_password) {
+      req.flash("error", "Password dan Konfirmasi Password tidak sama");
+      return res.redirect("/hmsi/profile/edit");
+    }
+
+    let query = "UPDATE user SET id_anggota = ?, nama = ?, foto_profile = ?";
+    let values = [id_anggota, nama, foto_profile];
+
+    if (password && password.trim() !== "") {
+      const hashed = await bcrypt.hash(password, 10);
+      query += ", password = ?";
+      values.push(hashed);
+    }
+
+    query += " WHERE id_anggota = ?";
+    values.push(oldId);
+
+    await db.query(query, values);
+
+    const [rows] = await db.query(
+      "SELECT id_anggota, nama, email, divisi, role, foto_profile, theme FROM user WHERE id_anggota = ?",
+      [id_anggota]
+    );
+    if (rows.length) {
+      req.session.user = rows[0];
+    }
+
+    req.flash("success", "Profil berhasil diperbarui");
+    res.redirect("/hmsi/profile");
+  } catch (err) {
+    req.flash("error", "Gagal menyimpan perubahan profil");
+    res.redirect("/hmsi/profile/edit");
+  }
+};
+
+// =====================================================
+// 🌙 Toggle Theme (Light/Dark)
+// =====================================================
+exports.toggleTheme = async (req, res) => {
+  try {
+    const userId = req.session.user?.id_anggota;
+    if (!userId) return res.redirect("/auth/login");
+
+    const currentTheme = req.session.user.theme || "light";
+    const newTheme = currentTheme === "dark" ? "light" : "dark";
+
+    await db.query("UPDATE user SET theme = ? WHERE id_anggota = ?", [
+      newTheme,
       userId,
     ]);
 
-    // Update session
-    req.session.user.foto_profile = "profile/" + filename;
+    const [rows] = await db.query(
+      "SELECT id_anggota, nama, email, divisi, role, foto_profile, theme FROM user WHERE id_anggota = ?",
+      [userId]
+    );
+    if (rows.length) req.session.user = rows[0];
 
-    res.redirect("/hmsi/profile?success=Foto profil berhasil diperbarui");
+    res.redirect("/hmsi/profile");
   } catch (err) {
-    console.error("❌ Error uploadFoto:", err.message);
-    res.status(500).send("Gagal upload foto profil");
+    req.flash("error", "Gagal mengganti mode tampilan");
+    res.redirect("/hmsi/profile");
   }
 };

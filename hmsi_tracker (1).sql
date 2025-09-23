@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 21, 2025 at 09:07 AM
+-- Generation Time: Sep 21, 2025 at 04:16 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -30,6 +30,7 @@ SET time_zone = "+00:00";
 CREATE TABLE `evaluasi` (
   `id_evaluasi` varchar(50) NOT NULL,
   `komentar` varchar(200) DEFAULT NULL,
+  `komentar_hmsi` text DEFAULT NULL,
   `pemberi_evaluasi` varchar(50) DEFAULT NULL,
   `status_konfirmasi` varchar(50) DEFAULT NULL,
   `tanggal_evaluasi` date DEFAULT NULL,
@@ -40,12 +41,12 @@ CREATE TABLE `evaluasi` (
 -- Dumping data for table `evaluasi`
 --
 
-INSERT INTO `evaluasi` (`id_evaluasi`, `komentar`, `pemberi_evaluasi`, `status_konfirmasi`, `tanggal_evaluasi`, `id_laporan`) VALUES
-('88cb5ef8-677b-4846-879f-0252996e30c2', 'Salah nih', '8d477929-9464-11f0-981a-442e1c01b37c', 'Revisi', '2025-09-20', '17426d59-9571-11f0-981a-442e1c01b37c'),
-('b58c233f-dce8-427c-b8f2-1d76d2fac568', 'Keren Banget', '8d477929-9464-11f0-981a-442e1c01b37c', 'Selesai', '2025-09-20', '790ae88d-9571-11f0-981a-442e1c01b37c'),
-('bb7aca3e-db5b-4539-8a60-e7cb1fece1c2', 'Kelazz king\r\n', '8d477929-9464-11f0-981a-442e1c01b37c', 'Selesai', '2025-09-20', '7eba709a-95e5-11f0-981a-442e1c01b37c'),
-('d5e377b7-36bf-4e23-ba71-cc6c62d4fbb1', 'gsavdacveuicvdchsvcyeccbdcbhdb', '8d477929-9464-11f0-981a-442e1c01b37c', 'Revisi', '2025-09-20', NULL),
-('ea4c6373-dba7-4f38-a292-a7c11e146a78', 'jelekkk', '8d477929-9464-11f0-981a-442e1c01b37c', 'Revisi', '2025-09-20', '19e74317-6e15-4513-bd59-3ee4351692c1');
+INSERT INTO `evaluasi` (`id_evaluasi`, `komentar`, `komentar_hmsi`, `pemberi_evaluasi`, `status_konfirmasi`, `tanggal_evaluasi`, `id_laporan`) VALUES
+('88cb5ef8-677b-4846-879f-0252996e30c2', 'udah dibilang salah', 'BENER ANJERR', '8d477929-9464-11f0-981a-442e1c01b37c', 'Revisi', '2025-09-21', '17426d59-9571-11f0-981a-442e1c01b37c'),
+('b58c233f-dce8-427c-b8f2-1d76d2fac568', 'Keren Banget', NULL, '8d477929-9464-11f0-981a-442e1c01b37c', 'Selesai', '2025-09-20', '790ae88d-9571-11f0-981a-442e1c01b37c'),
+('bb7aca3e-db5b-4539-8a60-e7cb1fece1c2', 'Kelazz king\r\n', NULL, '8d477929-9464-11f0-981a-442e1c01b37c', 'Selesai', '2025-09-20', '7eba709a-95e5-11f0-981a-442e1c01b37c'),
+('d5e377b7-36bf-4e23-ba71-cc6c62d4fbb1', 'gsavdacveuicvdchsvcyeccbdcbhdb', NULL, '8d477929-9464-11f0-981a-442e1c01b37c', 'Revisi', '2025-09-20', NULL),
+('ea4c6373-dba7-4f38-a292-a7c11e146a78', 'jelekkk', 'ma adoo jelekk', '8d477929-9464-11f0-981a-442e1c01b37c', 'Revisi', '2025-09-20', '19e74317-6e15-4513-bd59-3ee4351692c1');
 
 -- --------------------------------------------------------
 
@@ -85,6 +86,7 @@ INSERT INTO `laporan` (`id_laporan`, `judul_laporan`, `deskripsi_kegiatan`, `sas
 ('444501ad-c260-41d5-87f0-db166369abc8', 'testtttttttt notif 4', '-', '', '08-00', '', '', '', '', '', '', NULL, '0376b2cd-95f1-11f0-981a-442e1c01b37c', 'Internal', '2025-09-20', NULL),
 ('790ae88d-9571-11f0-981a-442e1c01b37c', 'test tanggal', '-', '', '09', '', '', '', '', '', '', NULL, '9ae3807a-956e-11f0-981a-442e1c01b37c', 'Eksternal', '2025-09-19', NULL),
 ('7eba709a-95e5-11f0-981a-442e1c01b37c', 'test notif', '-', '', '09:00 - 10:00 WIB, gedung C', '', '', '', '', '', '', NULL, '3ab0989e-9496-11f0-981a-442e1c01b37c', 'Eksternal', '2025-09-20', NULL),
+('b7e33127-8bcd-466b-bc5a-d83900bf3c32', 'laporan 1', 'gaa da', '', '08-00', '', '', '', '', '', '', NULL, '0376b2cd-95f1-11f0-981a-442e1c01b37c', 'Internal', '2025-09-21', NULL),
 ('cf3371f4-949c-11f0-981a-442e1c01b37c', 'test tanggal', '-', '-', '08-000', '', '', '34', '20', '-', '-', 'dokumentasi-1758206268668-273573665.pdf', '3ab0989e-9496-11f0-981a-442e1c01b37c', '', '2025-09-18', NULL),
 ('f296bbac-e89d-4b1c-9eca-af5ad229e5e4', 'Technofest testing 3', '-', '', '08-00', '', '', '', '', '', '', NULL, '0376b2cd-95f1-11f0-981a-442e1c01b37c', 'Internal', '2025-09-20', NULL);
 
@@ -97,6 +99,7 @@ INSERT INTO `laporan` (`id_laporan`, `judul_laporan`, `deskripsi_kegiatan`, `sas
 CREATE TABLE `notifikasi` (
   `id_notifikasi` varchar(50) NOT NULL,
   `pesan` varchar(200) DEFAULT NULL,
+  `role` varchar(50) DEFAULT NULL,
   `divisi` enum('Internal','Medkraf','Eksternal','Bikraf','PSI','PSDM','RTK') NOT NULL,
   `status_baca` tinyint(1) DEFAULT NULL,
   `id_anggota` varchar(50) DEFAULT NULL,
@@ -110,15 +113,25 @@ CREATE TABLE `notifikasi` (
 -- Dumping data for table `notifikasi`
 --
 
-INSERT INTO `notifikasi` (`id_notifikasi`, `pesan`, `divisi`, `status_baca`, `id_anggota`, `id_evaluasi`, `id_ProgramKerja`, `id_laporan`, `created_at`) VALUES
-('1d9a2228-aaef-46f7-8acc-54e765806562', 'Divisi Internal telah menambahkan laporan baru: test notiff', 'Internal', 1, NULL, NULL, NULL, '3fa7ea5f-6b0e-4d35-8a9c-6caa7c3b8fa2', '2025-09-20 08:07:15'),
-('2528d177-18fe-461b-9222-c7dfce4b3b83', 'HMSI (Internal) telah membuat Program Kerja baru: \"test Notifff\"', 'Internal', 1, NULL, NULL, '0c3d6d76-95f9-11f0-981a-442e1c01b37c', NULL, '2025-09-20 08:08:38'),
-('4997b5bc-d819-4b2b-9ac2-3a40319f0948', 'Divisi Internal telah menambahkan laporan baru: testtttt notif', 'Internal', 1, NULL, NULL, NULL, '19e74317-6e15-4513-bd59-3ee4351692c1', '2025-09-20 08:06:59'),
-('9017d86d-7a78-4673-b85d-3b0c13080ed0', 'DPA memberi evaluasi pada laporan \"test notif\"', 'Eksternal', 1, NULL, 'bb7aca3e-db5b-4539-8a60-e7cb1fece1c2', NULL, '7eba709a-95e5-11f0-981a-442e1c01b37c', '2025-09-20 15:45:04'),
-('ad71c95d-e2af-42c2-b07d-470ca0b1af32', 'Divisi Internal telah menghapus laporan: Technofest testing 1', 'Internal', 0, NULL, NULL, NULL, NULL, '2025-09-21 06:36:03'),
-('b5bc6812-835c-4cc0-8be9-5cf6ae6b05ad', 'DPA memberi evaluasi pada laporan \"Technofest testing 1\"', 'Internal', 1, NULL, 'd5e377b7-36bf-4e23-ba71-cc6c62d4fbb1', NULL, NULL, '2025-09-20 15:47:06'),
-('e7655a96-e4ba-491a-869c-5977f922761b', 'DPA memberi evaluasi pada laporan \"testtttt notif\"', 'Internal', 1, NULL, 'ea4c6373-dba7-4f38-a292-a7c11e146a78', NULL, '19e74317-6e15-4513-bd59-3ee4351692c1', '2025-09-20 08:41:29'),
-('f3219f1f-9331-4ea1-a92b-a9ea5e8d9bc4', 'Divisi Internal telah menambahkan laporan baru: testtttttttt notif 4', 'Internal', 1, NULL, NULL, NULL, '444501ad-c260-41d5-87f0-db166369abc8', '2025-09-20 08:08:13');
+INSERT INTO `notifikasi` (`id_notifikasi`, `pesan`, `role`, `divisi`, `status_baca`, `id_anggota`, `id_evaluasi`, `id_ProgramKerja`, `id_laporan`, `created_at`) VALUES
+('10c03292-4f36-4c9e-a80b-0c988ef29e50', 'DPA memberi evaluasi pada laporan \"keuangan 1\"', NULL, 'Eksternal', 0, NULL, '88cb5ef8-677b-4846-879f-0252996e30c2', NULL, '17426d59-9571-11f0-981a-442e1c01b37c', '2025-09-21 10:42:02'),
+('1d9a2228-aaef-46f7-8acc-54e765806562', 'Divisi Internal telah menambahkan laporan baru: test notiff', NULL, 'Internal', 1, NULL, NULL, NULL, '3fa7ea5f-6b0e-4d35-8a9c-6caa7c3b8fa2', '2025-09-20 08:07:15'),
+('2528d177-18fe-461b-9222-c7dfce4b3b83', 'HMSI (Internal) telah membuat Program Kerja baru: \"test Notifff\"', NULL, 'Internal', 1, NULL, NULL, '0c3d6d76-95f9-11f0-981a-442e1c01b37c', NULL, '2025-09-20 08:08:38'),
+('4997b5bc-d819-4b2b-9ac2-3a40319f0948', 'Divisi Internal telah menambahkan laporan baru: testtttt notif', NULL, 'Internal', 1, NULL, NULL, NULL, '19e74317-6e15-4513-bd59-3ee4351692c1', '2025-09-20 08:06:59'),
+('4bbbb184-96d7-11f0-981a-442e1c01b37c', 'HMSI (Eksternal) memberikan komentar baru pada evaluasi program \"HMSI FEST\"', 'DPA', 'Internal', 0, NULL, '88cb5ef8-677b-4846-879f-0252996e30c2', NULL, '17426d59-9571-11f0-981a-442e1c01b37c', '2025-09-21 10:39:34'),
+('598ec634-b7b4-4730-9132-336e0e826ab2', 'DPA memberi evaluasi pada laporan \"keuangan 1\"', NULL, 'Eksternal', 0, NULL, '88cb5ef8-677b-4846-879f-0252996e30c2', NULL, '17426d59-9571-11f0-981a-442e1c01b37c', '2025-09-21 11:18:19'),
+('60e853b7-1cec-4cab-a182-4cd6156028a6', 'Divisi Internal telah menambahkan laporan baru: laporan 1', NULL, 'Internal', 1, NULL, NULL, NULL, 'b7e33127-8bcd-466b-bc5a-d83900bf3c32', '2025-09-21 09:08:08'),
+('9017d86d-7a78-4673-b85d-3b0c13080ed0', 'DPA memberi evaluasi pada laporan \"test notif\"', NULL, 'Eksternal', 1, NULL, 'bb7aca3e-db5b-4539-8a60-e7cb1fece1c2', NULL, '7eba709a-95e5-11f0-981a-442e1c01b37c', '2025-09-20 15:45:04'),
+('a030f1de-96d2-11f0-981a-442e1c01b37c', 'HMSI (Internal) memberikan komentar baru pada evaluasi program \"Proker 3\"', 'DPA', 'Internal', 0, NULL, 'ea4c6373-dba7-4f38-a292-a7c11e146a78', NULL, '19e74317-6e15-4513-bd59-3ee4351692c1', '2025-09-21 10:06:08'),
+('a32de785-96d2-11f0-981a-442e1c01b37c', 'HMSI (Internal) memberikan komentar baru pada evaluasi program \"Proker 3\"', 'DPA', 'Internal', 0, NULL, 'ea4c6373-dba7-4f38-a292-a7c11e146a78', NULL, '19e74317-6e15-4513-bd59-3ee4351692c1', '2025-09-21 10:06:13'),
+('a77c2f87-96e3-11f0-981a-442e1c01b37c', 'HMSI (Internal) memberikan komentar baru pada evaluasi program \"Proker 3\"', 'DPA', 'Internal', 0, NULL, 'ea4c6373-dba7-4f38-a292-a7c11e146a78', NULL, '19e74317-6e15-4513-bd59-3ee4351692c1', '2025-09-21 12:08:02'),
+('a82d47a6-96d2-11f0-981a-442e1c01b37c', 'HMSI (Internal) memberikan komentar baru pada evaluasi program \"Proker 3\"', 'DPA', 'Internal', 0, NULL, 'ea4c6373-dba7-4f38-a292-a7c11e146a78', NULL, '19e74317-6e15-4513-bd59-3ee4351692c1', '2025-09-21 10:06:22'),
+('ad71c95d-e2af-42c2-b07d-470ca0b1af32', 'Divisi Internal telah menghapus laporan: Technofest testing 1', NULL, 'Internal', 1, NULL, NULL, NULL, NULL, '2025-09-21 06:36:03'),
+('b0b5bbea-96d2-11f0-981a-442e1c01b37c', 'HMSI (Internal) memberikan komentar baru pada evaluasi program \"Proker 3\"', 'DPA', 'Internal', 0, NULL, 'ea4c6373-dba7-4f38-a292-a7c11e146a78', NULL, '19e74317-6e15-4513-bd59-3ee4351692c1', '2025-09-21 10:06:36'),
+('b5bc6812-835c-4cc0-8be9-5cf6ae6b05ad', 'DPA memberi evaluasi pada laporan \"Technofest testing 1\"', NULL, 'Internal', 1, NULL, 'd5e377b7-36bf-4e23-ba71-cc6c62d4fbb1', NULL, NULL, '2025-09-20 15:47:06'),
+('e2acd0db-1b1c-4a91-baf9-dad3f87a9bee', 'HMSI (Internal) telah membuat Program Kerja baru: \"Proker 3\"', NULL, 'Internal', 0, NULL, NULL, '0376b2cd-95f1-11f0-981a-442e1c01b37c', NULL, '2025-09-21 09:07:49'),
+('e7655a96-e4ba-491a-869c-5977f922761b', 'DPA memberi evaluasi pada laporan \"testtttt notif\"', NULL, 'Internal', 1, NULL, 'ea4c6373-dba7-4f38-a292-a7c11e146a78', NULL, '19e74317-6e15-4513-bd59-3ee4351692c1', '2025-09-20 08:41:29'),
+('f3219f1f-9331-4ea1-a92b-a9ea5e8d9bc4', 'Divisi Internal telah menambahkan laporan baru: testtttttttt notif 4', NULL, 'Internal', 1, NULL, NULL, NULL, '444501ad-c260-41d5-87f0-db166369abc8', '2025-09-20 08:08:13');
 
 -- --------------------------------------------------------
 
@@ -142,14 +155,15 @@ CREATE TABLE `program_kerja` (
 --
 
 INSERT INTO `program_kerja` (`id_ProgramKerja`, `Nama_ProgramKerja`, `Deskripsi`, `Tanggal_mulai`, `Tanggal_selesai`, `Penanggung_jawab`, `id_anggota`, `Dokumen_pendukung`) VALUES
-('0376b2cd-95f1-11f0-981a-442e1c01b37c', 'Proker 3', '-', '2025-09-25', '2025-09-30', '-', '3581d577-946a-11f0-981a-442e1c01b37c', NULL),
-('0c3d6d76-95f9-11f0-981a-442e1c01b37c', 'test Notifff', '-', '2025-09-24', '2025-09-30', 'hbjkn', '3581d577-946a-11f0-981a-442e1c01b37c', NULL),
-('279a187d-95eb-11f0-981a-442e1c01b37c', 'test notif', '-', '2025-09-26', '2025-09-30', 'afiq', '8d488fd7-9464-11f0-981a-442e1c01b37c', NULL),
-('3ab0989e-9496-11f0-981a-442e1c01b37c', 'Proker eksternal 1', '-', '2025-09-13', '2025-10-29', 'jakhel', '8d488fd7-9464-11f0-981a-442e1c01b37c', NULL),
-('48779a2a-9491-11f0-981a-442e1c01b37c', 'Proker 2', '-', '2025-09-30', '2025-10-31', 'Hafizh', '3581d577-946a-11f0-981a-442e1c01b37c', 'dokumen_pendukung-1758201201969-982370291.png'),
-('6dd8c0b7-95e5-11f0-981a-442e1c01b37c', 'test notif', '-', '2025-09-19', '2025-09-24', '-', '8d488fd7-9464-11f0-981a-442e1c01b37c', NULL),
-('9ae3807a-956e-11f0-981a-442e1c01b37c', 'HMSI FEST', '-', '2025-09-30', '2025-10-14', 'alex', '8d488fd7-9464-11f0-981a-442e1c01b37c', 'dokumen_pendukung-1758296257954-72663265.pdf'),
-('a260f2eb-9490-11f0-981a-442e1c01b37c', 'Proker 1', '-', '2025-09-19', '2025-09-23', 'Afiq', '3581d577-946a-11f0-981a-442e1c01b37c', 'dokumen_pendukung-1758200923261-928409523.pdf');
+('0376b2cd-95f1-11f0-981a-442e1c01b37c', 'Proker 3', '-', '2025-09-25', '2025-09-30', '-', '2311522033', NULL),
+('0c3d6d76-95f9-11f0-981a-442e1c01b37c', 'test Notifff', '-', '2025-09-24', '2025-09-30', 'hbjkn', '2311522033', NULL),
+('279a187d-95eb-11f0-981a-442e1c01b37c', 'test notif', '-', '2025-09-26', '2025-09-30', 'afiq', '2311522021', NULL),
+('3ab0989e-9496-11f0-981a-442e1c01b37c', 'Proker eksternal 1', '-', '2025-09-13', '2025-10-29', 'jakhel', '2311522021', NULL),
+('48779a2a-9491-11f0-981a-442e1c01b37c', 'Proker 2', '-', '2025-09-30', '2025-10-31', 'Hafizh', '2311522033', 'dokumen_pendukung-1758201201969-982370291.png'),
+('6dd8c0b7-95e5-11f0-981a-442e1c01b37c', 'test notif', '-', '2025-09-19', '2025-09-24', '-', '2311522021', NULL),
+('7a3c598f-96ca-11f0-981a-442e1c01b37c', 'Proker 3', 'ga ada', '2025-09-10', '2025-09-24', 'ga ada', '2311522033', NULL),
+('9ae3807a-956e-11f0-981a-442e1c01b37c', 'HMSI FEST', '-', '2025-09-30', '2025-10-14', 'alex', '2311522021', 'dokumen_pendukung-1758296257954-72663265.pdf'),
+('a260f2eb-9490-11f0-981a-442e1c01b37c', 'Proker 1', '-', '2025-09-19', '2025-09-23', 'Afiq', '2311522033', 'dokumen_pendukung-1758200923261-928409523.pdf');
 
 -- --------------------------------------------------------
 
@@ -172,10 +186,10 @@ CREATE TABLE `user` (
 --
 
 INSERT INTO `user` (`id_anggota`, `nama`, `email`, `password`, `role`, `divisi`, `foto_profile`) VALUES
-('3581d577-946a-11f0-981a-442e1c01b37c', 'Ketua Divisi Internal', 'internal', 'hmsi123', 'HMSI', 'Internal', NULL),
+('2311522021', 'Ketua Divisi Eksternal', 'eksternal', 'hmsi123', 'HMSI', 'Eksternal', 'profile/05d0e666-2b28-4e1e-a7b8-7e8b67537ac6.jpg'),
+('2311522033', 'Ketua Divisi Internal', 'internal', 'hmsi123', 'HMSI', 'Internal', NULL),
 ('8d43d10d-9464-11f0-981a-442e1c01b37c', 'Admin User', 'admin', 'admin123', 'Admin', NULL, NULL),
-('8d477929-9464-11f0-981a-442e1c01b37c', 'DPA User', 'dpa', 'dpa123', 'DPA', NULL, NULL),
-('8d488fd7-9464-11f0-981a-442e1c01b37c', 'Ketua Divisi Eksternal', 'eksternal', 'hmsi123', 'HMSI', 'Eksternal', NULL);
+('8d477929-9464-11f0-981a-442e1c01b37c', 'DPA User', 'dpa', 'dpa123', 'DPA', NULL, NULL);
 
 --
 -- Indexes for dumped tables
