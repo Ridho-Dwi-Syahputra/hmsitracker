@@ -37,9 +37,7 @@ function safeRemoveFile(filename) {
   if (!filename) return;
   try {
     const fp = path.join(UPLOAD_DIR, filename);
-    if (fs.existsSync(fp)) {
-      fs.unlinkSync(fp);
-    }
+    if (fs.existsSync(fp)) fs.unlinkSync(fp);
   } catch (err) {
     console.error("⚠️ gagal menghapus file lama:", err.message);
   }
@@ -60,6 +58,25 @@ function formatTanggal(dateValue) {
 }
 
 // =====================================================
+// helper: hitung status otomatis (dengan respect ke DPA)
+// =====================================================
+function calculateStatusWithLock(start, end, status_db) {
+  // Jika sudah diputuskan DPA, jangan override
+  if (status_db === "Selesai" || status_db === "Gagal") {
+    return status_db;
+  }
+
+  const today = new Date();
+  start = start ? new Date(start) : null;
+  end = end ? new Date(end) : null;
+
+  if (start && today < start) return "Belum Dimulai";
+  if (start && end && today >= start && today <= end) return "Sedang Berjalan";
+  if (end && today > end) return "Selesai";
+  return "Belum Dimulai";
+}
+
+// =====================================================
 // 📄 Ambil semua program kerja
 // =====================================================
 exports.getAllProker = async (req, res) => {
@@ -74,7 +91,8 @@ exports.getAllProker = async (req, res) => {
         p.Tanggal_mulai AS tanggal_mulai,
         p.Tanggal_selesai AS tanggal_selesai,
         p.Penanggung_jawab AS penanggungJawab,
-        p.Dokumen_pendukung AS dokumen_pendukung
+        p.Dokumen_pendukung AS dokumen_pendukung,
+        p.Status AS status_db
       FROM Program_kerja p
       LEFT JOIN User u ON p.id_anggota = u.id_anggota
     `;
@@ -90,25 +108,21 @@ exports.getAllProker = async (req, res) => {
 
     const [rows] = await db.query(query, params);
 
-    // Tambahkan status otomatis berdasarkan tanggal
-    const programs = rows.map(r => {
-      const today = new Date();
-      const start = r.tanggal_mulai ? new Date(r.tanggal_mulai) : null;
-      const end = r.tanggal_selesai ? new Date(r.tanggal_selesai) : null;
+    const programs = [];
+    for (const r of rows) {
+      const status = calculateStatusWithLock(r.tanggal_mulai, r.tanggal_selesai, r.status_db);
 
-      let status = "Belum Dimulai";
-      if (start && today >= start && (!end || today <= end)) {
-        status = "Sedang Berjalan";
-      } else if (end && today > end) {
-        status = "Selesai";
+      // hanya update DB jika status belum final
+      if (status !== r.status_db && !(r.status_db === "Selesai" || r.status_db === "Gagal")) {
+        await db.query("UPDATE Program_kerja SET Status=? WHERE id_ProgramKerja=?", [status, r.id]);
       }
 
-      return {
+      programs.push({
         ...r,
         tanggalFormatted: formatTanggal(r.tanggal_mulai),
         status,
-      };
-    });
+      });
+    }
 
     res.render("hmsi/kelolaProker", {
       title: "Kelola Program Kerja",
@@ -141,27 +155,27 @@ exports.getDetailProker = async (req, res) => {
         p.Tanggal_mulai AS tanggal_mulai,
         p.Tanggal_selesai AS tanggal_selesai,
         p.Penanggung_jawab AS penanggungJawab,
-        p.Dokumen_pendukung AS dokumen_pendukung
+        p.Dokumen_pendukung AS dokumen_pendukung,
+        p.Status AS status_db
       FROM Program_kerja p
       LEFT JOIN User u ON p.id_anggota = u.id_anggota
       WHERE p.id_ProgramKerja = ?`,
       [req.params.id]
     );
 
-    if (!rows.length) {
-      return res.status(404).send("Program Kerja tidak ditemukan");
-    }
+    if (!rows.length) return res.status(404).send("Program Kerja tidak ditemukan");
 
     const proker = rows[0];
 
-    const today = new Date();
-    const start = proker.tanggal_mulai ? new Date(proker.tanggal_mulai) : null;
-    const end = proker.tanggal_selesai ? new Date(proker.tanggal_selesai) : null;
-    let status = "Belum Dimulai";
-    if (start && today >= start && (!end || today <= end)) {
-      status = "Sedang Berjalan";
-    } else if (end && today > end) {
-      status = "Selesai";
+    // 🔒 Validasi: HMSI hanya boleh akses proker divisi sendiri
+    if (req.session.user.role === "HMSI" && proker.divisi !== req.session.user.divisi) {
+      return res.status(403).send("Akses ditolak ke proker divisi lain");
+    }
+
+    const status = calculateStatusWithLock(proker.tanggal_mulai, proker.tanggal_selesai, proker.status_db);
+
+    if (status !== proker.status_db && !(proker.status_db === "Selesai" || proker.status_db === "Gagal")) {
+      await db.query("UPDATE Program_kerja SET Status=? WHERE id_ProgramKerja=?", [status, proker.id]);
     }
 
     res.render("hmsi/detailProker", {
@@ -191,10 +205,11 @@ exports.createProker = async (req, res) => {
     const user = req.session.user;
     const { namaProker, deskripsi, tanggal_mulai, tanggal_selesai, penanggungJawab, id_anggota } = req.body;
 
+    // Validasi wajib isi
     if (!namaProker || !penanggungJawab || !tanggal_mulai || !tanggal_selesai) {
       return res.render("hmsi/tambahProker", {
         title: "Tambah Proker",
-        user: user,
+        user,
         activeNav: "Program Kerja",
         old: req.body,
         errorMsg: "Semua field wajib diisi!",
@@ -202,14 +217,27 @@ exports.createProker = async (req, res) => {
       });
     }
 
+    // Validasi tanggal
+    if (new Date(tanggal_mulai) > new Date(tanggal_selesai)) {
+      return res.render("hmsi/tambahProker", {
+        title: "Tambah Proker",
+        user,
+        activeNav: "Program Kerja",
+        old: req.body,
+        errorMsg: "Tanggal selesai tidak boleh lebih awal dari tanggal mulai!",
+        successMsg: null,
+      });
+    }
+
     const dokumen = req.file ? req.file.filename : null;
+    const status = calculateStatusWithLock(tanggal_mulai, tanggal_selesai, null);
 
     // Insert Proker
-    const [result] = await db.query(
+    await db.query(
       `INSERT INTO Program_kerja 
-        (id_ProgramKerja, Nama_ProgramKerja, Deskripsi, Tanggal_mulai, Tanggal_selesai, Penanggung_jawab, id_anggota, Dokumen_pendukung)
-       VALUES (UUID(), ?, ?, ?, ?, ?, ?, ?)`,
-      [namaProker, deskripsi, tanggal_mulai, tanggal_selesai, penanggungJawab, id_anggota || user.id, dokumen]
+        (id_ProgramKerja, Nama_ProgramKerja, Deskripsi, Tanggal_mulai, Tanggal_selesai, Penanggung_jawab, id_anggota, Dokumen_pendukung, Status)
+       VALUES (UUID(), ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [namaProker, deskripsi, tanggal_mulai, tanggal_selesai, penanggungJawab, id_anggota || user.id, dokumen, status]
     );
 
     // 🟠 Tambahkan notifikasi
@@ -282,15 +310,30 @@ exports.updateProker = async (req, res) => {
     const { id } = req.params;
     const { namaProker, deskripsi, tanggal_mulai, tanggal_selesai, penanggungJawab, id_anggota } = req.body;
 
+    // Validasi tanggal
+    if (new Date(tanggal_mulai) > new Date(tanggal_selesai)) {
+      return res.render("hmsi/editProker", {
+        title: "Edit Program Kerja",
+        user,
+        activeNav: "Program Kerja",
+        proker: { ...req.body, id },
+        errorMsg: "Tanggal selesai tidak boleh lebih awal dari tanggal mulai!",
+        successMsg: null,
+      });
+    }
+
     const newFile = req.file ? req.file.filename : null;
 
     const [existingRows] = await db.query(
-      "SELECT Dokumen_pendukung FROM Program_kerja WHERE id_ProgramKerja = ?",
+      "SELECT Dokumen_pendukung, Status FROM Program_kerja WHERE id_ProgramKerja = ?",
       [id]
     );
     if (!existingRows.length) return res.status(404).send("Proker tidak ditemukan");
 
     const oldFile = existingRows[0].Dokumen_pendukung;
+    const status_db = existingRows[0].Status;
+
+    const status = calculateStatusWithLock(tanggal_mulai, tanggal_selesai, status_db);
 
     let query = `
       UPDATE Program_kerja SET 
@@ -299,8 +342,9 @@ exports.updateProker = async (req, res) => {
         Tanggal_mulai=?, 
         Tanggal_selesai=?, 
         Penanggung_jawab=?, 
-        id_anggota=?`;
-    const params = [namaProker, deskripsi, tanggal_mulai, tanggal_selesai, penanggungJawab, id_anggota || user.id];
+        id_anggota=?, 
+        Status=?`;
+    const params = [namaProker, deskripsi, tanggal_mulai, tanggal_selesai, penanggungJawab, id_anggota || user.id, status];
 
     if (newFile) {
       query += `, Dokumen_pendukung=?`;
@@ -312,9 +356,7 @@ exports.updateProker = async (req, res) => {
 
     await db.query(query, params);
 
-    if (newFile && oldFile) {
-      safeRemoveFile(oldFile);
-    }
+    if (newFile && oldFile) safeRemoveFile(oldFile);
 
     // 🟠 Tambahkan notifikasi update
     const idNotifikasi = uuidv4();

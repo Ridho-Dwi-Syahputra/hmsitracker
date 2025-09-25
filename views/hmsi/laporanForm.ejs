@@ -19,19 +19,19 @@
     <div class="max-w-5xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-orange-200">
 
       <!-- Header Card -->
-      <div class="bg-orange-500 text-white px-6 py-10">
+      <div class="bg-orange-500 text-white px-6 py-6">
         <h1 class="text-2xl font-bold">Tambah Laporan</h1>
         <p class="text-sm text-orange-100">Lengkapi detail laporan kegiatan di bawah</p>
       </div>
 
       <!-- Body Card -->
-      <div class="p-6 sm:p-8 space-y-0">
+      <div class="p-6 sm:p-8 ">
 
         <!-- Alert -->
         <%- include('../partials/alert', { errorMsg: errorMsg, successMsg: successMsg }) %>
 
         <!-- Form -->
-        <form action="/hmsi/laporan/tambah" method="POST" enctype="multipart/form-data" class="space-y-10">
+        <form id="laporanForm" action="/hmsi/laporan/tambah" method="POST" enctype="multipart/form-data" class="space-y-10">
 
           <!-- Informasi Dasar -->
           <div>
@@ -54,16 +54,13 @@
                 <label class="block text-sm font-medium text-orange-700 mb-2">
                   Program Kerja <span class="text-red-500">*</span>
                 </label>
-                
-                <!-- Dropdown Button -->
+                <!-- Dropdown -->
                 <button type="button" id="prokerDropdownBtn"
                   class="flex items-center justify-between w-full px-4 py-3 border border-orange-200 rounded-lg text-sm bg-white
                          hover:border-orange-500 hover:shadow-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200">
                   <span id="prokerDropdownLabel"><%= old?.id_ProgramKerja ? programs.find(p => p.id == old.id_ProgramKerja)?.namaProker : 'Pilih Program Kerja' %></span>
                   <i class="fa-solid fa-chevron-down text-orange-500"></i>
                 </button>
-
-                <!-- Dropdown Menu -->
                 <div id="prokerDropdownMenu"
                   class="hidden absolute left-0 mt-2 w-full bg-white border border-orange-200 rounded-lg shadow-lg z-10">
                   <ul class="max-h-48 overflow-y-auto text-sm text-gray-700">
@@ -76,8 +73,6 @@
                     <% }) %>
                   </ul>
                 </div>
-
-                <!-- Hidden Input -->
                 <input type="hidden" name="id_ProgramKerja" id="prokerInput" value="<%= old?.id_ProgramKerja || '' %>">
               </div>
 
@@ -108,18 +103,45 @@
           <div>
             <h4 class="text-lg font-semibold text-orange-600 mb-4">Informasi Keuangan</h4>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+              <!-- Sumber Dana Radio -->
               <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
                 <label class="block text-sm font-medium text-orange-700 mb-2">Sumber Dana</label>
-                <input type="text" name="sumber_dana"
-                  value="<%= old?.sumber_dana || '' %>"
-                  placeholder="Contoh: HMSI Fakultas Teknik"
-                  class="w-full px-4 py-3 border border-orange-200 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-200">
+                <div class="flex flex-col gap-3">
+                  <label class="flex items-center gap-2">
+                    <input type="radio" name="sumber_dana_radio" value="uang_kas"
+                      class="text-orange-500 focus:ring-orange-500"
+                      <%= old?.sumber_dana === 'Uang Kas HMSI' ? 'checked' : '' %>>
+                    <span>Uang Kas HMSI</span>
+                  </label>
+                  <label class="flex items-center gap-2">
+                    <input type="radio" name="sumber_dana_radio" value="lainnya"
+                      class="text-orange-500 focus:ring-orange-500"
+                      <%= old?.sumber_dana && old?.sumber_dana !== 'Uang Kas HMSI' ? 'checked' : '' %>>
+                    <input type="text" name="sumber_dana_text"
+                      value="<%= old?.sumber_dana && old?.sumber_dana !== 'Uang Kas HMSI' ? old.sumber_dana : '' %>"
+                      placeholder="lainnya, contoh : Departemen SI"
+                      class="flex-1 px-4 py-2 border border-orange-200 rounded-lg text-sm placeholder-gray-400 focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
+                      <%= !old?.sumber_dana || old?.sumber_dana === 'Uang Kas HMSI' ? 'disabled' : '' %>>
+                  </label>
+                </div>
               </div>
+
+              <!-- Dana Digunakan (umum) -->
               <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
-                <label class="block text-sm font-medium text-orange-700 mb-2">Dana Terpakai (Rp)</label>
+                <label class="block text-sm font-medium text-orange-700 mb-2">Total Dana Kegiatan (Rp)</label>
                 <input type="number" name="dana_digunakan"
                   value="<%= old?.dana_digunakan || '' %>"
-                  placeholder="Contoh: 2500000"
+                  placeholder="Contoh: 3000000"
+                  class="w-full px-4 py-3 border border-orange-200 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-200">
+              </div>
+
+              <!-- Dana Terpakai (khusus kas HMSI) -->
+              <div class="bg-orange-50 border border-orange-200 rounded-xl p-4 md:col-span-2">
+                <label class="block text-sm font-medium text-orange-700 mb-2">Dana Terpakai dari Uang Kas HMSI (Rp)</label>
+                <input type="number" name="dana_terpakai"
+                  value="<%= old?.dana_terpakai || '' %>"
+                  placeholder="Contoh: 1500000"
                   class="w-full px-4 py-3 border border-orange-200 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-200">
               </div>
             </div>
@@ -176,35 +198,23 @@
           <div>
             <h4 class="text-lg font-semibold text-orange-600 mb-1">File Dokumentasi</h4>
             <p class="text-sm text-gray-500 mb-4">Upload file pendukung laporan kegiatan</p>
-
-            <!-- Dropzone -->
             <div id="dropzone"
               class="border-2 border-dashed border-orange-300 rounded-xl p-10 bg-orange-50/30 text-center cursor-pointer 
                      transition duration-200 hover:border-orange-500 hover:bg-orange-100/50 flex flex-col items-center gap-4">
-              
-              <!-- Hidden file input -->
               <input type="file" name="dokumentasi" id="fileUpload" class="hidden"
                 accept=".pdf,.jpg,.jpeg,.png" />
-
-              <!-- Icon -->
               <div class="text-4xl text-gray-400">📄</div>
-
-              <!-- Button -->
               <label for="fileUpload" class="cursor-pointer">
-                <span 
-                  class="px-6 py-3 bg-orange-500 text-white rounded-lg text-sm font-medium 
+                <span class="px-6 py-3 bg-orange-500 text-white rounded-lg text-sm font-medium 
                          transition duration-200 hover:bg-orange-600 hover:shadow-md active:scale-95">
                   Pilih File atau Drag & Drop
                 </span>
               </label>
-
-              <!-- File info -->
               <p class="text-sm text-gray-600">
                 Format yang didukung: <span class="font-medium">PDF, JPG, JPEG, PNG</span><br>
                 Maksimal ukuran file: <span class="font-medium">5MB</span>
               </p>
             </div>
-
             <p id="fileName" class="text-sm text-gray-600 mt-3"></p>
           </div>
 
@@ -222,7 +232,6 @@
             <button type="submit" id="submitBtn"
               class="flex items-center justify-center gap-2 px-8 py-3 text-white bg-orange-500 rounded-xl text-sm font-semibold transition-all duration-200 hover:bg-orange-600">
               <span id="btnText">Simpan</span>
-              <div id="btnSpinner" class="hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
             </button>
           </div>
         </form>
@@ -240,26 +249,31 @@
     const menu = document.getElementById("prokerDropdownMenu");
     const input = document.getElementById("prokerInput");
     const label = document.getElementById("prokerDropdownLabel");
-
-    btn.addEventListener("click", () => {
-      menu.classList.toggle("hidden");
-    });
-
+    btn.addEventListener("click", () => menu.classList.toggle("hidden"));
     menu.querySelectorAll("button").forEach(item => {
       item.addEventListener("click", () => {
-        const value = item.getAttribute("data-value");
-        const text = item.textContent;
-        input.value = value;
-        label.textContent = text;
+        input.value = item.dataset.value;
+        label.textContent = item.textContent;
         menu.classList.add("hidden");
       });
     });
-
-    // Tutup dropdown saat klik luar
     window.addEventListener("click", (e) => {
-      if (!btn.contains(e.target) && !menu.contains(e.target)) {
-        menu.classList.add("hidden");
-      }
+      if (!btn.contains(e.target) && !menu.contains(e.target)) menu.classList.add("hidden");
+    });
+
+    // Enable/disable text sumber dana
+    const radios = document.querySelectorAll('input[name="sumber_dana_radio"]');
+    const textInput = document.querySelector('input[name="sumber_dana_text"]');
+    radios.forEach(r => {
+      r.addEventListener('change', () => {
+        if (r.value === 'lainnya' && r.checked) {
+          textInput.disabled = false;
+          textInput.focus();
+        } else if (r.value === 'uang_kas' && r.checked) {
+          textInput.disabled = true;
+          textInput.value = '';
+        }
+      });
     });
   </script>
 

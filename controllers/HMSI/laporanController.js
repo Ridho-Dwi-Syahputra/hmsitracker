@@ -1,13 +1,14 @@
 // =====================================================
-// controllers/HMSI/laporanController.js
+// controllers/hmsi/laporanController.js
 // CRUD Laporan HMSI (simpan file ke /public/uploads) + role-based access
 // + Notifikasi otomatis untuk DPA
+// + Sinkronisasi otomatis keuangan (pengeluaran kas HMSI)
 // =====================================================
 
 const db = require("../../config/db");
 const path = require("path");
 const fs = require("fs");
-const { v4: uuidv4 } = require("uuid"); // ✅ untuk id_laporan & id_notifikasi
+const { v4: uuidv4 } = require("uuid");
 
 const UPLOAD_DIR = path.join(__dirname, "../../public/uploads");
 
@@ -60,7 +61,7 @@ function formatTanggal(dateValue) {
 }
 
 // =====================================================
-// 📄 Daftar semua laporan (role-based, divisi dari user)
+// 📄 Daftar semua laporan
 // =====================================================
 exports.getAllLaporan = async (req, res) => {
   try {
@@ -133,7 +134,7 @@ exports.getFormLaporan = async (req, res) => {
 };
 
 // =====================================================
-// 💾 Simpan laporan baru + notifikasi
+// 💾 Simpan laporan baru + keuangan
 // =====================================================
 exports.createLaporan = async (req, res) => {
   try {
@@ -144,7 +145,9 @@ exports.createLaporan = async (req, res) => {
       sasaran,
       waktu_tempat,
       dana_digunakan,
-      sumber_dana,
+      sumber_dana_radio,
+      sumber_dana_text,
+      dana_terpakai,
       persentase_kualitatif,
       persentase_kuantitatif,
       kendala,
@@ -156,22 +159,37 @@ exports.createLaporan = async (req, res) => {
       return res.redirect("/hmsi/laporan?error=Judul, Proker, Deskripsi wajib diisi");
     }
 
+    const sumberDana = sumber_dana_radio === "uang_kas"
+      ? "Uang Kas HMSI"
+      : (sumber_dana_text || null);
+
+    // Normalisasi angka
+    let danaDigunakanNum = dana_digunakan ? parseFloat(String(dana_digunakan).replace(/[^\d.-]/g, "")) : 0;
+    let danaTerpakaiNum = dana_terpakai ? parseFloat(String(dana_terpakai).replace(/[^\d.-]/g, "")) : 0;
+
+    // Samakan jika salah satu kosong
+    if (danaDigunakanNum > 0 && danaTerpakaiNum === 0) danaTerpakaiNum = danaDigunakanNum;
+    if (danaTerpakaiNum > 0 && danaDigunakanNum === 0) danaDigunakanNum = danaTerpakaiNum;
+
     const dokumentasi = req.file ? req.file.filename : null;
     const idLaporan = uuidv4();
 
     await db.query(
       `INSERT INTO Laporan 
-        (id_laporan, judul_laporan, deskripsi_kegiatan, sasaran, waktu_tempat, dana_digunakan, sumber_dana, 
+        (id_laporan, judul_laporan, deskripsi_kegiatan, sasaran, waktu_tempat, dana_digunakan, 
+         sumber_dana, sumber_dana_lainnya, dana_terpakai,
          persentase_kualitatif, persentase_kuantitatif, kendala, solusi, dokumentasi, id_ProgramKerja, divisi, tanggal)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURDATE())`,
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURDATE())`,
       [
         idLaporan,
         judul_laporan,
         deskripsi_kegiatan,
         sasaran,
         waktu_tempat,
-        dana_digunakan,
-        sumber_dana,
+        danaDigunakanNum,
+        sumberDana,
+        sumber_dana_text || null,
+        danaTerpakaiNum,
         persentase_kualitatif,
         persentase_kuantitatif,
         kendala,
@@ -181,6 +199,23 @@ exports.createLaporan = async (req, res) => {
         user.divisi || null,
       ]
     );
+
+    // 🔗 Tambah keuangan jika pakai kas HMSI
+    if (sumberDana === "Uang Kas HMSI" && danaTerpakaiNum > 0) {
+      const id_keuangan = uuidv4();
+      await db.query(
+        `INSERT INTO keuangan 
+         (id_keuangan, tanggal, tipe, sumber, jumlah, id_laporan, id_anggota, created_at)
+         VALUES (?, CURDATE(), 'Pengeluaran', ?, ?, ?, ?, NOW())`,
+        [
+          id_keuangan,
+          `Pengeluaran dari Laporan: ${judul_laporan}`,
+          danaTerpakaiNum,
+          idLaporan,
+          user?.id_anggota || null
+        ]
+      );
+    }
 
     // ✅ Notifikasi ke DPA
     const pesanNotif = `Divisi ${user.divisi} telah menambahkan laporan baru: ${judul_laporan}`;
@@ -286,7 +321,7 @@ exports.getEditLaporan = async (req, res) => {
 };
 
 // =====================================================
-// 💾 Update laporan + notifikasi
+// 💾 Update laporan + keuangan
 // =====================================================
 exports.updateLaporan = async (req, res) => {
   try {
@@ -297,13 +332,26 @@ exports.updateLaporan = async (req, res) => {
       sasaran,
       waktu_tempat,
       dana_digunakan,
-      sumber_dana,
+      sumber_dana_radio,
+      sumber_dana_text,
+      dana_terpakai,
       persentase_kualitatif,
       persentase_kuantitatif,
       kendala,
       solusi,
       id_ProgramKerja,
     } = req.body;
+
+    const sumberDana = sumber_dana_radio === "uang_kas"
+      ? "Uang Kas HMSI"
+      : (sumber_dana_text || null);
+
+    let danaDigunakanNum = dana_digunakan ? parseFloat(String(dana_digunakan).replace(/[^\d.-]/g, "")) : 0;
+    let danaTerpakaiNum = dana_terpakai ? parseFloat(String(dana_terpakai).replace(/[^\d.-]/g, "")) : 0;
+
+    // Samakan jika salah satu kosong
+    if (danaDigunakanNum > 0 && danaTerpakaiNum === 0) danaTerpakaiNum = danaDigunakanNum;
+    if (danaTerpakaiNum > 0 && danaDigunakanNum === 0) danaDigunakanNum = danaTerpakaiNum;
 
     const newFile = req.file ? req.file.filename : null;
 
@@ -330,6 +378,8 @@ exports.updateLaporan = async (req, res) => {
         waktu_tempat=?, 
         dana_digunakan=?, 
         sumber_dana=?, 
+        sumber_dana_lainnya=?,
+        dana_terpakai=?,
         persentase_kualitatif=?, 
         persentase_kuantitatif=?, 
         kendala=?, 
@@ -341,8 +391,10 @@ exports.updateLaporan = async (req, res) => {
       deskripsi_kegiatan,
       sasaran,
       waktu_tempat,
-      dana_digunakan,
-      sumber_dana,
+      danaDigunakanNum,
+      sumberDana,
+      sumber_dana_text || null,
+      danaTerpakaiNum,
       persentase_kualitatif,
       persentase_kuantitatif,
       kendala,
@@ -365,6 +417,37 @@ exports.updateLaporan = async (req, res) => {
       safeRemoveFile(oldFile);
     }
 
+    // 🔗 Sinkronisasi keuangan
+    const [keuRows] = await db.query(`SELECT * FROM keuangan WHERE id_laporan=?`, [req.params.id]);
+    const hasKeu = keuRows.length > 0;
+
+    if (sumberDana === "Uang Kas HMSI" && danaTerpakaiNum > 0) {
+      if (hasKeu) {
+        await db.query(
+          `UPDATE keuangan SET jumlah=?, sumber=?, tanggal=CURDATE() WHERE id_laporan=?`,
+          [danaTerpakaiNum, `Pengeluaran dari Laporan: ${judul_laporan}`, req.params.id]
+        );
+      } else {
+        const id_keuangan = uuidv4();
+        await db.query(
+          `INSERT INTO keuangan 
+           (id_keuangan, tanggal, tipe, sumber, jumlah, id_laporan, id_anggota, created_at)
+           VALUES (?, CURDATE(), 'Pengeluaran', ?, ?, ?, ?, NOW())`,
+          [
+            id_keuangan,
+            `Pengeluaran dari Laporan: ${judul_laporan}`,
+            danaTerpakaiNum,
+            req.params.id,
+            user?.id_anggota || null
+          ]
+        );
+      }
+    } else {
+      if (hasKeu) {
+        await db.query(`DELETE FROM keuangan WHERE id_laporan=?`, [req.params.id]);
+      }
+    }
+
     // ✅ Notifikasi update
     const pesanNotif = `Divisi ${user.divisi} telah mengupdate laporan: ${judul_laporan}`;
     await db.query(
@@ -381,7 +464,7 @@ exports.updateLaporan = async (req, res) => {
 };
 
 // =====================================================
-// ❌ Hapus laporan + notifikasi
+// ❌ Hapus laporan
 // =====================================================
 exports.deleteLaporan = async (req, res) => {
   try {
@@ -400,6 +483,7 @@ exports.deleteLaporan = async (req, res) => {
       return res.status(403).send("Tidak boleh hapus laporan divisi lain");
     }
 
+    await db.query("DELETE FROM keuangan WHERE id_laporan = ?", [req.params.id]);
     await db.query("DELETE FROM Laporan WHERE id_laporan = ?", [req.params.id]);
 
     if (file) safeRemoveFile(file);
@@ -424,21 +508,14 @@ exports.deleteLaporan = async (req, res) => {
 // =====================================================
 exports.downloadDokumentasi = async (req, res) => {
   try {
-    const [rows] = await db.query(
-      "SELECT dokumentasi FROM Laporan WHERE id_laporan = ?",
-      [req.params.id]
-    );
-
-    if (!rows.length || !rows[0].dokumentasi) {
-      return res.status(404).send("Dokumentasi tidak ditemukan");
-    }
+    const [rows] = await db.query("SELECT dokumentasi FROM Laporan WHERE id_laporan = ?", [req.params.id]);
+    if (!rows.length) return res.status(404).send("Dokumentasi tidak ditemukan");
 
     const fileName = rows[0].dokumentasi;
-    const filePath = path.join(UPLOAD_DIR, fileName);
+    if (!fileName) return res.status(404).send("Tidak ada file dokumentasi");
 
-    if (!fs.existsSync(filePath)) {
-      return res.status(404).send("File dokumentasi tidak ditemukan di server");
-    }
+    const filePath = path.join(UPLOAD_DIR, fileName);
+    if (!fs.existsSync(filePath)) return res.status(404).send("File dokumentasi hilang");
 
     res.download(filePath, fileName);
   } catch (err) {

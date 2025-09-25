@@ -23,14 +23,14 @@
       <!-- Header Card -->
       <div class="bg-orange-500 text-white px-6 py-6">
         <h1 class="text-2xl font-bold">Notifikasi</h1>
-        <p class="text-sm text-orange-100">Update evaluasi laporan dari DPA untuk divisi Anda</p>
+        <p class="text-sm text-orange-100">Update terbaru dari DPA untuk divisi Anda</p>
       </div>
 
       <!-- Body Card -->
       <div class="p-6 sm:p-8 space-y-4">
         <% if (notifikasi && notifikasi.length > 0) { %>
           <% notifikasi.forEach(function(n) { %>
-            <% const targetUrl = '/hmsi/evaluasi/' + n.id_evaluasi; %>
+            <% const targetUrl = n.linkUrl; %>
 
             <!-- Card Notifikasi -->
             <a href="/hmsi/notifikasi/read/<%= n.id_notifikasi %>?to=<%= encodeURIComponent(targetUrl) %>"
@@ -49,14 +49,21 @@
                     <%= n.pesan || 'Ada evaluasi pada laporan Anda' %>
                   </p>
 
-                  <p class="text-gray-600 text-xs mt-1">
-                    <span class="font-semibold">Judul Laporan:</span> <%= n.judul_laporan || '-' %><br>
-                    <span class="font-semibold">Evaluator:</span> <%= n.evaluator || 'DPA' %>
-                  </p>
+                  <!-- Info tambahan jika ada laporan -->
+                  <% if (n.id_evaluasi) { %>
+                    <p class="text-gray-600 text-xs mt-1">
+                      <span class="font-semibold">Judul Laporan:</span> <%= n.judul_laporan || '-' %><br>
+                      <span class="font-semibold">Evaluator:</span> <%= n.evaluator || 'DPA' %>
+                    </p>
+                  <% } else if (n.id_ProgramKerja) { %>
+                    <p class="text-gray-600 text-xs mt-1">
+                      <span class="font-semibold">Program Kerja:</span> <%= n.Nama_ProgramKerja || '-' %>
+                    </p>
+                  <% } %>
 
                   <div class="flex items-center justify-between mt-3">
                     <span class="text-xs text-gray-500"><%= n.tanggalFormatted || '-' %></span>
-                    <span class="text-orange-500 text-xs font-medium hover:underline">Lihat Evaluasi</span>
+                    <span class="text-orange-500 text-xs font-medium hover:underline"><%= n.linkLabel %></span>
                   </div>
                 </div>
 

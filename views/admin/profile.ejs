@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Profil Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" 
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" 
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body class="bg-orange-50 min-h-screen flex flex-col">
+
+  <!-- Navbar -->
+  <%- include('../partials/navbarAdmin', { user: user }) %>
+
+  <!-- Sidebar -->
+  <%- include('../partials/sidebarAdmin', { user: user, activeNav: 'profile' }) %>
+
+  <!-- Wrapper -->
+  <main class="lg:ml-80 px-6 pt-20 pb-8 flex-grow">
+    <div class="max-w-3xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-orange-200">
+
+      <!-- Header -->
+      <div class="bg-orange-500 text-white px-6 py-5">
+        <h1 class="text-2xl font-bold">Profil Admin (Presidium Inti)</h1>
+        <p class="text-sm text-orange-100">Informasi akun & pengaturan profil</p>
+      </div>
+
+      <!-- Body -->
+      <div class="p-6 sm:p-8 space-y-8">
+
+        <!-- Flash Messages -->
+        <% if (errorMsg && errorMsg.length > 0) { %>
+          <% errorMsg.forEach(msg => { %>
+            <div class="p-4 bg-red-100 text-red-700 rounded-xl text-sm"><%= msg %></div>
+          <% }) %>
+        <% } %>
+        <% if (successMsg && successMsg.length > 0) { %>
+          <% successMsg.forEach(msg => { %>
+            <div class="p-4 bg-green-100 text-green-700 rounded-xl text-sm"><%= msg %></div>
+          <% }) %>
+        <% } %>
+
+        <!-- Foto + Info -->
+        <%
+          // Normalisasi foto profil
+          var fotoProfile = (user && user.foto_profile) 
+            ? ('/' + user.foto_profile.replace(/^\/+/, '')) 
+            : '/default-profile.png';
+        %>
+        <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+          <img src="<%= fotoProfile %>?v=<%= Date.now() %>"
+               class="w-28 h-28 rounded-full border-4 border-orange-200 shadow-md object-cover"
+               alt="Foto Profil"
+               onerror="this.onerror=null;this.src='/default-profile.png?v=<%= Date.now() %>'">
+
+          <div class="text-center sm:text-left">
+            <h2 class="text-xl font-semibold text-gray-800"><%= user.nama || user.name %></h2>
+            <p class="text-sm text-gray-500">
+              NIM: <%= user.id_anggota ? user.id_anggota : '-' %>
+            </p>
+          </div>
+        </div>
+
+        <!-- Info Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="p-4 bg-orange-50 border border-orange-200 rounded-xl">
+            <p class="text-xs text-gray-500">Email</p>
+            <p class="text-sm font-medium text-gray-800 break-all"><%= user.email %></p>
+          </div>
+          <div class="p-4 bg-orange-50 border border-orange-200 rounded-xl">
+            <p class="text-xs text-gray-500">Role</p>
+            <p class="text-sm font-medium text-gray-800"><%= user.role %></p>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row justify-between gap-3 pt-6 border-t">
+          <a href="/admin/dashboard"
+             class="w-full sm:w-auto px-6 py-3 border border-gray-300 rounded-xl text-sm font-medium bg-white text-gray-700 transition-all duration-200 hover:shadow-md text-center">
+            Kembali
+          </a>
+          <a href="/admin/profile/edit"
+             class="w-full sm:w-auto px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-sm font-semibold transition-all duration-200 text-center">
+            Edit Profil
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+   <!-- Footer -->
+   <%- include('../partials/footer') %>
+
+  <!-- Print-friendly -->
+  <style>
+    @media print {
+      body { background: white; }
+      .no-print, .lg\:ml-80 { display: none !important; }
+    }
+  </style>
+</body>
+</html>

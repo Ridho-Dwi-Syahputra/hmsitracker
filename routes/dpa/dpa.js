@@ -8,17 +8,21 @@ const router = express.Router();
 const path = require("path");
 const multer = require("multer");
 
-// 🔑 Middleware auth
+// =====================================================
+// IMPORT AUTH & MIDDLEWARE
+// =====================================================
 const { requireLogin, requireRole } = require("../../middleware/auth");
 
-// 📂 Controllers
+// =====================================================
+// IMPORT CONTROLLERS
+// =====================================================
 const dpaProkerController = require("../../controllers/DPA/prokerController");
 const dpaLaporanController = require("../../controllers/DPA/laporanController");
 const dpaNotifikasiController = require("../../controllers/DPA/notifikasiController");
 const dpaProfileController = require("../../controllers/DPA/profileController");
 
 // =====================================================
-// 🏠 Dashboard DPA
+// DASHBOARD DPA
 // =====================================================
 router.get(
   "/dashboard",
@@ -34,7 +38,7 @@ router.get(
 );
 
 // =====================================================
-// 📋 Program Kerja
+// PROGRAM KERJA (PROKER)
 // =====================================================
 router.get(
   "/lihatProker",
@@ -50,7 +54,7 @@ router.get(
   dpaProkerController.getDetailProkerDPA
 );
 
-// 📌 Alias untuk konsistensi
+// 📌 Alias route untuk konsistensi
 router.get(
   "/proker/:id/detail",
   requireLogin,
@@ -58,8 +62,16 @@ router.get(
   dpaProkerController.getDetailProkerDPA
 );
 
+// 🔄 Update Status Proker (DPA → tandai Selesai / Gagal)
+router.post(
+  "/proker/:id/status",
+  requireLogin,
+  requireRole(["DPA"]),
+  dpaProkerController.updateStatusProker
+);
+
 // =====================================================
-// 📑 Laporan
+// LAPORAN
 // =====================================================
 router.get(
   "/kelolaLaporan",
@@ -84,10 +96,8 @@ router.get(
 );
 
 // =====================================================
-// 📝 Evaluasi Laporan
+// EVALUASI LAPORAN
 // =====================================================
-
-// versi dari kelolaLaporan
 router.get(
   "/kelolaLaporan/:id/evaluasi",
   requireLogin,
@@ -118,7 +128,7 @@ router.post(
 );
 
 // =====================================================
-// 📊 Kelola Evaluasi (list semua evaluasi yang pernah dibuat DPA)
+// KELOLA EVALUASI (list semua evaluasi oleh DPA)
 // =====================================================
 router.get(
   "/kelolaEvaluasi",
@@ -128,7 +138,7 @@ router.get(
 );
 
 // =====================================================
-// 🔔 Notifikasi DPA
+// NOTIFIKASI DPA
 // =====================================================
 router.get(
   "/dpaNotifikasi",
@@ -137,7 +147,7 @@ router.get(
   dpaNotifikasiController.getAllNotifikasi
 );
 
-// 📌 Klik notifikasi = otomatis tandai sudah dibaca + redirect
+// 📌 Klik notifikasi = tandai sudah dibaca + redirect
 router.get(
   "/notifikasi/read/:id",
   requireLogin,
@@ -145,7 +155,7 @@ router.get(
   dpaNotifikasiController.readAndRedirect
 );
 
-// (opsional) tandai dibaca manual
+// 📌 Tandai notifikasi sebagai dibaca (manual)
 router.get(
   "/notifikasi/mark/:id",
   requireLogin,
@@ -154,7 +164,7 @@ router.get(
 );
 
 // =====================================================
-// 👤 Profile DPA
+// PROFILE DPA
 // =====================================================
 
 // 📄 Lihat profil
@@ -185,7 +195,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
-// 💾 Update profil (nama wajib, password & foto opsional via file upload)
+// 💾 Update profil (nama wajib, password & foto opsional)
 router.post(
   "/profile/update",
   requireLogin,
@@ -194,4 +204,7 @@ router.post(
   dpaProfileController.postEditProfile
 );
 
+// =====================================================
+// EXPORT ROUTER
+// =====================================================
 module.exports = router;

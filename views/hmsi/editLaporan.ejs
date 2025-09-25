@@ -34,7 +34,7 @@
         <%- include('../partials/alert', { errorMsg: errorMsg, successMsg: successMsg }) %>
 
         <!-- Form -->
-        <form action="/hmsi/laporan/edit/<%= laporan.id_laporan %>" method="POST" enctype="multipart/form-data" class="space-y-8" data-mode="edit">
+        <form id="editLaporanForm" action="/hmsi/laporan/edit/<%= laporan.id_laporan %>" method="POST" enctype="multipart/form-data" class="space-y-10">
 
           <!-- Informasi Dasar -->
           <div>
@@ -42,19 +42,23 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
               <!-- Judul Laporan -->
-              <div class="md:col-span-2">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Judul Laporan</label>
+              <div class="md:col-span-2 bg-orange-50 border border-orange-200 rounded-xl p-4">
+                <label class="block text-sm font-medium text-orange-700 mb-2">
+                  Judul Laporan <span class="text-red-500">*</span>
+                </label>
                 <input type="text" name="judul_laporan"
                   value="<%= old.judul_laporan || laporan.judul_laporan || '' %>" required
                   placeholder="Masukkan judul laporan..."
-                  class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500">
+                  class="w-full px-4 py-3 border border-orange-200 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-200">
               </div>
 
               <!-- Program Kerja -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Program Kerja</label>
+              <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
+                <label class="block text-sm font-medium text-orange-700 mb-2">
+                  Program Kerja <span class="text-red-500">*</span>
+                </label>
                 <select name="id_ProgramKerja" required
-                  class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500">
+                  class="w-full px-4 py-3 border border-orange-200 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-200">
                   <option value="">-- Pilih Program Kerja --</option>
                   <% (programs || []).forEach(p => { 
                        let selected = old.id_ProgramKerja 
@@ -68,20 +72,22 @@
               </div>
 
               <!-- Waktu & Tempat -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Waktu & Tempat</label>
+              <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
+                <label class="block text-sm font-medium text-orange-700 mb-2">Waktu & Tempat</label>
                 <input type="text" name="waktu_tempat"
                   value="<%= old.waktu_tempat || laporan.waktu_tempat || '' %>"
                   placeholder="Contoh: 09:00 - 12:00 WIB, Gedung A"
-                  class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500">
+                  class="w-full px-4 py-3 border border-orange-200 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-200">
               </div>
 
               <!-- Deskripsi -->
-              <div class="md:col-span-2">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Deskripsi Kegiatan</label>
+              <div class="md:col-span-2 bg-orange-50 border border-orange-200 rounded-xl p-4">
+                <label class="block text-sm font-medium text-orange-700 mb-2">
+                  Deskripsi Kegiatan <span class="text-red-500">*</span>
+                </label>
                 <textarea name="deskripsi_kegiatan" rows="4" required
                   placeholder="Tuliskan deskripsi kegiatan..."
-                  class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm resize-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500"><%= old.deskripsi_kegiatan || laporan.deskripsi_kegiatan || '' %></textarea>
+                  class="w-full px-4 py-3 border border-orange-200 rounded-lg text-sm resize-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200"><%= old.deskripsi_kegiatan || laporan.deskripsi_kegiatan || '' %></textarea>
               </div>
             </div>
           </div>
@@ -90,19 +96,46 @@
           <div>
             <h4 class="text-lg font-semibold text-orange-600 mb-4">Informasi Keuangan</h4>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Sumber Dana</label>
-                <input type="text" name="sumber_dana"
-                  value="<%= old.sumber_dana || laporan.sumber_dana || '' %>"
-                  placeholder="Contoh: HMSI Fakultas Teknik"
-                  class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500">
+
+              <!-- Sumber Dana Radio -->
+              <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
+                <label class="block text-sm font-medium text-orange-700 mb-2">Sumber Dana</label>
+                <div class="flex flex-col gap-3">
+                  <label class="flex items-center gap-2">
+                    <input type="radio" name="sumber_dana_radio" value="uang_kas"
+                      class="text-orange-500 focus:ring-orange-500"
+                      <%= (old?.sumber_dana || laporan.sumber_dana) === 'Uang Kas HMSI' ? 'checked' : '' %>>
+                    <span>Uang Kas HMSI</span>
+                  </label>
+                  <label class="flex items-center gap-2">
+                    <input type="radio" name="sumber_dana_radio" value="lainnya"
+                      class="text-orange-500 focus:ring-orange-500"
+                      <%= (old?.sumber_dana || laporan.sumber_dana) !== 'Uang Kas HMSI' ? 'checked' : '' %>>
+                    <input type="text" name="sumber_dana_text"
+                      value="<%= (old?.sumber_dana || laporan.sumber_dana) !== 'Uang Kas HMSI' ? (old?.sumber_dana || laporan.sumber_dana) : '' %>"
+                      placeholder="lainnya, contoh : Departemen SI"
+                      class="flex-1 px-4 py-2 border border-orange-200 rounded-lg text-sm placeholder-gray-400 focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
+                      <%= (old?.sumber_dana || laporan.sumber_dana) === 'Uang Kas HMSI' ? 'disabled' : '' %>>
+                  </label>
+                </div>
               </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Dana Terpakai (Rp)</label>
+
+              <!-- Dana Digunakan -->
+              <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
+                <label class="block text-sm font-medium text-orange-700 mb-2">Total Dana Kegiatan (Rp)</label>
                 <input type="number" name="dana_digunakan"
                   value="<%= old.dana_digunakan || laporan.dana_digunakan || '' %>"
-                  placeholder="Contoh: 2500000"
-                  class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500">
+                  placeholder="Contoh: 3000000"
+                  class="w-full px-4 py-3 border border-orange-200 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-200">
+              </div>
+
+              <!-- Dana Terpakai -->
+              <div class="bg-orange-50 border border-orange-200 rounded-xl p-4 md:col-span-2">
+                <label class="block text-sm font-medium text-orange-700 mb-2">Dana Terpakai dari Uang Kas HMSI (Rp)</label>
+                <input type="number" name="dana_terpakai"
+                  value="<%= old.dana_terpakai || laporan.dana_terpakai || '' %>"
+                  placeholder="Contoh: 1500000"
+                  class="w-full px-4 py-3 border border-orange-200 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-200">
               </div>
             </div>
           </div>
@@ -111,19 +144,19 @@
           <div>
             <h4 class="text-lg font-semibold text-orange-600 mb-4">Target Pencapaian</h4>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Target Kuantitatif (%)</label>
+              <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
+                <label class="block text-sm font-medium text-orange-700 mb-2">Target Kuantitatif (%)</label>
                 <input type="number" name="persentase_kuantitatif"
                   value="<%= old.persentase_kuantitatif || laporan.persentase_kuantitatif || '' %>"
                   min="0" max="100"
-                  class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500">
+                  class="w-full px-4 py-3 border border-orange-200 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-200">
               </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Target Kualitatif (%)</label>
+              <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
+                <label class="block text-sm font-medium text-orange-700 mb-2">Target Kualitatif (%)</label>
                 <input type="number" name="persentase_kualitatif"
                   value="<%= old.persentase_kualitatif || laporan.persentase_kualitatif || '' %>"
                   min="0" max="100"
-                  class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500">
+                  class="w-full px-4 py-3 border border-orange-200 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-200">
               </div>
             </div>
           </div>
@@ -132,25 +165,25 @@
           <div>
             <h4 class="text-lg font-semibold text-orange-600 mb-4">Kendala dan Solusi</h4>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Kendala</label>
+              <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
+                <label class="block text-sm font-medium text-orange-700 mb-2">Kendala</label>
                 <textarea name="kendala" rows="3"
-                  class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm resize-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500"><%= old.kendala || laporan.kendala || '' %></textarea>
+                  class="w-full px-4 py-3 border border-orange-200 rounded-lg text-sm resize-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200"><%= old.kendala || laporan.kendala || '' %></textarea>
               </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Solusi</label>
+              <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
+                <label class="block text-sm font-medium text-orange-700 mb-2">Solusi</label>
                 <textarea name="solusi" rows="3"
-                  class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm resize-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500"><%= old.solusi || laporan.solusi || '' %></textarea>
+                  class="w-full px-4 py-3 border border-orange-200 rounded-lg text-sm resize-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200"><%= old.solusi || laporan.solusi || '' %></textarea>
               </div>
             </div>
           </div>
 
           <!-- Sasaran -->
-          <div>
-            <h4 class="text-lg font-semibold text-orange-600 mb-4">Sasaran Kegiatan</h4>
+          <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
+            <h4 class="text-lg font-semibold text-orange-600 mb-2">Sasaran Kegiatan</h4>
             <input type="text" name="sasaran"
               value="<%= old.sasaran || laporan.sasaran || '' %>"
-              class="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-500">
+              class="w-full px-4 py-3 border border-orange-200 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-200">
           </div>
 
           <!-- Dokumentasi -->
@@ -162,23 +195,18 @@
               class="border-2 border-dashed border-orange-300 rounded-xl p-8 bg-orange-50/30 text-center cursor-pointer 
                      transition duration-200 hover:border-orange-500 hover:bg-orange-100/50 flex flex-col items-center gap-4">
 
-              <!-- Hidden file input -->
               <input type="file" name="dokumentasi" id="fileUpload" class="hidden" accept=".pdf,.jpg,.jpeg,.png"/>
-
               <div class="text-4xl text-gray-400">📄</div>
-
               <label for="fileUpload" class="cursor-pointer">
                 <span class="px-6 py-3 bg-orange-500 text-white rounded-lg text-sm font-medium transition hover:bg-orange-600 hover:shadow-md active:scale-95">
                   Pilih File atau Drag & Drop
                 </span>
               </label>
-
               <p class="text-sm text-gray-600">
                 Format didukung: <span class="font-medium">PDF, JPG, JPEG, PNG</span><br>
                 Maksimal ukuran: <span class="font-medium">5MB</span>
               </p>
             </div>
-
             <p id="fileName" class="text-sm text-gray-600 mt-3"></p>
 
             <% if (laporan && laporan.dokumentasi) { %>
@@ -216,17 +244,57 @@
 
   <!-- Script -->
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const input = document.getElementById("fileUpload");
-      const fileName = document.getElementById("fileName");
-
-      input.addEventListener("change", () => {
-        if (input.files.length > 0) {
-          fileName.textContent = "File dipilih: " + input.files[0].name;
-        } else {
-          fileName.textContent = "";
+    // handle sumber dana radio
+    const radios = document.querySelectorAll('input[name="sumber_dana_radio"]');
+    const textInput = document.querySelector('input[name="sumber_dana_text"]');
+    radios.forEach(r => {
+      r.addEventListener('change', () => {
+        if (r.value === 'lainnya' && r.checked) {
+          textInput.disabled = false;
+          textInput.focus();
+        } else if (r.value === 'uang_kas' && r.checked) {
+          textInput.disabled = true;
+          textInput.value = '';
         }
       });
+    });
+
+    const inputFile = document.getElementById("fileUpload");
+    const fileName = document.getElementById("fileName");
+    inputFile?.addEventListener("change", () => {
+      fileName.textContent = inputFile.files.length > 0 ? "File dipilih: " + inputFile.files[0].name : "";
+    });
+
+    // --- AJAX submit untuk update ---
+    const form = document.getElementById('editLaporanForm');
+    const btnSubmit = document.getElementById('submitBtn');
+    const btnText = document.getElementById('btnText');
+    const btnSpinner = document.getElementById('btnSpinner');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      btnSubmit.disabled = true;
+      btnText.textContent = 'Menyimpan...';
+      btnSpinner.classList.remove('hidden');
+
+      const formData = new FormData(form);
+      try {
+        const res = await fetch(form.action, { method: 'POST', body: formData });
+        const text = await res.text();
+        if (res.ok) {
+          alert('✅ Laporan berhasil diperbarui!');
+          window.location.href = "/hmsi/laporan";
+        } else {
+          alert('❌ Gagal memperbarui laporan: ' + text);
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Terjadi error koneksi');
+      } finally {
+        btnSubmit.disabled = false;
+        btnText.textContent = 'Update';
+        btnSpinner.classList.add('hidden');
+      }
     });
   </script>
 

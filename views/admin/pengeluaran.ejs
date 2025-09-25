@@ -16,32 +16,26 @@
   <!-- ✅ Sidebar Admin -->
   <%- include('../partials/sidebarAdmin', { user: user, activeNav: activeNav }) %>
 
-  <!-- Wrapper Konten -->
+  <!-- Konten Utama -->
   <main class="lg:ml-80 px-6 pt-20 pb-8 flex-grow">
     <div class="max-w-6xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-orange-200">
 
-      <!-- Header Card -->
+      <!-- Header -->
       <div class="bg-orange-500 text-white px-6 py-6 flex items-center justify-between">
         <div>
           <h1 class="text-2xl font-bold"><%= title %></h1>
-          <p class="text-sm text-orange-100">Kelola pemasukan kas HMSI</p>
+          <p class="text-sm text-orange-100">Daftar pengeluaran kas HMSI berdasarkan kegiatan laporan</p>
         </div>
-        <a href="/admin/keuangan/tambah"
-          class="flex items-center space-x-2 px-4 py-2 bg-white text-orange-600 rounded-lg font-semibold
-                 transition-all duration-200 hover:bg-orange-100 hover:scale-105 active:scale-95">
-          <i class="fa-solid fa-plus"></i>
-          <span>Tambah Pemasukan</span>
-        </a>
       </div>
 
-      <!-- Body Card -->
+      <!-- Body -->
       <div class="p-6 sm:p-8">
 
         <!-- Search -->
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
           <div class="flex-1">
             <div class="relative">
-              <input id="searchInput" type="text" placeholder="Cari pemasukan..."
+              <input id="searchInput" type="text" placeholder="Cari pengeluaran..."
                 class="w-full pl-10 pr-4 py-3 border rounded-xl text-sm
                        border-gray-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-500
                        focus:bg-orange-50 focus:text-orange-700 
@@ -52,17 +46,18 @@
           </div>
         </div>
 
-        <% if (!pemasukan || pemasukan.length === 0) { %>
+        <% if (!pengeluaran || pengeluaran.length === 0) { %>
           <!-- Empty State -->
           <div class="flex flex-col items-center space-y-4 py-20">
             <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
               <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
               </svg>
             </div>
             <div class="text-center">
-              <div class="text-xl font-semibold text-gray-800 mb-2">Belum ada pemasukan</div>
-              <div class="text-gray-500">Klik "Tambah Pemasukan" untuk menambah dana kas</div>
+              <div class="text-xl font-semibold text-gray-800 mb-2">Belum ada pengeluaran</div>
+              <div class="text-gray-500">Data pengeluaran akan muncul jika ada laporan yang menggunakan dana kas</div>
             </div>
           </div>
         <% } else { %>
@@ -72,40 +67,31 @@
               <thead class="bg-orange-100 text-gray-700">
                 <tr>
                   <th class="py-3 px-4 font-semibold border border-orange-200">No</th>
-                  <th class="py-3 px-4 font-semibold border border-orange-200">Tanggal Pemasukan</th>
-                  <th class="py-3 px-4 font-semibold border border-orange-200 text-center">Sumber Pemasukan</th>
-                  <th class="py-3 px-4 font-semibold border border-orange-200 text-center">Jumlah Dana (Rp)</th>
-                  <th class="py-3 px-4 font-semibold border border-orange-200">Aksi</th>
+                  <th class="py-3 px-4 font-semibold border border-orange-200">Divisi</th>
+                  <th class="py-3 px-4 font-semibold border border-orange-200">Program Kerja</th>
+                  <th class="py-3 px-4 font-semibold border border-orange-200">Dana Terpakai</th>
+                  <th class="py-3 px-4 font-semibold border border-orange-200">Tanggal Pengeluaran</th>
                 </tr>
               </thead>
-              <tbody id="kasTable">
-                <% pemasukan.forEach(function(item, i) { %>
+              <tbody id="pengeluaranTable">
+                <% let totalPengeluaran = 0; %>
+                <% pengeluaran.forEach(function(p, i) { %>
+                  <% totalPengeluaran += parseFloat(p.dana_terpakai || 0); %>
                   <tr class="hover:bg-orange-50 transition">
                     <td class="py-3 px-4 border border-orange-100"><%= i + 1 %></td>
-                    <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= item.tanggalFormatted %></td>
-                    <td class="py-3 px-4 font-medium text-gray-800 border border-orange-100 text-center"><%= item.sumber %></td>
-                    <td class="py-3 px-4 text-gray-800 font-semibold border border-orange-100 text-center">
-                      Rp <%= item.jumlah.toLocaleString('id-ID') %>
-                    </td>
-                    <td class="py-3 px-4 flex justify-center gap-4 border border-orange-100">
-                      <a href="/admin/keuangan/edit/<%= item.id_keuangan %>" class="text-orange-500 hover:text-orange-700 transition transform hover:scale-110" title="Edit">
-                        <i class="fa-solid fa-pen-to-square text-lg"></i>
-                      </a>
-                      <form action="/admin/keuangan/delete/<%= item.id_keuangan %>" method="POST" class="inline" onsubmit="return confirm('Yakin hapus pemasukan ini?')">
-                        <button type="submit" class="text-orange-500 hover:text-orange-700 transition transform hover:scale-110" title="Hapus">
-                          <i class="fa-solid fa-trash text-lg"></i>
-                        </button>
-                      </form>
-                    </td>
+                    <td class="py-3 px-4 font-medium text-gray-800 border border-orange-100"><%= p.divisi %></td>
+                    <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= p.program_kerja %></td>
+                    <td class="py-3 px-4 text-gray-600 border border-orange-100">Rp <%= Number(p.dana_terpakai).toLocaleString('id-ID') %></td>
+                    <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= p.tanggal_pengeluaran %></td>
                   </tr>
                 <% }); %>
                 <!-- Total -->
-                <tr class="bg-orange-50 font-bold">
-                  <td colspan="4" class="py-3 px-4 text-right border-t border-orange-300">Total Pemasukan</td>
-                  <td class="py-3 px-4 text-orange-700 text-center border-t border-orange-300">
-                    Rp <%= totalPemasukan.toLocaleString('id-ID') %>
-                  </td>
-                </tr>
+<tr class="bg-orange-50 font-bold">
+  <td colspan="4" class="py-3 px-4 text-right border-t border-orange-300">Total Pengeluaran</td>
+  <td class="py-3 px-4 text-orange-700 text-right border-t border-orange-300">
+    Rp <%= Number(totalPengeluaran).toLocaleString('id-ID') %>
+  </td>
+</tr>
               </tbody>
             </table>
           </div>
@@ -129,30 +115,29 @@
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const searchInput = document.getElementById("searchInput");
-      const tbody = document.getElementById("kasTable");
-      let rows = tbody ? Array.from(tbody.querySelectorAll("tr")) : [];
-      // exclude last row (total)
-      let dataRows = rows.slice(0, -1);
+      const tbody = document.getElementById("pengeluaranTable");
+      let rows = tbody ? Array.from(tbody.querySelectorAll("tr")).filter(r => !r.classList.contains("bg-orange-100")) : [];
 
       const rowsPerPage = 10;
       let currentPage = 1;
 
       function filterRows() {
         const searchValue = searchInput.value.toLowerCase();
-        dataRows.forEach(row => {
-          const sumber = row.cells[2]?.innerText.toLowerCase() || "";
-          let matchSearch = sumber.includes(searchValue);
+        rows.forEach(row => {
+          const divisi = row.cells[1]?.innerText.toLowerCase() || "";
+          const program = row.cells[2]?.innerText.toLowerCase() || "";
+          let matchSearch = divisi.includes(searchValue) || program.includes(searchValue);
           row.dataset.visible = matchSearch ? "true" : "false";
         });
         paginate();
       }
 
       function paginate() {
-        let visibleRows = dataRows.filter(row => row.dataset.visible !== "false");
+        let visibleRows = rows.filter(row => row.dataset.visible !== "false");
         let totalPages = Math.ceil(visibleRows.length / rowsPerPage);
         if (currentPage > totalPages) currentPage = totalPages || 1;
 
-        dataRows.forEach(row => row.style.display = "none");
+        rows.forEach(row => row.style.display = "none");
         visibleRows.forEach((row, index) => {
           if (index >= (currentPage-1)*rowsPerPage && index < currentPage*rowsPerPage) {
             row.style.display = "";
@@ -169,7 +154,7 @@
 
       searchInput?.addEventListener("input", filterRows);
 
-      if (dataRows.length > 0) filterRows();
+      if (rows.length > 0) filterRows();
     });
   </script>
 </body>

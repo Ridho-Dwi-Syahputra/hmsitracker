@@ -2,13 +2,14 @@
 // =====================================================
 // Controller untuk Notifikasi HMSI
 // - Hanya menampilkan notifikasi evaluasi dari DPA
-// - Klik notifikasi = otomatis tandai sudah dibaca + redirect ke detail evaluasi laporan
+// - Juga menampilkan notifikasi update status Proker dari DPA
+// - Klik notifikasi = otomatis tandai sudah dibaca + redirect
 // =====================================================
 
 const db = require("../../config/db");
 
 // =====================================================
-// 📄 Ambil semua notifikasi evaluasi untuk HMSI sesuai divisi
+// 📄 Ambil semua notifikasi untuk HMSI sesuai divisi
 // =====================================================
 exports.getAllNotifikasi = async (req, res) => {
   try {
@@ -21,15 +22,19 @@ exports.getAllNotifikasi = async (req, res) => {
       `SELECT n.*, l.judul_laporan, p.Nama_ProgramKerja, u.nama AS evaluator
        FROM Notifikasi n
        LEFT JOIN Laporan l ON n.id_laporan = l.id_laporan
-       LEFT JOIN Program_kerja p ON l.id_ProgramKerja = p.id_ProgramKerja
+       LEFT JOIN Program_kerja p ON 
+          (l.id_ProgramKerja = p.id_ProgramKerja OR n.id_ProgramKerja = p.id_ProgramKerja)
        LEFT JOIN Evaluasi e ON n.id_evaluasi = e.id_evaluasi
        LEFT JOIN User u ON e.pemberi_evaluasi = u.id_anggota
        WHERE n.divisi = ?
-         AND n.id_evaluasi IS NOT NULL
-         AND (n.role IS NULL OR n.role = 'HMSI')   -- ✅ hanya notif untuk HMSI
+         AND (
+              (n.role = 'HMSI')         -- 🔹 notif untuk HMSI (status Proker dari DPA)
+              OR (n.id_evaluasi IS NOT NULL) -- 🔹 evaluasi dari DPA
+             )
        ORDER BY n.created_at DESC`,
       [user.divisi]
     );
+    
 
     const notifikasi = rows.map(n => {
       let tanggalFormatted = "-";
@@ -44,11 +49,21 @@ exports.getAllNotifikasi = async (req, res) => {
         }
       }
 
+      // Default: link evaluasi
+      let linkUrl = `/hmsi/evaluasi/${n.id_evaluasi}`;
+      let linkLabel = "Lihat Evaluasi";
+
+      // 🔹 Jika ini notifikasi terkait Proker (status update dari DPA)
+      if (n.id_ProgramKerja && !n.id_evaluasi) {
+        linkUrl = `/hmsi/proker/${n.id_ProgramKerja}`;
+        linkLabel = "Lihat Program Kerja";
+      }
+
       return {
         ...n,
         tanggalFormatted,
-        linkUrl: `/hmsi/evaluasi/${n.id_evaluasi}`,
-        linkLabel: "Lihat Evaluasi"
+        linkUrl,
+        linkLabel
       };
     });
 

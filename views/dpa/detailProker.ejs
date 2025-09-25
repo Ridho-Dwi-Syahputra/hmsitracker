@@ -33,9 +33,26 @@
       <div id="prokerContent" class="max-w-5xl mx-auto bg-white rounded-2xl border border-gray-200 shadow-sm p-8">
 
         <!-- Card Header -->
-        <div class="mb-8 border-b border-gray-100 pb-6">
-          <h3 class="text-2xl font-bold text-gray-800 mb-2">Informasi Program Kerja</h3>
-          <p class="text-base text-gray-600 m-0">Detail lengkap program kerja</p>
+        <div class="mb-8 border-b border-gray-100 pb-6 flex justify-between items-center">
+          <div>
+            <h3 class="text-2xl font-bold text-gray-800 mb-2">Informasi Program Kerja</h3>
+            <p class="text-base text-gray-600 m-0">Detail lengkap program kerja</p>
+          </div>
+          <!-- Tombol Aksi Ubah Status -->
+          <div class="flex gap-3">
+            <% if (proker.status !== "Selesai") { %>
+              <button onclick="ubahStatus('<%= proker.id %>', 'Selesai')" 
+                class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white text-sm rounded-lg shadow transition">
+                Tandai Selesai
+              </button>
+            <% } %>
+            <% if (proker.status !== "Gagal") { %>
+              <button onclick="ubahStatus('<%= proker.id %>', 'Gagal')" 
+                class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-sm rounded-lg shadow transition">
+                Tandai Gagal
+              </button>
+            <% } %>
+          </div>
         </div>
 
         <!-- ALERT POPUP -->
@@ -80,6 +97,8 @@
                   <span class="px-3 py-1 text-sm rounded-full bg-blue-100 text-blue-700 font-medium"><%= proker.status %></span>
                 <% } else if (proker.status === "Selesai") { %>
                   <span class="px-3 py-1 text-sm rounded-full bg-green-100 text-green-700 font-medium"><%= proker.status %></span>
+                <% } else if (proker.status === "Gagal") { %>
+                  <span class="px-3 py-1 text-sm rounded-full bg-red-100 text-red-700 font-medium"><%= proker.status %></span>
                 <% } else { %>
                   <span class="px-3 py-1 text-sm rounded-full bg-gray-100 text-gray-600 font-medium"><%= proker.status %></span>
                 <% } %>
@@ -135,6 +154,32 @@
       #prokerContent { box-shadow: none; border: none; }
     }
   </style>
+
+  <!-- Script ubah status -->
+  <script>
+    function ubahStatus(id, status) {
+      if (!confirm(`Apakah Anda yakin ingin mengubah status menjadi ${status}?`)) return;
+
+      fetch(`/dpa/proker/${id}/status`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          alert(data.message);
+          location.reload();
+        } else {
+          alert("Gagal mengubah status: " + data.message);
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        alert("Terjadi kesalahan saat mengubah status.");
+      });
+    }
+  </script>
 
 </body>
 </html>

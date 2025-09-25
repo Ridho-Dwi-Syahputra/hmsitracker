@@ -18,13 +18,13 @@
     <div id="laporanContent" class="max-w-5xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-orange-200">
 
       <!-- Header Card -->
-      <div class="bg-orange-500 text-white px-6 py-10">
+      <div class="bg-orange-500 text-white px-6 py-6">
         <h1 class="text-2xl font-bold">Detail Laporan</h1>
         <p class="text-sm text-orange-100">Detail lengkap laporan kegiatan</p>
       </div>
 
       <!-- Body Card -->
-      <div class="p-6 sm:p-8 space-y-0">
+      <div class="p-6 sm:p-8 ">
 
         <!-- Alert -->
         <%- include('../partials/alert', { errorMsg: errorMsg, successMsg: successMsg }) %>
@@ -33,36 +33,32 @@
         <div>
           <h4 class="text-lg font-semibold text-orange-600 mb-4">Informasi Dasar</h4>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-            
-            <!-- Judul Laporan -->
+
             <div class="col-span-2 bg-orange-50 border border-orange-200 rounded-xl p-4">
               <p class="font-medium text-orange-700">Judul Laporan</p>
               <p class="text-gray-800"><%= laporan.judul_laporan || '-' %></p>
             </div>
 
-            <!-- Program Kerja -->
             <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
               <p class="font-medium text-orange-700">Program Kerja</p>
               <p class="text-gray-800"><%= laporan.namaProker || '-' %></p>
             </div>
 
-            <!-- Tanggal Upload -->
             <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
               <p class="font-medium text-orange-700">Tanggal Upload</p>
               <p class="text-gray-800"><%= laporan.tanggalFormatted || '-' %></p>
             </div>
 
-            <!-- Waktu & Tempat -->
             <div class="col-span-2 bg-orange-50 border border-orange-200 rounded-xl p-4">
               <p class="font-medium text-orange-700">Waktu & Tempat</p>
               <p class="text-gray-800"><%= laporan.waktu_tempat || '-' %></p>
             </div>
 
-            <!-- Deskripsi -->
             <div class="col-span-2 bg-orange-50 border border-orange-200 rounded-xl p-4">
               <p class="font-medium text-orange-700">Deskripsi Kegiatan</p>
               <p class="text-gray-800 whitespace-pre-line"><%= laporan.deskripsi_kegiatan || '-' %></p>
             </div>
+
           </div>
         </div>
 
@@ -132,7 +128,7 @@
                 <p class="text-sm text-gray-500">Preview tidak tersedia, silakan unduh.</p>
               <% } %>
               <a href="/uploads/<%= laporan.dokumentasi %>"
-                 class="inline-block px-4 py-2 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600 transition">
+                 class="inline-block px-6 py-3 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600 transition">
                 Download Dokumentasi
               </a>
             </div>
@@ -142,13 +138,13 @@
         </div>
 
         <!-- Tombol Aksi -->
-        <div class="pt-6 border-t border-gray-100 flex justify-between items-center no-print">
-          <a href="/hmsi/laporan" 
-             class="px-4 py-2 border border-gray-400 text-gray-600 rounded-xl hover:bg-gray-100">
+        <div class="pt-6 border-t border-gray-100 flex gap-4 justify-end no-print">
+          <a href="/hmsi/laporan"
+            class="px-8 py-3 border border-gray-300 rounded-xl text-sm font-medium bg-white text-gray-700 transition hover:shadow-md">
             Kembali
           </a>
           <a href="/hmsi/laporan/edit/<%= laporan.id_laporan %>"
-             class="px-6 py-3 bg-orange-500 text-white rounded-xl text-sm font-semibold hover:bg-orange-600 transition transform hover:scale-105 active:scale-95">
+            class="flex items-center justify-center gap-2 px-8 py-3 text-white bg-orange-500 rounded-xl text-sm font-semibold transition hover:bg-orange-600">
             Edit Laporan
           </a>
         </div>

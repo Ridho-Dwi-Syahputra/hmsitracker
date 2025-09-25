@@ -45,7 +45,7 @@
             </div>
           </div>
 
-          <!-- Custom Dropdown Status -->
+          <!-- Dropdown Status -->
           <div class="relative">
             <button id="dropdownButton" 
               class="flex items-center justify-between gap-2 px-4 py-3 border border-gray-300 rounded-xl text-sm bg-white
@@ -60,6 +60,7 @@
                 <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="Belum Dimulai">Belum Dimulai</button></li>
                 <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="Sedang Berjalan">Sedang Berjalan</button></li>
                 <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="Selesai">Selesai</button></li>
+                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="Gagal">Gagal</button></li>
               </ul>
             </div>
           </div>
@@ -81,7 +82,7 @@
             <tbody id="programTable">
               <% if (programs && programs.length > 0) { %>
                 <% programs.forEach((proker, index) => { %>
-                  <tr class="hover:bg-orange-50 transition">
+                  <tr class="hover:bg-orange-50 transition" data-status="<%= proker.status %>">
                     <td class="py-3 px-4 border border-orange-100"><%= index + 1 %></td>
                     <td class="py-3 px-4 font-medium text-gray-800 border border-orange-100 text-left"><%= proker.namaProker %></td>
                     <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= proker.divisi %></td>
@@ -93,6 +94,8 @@
                         <span class="px-3 py-1 text-xs rounded-full bg-blue-100 text-blue-700 font-medium"><%= proker.status %></span>
                       <% } else if (proker.status === "Selesai") { %>
                         <span class="px-3 py-1 text-xs rounded-full bg-green-100 text-green-700 font-medium"><%= proker.status %></span>
+                      <% } else if (proker.status === "Gagal") { %>
+                        <span class="px-3 py-1 text-xs rounded-full bg-red-100 text-red-700 font-medium"><%= proker.status %></span>
                       <% } else { %>
                         <span class="px-3 py-1 text-xs rounded-full bg-gray-100 text-gray-600 font-medium"><%= proker.status %></span>
                       <% } %>
@@ -101,6 +104,19 @@
                       <a href="/dpa/proker/<%= proker.id %>/detail" class="text-orange-500 hover:text-orange-700 transition transform hover:scale-110" title="Lihat Detail">
                         <i class="fa-solid fa-eye text-lg"></i>
                       </a>
+                      <!-- Tombol aksi ubah status -->
+                      <% if (proker.status !== "Selesai") { %>
+                        <button onclick="ubahStatus('<%= proker.id %>', 'Selesai')" 
+                          class="text-green-600 hover:text-green-800" title="Tandai Selesai">
+                          <i class="fa-solid fa-check-circle text-lg"></i>
+                        </button>
+                      <% } %>
+                      <% if (proker.status !== "Gagal") { %>
+                        <button onclick="ubahStatus('<%= proker.id %>', 'Gagal')" 
+                          class="text-red-600 hover:text-red-800" title="Tandai Gagal">
+                          <i class="fa-solid fa-xmark-circle text-lg"></i>
+                        </button>
+                      <% } %>
                     </td>
                   </tr>
                 <% }) %>
@@ -130,11 +146,6 @@
     .animate-fade-in { animation: fadeIn 0.7s ease-out forwards; }
     @keyframes slideDown { from {opacity:0; transform:translateY(-20px);} to {opacity:1; transform:translateY(0);} }
     .animate-slide-down { animation: slideDown 0.5s ease-out forwards; }
-
-    #searchInput:focus {
-      outline: none !important;
-      box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.4);
-    }
   </style>
 
   <!-- Script -->
@@ -209,6 +220,30 @@
 
       filterRows();
     });
+
+    // 🔄 Fungsi ubah status via fetch
+    function ubahStatus(id, status) {
+      if (!confirm(`Apakah Anda yakin ingin mengubah status menjadi ${status}?`)) return;
+
+      fetch(`/dpa/proker/${id}/status`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          alert(data.message);
+          location.reload();
+        } else {
+          alert("Gagal mengubah status: " + data.message);
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        alert("Terjadi kesalahan saat mengubah status.");
+      });
+    }
   </script>
 
 </body>

@@ -1,5 +1,4 @@
 <%
-  // normalize beberapa field
   const id = proker?.id || proker?.id_ProgramKerja || "";
   const nama = proker?.namaProker || proker?.Nama_ProgramKerja || "-";
   const divisi = proker?.divisi || proker?.Divisi || "-";
@@ -16,7 +15,6 @@
     return d.toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" });
   };
 
-  // status otomatis
   let status = proker?.status;
   if (!status) {
     const today = new Date();
@@ -51,50 +49,49 @@
     <div id="prokerContent" class="max-w-5xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-orange-200">
 
       <!-- Header Card -->
-      <div class="bg-orange-500 text-white px-6 py-6 flex justify-between items-center">
-        <div>
-          <h1 class="text-2xl font-bold">Detail Program Kerja</h1>
-          <p class="text-sm text-orange-100">Detail lengkap program kerja yang dipilih</p>
-        </div>
-        <a href="/hmsi/kelola-proker"
-           class="flex items-center gap-2 px-4 py-2 text-white bg-orange-600 hover:bg-orange-700 rounded-lg text-sm font-medium transition transform hover:scale-105 active:scale-95">
-          <i class="fa fa-arrow-left"></i>
-          <span>Kembali</span>
-        </a>
+      <div class="bg-orange-500 text-white px-6 py-6">
+        <h1 class="text-2xl font-bold">Detail Program Kerja</h1>
+        <p class="text-sm text-orange-100">Detail lengkap program kerja yang dipilih</p>
       </div>
 
       <!-- Body Card -->
-      <div class="p-6 sm:p-8">
+      <div class="p-6 sm:p-8 ">
 
         <!-- Alert -->
         <%- include('../partials/alert', { errorMsg: errorMsg, successMsg: successMsg }) %>
 
         <!-- Informasi Dasar -->
-        <div class="mb-8">
+        <div>
           <h4 class="text-lg font-semibold text-orange-600 mb-4">Informasi Dasar</h4>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-            <div>
-              <p class="font-medium text-gray-700">Nama Program Kerja</p>
+
+            <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
+              <p class="font-medium text-orange-700">Nama Program Kerja</p>
               <p class="text-gray-800"><%= nama %></p>
             </div>
-            <div>
-              <p class="font-medium text-gray-700">Divisi</p>
+
+            <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
+              <p class="font-medium text-orange-700">Divisi</p>
               <p class="text-gray-800"><%= divisi %></p>
             </div>
-            <div>
-              <p class="font-medium text-gray-700">Tanggal Mulai</p>
+
+            <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
+              <p class="font-medium text-orange-700">Tanggal Mulai</p>
               <p class="text-gray-800"><%= fmt(tstart) %></p>
             </div>
-            <div>
-              <p class="font-medium text-gray-700">Tanggal Selesai</p>
+
+            <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
+              <p class="font-medium text-orange-700">Tanggal Selesai</p>
               <p class="text-gray-800"><%= fmt(tend) %></p>
             </div>
-            <div>
-              <p class="font-medium text-gray-700">Penanggung Jawab</p>
+
+            <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
+              <p class="font-medium text-orange-700">Penanggung Jawab</p>
               <p class="text-gray-800"><%= penanggung %></p>
             </div>
-            <div>
-              <p class="font-medium text-gray-700">Status</p>
+
+            <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
+              <p class="font-medium text-orange-700">Status</p>
               <% if (status === "Belum Dimulai") { %>
                 <span class="px-3 py-1 text-sm rounded-full bg-yellow-100 text-yellow-700 font-medium"><%= status %></span>
               <% } else if (status === "Sedang Berjalan") { %>
@@ -105,10 +102,12 @@
                 <span class="px-3 py-1 text-sm rounded-full bg-gray-100 text-gray-600 font-medium"><%= status %></span>
               <% } %>
             </div>
-            <div class="md:col-span-2">
-              <p class="font-medium text-gray-700">Deskripsi</p>
+
+            <div class="md:col-span-2 bg-orange-50 border border-orange-200 rounded-xl p-4">
+              <p class="font-medium text-orange-700">Deskripsi</p>
               <p class="text-gray-800 whitespace-pre-line"><%= deskripsi %></p>
             </div>
+
           </div>
         </div>
 
@@ -120,19 +119,17 @@
               <div class="mb-4">
                 <img src="/uploads/<%= dok %>" alt="Dokumen" class="w-full max-h-80 object-contain rounded-lg shadow">
               </div>
-              <a href="/hmsi/proker/download/<%= id %>" class="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg text-sm font-medium">Download</a>
+              <a href="/hmsi/proker/download/<%= id %>" class="px-6 py-3 bg-orange-500 text-white rounded-xl text-sm font-medium hover:bg-orange-600 transition">Download</a>
             <% } else if (isPdf) { %>
               <div class="mb-4">
                 <embed src="/uploads/<%= dok %>" type="application/pdf" width="100%" height="420px" class="rounded-lg border" />
               </div>
-              <a href="/hmsi/proker/download/<%= id %>" class="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg text-sm font-medium">Download PDF</a>
+              <a href="/hmsi/proker/download/<%= id %>" class="px-6 py-3 bg-orange-500 text-white rounded-xl text-sm font-medium hover:bg-orange-600 transition">Download PDF</a>
             <% } else { %>
-              <div class="mb-4 p-4 bg-gray-50 border rounded-lg flex items-center justify-between">
-                <div>
-                  <p class="font-medium"><%= dok %></p>
-                  <p class="text-xs text-gray-500">Tipe file tidak dapat dipreview — silakan unduh.</p>
-                </div>
-                <a href="/hmsi/proker/download/<%= id %>" class="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg text-sm font-medium">Download</a>
+              <div class="mb-4 p-4 bg-orange-50 border border-orange-200 rounded-xl">
+                <p class="font-medium text-gray-800"><%= dok %></p>
+                <p class="text-xs text-gray-500">Tipe file tidak dapat dipreview — silakan unduh.</p>
+                <a href="/hmsi/proker/download/<%= id %>" class="mt-2 inline-block px-6 py-2 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600 transition">Download</a>
               </div>
             <% } %>
           <% } else { %>
@@ -141,18 +138,15 @@
         </div>
 
         <!-- Tombol Aksi -->
-        <div class="mt-10 pt-6 border-t border-gray-100 flex gap-3 justify-end no-print">
-          <a href="/hmsi/proker/edit/<%= id %>"
-             class="px-6 py-3 bg-blue-500 text-white rounded-xl text-sm font-semibold hover:bg-blue-600 transition transform hover:scale-105 active:scale-95">
-            Edit
+        <div class="pt-6 border-t border-gray-100 flex gap-4 justify-end no-print">
+          <a href="/hmsi/kelola-proker"
+            class="px-8 py-3 border border-gray-300 rounded-xl text-sm font-medium bg-white text-gray-700 transition hover:shadow-md">
+            Kembali
           </a>
-          <form action="/hmsi/proker/<%= id %>/delete" method="POST" 
-                onsubmit="return confirm('Yakin hapus program kerja ini?')">
-            <button type="submit" 
-              class="px-6 py-3 bg-red-500 text-white rounded-xl text-sm font-semibold hover:bg-red-600 transition transform hover:scale-105 active:scale-95">
-              Hapus
-            </button>
-          </form>
+          <a href="/hmsi/proker/edit/<%= id %>"
+            class="flex items-center justify-center gap-2 px-8 py-3 text-white bg-orange-500 rounded-xl text-sm font-semibold transition hover:bg-orange-600">
+            Edit Program Kerja
+          </a>
         </div>
 
       </div>
