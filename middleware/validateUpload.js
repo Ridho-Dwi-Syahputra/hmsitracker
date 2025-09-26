@@ -20,9 +20,24 @@ if (!fs.existsSync(uploadDir)) {
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, uploadDir),
   filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
     const ext = path.extname(file.originalname);
-    cb(null, file.fieldname + "-" + uniqueSuffix + ext);
+
+    if (req.session.user && req.session.user.role === "HMSI") {
+      // 🔑 Kalau HMSI → pakai nama asli
+      const finalName = file.originalname;
+
+      // Jika file dengan nama sama sudah ada → hapus dulu (overwrite)
+      const filePath = path.join(uploadDir, finalName);
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+
+      cb(null, finalName);
+    } else {
+      // Selain HMSI → pakai nama unik biar tidak bentrok
+      const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+      cb(null, file.fieldname + "-" + uniqueSuffix + ext);
+    }
   },
 });
 

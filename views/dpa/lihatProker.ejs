@@ -64,6 +64,28 @@
               </ul>
             </div>
           </div>
+
+          <!-- Dropdown Divisi -->
+          <div class="relative">
+            <button id="divisiDropdownBtn" 
+              class="flex items-center justify-between gap-2 px-4 py-3 border border-gray-300 rounded-xl text-sm bg-white
+                     hover:border-orange-500 hover:shadow-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200">
+              <span id="divisiDropdownLabel">Semua Divisi</span>
+              <i class="fa-solid fa-chevron-down text-orange-500"></i>
+            </button>
+            <div id="divisiDropdownMenu" 
+              class="hidden absolute right-0 mt-2 w-48 bg-white border border-orange-200 rounded-lg shadow-lg z-10">
+              <ul class="text-sm text-gray-700">
+                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="all">Semua Divisi</button></li>
+                <% 
+                  const uniqueDivisi = [...new Set(programs.map(p => p.divisi))];
+                  uniqueDivisi.forEach(div => { 
+                %>
+                  <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="<%= div %>"><%= div %></button></li>
+                <% }) %>
+              </ul>
+            </div>
+          </div>
         </div>
 
         <!-- Tabel -->
@@ -104,7 +126,6 @@
                       <a href="/dpa/proker/<%= proker.id %>/detail" class="text-orange-500 hover:text-orange-700 transition transform hover:scale-110" title="Lihat Detail">
                         <i class="fa-solid fa-eye text-lg"></i>
                       </a>
-                      <!-- Tombol aksi ubah status -->
                       <% if (proker.status !== "Selesai") { %>
                         <button onclick="ubahStatus('<%= proker.id %>', 'Selesai')" 
                           class="text-green-600 hover:text-green-800" title="Tandai Selesai">
@@ -155,24 +176,43 @@
       const dropdownButton = document.getElementById("dropdownButton");
       const dropdownMenu = document.getElementById("dropdownMenu");
       const dropdownLabel = document.getElementById("dropdownLabel");
+
+      const divisiDropdownBtn = document.getElementById("divisiDropdownBtn");
+      const divisiDropdownMenu = document.getElementById("divisiDropdownMenu");
+      const divisiDropdownLabel = document.getElementById("divisiDropdownLabel");
+
       const tbody = document.getElementById("programTable");
       let rows = Array.from(tbody.querySelectorAll("tr"));
 
       let statusValue = "all";
+      let divisiValue = "all";
       const rowsPerPage = 10;
       let currentPage = 1;
 
-      // Toggle dropdown
+      // Toggle dropdown status
       dropdownButton.addEventListener("click", () => {
         dropdownMenu.classList.toggle("hidden");
       });
 
-      // Klik pilihan status
       dropdownMenu.querySelectorAll("button").forEach(btn => {
         btn.addEventListener("click", () => {
           statusValue = btn.dataset.value;
           dropdownLabel.textContent = btn.textContent;
           dropdownMenu.classList.add("hidden");
+          filterRows();
+        });
+      });
+
+      // Toggle dropdown divisi
+      divisiDropdownBtn.addEventListener("click", () => {
+        divisiDropdownMenu.classList.toggle("hidden");
+      });
+
+      divisiDropdownMenu.querySelectorAll("button").forEach(btn => {
+        btn.addEventListener("click", () => {
+          divisiValue = btn.dataset.value;
+          divisiDropdownLabel.textContent = btn.textContent;
+          divisiDropdownMenu.classList.add("hidden");
           filterRows();
         });
       });
@@ -189,8 +229,9 @@
 
           let matchSearch = namaProker.includes(searchValue) || divisi.includes(searchValue) || pj.includes(searchValue);
           let matchStatus = (statusValue === "all" || status === statusValue);
+          let matchDivisi = (divisiValue === "all" || divisi === divisiValue.toLowerCase());
 
-          row.dataset.visible = (matchSearch && matchStatus) ? "true" : "false";
+          row.dataset.visible = (matchSearch && matchStatus && matchDivisi) ? "true" : "false";
         });
 
         paginate();
@@ -221,7 +262,6 @@
       filterRows();
     });
 
-    // 🔄 Fungsi ubah status via fetch
     function ubahStatus(id, status) {
       if (!confirm(`Apakah Anda yakin ingin mengubah status menjadi ${status}?`)) return;
 
