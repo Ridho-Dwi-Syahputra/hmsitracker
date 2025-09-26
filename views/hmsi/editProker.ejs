@@ -5,9 +5,7 @@
   <meta charset="UTF-8">
   <title><%= title %></title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <script src="https://kit.fontawesome.com/your-fa-kit.js" crossorigin="anonymous"></script>
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col">
 
@@ -19,92 +17,103 @@
 
   <!-- Wrapper -->
   <main class="lg:ml-80 px-6 pt-20 pb-8 flex-grow">
-    <div class="max-w-5xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-orange-200">
+    <div class="max-w-5xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-200">
 
       <!-- Header Card -->
-      <div class="bg-orange-500 text-white px-6 py-10">
+      <div class="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-6">
         <h1 class="text-2xl font-bold">Edit Program Kerja</h1>
         <p class="text-sm text-orange-100">Perbarui detail program kerja di bawah</p>
       </div>
 
       <!-- Body Card -->
-      <div class="p-6 sm:p-8 space-y-10">
+      <div class="p-6 sm:p-8">
 
         <!-- Alert -->
         <%- include('../partials/alert', { errorMsg: errorMsg, successMsg: successMsg }) %>
 
         <!-- Form -->
-        <form action="/hmsi/proker/<%= proker.id_ProgramKerja %>/edit" method="POST" enctype="multipart/form-data" class="space-y-10" data-mode="edit">
+        <form id="editProkerForm" action="/hmsi/proker/<%= proker.id_ProgramKerja %>/edit" method="POST" enctype="multipart/form-data" class="space-y-10" data-mode="edit">
 
           <!-- Informasi Dasar -->
           <div>
-            <h4 class="text-lg font-semibold text-orange-600 mb-4">Informasi Dasar</h4>
+            <h4 class="text-lg font-semibold text-gray-700 mb-4">Informasi Dasar</h4>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
               <!-- Nama Proker -->
-              <div class="md:col-span-2 bg-orange-50 border border-orange-200 rounded-xl p-4">
-                <label class="block text-sm font-medium text-orange-700 mb-2">Nama Program Kerja</label>
-                <input type="text" name="namaProker"
+              <div class="md:col-span-2 bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition-colors">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Nama Program Kerja <span class="text-red-500">*</span>
+                </label>
+                <input type="text" name="namaProker" id="namaProker"
                   value="<%= old.namaProker || proker.Nama_ProgramKerja || '' %>" required
                   placeholder="Masukkan nama program kerja..."
-                  class="w-full px-4 py-3 border border-orange-200 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-200">
-              </div>
-
-              <!-- Penanggung Jawab -->
-              <div class="md:col-span-2 bg-orange-50 border border-orange-200 rounded-xl p-4">
-                <label class="block text-sm font-medium text-orange-700 mb-2">Penanggung Jawab</label>
-                <input type="text" name="penanggungJawab"
-                  value="<%= old.penanggungJawab || proker.Penanggung_jawab || '' %>" required
-                  placeholder="Masukkan nama penanggung jawab..."
-                  class="w-full px-4 py-3 border border-orange-200 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-200">
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100 hover:border-gray-400 transition-all">
+                <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
               </div>
 
               <!-- Tanggal Mulai -->
-              <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
-                <label class="block text-sm font-medium text-orange-700 mb-2">Tanggal Mulai</label>
-                <input type="date" name="tanggal_mulai"
+              <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition-colors">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Tanggal Mulai <span class="text-red-500">*</span>
+                </label>
+                <input type="date" name="tanggal_mulai" id="tanggal_mulai"
                   value="<%= old.tanggal_mulai || proker.tanggal_mulaiFormatted || '' %>" required
-                  class="w-full px-4 py-3 border border-orange-200 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-200">
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100 hover:border-gray-400 transition-all">
+                <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
               </div>
 
               <!-- Tanggal Selesai -->
-              <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
-                <label class="block text-sm font-medium text-orange-700 mb-2">Tanggal Selesai</label>
-                <input type="date" name="tanggal_selesai"
+              <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition-colors">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Tanggal Selesai <span class="text-red-500">*</span>
+                </label>
+                <input type="date" name="tanggal_selesai" id="tanggal_selesai"
                   value="<%= old.tanggal_selesai || proker.tanggal_selesaiFormatted || '' %>" required
-                  class="w-full px-4 py-3 border border-orange-200 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-200">
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100 hover:border-gray-400 transition-all">
+                <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
+              </div>
+
+              <!-- Penanggung Jawab -->
+              <div class="md:col-span-2 bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition-colors">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Penanggung Jawab <span class="text-red-500">*</span>
+                </label>
+                <input type="text" name="penanggungJawab" id="penanggungJawab"
+                  value="<%= old.penanggungJawab || proker.Penanggung_jawab || '' %>" required
+                  placeholder="Masukkan nama penanggung jawab..."
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100 hover:border-gray-400 transition-all">
+                <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
               </div>
 
               <!-- Deskripsi -->
-              <div class="md:col-span-2 bg-orange-50 border border-orange-200 rounded-xl p-4">
-                <label class="block text-sm font-medium text-orange-700 mb-2">Deskripsi Program</label>
-                <textarea name="deskripsi" rows="4" required
+              <div class="md:col-span-2 bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition-colors">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Deskripsi Program <span class="text-red-500">*</span>
+                </label>
+                <textarea name="deskripsi" id="deskripsi" rows="4" required
                   placeholder="Tuliskan deskripsi program kerja..."
-                  class="w-full px-4 py-3 border border-orange-200 rounded-lg text-sm resize-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200"><%= old.deskripsi || proker.Deskripsi || '' %></textarea>
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm resize-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100 hover:border-gray-400 transition-all"><%= old.deskripsi || proker.Deskripsi || '' %></textarea>
+                <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
               </div>
             </div>
           </div>
 
-          <!-- Dokumen Pendukung -->
+          <!-- Dokumentasi -->
           <div>
-            <h4 class="text-lg font-semibold text-orange-600 mb-1">File Dokumen Pendukung</h4>
-            <p class="text-sm text-gray-500 mb-4">Upload file rancangan program kerja</p>
-
+            <h4 class="text-lg font-semibold text-gray-700 mb-1">File Dokumen Pendukung</h4>
+            <p class="text-sm text-gray-500 mb-4">Upload file rancangan program kerja (opsional - kosongkan jika tidak ingin mengubah)</p>
+            
             <div id="dropzone"
-              class="border-2 border-dashed border-orange-300 rounded-xl p-10 bg-orange-50/30 text-center cursor-pointer 
-                     transition duration-200 hover:border-orange-500 hover:bg-orange-100/50 flex flex-col items-center gap-4">
-
-              <!-- Hidden file input -->
+              class="border-2 border-dashed border-gray-300 rounded-xl p-10 bg-gray-50/50 text-center cursor-pointer 
+                     transition duration-200 hover:border-orange-400 hover:bg-orange-50/30 flex flex-col items-center gap-4">
               <input type="file" name="dokumen_pendukung" id="fileUpload" class="hidden" accept=".pdf,.jpg,.jpeg,.png"/>
-
               <div class="text-4xl text-gray-400">📄</div>
-
               <label for="fileUpload" class="cursor-pointer">
-                <span class="px-6 py-3 bg-orange-500 text-white rounded-lg text-sm font-medium transition duration-200 hover:bg-orange-600 hover:shadow-md active:scale-95">
+                <span class="px-6 py-3 bg-orange-500 text-white rounded-lg text-sm font-medium 
+                         transition duration-200 hover:bg-orange-600 hover:shadow-md active:scale-95">
                   Pilih File atau Drag & Drop
                 </span>
               </label>
-
               <p class="text-sm text-gray-600">
                 Format didukung: <span class="font-medium">PDF, JPG, JPEG, PNG</span><br>
                 Maksimal ukuran: <span class="font-medium">5MB</span>
@@ -113,28 +122,53 @@
 
             <p id="fileName" class="text-sm text-gray-600 mt-3"></p>
 
+            <!-- Current file display -->
             <% if (proker && proker.Dokumen_pendukung) { %>
-              <div class="mt-3 p-3 bg-gray-50 border rounded-lg text-sm">
-                <p class="font-semibold mb-2">📂 File sebelumnya:</p>
+              <div class="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <h5 class="text-sm font-semibold text-blue-800 mb-2 flex items-center">
+                  <i class="fas fa-file text-blue-600"></i>
+                  File Saat Ini:
+                </h5>
+                <div class="flex items-center justify-between">
+                  <span class="text-sm text-blue-700"><%= proker.Dokumen_pendukung %></span>
+                  <% if (/\.(jpg|jpeg|png)$/i.test(proker.Dokumen_pendukung)) { %>
+                    <button type="button" onclick="togglePreview()" class="text-xs bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition-colors">
+                      Lihat Preview
+                    </button>
+                  <% } else if (/\.pdf$/i.test(proker.Dokumen_pendukung)) { %>
+                    <a href="/uploads/<%= proker.Dokumen_pendukung %>" target="_blank" 
+                       class="text-xs bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition-colors">
+                      Buka File
+                    </a>
+                  <% } %>
+                </div>
+                
+                <!-- Image preview (hidden by default) -->
                 <% if (/\.(jpg|jpeg|png)$/i.test(proker.Dokumen_pendukung)) { %>
-                  <img src="/uploads/<%= proker.Dokumen_pendukung %>" alt="Preview" class="max-h-40 rounded-lg shadow">
-                <% } else if (/\.pdf$/i.test(proker.Dokumen_pendukung)) { %>
-                  <a href="/uploads/<%= proker.Dokumen_pendukung %>" target="_blank" class="text-blue-600 underline">
-                    <%= proker.Dokumen_pendukung %>
-                  </a>
+                  <div id="imagePreview" class="mt-3 hidden">
+                    <img src="/uploads/<%= proker.Dokumen_pendukung %>" alt="Preview" 
+                         class="max-h-48 rounded-lg shadow-md border">
+                  </div>
                 <% } %>
               </div>
             <% } %>
+            
+            <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
           </div>
 
+          <!-- Keterangan Wajib -->
+          <p class="text-sm text-red-500 mt-4">
+            * Semua field wajib diisi
+          </p>
+
           <!-- Tombol -->
-          <div class="pt-6 border-t border-gray-100 flex gap-4 justify-end">
+          <div class="pt-6 border-t border-gray-200 flex gap-4 justify-end">
             <a href="/hmsi/kelola-proker"
-              class="px-8 py-3 border border-gray-300 rounded-xl text-sm font-medium bg-white text-gray-700 transition-all duration-200 hover:shadow-md">
+              class="px-8 py-3 border border-gray-300 rounded-xl text-sm font-medium bg-white text-gray-700 transition-all duration-200 hover:shadow-md hover:border-gray-400">
               Batal
             </a>
             <button type="submit" id="submitBtn"
-              class="flex items-center justify-center gap-2 px-8 py-3 text-white bg-orange-500 rounded-xl text-sm font-semibold transition-all duration-200 hover:bg-orange-600">
+              class="flex items-center justify-center gap-2 px-8 py-3 text-white bg-orange-500 rounded-xl text-sm font-semibold transition-all duration-200 hover:bg-orange-600 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed">
               <span id="btnText">Update</span>
               <div id="btnSpinner" class="hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
             </button>
@@ -151,18 +185,182 @@
 
   <!-- Script -->
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const input = document.getElementById("fileUpload");
-      const fileName = document.getElementById("fileName");
+    // File upload functionality
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('fileUpload');
+    const fileName = document.getElementById('fileName');
 
-      input.addEventListener("change", () => {
-        if (input.files.length > 0) {
-          fileName.textContent = "File dipilih: " + input.files[0].name;
-        } else {
-          fileName.textContent = "";
+    dropzone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropzone.classList.add('border-orange-400', 'bg-orange-50');
+    });
+    
+    dropzone.addEventListener('dragleave', () => {
+      dropzone.classList.remove('border-orange-400', 'bg-orange-50');
+    });
+    
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('border-orange-400', 'bg-orange-50');
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        fileInput.files = files;
+        fileName.textContent = `File baru dipilih: ${files[0].name}`;
+        validateField(fileInput);
+      }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        fileName.textContent = `File baru dipilih: ${e.target.files[0].name}`;
+        validateField(fileInput);
+      }
+    });
+
+    // Date validation
+    const tglMulai = document.getElementById("tanggal_mulai");
+    const tglSelesai = document.getElementById("tanggal_selesai");
+
+    function syncTanggal() {
+      if (tglMulai.value) {
+        tglSelesai.min = tglMulai.value;
+        if (tglSelesai.value && tglSelesai.value < tglMulai.value) {
+          tglSelesai.value = tglMulai.value;
+        }
+      }
+    }
+
+    tglMulai.addEventListener("change", syncTanggal);
+    syncTanggal(); // Run once on load
+
+    // Toggle image preview function
+    function togglePreview() {
+      const preview = document.getElementById('imagePreview');
+      if (preview) {
+        preview.classList.toggle('hidden');
+      }
+    }
+
+    // Validation functions
+    function validateField(field) {
+      const errorDiv = field.closest('.bg-gray-50')?.querySelector('.error-message') || 
+                      field.closest('div')?.querySelector('.error-message');
+      
+      if (!errorDiv) return true;
+
+      let isValid = true;
+      let errorMessage = '';
+
+      // Check if field is required and empty
+      if (field.hasAttribute('required')) {
+        if (field.type === 'file') {
+          // File is optional in edit mode
+          isValid = true;
+        } else if (field.type === 'date') {
+          isValid = field.value !== '';
+          errorMessage = 'Tanggal wajib diisi';
+        } else if (field.value.trim() === '') {
+          isValid = false;
+          errorMessage = 'Field ini wajib diisi';
+        }
+      }
+
+      // Date validation
+      if (field.type === 'date' && field.value !== '') {
+        if (field.id === 'tanggal_selesai' && tglMulai.value && field.value < tglMulai.value) {
+          isValid = false;
+          errorMessage = 'Tanggal selesai tidak boleh lebih awal dari tanggal mulai';
+        }
+      }
+
+      // Show/hide error message
+      if (!isValid) {
+        errorDiv.textContent = errorMessage;
+        errorDiv.classList.remove('hidden');
+        field.classList.add('border-red-500');
+        field.classList.remove('border-gray-300');
+      } else {
+        errorDiv.classList.add('hidden');
+        field.classList.remove('border-red-500');
+        field.classList.add('border-gray-300');
+      }
+
+      return isValid;
+    }
+
+    function validateAllFields() {
+      let allValid = true;
+      
+      const requiredFields = ['namaProker', 'tanggal_mulai', 'tanggal_selesai', 'penanggungJawab', 'deskripsi'];
+
+      requiredFields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field && !validateField(field)) {
+          allValid = false;
+        }
+      });
+
+      return allValid;
+    }
+
+    // Add real-time validation
+    document.querySelectorAll('input[required], textarea[required]').forEach(field => {
+      field.addEventListener('blur', () => validateField(field));
+      field.addEventListener('input', () => {
+        if (field.classList.contains('border-red-500')) {
+          validateField(field);
         }
       });
     });
+
+    // Form submission with validation
+    const form = document.getElementById('editProkerForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const btnText = document.getElementById('btnText');
+    const btnSpinner = document.getElementById('btnSpinner');
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      // Validate all fields before submission
+      if (!validateAllFields()) {
+        alert('Mohon lengkapi semua field yang wajib diisi!');
+        return;
+      }
+
+      // Show loading state
+      submitBtn.disabled = true;
+      btnText.textContent = 'Menyimpan...';
+      btnSpinner.classList.remove('hidden');
+
+      // Submit form
+      const formData = new FormData(form);
+
+      fetch(form.action, {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => {
+        if (response.ok) {
+          alert('Program kerja berhasil diperbarui!');
+          window.location.href = '/hmsi/kelola-proker';
+        } else {
+          return response.text().then(text => {
+            throw new Error(text);
+          });
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Terjadi kesalahan: ' + error.message);
+      })
+      .finally(() => {
+        submitBtn.disabled = false;
+        btnText.textContent = 'Update';
+        btnSpinner.classList.add('hidden');
+      });
+    });
   </script>
+
 </body>
 </html>

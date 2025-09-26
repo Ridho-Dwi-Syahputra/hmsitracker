@@ -4,8 +4,9 @@
   <meta charset="UTF-8">
   <title><%= title %></title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://kit.fontawesome.com/your-fa-kit.js" crossorigin="anonymous"></script>
 </head>
-<body class="bg-orange-50 min-h-screen flex flex-col">
+<body class="bg-gray-50 min-h-screen flex flex-col">
 
   <!-- Navbar -->
   <%- include('../partials/navbarHMSI', { user: user, unreadCount: unreadCount }) %>
@@ -15,121 +16,125 @@
 
   <!-- Wrapper -->
   <main class="lg:ml-80 px-6 pt-20 pb-8 flex-grow">
-    <div class="max-w-5xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-orange-200">
+    <div class="max-w-5xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-200">
 
       <!-- Header Card -->
-      <div class="bg-orange-500 text-white px-6 py-6">
+      <div class="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-6">
         <h1 class="text-2xl font-bold">Tambah Program Kerja</h1>
         <p class="text-sm text-orange-100">Lengkapi detail program kerja di bawah</p>
       </div>
 
       <!-- Body Card -->
-      <div class="p-6 sm:p-8 ">
+      <div class="p-6 sm:p-8">
 
         <!-- Alert -->
         <%- include('../partials/alert', { errorMsg: errorMsg, successMsg: successMsg }) %>
 
         <!-- Form -->
-        <form action="/hmsi/tambah-proker" method="POST" enctype="multipart/form-data" class="space-y-10">
+        <form id="prokerForm" action="/hmsi/tambah-proker" method="POST" enctype="multipart/form-data" class="space-y-10">
 
           <!-- Informasi Dasar -->
           <div>
-            <h4 class="text-lg font-semibold text-orange-600 mb-4">Informasi Dasar</h4>
+            <h4 class="text-lg font-semibold text-gray-700 mb-4">Informasi Dasar</h4>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
               <!-- Nama Program Kerja -->
-              <div class="md:col-span-2 bg-orange-50 border border-orange-200 rounded-xl p-4">
-                <label class="block text-sm font-medium text-orange-700 mb-2">Nama Program Kerja</label>
-                <input type="text" name="namaProker"
+              <div class="md:col-span-2 bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition-colors">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Nama Program Kerja <span class="text-red-500">*</span>
+                </label>
+                <input type="text" name="namaProker" id="namaProker"
                   value="<%= old?.namaProker || '' %>" required
                   placeholder="Masukkan nama program kerja..."
-                  class="w-full px-4 py-3 border border-orange-200 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-200">
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100 hover:border-gray-400 transition-all">
+                <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
               </div>
 
               <!-- Tanggal Mulai -->
-              <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
-                <label class="block text-sm font-medium text-orange-700 mb-2">Tanggal Mulai</label>
+              <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition-colors">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Tanggal Mulai <span class="text-red-500">*</span>
+                </label>
                 <input type="date" id="tanggal_mulai" name="tanggal_mulai"
                   value="<%= old?.tanggal_mulai || '' %>" required
-                  class="w-full px-4 py-3 border border-orange-200 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-200">
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100 hover:border-gray-400 transition-all">
+                <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
               </div>
 
               <!-- Tanggal Selesai -->
-              <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
-                <label class="block text-sm font-medium text-orange-700 mb-2">Tanggal Selesai</label>
+              <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition-colors">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Tanggal Selesai <span class="text-red-500">*</span>
+                </label>
                 <input type="date" id="tanggal_selesai" name="tanggal_selesai"
                   value="<%= old?.tanggal_selesai || '' %>" required
-                  class="w-full px-4 py-3 border border-orange-200 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-200">
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100 hover:border-gray-400 transition-all">
+                <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
               </div>
 
               <!-- Penanggung Jawab -->
-              <div class="md:col-span-2 bg-orange-50 border border-orange-200 rounded-xl p-4">
-                <label class="block text-sm font-medium text-orange-700 mb-2">Penanggung Jawab</label>
-                <input type="text" name="penanggungJawab"
+              <div class="md:col-span-2 bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition-colors">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Penanggung Jawab <span class="text-red-500">*</span>
+                </label>
+                <input type="text" name="penanggungJawab" id="penanggungJawab"
                   value="<%= old?.penanggungJawab || '' %>" required
                   placeholder="Masukkan nama penanggung jawab..."
-                  class="w-full px-4 py-3 border border-orange-200 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-200">
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100 hover:border-gray-400 transition-all">
+                <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
               </div>
 
               <!-- Deskripsi -->
-              <div class="md:col-span-2 bg-orange-50 border border-orange-200 rounded-xl p-4">
-                <label class="block text-sm font-medium text-orange-700 mb-2">Deskripsi Program</label>
-                <textarea name="deskripsi" rows="4" required
+              <div class="md:col-span-2 bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition-colors">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Deskripsi Program <span class="text-red-500">*</span>
+                </label>
+                <textarea name="deskripsi" id="deskripsi" rows="4" required
                   placeholder="Tuliskan deskripsi program kerja..."
-                  class="w-full px-4 py-3 border border-orange-200 rounded-lg text-sm resize-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200"><%= old?.deskripsi || '' %></textarea>
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm resize-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100 hover:border-gray-400 transition-all"><%= old?.deskripsi || '' %></textarea>
+                <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
               </div>
             </div>
           </div>
 
-          <!-- Dokumen Pendukung -->
+          <!-- Dokumentasi -->
           <div>
-            <h4 class="text-lg font-semibold text-orange-600 mb-1">File Dokumen Pendukung</h4>
+            <h4 class="text-lg font-semibold text-gray-700 mb-1">File Dokumen Pendukung <span class="text-red-500">*</span></h4>
             <p class="text-sm text-gray-500 mb-4">Upload file pendukung program kerja</p>
-
-            <!-- Dropzone -->
             <div id="dropzone"
-              class="border-2 border-dashed border-orange-300 rounded-xl p-10 bg-orange-50/30 text-center cursor-pointer 
-                     transition duration-200 hover:border-orange-500 hover:bg-orange-100/50 flex flex-col items-center gap-4">
-              
-              <!-- Hidden file input -->
-              <input type="file" name="dokumen_pendukung" id="fileUpload" class="hidden"
+              class="border-2 border-dashed border-gray-300 rounded-xl p-10 bg-gray-50/50 text-center cursor-pointer 
+                     transition duration-200 hover:border-orange-400 hover:bg-orange-50/30 flex flex-col items-center gap-4">
+              <input type="file" name="dokumen_pendukung" id="fileUpload" class="hidden" required
                 accept=".pdf,.jpg,.jpeg,.png" />
-
-              <!-- Icon -->
-              <div class="text-4xl text-gray-400">
-                📄
-              </div>
-
-              <!-- Button -->
+              <div class="text-4xl text-gray-400">📄</div>
               <label for="fileUpload" class="cursor-pointer">
-                <span 
-                  class="px-6 py-3 bg-orange-500 text-white rounded-lg text-sm font-medium 
+                <span class="px-6 py-3 bg-orange-500 text-white rounded-lg text-sm font-medium 
                          transition duration-200 hover:bg-orange-600 hover:shadow-md active:scale-95">
                   Pilih File atau Drag & Drop
                 </span>
               </label>
-
-              <!-- File info -->
               <p class="text-sm text-gray-600">
                 Format yang didukung: <span class="font-medium">PDF, JPG, JPEG, PNG</span><br>
                 Maksimal ukuran file: <span class="font-medium">5MB</span>
               </p>
             </div>
-
             <p id="fileName" class="text-sm text-gray-600 mt-3"></p>
+            <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
           </div>
 
+          <!-- Keterangan Wajib -->
+          <p class="text-sm text-red-500 mt-4">
+            * Semua field wajib diisi
+          </p>
+
           <!-- Tombol -->
-          <div class="pt-6 border-t border-gray-100 flex gap-4 justify-end">
-            <!-- Batal -->
+          <div class="pt-6 border-t border-gray-200 flex gap-4 justify-end">
             <a href="/hmsi/kelola-proker"
-              class="px-8 py-3 border border-gray-300 rounded-xl text-sm font-medium bg-white text-gray-700 transition-all duration-200 hover:shadow-md">
+              class="px-8 py-3 border border-gray-300 rounded-xl text-sm font-medium bg-white text-gray-700 transition-all duration-200 hover:shadow-md hover:border-gray-400">
               Batal
             </a>
-
-            <!-- Simpan -->
             <button type="submit" id="submitBtn"
-              class="flex items-center justify-center gap-2 px-8 py-3 text-white bg-orange-500 rounded-xl text-sm font-semibold transition-all duration-200 hover:bg-orange-600">
+              class="flex items-center justify-center gap-2 px-8 py-3 text-white bg-orange-500 rounded-xl text-sm font-semibold transition-all duration-200 hover:bg-orange-600 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed">
               <span id="btnText">Simpan</span>
               <div id="btnSpinner" class="hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
             </button>
@@ -139,45 +144,185 @@
     </div>
   </main>
 
-   <!-- Footer -->
-   <%- include('../partials/footer') %>
+  <!-- Footer -->
+  <%- include('../partials/footer') %>
 
-  <!-- Script eksternal -->
-  <script src="/javascripts/proker.js"></script>
-
-  <!-- Validasi tanggal -->
+  <!-- Script -->
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const tglMulai = document.getElementById("tanggal_mulai");
-      const tglSelesai = document.getElementById("tanggal_selesai");
+    // File upload functionality
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('fileUpload');
+    const fileName = document.getElementById('fileName');
 
-      function syncTanggal() {
-        if (tglMulai.value) {
-          // ✅ Set minimal tanggal selesai = tanggal mulai
-          tglSelesai.min = tglMulai.value;
+    dropzone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropzone.classList.add('border-orange-400', 'bg-orange-50');
+    });
+    
+    dropzone.addEventListener('dragleave', () => {
+      dropzone.classList.remove('border-orange-400', 'bg-orange-50');
+    });
+    
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('border-orange-400', 'bg-orange-50');
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        fileInput.files = files;
+        fileName.textContent = `File dipilih: ${files[0].name}`;
+        validateField(fileInput);
+      }
+    });
 
-          // Jika tanggal selesai < tanggal mulai, reset
-          if (tglSelesai.value && tglSelesai.value < tglMulai.value) {
-            tglSelesai.value = tglMulai.value;
-          }
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        fileName.textContent = `File dipilih: ${e.target.files[0].name}`;
+        validateField(fileInput);
+      }
+    });
+
+    // Date validation
+    const tglMulai = document.getElementById("tanggal_mulai");
+    const tglSelesai = document.getElementById("tanggal_selesai");
+
+    function syncTanggal() {
+      if (tglMulai.value) {
+        tglSelesai.min = tglMulai.value;
+        if (tglSelesai.value && tglSelesai.value < tglMulai.value) {
+          tglSelesai.value = tglMulai.value;
+        }
+      }
+    }
+
+    tglMulai.addEventListener("change", syncTanggal);
+    syncTanggal(); // Run once on load
+
+    // Validation functions
+    function validateField(field) {
+      const errorDiv = field.closest('.bg-gray-50')?.querySelector('.error-message') || 
+                      field.closest('div')?.querySelector('.error-message');
+      
+      if (!errorDiv) return true;
+
+      let isValid = true;
+      let errorMessage = '';
+
+      // Check if field is required and empty
+      if (field.hasAttribute('required')) {
+        if (field.type === 'file') {
+          isValid = field.files.length > 0;
+          errorMessage = 'File dokumen pendukung wajib diunggah';
+        } else if (field.type === 'date') {
+          isValid = field.value !== '';
+          errorMessage = 'Tanggal wajib diisi';
+        } else if (field.value.trim() === '') {
+          isValid = false;
+          errorMessage = 'Field ini wajib diisi';
         }
       }
 
-      tglMulai.addEventListener("change", syncTanggal);
+      // Date validation
+      if (field.type === 'date' && field.value !== '') {
+        if (field.id === 'tanggal_selesai' && tglMulai.value && field.value < tglMulai.value) {
+          isValid = false;
+          errorMessage = 'Tanggal selesai tidak boleh lebih awal dari tanggal mulai';
+        }
+      }
 
-      // jalankan sekali saat load (untuk old value)
-      syncTanggal();
+      // Show/hide error message
+      if (!isValid) {
+        errorDiv.textContent = errorMessage;
+        errorDiv.classList.remove('hidden');
+        field.classList.add('border-red-500');
+        field.classList.remove('border-gray-300');
+      } else {
+        errorDiv.classList.add('hidden');
+        field.classList.remove('border-red-500');
+        field.classList.add('border-gray-300');
+      }
+
+      return isValid;
+    }
+
+    function validateAllFields() {
+      let allValid = true;
+      
+      const requiredFields = ['namaProker', 'tanggal_mulai', 'tanggal_selesai', 'penanggungJawab', 'deskripsi'];
+
+      requiredFields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field && !validateField(field)) {
+          allValid = false;
+        }
+      });
+
+      // Validate file upload
+      const fileInput = document.getElementById('fileUpload');
+      if (!validateField(fileInput)) {
+        allValid = false;
+      }
+
+      return allValid;
+    }
+
+    // Add real-time validation
+    document.querySelectorAll('input[required], textarea[required]').forEach(field => {
+      field.addEventListener('blur', () => validateField(field));
+      field.addEventListener('input', () => {
+        if (field.classList.contains('border-red-500')) {
+          validateField(field);
+        }
+      });
+    });
+
+    // Form submission with validation
+    const form = document.getElementById('prokerForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const btnText = document.getElementById('btnText');
+    const btnSpinner = document.getElementById('btnSpinner');
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      // Validate all fields before submission
+      if (!validateAllFields()) {
+        alert('Mohon lengkapi semua field yang wajib diisi!');
+        return;
+      }
+
+      // Show loading state
+      submitBtn.disabled = true;
+      btnText.textContent = 'Menyimpan...';
+      btnSpinner.classList.remove('hidden');
+
+      // Submit form
+      const formData = new FormData(form);
+
+      fetch(form.action, {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => {
+        if (response.ok) {
+          alert('Program kerja berhasil disimpan!');
+          window.location.href = '/hmsi/kelola-proker';
+        } else {
+          return response.text().then(text => {
+            throw new Error(text);
+          });
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Terjadi kesalahan: ' + error.message);
+      })
+      .finally(() => {
+        submitBtn.disabled = false;
+        btnText.textContent = 'Simpan';
+        btnSpinner.classList.add('hidden');
+      });
     });
   </script>
-
-  <!-- Print-friendly -->
-  <style>
-    @media print {
-      body { background: white; }
-      .no-print, .lg\:ml-80 { display: none !important; }
-      #laporanContent { box-shadow: none; border: none; }
-    }
-  </style>
 
 </body>
 </html>
