@@ -16,6 +16,8 @@ const { requireLogin, requireRole } = require("../../middleware/auth");
 // =====================================================
 // IMPORT CONTROLLERS
 // =====================================================
+// 🔽 Mengimpor controller untuk dashboard
+const dpaDashboardController = require("../../controllers/DPA/dpaDashboardController"); 
 const dpaProkerController = require("../../controllers/DPA/prokerController");
 const dpaLaporanController = require("../../controllers/DPA/laporanController");
 const dpaNotifikasiController = require("../../controllers/DPA/notifikasiController");
@@ -24,17 +26,12 @@ const dpaProfileController = require("../../controllers/DPA/profileController");
 // =====================================================
 // DASHBOARD DPA
 // =====================================================
+// 🔽 Rute ini sekarang memanggil controller untuk mengambil data statistik
 router.get(
   "/dashboard",
   requireLogin,
   requireRole(["DPA"]),
-  (req, res) => {
-    res.render("dpa/dpaDashboard", {
-      title: "Dashboard DPA",
-      user: req.session.user,
-      activeNav: "Dashboard",
-    });
-  }
+  dpaDashboardController.getDpaDashboardStats // Memanggil fungsi dari controller
 );
 
 // =====================================================

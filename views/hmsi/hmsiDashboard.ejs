@@ -8,18 +8,14 @@
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
         crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
-<body class="bg-orange-50 min-h-screen flex flex-col">
+<body class="bg-gray-50">
 
-  <!-- Navbar -->
   <%- include('../partials/navbarHMSI', { user: user, unreadCount: unreadCount }) %>
 
-  <!-- Sidebar -->
   <%- include('../partials/sidebarHMSI', { user: user, activeNav: 'Dashboard' }) %>
 
-  <!-- Wrapper -->
-  <main class="lg:ml-80 px-6 pt-20 pb-8 flex-grow">
+  <main class="lg:ml-80 px-6 pt-20 pb-24">
 
-    <!-- Card Header Utama -->
     <div class="max-w-6xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-orange-200 mb-8">
       <div class="bg-orange-500 text-white px-6 py-8 flex items-center justify-between">
         <div>
@@ -32,11 +28,9 @@
       </div>
     </div>
 
-    <!-- Statistik -->
     <div class="max-w-6xl mx-auto mb-8">
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         
-        <!-- Total Proker -->
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-orange-200">
           <div class="flex items-center justify-between">
             <div>
@@ -51,7 +45,6 @@
           </div>
         </div>
 
-        <!-- Proker Selesai -->
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-orange-200">
           <div class="flex items-center justify-between">
             <div>
@@ -66,7 +59,6 @@
           </div>
         </div>
 
-        <!-- Proker Berjalan -->
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-orange-200">
           <div class="flex items-center justify-between">
             <div>
@@ -81,7 +73,6 @@
           </div>
         </div>
 
-        <!-- Total Laporan -->
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-orange-200">
           <div class="flex items-center justify-between">
             <div>
@@ -99,7 +90,6 @@
       </div>
     </div>
 
-    <!-- Aksi Cepat -->
     <div class="max-w-6xl mx-auto">
       <div class="bg-white rounded-2xl border border-orange-200 shadow-sm p-6">
         <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
@@ -133,7 +123,6 @@
 
   </main>
 
-  <!-- Footer -->
   <%- include('../partials/footer') %>
 
 </body>
