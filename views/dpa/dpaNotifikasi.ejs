@@ -8,115 +8,132 @@
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
         crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="bg-gray-50 min-h-screen flex flex-col">
 
-  <!-- Sidebar DPA -->
+  <!-- Navbar -->
+  <%- include('../partials/navbarDPA', { user: user, unreadCount: unreadCount }) %>
+
+  <!-- Sidebar -->
   <%- include('../partials/sidebarDPA', { user: user, activeNav: 'Notifikasi' }) %>
 
   <!-- Wrapper -->
-  <div class="lg:ml-80 px-6 py-8">
+  <main class="lg:ml-80 px-6 pt-20 pb-8 flex-grow">
+    <div class="max-w-4xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-orange-200">
 
-    <!-- Header -->
-    <div class="max-w-4xl mx-auto mb-8">
-      <h1 class="text-2xl font-bold text-gray-800 mb-2">Notifikasi</h1>
-      <p class="text-gray-600 text-sm">Lihat semua update laporan, program kerja, dan komentar evaluasi dari HMSI.</p>
-    </div>
+      <!-- Header Card -->
+      <div class="bg-orange-500 text-white px-6 py-6">
+        <h1 class="text-2xl font-bold">Notifikasi</h1>
+        <p class="text-sm text-orange-100">Lihat semua update laporan, program kerja, dan komentar evaluasi dari HMSI</p>
+      </div>
 
-    <!-- List Notifikasi -->
-    <div class="max-w-4xl mx-auto space-y-4">
-      <% if (notifikasi && notifikasi.length > 0) { %>
-        <% notifikasi.forEach(function(n) { 
-             const isProker = !!n.proker_id;
-             const isLaporan = !!n.id_laporan && !n.id_evaluasi;
-             const isEvaluasi = !!n.id_evaluasi;
+      <!-- Body Card -->
+      <div class="p-6 sm:p-8 space-y-4">
+        <% if (notifikasi && notifikasi.length > 0) { %>
+          <% notifikasi.forEach(function(n) { 
+               const isProker = !!n.proker_id;
+               const isLaporan = !!n.id_laporan && !n.id_evaluasi;
+               const isEvaluasi = !!n.id_evaluasi;
 
-             const pesanLower = (n.pesan || '').toLowerCase();
-             const divisiText = (n.divisi && n.divisi !== '-') ? n.divisi : 'Divisi';
+               const pesanLower = (n.pesan || '').toLowerCase();
+               const divisiText = (n.divisi && n.divisi !== '-') ? n.divisi : 'Divisi';
 
-             // short message
-             let shortMsg = '';
-             if (isProker) {
-               shortMsg = `${divisiText} telah membuat Program Kerja baru`;
-             } else if (isLaporan) {
-               shortMsg = `${divisiText} telah menambahkan Laporan baru`;
-             } else if (isEvaluasi) {
-               shortMsg = `${divisiText} menambahkan komentar pada evaluasi laporan`;
-             }
-
-             // link label
-             let displayLinkLabel = 'Lihat';
-             if (isProker) {
-               displayLinkLabel = 'Lihat Program Kerja';
-             } else if (isLaporan) {
-               if (/menambah|menambahkan|ditambahkan|baru/.test(pesanLower)) {
-                 displayLinkLabel = 'Lihat Laporan Baru';
-               } else {
-                 displayLinkLabel = 'Lihat Laporan';
+               // short message
+               let shortMsg = '';
+               if (isProker) {
+                 shortMsg = `${divisiText} telah membuat Program Kerja baru`;
+               } else if (isLaporan) {
+                 shortMsg = `${divisiText} telah menambahkan Laporan baru`;
+               } else if (isEvaluasi) {
+                 shortMsg = `${divisiText} menambahkan komentar pada evaluasi laporan`;
                }
-             } else if (isEvaluasi) {
-               displayLinkLabel = 'Lihat Komentar';
-             }
 
-             // target url
-             let targetUrl = '#';
-             if (isProker) {
-               targetUrl = `/dpa/lihatProker/${n.proker_id || n.id_ProgramKerja}/detail`;
-             } else if (isLaporan) {
-               targetUrl = `/dpa/kelolaLaporan/${n.id_laporan}`;
-             } else if (isEvaluasi) {
-               targetUrl = `/dpa/detailLaporan/${n.id_laporan}`;
-             }
-        %>
-          <a href="/dpa/notifikasi/read/<%= n.id_notifikasi %>?to=<%= encodeURIComponent(targetUrl) %>" class="block">
-            <div class="flex items-start gap-4 p-4 bg-white border border-orange-200 rounded-xl shadow-sm hover:shadow-md transition cursor-pointer <%= !n.status_baca ? 'border-2 border-orange-300' : '' %>">
-              
-              <!-- Icon -->
-              <div class="flex-shrink-0 mt-1">
-                <% if (isEvaluasi) { %>
-                  <i class="fa-solid fa-comments text-orange-500 text-lg"></i>
-                <% } else { %>
-                  <i class="fa-solid fa-bell text-orange-500 text-lg"></i>
-                <% } %>
-              </div>
+               // link label
+               let displayLinkLabel = 'Lihat';
+               if (isProker) {
+                 displayLinkLabel = 'Lihat Program Kerja';
+               } else if (isLaporan) {
+                 if (/menambah|menambahkan|ditambahkan|baru/.test(pesanLower)) {
+                   displayLinkLabel = 'Lihat Laporan Baru';
+                 } else {
+                   displayLinkLabel = 'Lihat Laporan';
+                 }
+               } else if (isEvaluasi) {
+                 displayLinkLabel = 'Lihat Komentar';
+               }
 
-              <!-- Isi -->
-              <div class="flex-1">
-                <p class="text-gray-800 text-sm font-medium"><%= shortMsg %></p>
+               // target url
+               let targetUrl = '#';
+               if (isProker) {
+                 targetUrl = `/dpa/lihatProker/${n.proker_id || n.id_ProgramKerja}/detail`;
+               } else if (isLaporan) {
+                 targetUrl = `/dpa/kelolaLaporan/${n.id_laporan}`;
+               } else if (isEvaluasi) {
+                 targetUrl = `/dpa/detailLaporan/${n.id_laporan}`;
+               }
+          %>
+            <!-- Card Notifikasi -->
+            <a href="/dpa/notifikasi/read/<%= n.id_notifikasi %>?to=<%= encodeURIComponent(targetUrl) %>"
+               class="block" aria-label="Buka notifikasi">
+              <div class="flex items-start gap-4 p-4 bg-white border rounded-xl shadow-sm hover:shadow-md transition cursor-pointer
+                          <%= !n.status_baca ? 'border-2 border-orange-300' : 'border-orange-200' %>">
 
-                <p class="text-gray-600 text-xs mt-1">
-                  <% if (isLaporan) { %>
-                    <span class="font-semibold">Judul:</span> <%= n.judul_laporan || '-' %><br>
-                  <% } else if (isProker) { %>
-                    <span class="font-semibold">Program Kerja:</span> <%= n.Nama_ProgramKerja || '-' %><br>
-                  <% } else if (isEvaluasi) { %>
-                    <span class="font-semibold">Laporan:</span> <%= n.judul_laporan || '-' %><br>
-                    <span class="font-semibold">Program Kerja:</span> <%= n.Nama_ProgramKerja || '-' %><br>
+                <!-- Icon -->
+                <div class="flex-shrink-0 mt-1">
+                  <% if (isEvaluasi) { %>
+                    <i class="fa-solid fa-comments text-orange-500 text-lg"></i>
+                  <% } else { %>
+                    <i class="fa-solid fa-bell text-orange-500 text-lg"></i>
                   <% } %>
-                  <span class="font-semibold">Divisi:</span> <%= divisiText %>
-                </p>
+                </div>
 
-                <div class="flex items-center justify-between mt-3">
-                  <span class="text-xs text-gray-500"><%= n.tanggalFormatted %></span>
-                  <span class="text-orange-500 text-xs font-medium hover:underline"><%= displayLinkLabel %></span>
+                <!-- Isi -->
+                <div class="flex-1">
+                  <p class="text-gray-800 text-sm font-medium"><%= shortMsg %></p>
+
+                  <p class="text-gray-600 text-xs mt-1">
+                    <% if (isLaporan) { %>
+                      <span class="font-semibold">Judul:</span> <%= n.judul_laporan || '-' %><br>
+                    <% } else if (isProker) { %>
+                      <span class="font-semibold">Program Kerja:</span> <%= n.Nama_ProgramKerja || '-' %><br>
+                    <% } else if (isEvaluasi) { %>
+                      <span class="font-semibold">Laporan:</span> <%= n.judul_laporan || '-' %><br>
+                      <span class="font-semibold">Program Kerja:</span> <%= n.Nama_ProgramKerja || '-' %><br>
+                    <% } %>
+                    <span class="font-semibold">Divisi:</span> <%= divisiText %>
+                  </p>
+
+                  <div class="flex items-center justify-between mt-3">
+                    <span class="text-xs text-gray-500"><%= n.tanggalFormatted %></span>
+                    <span class="text-orange-500 text-xs font-medium hover:underline"><%= displayLinkLabel %></span>
+                  </div>
+                </div>
+
+                <!-- Status -->
+                <div class="flex flex-col items-end gap-2">
+                  <% if (!n.status_baca) { %>
+                    <span class="text-[10px] px-2 py-1 bg-orange-100 text-orange-700 rounded-full">Baru</span>
+                  <% } %>
                 </div>
               </div>
-
-              <!-- Status -->
-              <div class="flex flex-col items-end gap-2">
-                <% if (!n.status_baca) { %>
-                  <span class="text-[10px] px-2 py-1 bg-orange-100 text-orange-700 rounded-full">Baru</span>
-                <% } %>
-              </div>
+            </a>
+          <% }) %>
+        <% } else { %>
+          <!-- Empty State -->
+          <div class="flex flex-col items-center space-y-4 py-20">
+            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+              <i class="fa-solid fa-bell-slash text-2xl text-gray-400"></i>
             </div>
-          </a>
-        <% }) %>
-      <% } else { %>
-        <div class="p-6 text-center text-gray-500 bg-white border rounded-xl">
-          Belum ada notifikasi dari HMSI.
-        </div>
-      <% } %>
+            <div class="text-center">
+              <div class="text-xl font-semibold text-gray-800 mb-2">Tidak ada notifikasi</div>
+              <div class="text-gray-500">Belum ada notifikasi dari HMSI</div>
+            </div>
+          </div>
+        <% } %>
+      </div>
     </div>
-  </div>
+  </main>
 
+  <!-- Footer -->
+  <%- include('../partials/footer') %>
 </body>
 </html>

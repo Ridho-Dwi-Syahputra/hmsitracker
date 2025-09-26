@@ -7,6 +7,9 @@
 </head>
 <body class="bg-gray-50 min-h-screen">
 
+  <!-- Navbar -->
+  <%- include('../partials/navbarDPA', { user: user, unreadCount: unreadCount }) %>
+
   <!-- Sidebar -->
   <%- include('../partials/sidebarDPA', { activeNav: 'Daftar Program Kerja', user: user }) %>
 

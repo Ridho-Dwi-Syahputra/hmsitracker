@@ -9,26 +9,28 @@
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
         crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="bg-orange-50 min-h-screen flex flex-col">
 
-  <!-- Sidebar -->
+  <!-- ✅ Navbar -->
+  <%- include('../partials/navbarDPA', { user: user, unreadCount: unreadCount }) %>
+  
+  <!-- ✅ Sidebar -->
   <%- include('../partials/sidebarDPA', { user: user, activeNav: 'Daftar Program Kerja' }) %>
 
   <!-- Wrapper -->
-  <div class="lg:ml-80 opacity-0 animate-fade-in" style="animation-delay:150ms;">
+  <main class="lg:ml-80 px-6 pt-20 pb-8 flex-grow">
+    <div class="max-w-7xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-orange-200">
 
-    <!-- Header -->
-    <div class="bg-white border-b border-gray-200">
-      <div class="max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
-        <h1 class="text-2xl font-bold text-gray-800 opacity-0 animate-slide-down" style="animation-delay:300ms;">
-          Daftar Program Kerja
-        </h1>
+      <!-- Header Card -->
+      <div class="bg-orange-500 text-white px-6 py-6 flex items-center justify-between">
+        <div>
+          <h1 class="text-2xl font-bold">Daftar Program Kerja</h1>
+          <p class="text-sm text-orange-100">Lihat & kelola program kerja HMSI</p>
+        </div>
       </div>
-    </div>
 
-    <!-- Main -->
-    <div class="px-6 py-8">
-      <div class="max-w-7xl mx-auto bg-white rounded-2xl border border-orange-200 shadow-sm p-6">
+      <!-- Body Card -->
+      <div class="p-6 sm:p-8">
 
         <!-- Search & Filter -->
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
@@ -138,15 +140,7 @@
 
       </div>
     </div>
-  </div>
-
-  <!-- Animasi & Custom Style -->
-  <style>
-    @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
-    .animate-fade-in { animation: fadeIn 0.7s ease-out forwards; }
-    @keyframes slideDown { from {opacity:0; transform:translateY(-20px);} to {opacity:1; transform:translateY(0);} }
-    .animate-slide-down { animation: slideDown 0.5s ease-out forwards; }
-  </style>
+  </main>
 
   <!-- Script -->
   <script>
@@ -245,6 +239,5 @@
       });
     }
   </script>
-
 </body>
 </html>

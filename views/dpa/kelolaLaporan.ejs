@@ -10,26 +10,24 @@
         crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body class="bg-gray-50 min-h-screen">
-
+  <!-- Navbar -->
+  <%- include('../partials/navbarDPA', { user: user, unreadCount: unreadCount }) %>
+  
   <!-- Sidebar -->
   <%- include('../partials/sidebarDPA', { activeNav: 'Laporan', user: user }) %>
 
   <!-- Wrapper -->
-  <div class="lg:ml-80 opacity-0 animate-fade-in" style="animation-delay:150ms;">
+  <div class="lg:ml-80 pt-20 px-6 pb-10">
+    <div class="max-w-7xl mx-auto bg-white rounded-2xl border border-orange-200 shadow-md overflow-hidden">
 
-    <!-- Header -->
-    <div class="bg-white border-b border-gray-200">
-      <div class="max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
-        <h1 class="text-2xl font-bold text-gray-800 opacity-0 animate-slide-down" style="animation-delay:300ms;">
-          <%= title %>
-        </h1>
+      <!-- Header (Judul) -->
+      <div class="bg-orange-500 px-6 py-4">
+        <h1 class="text-2xl font-bold text-white"><%= title %></h1>
+        <p class="text-sm text-orange-100">Daftar laporan kegiatan dari HMSI</p>
       </div>
-    </div>
 
-    <!-- Main -->
-    <div class="px-6 py-8">
-      <div class="max-w-7xl mx-auto bg-white rounded-2xl border border-orange-200 shadow-sm p-6">
-
+      <!-- Isi Konten -->
+      <div class="p-6">
         <!-- Search & Filter -->
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
           <!-- Search -->
@@ -38,9 +36,7 @@
               <input id="searchInput" type="text" placeholder="Cari laporan..."
                 class="w-full pl-10 pr-4 py-3 border rounded-xl text-sm
                        border-gray-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-500
-                       focus:bg-orange-50 focus:text-orange-700 
-                       placeholder-gray-400 focus:placeholder-orange-400
-                       transition-all duration-300">
+                       placeholder-gray-400 transition-all duration-300">
               <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
             </div>
           </div>
@@ -49,7 +45,7 @@
           <div class="relative">
             <button id="statusDropdownBtn"
               class="flex items-center justify-between gap-2 px-4 py-3 border border-gray-300 rounded-xl text-sm bg-white
-                     hover:border-orange-500 hover:shadow-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200">
+                     hover:border-orange-500 hover:shadow-md focus:ring-2 focus:ring-orange-500 transition-all duration-200">
               <span id="statusDropdownLabel">Semua Status</span>
               <i class="fa-solid fa-chevron-down text-orange-500"></i>
             </button>
@@ -68,7 +64,7 @@
           <div class="relative">
             <button id="divisiDropdownBtn"
               class="flex items-center justify-between gap-2 px-4 py-3 border border-gray-300 rounded-xl text-sm bg-white
-                     hover:border-orange-500 hover:shadow-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200">
+                     hover:border-orange-500 hover:shadow-md focus:ring-2 focus:ring-orange-500 transition-all duration-200">
               <span id="divisiDropdownLabel">Semua Divisi</span>
               <i class="fa-solid fa-chevron-down text-orange-500"></i>
             </button>
@@ -89,11 +85,10 @@
         </div>
 
         <% if (!laporan || laporan.length === 0) { %>
-          <div class="flex flex-col items-center space-y-4 py-20 opacity-0 animate-slide-up" style="animation-delay:800ms;">
+          <!-- Empty State -->
+          <div class="flex flex-col items-center space-y-4 py-20">
             <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
-              <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-              </svg>
+              <i class="fa-solid fa-folder-open text-2xl text-gray-400"></i>
             </div>
             <div class="text-center">
               <div class="text-xl font-semibold text-gray-800 mb-2">Belum ada laporan</div>
@@ -102,7 +97,7 @@
           </div>
         <% } else { %>
           <!-- Tabel -->
-          <div class="overflow-x-auto bg-white-50 p-2 shadow-sm rounded-xl">
+          <div class="overflow-x-auto p-2 shadow-sm rounded-xl">
             <table class="min-w-full text-sm text-center border border-orange-200 rounded-xl overflow-hidden border-separate border-spacing-0 divide-x divide-gray-200">
               <thead class="bg-orange-100 text-gray-700">
                 <tr>
@@ -151,32 +146,16 @@
             <button id="nextPage" class="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 disabled:opacity-50">Next</button>
           </div>
         <% } %>
-
       </div>
     </div>
   </div>
-
-  <!-- Style -->
-  <style>
-    @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
-    .animate-fade-in { animation: fadeIn 0.7s ease-out forwards; }
-    @keyframes slideDown { from {opacity:0; transform:translateY(-20px);} to {opacity:1; transform:translateY(0);} }
-    .animate-slide-down { animation: slideDown 0.5s ease-out forwards; }
-    @keyframes slideUp { from {opacity:0; transform:translateY(20px);} to {opacity:1; transform:translateY(0);} }
-    .animate-slide-up { animation: slideUp 0.6s ease-out forwards; }
-
-    #searchInput:focus {
-      outline: none !important;
-      box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.4);
-    }
-  </style>
 
   <!-- Script -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const searchInput = document.getElementById("searchInput");
       const tbody = document.getElementById("laporanTable");
-      let rows = Array.from(tbody.querySelectorAll("tr"));
+      let rows = Array.from(tbody?.querySelectorAll("tr") || []);
 
       const statusBtn = document.getElementById("statusDropdownBtn");
       const statusMenu = document.getElementById("statusDropdownMenu");
