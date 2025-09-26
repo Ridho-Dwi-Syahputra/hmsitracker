@@ -6,7 +6,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://kit.fontawesome.com/your-fa-kit.js" crossorigin="anonymous"></script>
 </head>
-<body class="bg-orange-50 min-h-screen flex flex-col">
+<body class="bg-gray-50 min-h-screen flex flex-col">
 
   <!-- Navbar -->
   <%- include('../partials/navbarHMSI', { user: user, unreadCount: unreadCount }) %>
@@ -16,10 +16,10 @@
 
   <!-- Wrapper -->
   <main class="lg:ml-80 px-6 pt-20 pb-8 flex-grow">
-    <div class="max-w-5xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-orange-200">
+    <div class="max-w-5xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-200">
 
       <!-- Header Card -->
-      <div class="bg-orange-500 text-white px-6 py-6">
+      <div class="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-6">
         <h1 class="text-2xl font-bold">Tambah Laporan</h1>
         <p class="text-sm text-orange-100">Lengkapi detail laporan kegiatan di bawah</p>
       </div>
@@ -35,173 +35,188 @@
 
           <!-- Informasi Dasar -->
           <div>
-            <h4 class="text-lg font-semibold text-orange-600 mb-4">Informasi Dasar</h4>
+            <h4 class="text-lg font-semibold text-gray-700 mb-4">Informasi Dasar</h4>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
               <!-- Judul Laporan -->
-              <div class="md:col-span-2 bg-orange-50 border border-orange-200 rounded-xl p-4">
-                <label class="block text-sm font-medium text-orange-700 mb-2">
+              <div class="md:col-span-2 bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition-colors">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
                   Judul Laporan <span class="text-red-500">*</span>
                 </label>
-                <input type="text" name="judul_laporan"
+                <input type="text" name="judul_laporan" id="judul_laporan"
                   value="<%= old?.judul_laporan || '' %>" required
                   placeholder="Masukkan judul laporan..."
-                  class="w-full px-4 py-3 border border-orange-200 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-200">
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100 hover:border-gray-400 transition-all">
+                <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
               </div>
 
               <!-- Program Kerja -->
-              <div class="bg-orange-50 border border-orange-200 rounded-xl p-4 relative">
-                <label class="block text-sm font-medium text-orange-700 mb-2">
+              <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 relative hover:bg-gray-100/50 transition-colors">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
                   Program Kerja <span class="text-red-500">*</span>
                 </label>
                 <!-- Dropdown -->
                 <button type="button" id="prokerDropdownBtn"
-                  class="flex items-center justify-between w-full px-4 py-3 border border-orange-200 rounded-lg text-sm bg-white
-                         hover:border-orange-500 hover:shadow-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200">
-                  <span id="prokerDropdownLabel"><%= old?.id_ProgramKerja ? programs.find(p => p.id == old.id_ProgramKerja)?.namaProker : 'Pilih Program Kerja' %></span>
-                  <i class="fa-solid fa-chevron-down text-orange-500"></i>
+                  class="flex items-center justify-between w-full px-4 py-3 border border-gray-300 rounded-lg text-sm bg-white
+                         hover:border-gray-400 hover:shadow-sm focus:ring-2 focus:ring-orange-100 focus:border-orange-500 transition-all duration-200">
+                  <span id="prokerDropdownLabel" class="text-gray-500"><%= old?.id_ProgramKerja ? programs.find(p => p.id == old.id_ProgramKerja)?.namaProker : 'Pilih Program Kerja' %></span>
+                  <i class="fa-solid fa-chevron-down text-gray-400"></i>
                 </button>
                 <div id="prokerDropdownMenu"
-                  class="hidden absolute left-0 mt-2 w-full bg-white border border-orange-200 rounded-lg shadow-lg z-10">
+                  class="hidden absolute left-0 mt-2 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-10">
                   <ul class="max-h-48 overflow-y-auto text-sm text-gray-700">
                     <% programs.forEach(p => { %>
                       <li>
                         <button type="button"
-                          class="w-full text-left px-4 py-2 hover:bg-orange-100"
+                          class="w-full text-left px-4 py-2 hover:bg-gray-100 transition-colors"
                           data-value="<%= p.id %>"><%= p.namaProker %></button>
                       </li>
                     <% }) %>
                   </ul>
                 </div>
-                <input type="hidden" name="id_ProgramKerja" id="prokerInput" value="<%= old?.id_ProgramKerja || '' %>">
+                <input type="hidden" name="id_ProgramKerja" id="prokerInput" value="<%= old?.id_ProgramKerja || '' %>" required>
+                <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
               </div>
 
               <!-- Waktu & Tempat -->
-              <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
-                <label class="block text-sm font-medium text-orange-700 mb-2">
+              <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition-colors">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
                   Waktu & Tempat <span class="text-red-500">*</span>
                 </label>
-                <input type="text" name="waktu_tempat"
-                  value="<%= old?.waktu_tempat || '' %>"
+                <input type="text" name="waktu_tempat" id="waktu_tempat"
+                  value="<%= old?.waktu_tempat || '' %>" required
                   placeholder="Contoh: 09:00 - 12:00 WIB, Gedung A"
-                  class="w-full px-4 py-3 border border-orange-200 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-200">
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100 hover:border-gray-400 transition-all">
+                <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
               </div>
 
               <!-- Deskripsi -->
-              <div class="md:col-span-2 bg-orange-50 border border-orange-200 rounded-xl p-4">
-                <label class="block text-sm font-medium text-orange-700 mb-2">
+              <div class="md:col-span-2 bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition-colors">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
                   Deskripsi Kegiatan <span class="text-red-500">*</span>
                 </label>
-                <textarea name="deskripsi_kegiatan" rows="4" required
+                <textarea name="deskripsi_kegiatan" id="deskripsi_kegiatan" rows="4" required
                   placeholder="Tuliskan deskripsi kegiatan..."
-                  class="w-full px-4 py-3 border border-orange-200 rounded-lg text-sm resize-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200"><%= old?.deskripsi_kegiatan || '' %></textarea>
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm resize-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100 hover:border-gray-400 transition-all"><%= old?.deskripsi_kegiatan || '' %></textarea>
+                <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
               </div>
             </div>
           </div>
 
           <!-- Informasi Keuangan -->
           <div>
-            <h4 class="text-lg font-semibold text-orange-600 mb-4">Informasi Keuangan</h4>
+            <h4 class="text-lg font-semibold text-gray-700 mb-4">Informasi Keuangan</h4>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
               <!-- Sumber Dana Radio -->
-              <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
-                <label class="block text-sm font-medium text-orange-700 mb-2">Sumber Dana</label>
+              <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition-colors">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Sumber Dana <span class="text-red-500">*</span></label>
                 <div class="flex flex-col gap-3">
-                  <label class="flex items-center gap-2">
+                  <label class="flex items-center gap-2 p-2 rounded-lg hover:bg-white transition-colors cursor-pointer">
                     <input type="radio" name="sumber_dana_radio" value="uang_kas"
                       class="text-orange-500 focus:ring-orange-500"
                       <%= old?.sumber_dana === 'Uang Kas HMSI' ? 'checked' : '' %>>
-                    <span>Uang Kas HMSI</span>
+                    <span class="text-sm">Uang Kas HMSI</span>
                   </label>
-                  <label class="flex items-center gap-2">
-                    <input type="radio" name="sumber_dana_radio" value="lainnya"
-                      class="text-orange-500 focus:ring-orange-500"
-                      <%= old?.sumber_dana && old?.sumber_dana !== 'Uang Kas HMSI' ? 'checked' : '' %>>
-                    <input type="text" name="sumber_dana_text"
+                  <div class="p-2 rounded-lg hover:bg-white transition-colors">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                      <input type="radio" name="sumber_dana_radio" value="lainnya"
+                        class="text-orange-500 focus:ring-orange-500"
+                        <%= old?.sumber_dana && old?.sumber_dana !== 'Uang Kas HMSI' ? 'checked' : '' %>>
+                      <span class="text-sm">Lainnya:</span>
+                    </label>
+                    <input type="text" name="sumber_dana_text" id="sumber_dana_text"
                       value="<%= old?.sumber_dana && old?.sumber_dana !== 'Uang Kas HMSI' ? old.sumber_dana : '' %>"
-                      placeholder="lainnya, contoh : Departemen SI"
-                      class="flex-1 px-4 py-2 border border-orange-200 rounded-lg text-sm placeholder-gray-400 focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
+                      placeholder="Contoh: Departemen SI"
+                      class="mt-2 w-full px-3 py-2 border border-gray-200 rounded-lg text-sm placeholder-gray-400 focus:border-orange-500 focus:ring-2 focus:ring-orange-100 disabled:bg-gray-100"
                       <%= !old?.sumber_dana || old?.sumber_dana === 'Uang Kas HMSI' ? 'disabled' : '' %>>
-                  </label>
+                  </div>
                 </div>
+                <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
               </div>
 
               <!-- Dana Digunakan (umum) -->
-              <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
-                <label class="block text-sm font-medium text-orange-700 mb-2">Total Dana Kegiatan (Rp)</label>
-                <input type="number" name="dana_digunakan"
-                  value="<%= old?.dana_digunakan || '' %>"
+              <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition-colors">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Total Dana Kegiatan (Rp) <span class="text-red-500">*</span></label>
+                <input type="number" name="dana_digunakan" id="dana_digunakan"
+                  value="<%= old?.dana_digunakan || '' %>" required min="0"
                   placeholder="Contoh: 3000000"
-                  class="w-full px-4 py-3 border border-orange-200 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-200">
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100 hover:border-gray-400 transition-all">
+                <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
               </div>
 
               <!-- Dana Terpakai (khusus kas HMSI) -->
-              <div class="bg-orange-50 border border-orange-200 rounded-xl p-4 md:col-span-2">
-                <label class="block text-sm font-medium text-orange-700 mb-2">Dana Terpakai dari Uang Kas HMSI (Rp)</label>
-                <input type="number" name="dana_terpakai"
-                  value="<%= old?.dana_terpakai || '' %>"
+              <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 md:col-span-2 hover:bg-gray-100/50 transition-colors">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Dana Terpakai dari Uang Kas HMSI (Rp) <span class="text-red-500">*</span></label>
+                <input type="number" name="dana_terpakai" id="dana_terpakai"
+                  value="<%= old?.dana_terpakai || '' %>" required min="0"
                   placeholder="Contoh: 1500000"
-                  class="w-full px-4 py-3 border border-orange-200 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-200">
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100 hover:border-gray-400 transition-all">
+                <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
               </div>
             </div>
           </div>
 
           <!-- Target Pencapaian -->
           <div>
-            <h4 class="text-lg font-semibold text-orange-600 mb-4">Target Pencapaian</h4>
+            <h4 class="text-lg font-semibold text-gray-700 mb-4">Target Pencapaian</h4>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
-                <label class="block text-sm font-medium text-orange-700 mb-2">Target Kuantitatif (%)</label>
-                <input type="number" name="persentase_kuantitatif"
-                  value="<%= old?.persentase_kuantitatif || '' %>"
+              <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition-colors">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Target Kuantitatif (%) <span class="text-red-500">*</span></label>
+                <input type="number" name="persentase_kuantitatif" id="persentase_kuantitatif"
+                  value="<%= old?.persentase_kuantitatif || '' %>" required
                   min="0" max="100" placeholder="Persentase target peserta..."
-                  class="w-full px-4 py-3 border border-orange-200 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-200">
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100 hover:border-gray-400 transition-all">
+                <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
               </div>
-              <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
-                <label class="block text-sm font-medium text-orange-700 mb-2">Target Kualitatif (%)</label>
-                <input type="number" name="persentase_kualitatif"
-                  value="<%= old?.persentase_kualitatif || '' %>"
+              <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition-colors">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Target Kualitatif (%) <span class="text-red-500">*</span></label>
+                <input type="number" name="persentase_kualitatif" id="persentase_kualitatif"
+                  value="<%= old?.persentase_kualitatif || '' %>" required
                   min="0" max="100" placeholder="Penilaian kualitas pelaksanaan..."
-                  class="w-full px-4 py-3 border border-orange-200 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-200">
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100 hover:border-gray-400 transition-all">
+                <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
               </div>
             </div>
           </div>
 
           <!-- Kendala dan Solusi -->
           <div>
-            <h4 class="text-lg font-semibold text-orange-600 mb-4">Kendala dan Solusi</h4>
+            <h4 class="text-lg font-semibold text-gray-700 mb-4">Kendala dan Solusi</h4>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
-                <label class="block text-sm font-medium text-orange-700 mb-2">Kendala yang Dihadapi</label>
-                <textarea name="kendala" rows="3" placeholder="Tuliskan kendala..."
-                  class="w-full px-4 py-3 border border-orange-200 rounded-lg text-sm resize-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200"><%= old?.kendala || '' %></textarea>
+              <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition-colors">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Kendala yang Dihadapi <span class="text-red-500">*</span></label>
+                <textarea name="kendala" id="kendala" rows="3" required placeholder="Tuliskan kendala..."
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm resize-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100 hover:border-gray-400 transition-all"><%= old?.kendala || '' %></textarea>
+                <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
               </div>
-              <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
-                <label class="block text-sm font-medium text-orange-700 mb-2">Solusi yang Diterapkan</label>
-                <textarea name="solusi" rows="3" placeholder="Tuliskan solusi..."
-                  class="w-full px-4 py-3 border border-orange-200 rounded-lg text-sm resize-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200"><%= old?.solusi || '' %></textarea>
+              <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition-colors">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Solusi yang Diterapkan <span class="text-red-500">*</span></label>
+                <textarea name="solusi" id="solusi" rows="3" required placeholder="Tuliskan solusi..."
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm resize-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100 hover:border-gray-400 transition-all"><%= old?.solusi || '' %></textarea>
+                <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
               </div>
             </div>
           </div>
 
           <!-- Sasaran Kegiatan -->
-          <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
-            <h4 class="text-lg font-semibold text-orange-600 mb-2">Sasaran Kegiatan</h4>
-            <input type="text" name="sasaran"
+          <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition-colors">
+            <h4 class="text-lg font-semibold text-gray-700 mb-2">Sasaran Kegiatan <span class="text-red-500">*</span></h4>
+            <input type="text" name="sasaran" id="sasaran" required
               value="<%= old?.sasaran || '' %>"
               placeholder="Contoh: Panti Asuhan"
-              class="w-full px-4 py-3 border border-orange-200 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-200 placeholder-gray-400">
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100 placeholder-gray-400 hover:border-gray-400 transition-all">
+            <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
           </div>
 
           <!-- Dokumentasi -->
           <div>
-            <h4 class="text-lg font-semibold text-orange-600 mb-1">File Dokumentasi</h4>
+            <h4 class="text-lg font-semibold text-gray-700 mb-1">File Dokumentasi <span class="text-red-500">*</span></h4>
             <p class="text-sm text-gray-500 mb-4">Upload file pendukung laporan kegiatan</p>
             <div id="dropzone"
-              class="border-2 border-dashed border-orange-300 rounded-xl p-10 bg-orange-50/30 text-center cursor-pointer 
-                     transition duration-200 hover:border-orange-500 hover:bg-orange-100/50 flex flex-col items-center gap-4">
-              <input type="file" name="dokumentasi" id="fileUpload" class="hidden"
+              class="border-2 border-dashed border-gray-300 rounded-xl p-10 bg-gray-50/50 text-center cursor-pointer 
+                     transition duration-200 hover:border-orange-400 hover:bg-orange-50/30 flex flex-col items-center gap-4">
+              <input type="file" name="dokumentasi" id="fileUpload" class="hidden" required
                 accept=".pdf,.jpg,.jpeg,.png" />
               <div class="text-4xl text-gray-400">📄</div>
               <label for="fileUpload" class="cursor-pointer">
@@ -216,22 +231,24 @@
               </p>
             </div>
             <p id="fileName" class="text-sm text-gray-600 mt-3"></p>
+            <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
           </div>
 
           <!-- Keterangan Wajib -->
           <p class="text-sm text-red-500 mt-4">
-            * Field dengan tanda (<span class="text-red-500">*</span>) wajib diisi
+            * Semua field wajib diisi
           </p>
 
           <!-- Tombol -->
-          <div class="pt-6 border-t border-gray-100 flex gap-4 justify-end">
+          <div class="pt-6 border-t border-gray-200 flex gap-4 justify-end">
             <a href="/hmsi/laporan"
-              class="px-8 py-3 border border-gray-300 rounded-xl text-sm font-medium bg-white text-gray-700 transition-all duration-200 hover:shadow-md">
+              class="px-8 py-3 border border-gray-300 rounded-xl text-sm font-medium bg-white text-gray-700 transition-all duration-200 hover:shadow-md hover:border-gray-400">
               Batal
             </a>
             <button type="submit" id="submitBtn"
-              class="flex items-center justify-center gap-2 px-8 py-3 text-white bg-orange-500 rounded-xl text-sm font-semibold transition-all duration-200 hover:bg-orange-600">
-              <span id="btnText">Simpan</span>
+              class="flex items-center justify-center gap-2 px-8 py-3 text-white bg-orange-500 rounded-xl text-sm font-semibold transition-all duration-200 hover:bg-orange-600 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed">
+              <span id="btnText">Kirim</span>
+              <div id="btnSpinner" class="hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
             </button>
           </div>
         </form>
@@ -254,7 +271,10 @@
       item.addEventListener("click", () => {
         input.value = item.dataset.value;
         label.textContent = item.textContent;
+        label.classList.remove("text-gray-500");
+        label.classList.add("text-gray-900");
         menu.classList.add("hidden");
+        validateField(input);
       });
     });
     window.addEventListener("click", (e) => {
@@ -269,10 +289,232 @@
         if (r.value === 'lainnya' && r.checked) {
           textInput.disabled = false;
           textInput.focus();
+          textInput.required = true;
         } else if (r.value === 'uang_kas' && r.checked) {
           textInput.disabled = true;
           textInput.value = '';
+          textInput.required = false;
         }
+        validateSumberDana();
+      });
+    });
+
+    // File upload functionality
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('fileUpload');
+    const fileName = document.getElementById('fileName');
+
+    dropzone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropzone.classList.add('border-orange-400', 'bg-orange-50');
+    });
+    
+    dropzone.addEventListener('dragleave', () => {
+      dropzone.classList.remove('border-orange-400', 'bg-orange-50');
+    });
+    
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('border-orange-400', 'bg-orange-50');
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        fileInput.files = files;
+        fileName.textContent = `File dipilih: ${files[0].name}`;
+        validateField(fileInput);
+      }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        fileName.textContent = `File dipilih: ${e.target.files[0].name}`;
+        validateField(fileInput);
+      }
+    });
+
+    // Validation functions
+    function validateField(field) {
+      const errorDiv = field.closest('.bg-gray-50')?.querySelector('.error-message') || 
+                      field.closest('div')?.querySelector('.error-message');
+      
+      if (!errorDiv) return true;
+
+      let isValid = true;
+      let errorMessage = '';
+
+      // Check if field is required and empty
+      if (field.hasAttribute('required')) {
+        if (field.type === 'file') {
+          isValid = field.files.length > 0;
+          errorMessage = 'File dokumentasi wajib diunggah';
+        } else if (field.value.trim() === '') {
+          isValid = false;
+          errorMessage = 'Field ini wajib diisi';
+        }
+      }
+
+      // Additional validation for specific fields
+      if (field.type === 'number' && field.value !== '') {
+        const value = parseFloat(field.value);
+        if (value < 0) {
+          isValid = false;
+          errorMessage = 'Nilai tidak boleh negatif';
+        }
+        if (field.hasAttribute('max') && value > parseFloat(field.getAttribute('max'))) {
+          isValid = false;
+          errorMessage = `Nilai maksimal ${field.getAttribute('max')}`;
+        }
+      }
+
+      // Show/hide error message
+      if (!isValid) {
+        errorDiv.textContent = errorMessage;
+        errorDiv.classList.remove('hidden');
+        field.classList.add('border-red-500');
+        field.classList.remove('border-gray-300');
+      } else {
+        errorDiv.classList.add('hidden');
+        field.classList.remove('border-red-500');
+        field.classList.add('border-gray-300');
+      }
+
+      return isValid;
+    }
+
+    function validateSumberDana() {
+      const radioChecked = document.querySelector('input[name="sumber_dana_radio"]:checked');
+      const textInput = document.querySelector('input[name="sumber_dana_text"]');
+      const errorDiv = document.querySelector('input[name="sumber_dana_radio"]').closest('.bg-gray-50').querySelector('.error-message');
+      
+      let isValid = true;
+      let errorMessage = '';
+
+      if (!radioChecked) {
+        isValid = false;
+        errorMessage = 'Pilih sumber dana';
+      } else if (radioChecked.value === 'lainnya' && textInput.value.trim() === '') {
+        isValid = false;
+        errorMessage = 'Isi sumber dana lainnya';
+      }
+
+      if (!isValid) {
+        errorDiv.textContent = errorMessage;
+        errorDiv.classList.remove('hidden');
+      } else {
+        errorDiv.classList.add('hidden');
+      }
+
+      return isValid;
+    }
+
+    function validateAllFields() {
+      let allValid = true;
+      
+      // Required text inputs and textareas
+      const requiredFields = [
+        'judul_laporan', 'waktu_tempat', 'deskripsi_kegiatan',
+        'dana_digunakan', 'dana_terpakai', 'persentase_kuantitatif',
+        'persentase_kualitatif', 'kendala', 'solusi', 'sasaran'
+      ];
+
+      requiredFields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field && !validateField(field)) {
+          allValid = false;
+        }
+      });
+
+      // Validate program kerja dropdown
+      const prokerInput = document.getElementById('prokerInput');
+      if (!validateField(prokerInput)) {
+        allValid = false;
+      }
+
+      // Validate sumber dana
+      if (!validateSumberDana()) {
+        allValid = false;
+      }
+
+      // Validate file upload
+      const fileInput = document.getElementById('fileUpload');
+      if (!validateField(fileInput)) {
+        allValid = false;
+      }
+
+      return allValid;
+    }
+
+    // Add real-time validation to all fields
+    document.querySelectorAll('input[required], textarea[required]').forEach(field => {
+      field.addEventListener('blur', () => validateField(field));
+      field.addEventListener('input', () => {
+        if (field.classList.contains('border-red-500')) {
+          validateField(field);
+        }
+      });
+    });
+
+    // Add validation to radio buttons
+    document.querySelectorAll('input[name="sumber_dana_radio"]').forEach(radio => {
+      radio.addEventListener('change', validateSumberDana);
+    });
+
+    // Form submission with validation
+    const form = document.getElementById('laporanForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const btnText = document.getElementById('btnText');
+    const btnSpinner = document.getElementById('btnSpinner');
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      // Validate all fields before submission
+      if (!validateAllFields()) {
+        alert('Mohon lengkapi semua field yang wajib diisi!');
+        return;
+      }
+
+      // Show loading state
+      submitBtn.disabled = true;
+      btnText.textContent = 'Menyimpan...';
+      btnSpinner.classList.remove('hidden');
+
+      // Submit form
+      const formData = new FormData(form);
+      
+      // Handle sumber dana logic
+      const sumberDanaRadio = document.querySelector('input[name="sumber_dana_radio"]:checked');
+      if (sumberDanaRadio) {
+        if (sumberDanaRadio.value === 'uang_kas') {
+          formData.set('sumber_dana', 'Uang Kas HMSI');
+        } else {
+          formData.set('sumber_dana', formData.get('sumber_dana_text'));
+        }
+      }
+      formData.delete('sumber_dana_radio');
+      formData.delete('sumber_dana_text');
+
+      fetch(form.action, {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => {
+        if (response.ok) {
+          alert('Laporan berhasil disimpan!');
+          window.location.href = '/hmsi/laporan';
+        } else {
+          return response.text().then(text => {
+            throw new Error(text);
+          });
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Terjadi kesalahan: ' + error.message);
+      })
+      .finally(() => {
+        submitBtn.disabled = false;
+        btnText.textContent = 'Simpan';
+        btnSpinner.classList.add('hidden');
       });
     });
   </script>

@@ -8,7 +8,7 @@
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
         crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
-<body class="bg-orange-50 min-h-screen flex flex-col">
+<body class="bg-gray-50 min-h-screen flex flex-col">
 
   <!-- ✅ Navbar harus duluan (agar tombol burger ada di DOM) -->
   <%- include('../partials/navbarHMSI', { user: user, unreadCount: unreadCount }) %>
@@ -86,9 +86,6 @@
                     <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= l.namaProker %></td>
                     <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= l.tanggalFormatted %></td>
                     <td class="py-3 px-4 flex justify-center gap-4 border border-orange-100">
-                      <a href="/hmsi/laporan/<%= l.id_laporan %>" class="text-orange-500 hover:text-orange-700 transition transform hover:scale-110" title="Detail">
-                        <i class="fa-solid fa-eye text-lg"></i>
-                      </a>
                       <a href="/hmsi/laporan/edit/<%= l.id_laporan %>" class="text-orange-500 hover:text-orange-700 transition transform hover:scale-110" title="Edit">
                         <i class="fa-solid fa-pen-to-square text-lg"></i>
                       </a>
