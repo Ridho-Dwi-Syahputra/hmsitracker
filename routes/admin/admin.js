@@ -14,6 +14,7 @@ const { requireLogin, requireRole } = require("../../middleware/auth");
 // 📦 Controller
 const keuanganController = require("../../controllers/Admin/keuanganController");
 const profileController = require("../../controllers/Admin/profileController");
+const userController = require("../../controllers/Admin/userController");
 
 // =====================================================
 // 🏠 Dashboard Admin (Presidium Inti)
@@ -92,17 +93,49 @@ router.get(
 // =====================================================
 // 👤 Kelola User
 // =====================================================
+
+// 📄 List user
 router.get(
   "/kelola-user",
   requireLogin,
   requireRole(["Admin"]),
-  (req, res) => {
-    res.render("admin/kelolaUser", {
-      title: "Kelola User",
-      user: req.session.user || { nama: "Admin" },
-      activeNav: "users",
-    });
-  }
+  userController.getAllUsers
+);
+
+// ➕ Tambah user
+router.get(
+  "/user/tambah",
+  requireLogin,
+  requireRole(["Admin"]),
+  userController.getTambahUser
+);
+router.post(
+  "/user/tambah",
+  requireLogin,
+  requireRole(["Admin"]),
+  userController.postTambahUser
+);
+
+// ✏️ Edit user
+router.get(
+  "/user/edit/:id",
+  requireLogin,
+  requireRole(["Admin"]),
+  userController.getEditUser
+);
+router.post(
+  "/user/edit/:id",
+  requireLogin,
+  requireRole(["Admin"]),
+  userController.postEditUser
+);
+
+// 🗑️ Hapus user
+router.post(
+  "/user/delete/:id",
+  requireLogin,
+  requireRole(["Admin"]),
+  userController.deleteUser
 );
 
 // =====================================================
