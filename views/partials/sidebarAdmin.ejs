@@ -1,6 +1,6 @@
 <%
   // ✅ Data user
-  var displayName = (user && (user.nama || user.name)) ? (user.nama || user.name) : 'Admin HMSI';
+  var displayName = (user && (user.nama || user.name)) ? (user.nama || user.name) : 'HMSI Tracker';
   var initial = displayName ? displayName.charAt(0).toUpperCase() : 'A';
   var fotoProfile = (user && user.foto_profile) 
     ? ('/' + user.foto_profile.replace(/^\/+/, '')) 
@@ -34,8 +34,8 @@
 
     <!-- Header -->
     <div class="hidden lg:block p-6 border-b border-gray-100 bg-gradient-to-br from-orange-500 to-orange-600">
-      <h1 class="text-xl font-bold text-white tracking-wide">ADMIN HMSI</h1>
-      <p class="text-sm text-orange-100 mt-1">Management System</p>
+      <h1 class="text-xl font-bold text-white tracking-wide">HMSI Tracker</h1>
+      <p class="text-sm text-orange-100 mt-1">Controlling System</p>
     </div>
 
     <!-- Profile -->
