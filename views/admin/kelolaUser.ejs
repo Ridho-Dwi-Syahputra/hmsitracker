@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title><%= title %></title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body class="bg-orange-50 min-h-screen flex flex-col">
+
+  <!-- Navbar -->
+  <%- include('../partials/navbarAdmin', { user: user }) %>
+
+  <!-- Sidebar -->
+  <%- include('../partials/sidebarAdmin', { activeNav: 'users', user: user }) %>
+
+  <!-- Wrapper -->
+  <main class="lg:ml-80 px-6 pt-20 pb-8 flex-grow">
+    <div class="max-w-7xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-orange-200">
+
+      <!-- Header -->
+      <div class="bg-orange-500 text-white px-6 py-6 flex justify-between items-center">
+        <div>
+          <h1 class="text-2xl font-bold">Kelola User</h1>
+          <p class="text-sm text-orange-100">Daftar semua user HMSI</p>
+        </div>
+        <a href="/admin/user/tambah" 
+          class="flex items-center space-x-2 px-4 py-2 bg-white text-orange-600 rounded-lg font-semibold
+                 transition-all duration-200 hover:bg-orange-100 hover:scale-105 active:scale-95">
+          <i class="fa-solid fa-plus"></i>
+          <span>Tambah User</span>
+        </a>
+      </div>
+
+      <!-- Body -->
+      <div class="p-6 sm:p-8">
+
+        <!-- Search & Filter -->
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+          <!-- Search -->
+          <div class="flex-1">
+            <div class="relative">
+              <input id="searchInput" type="text" placeholder="Cari user..."
+                class="w-full pl-10 pr-4 py-3 border rounded-xl text-sm
+                       border-gray-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-500
+                       focus:bg-orange-50 focus:text-orange-700 
+                       placeholder-gray-400 focus:placeholder-orange-400
+                       transition-all duration-300">
+              <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            </div>
+          </div>
+
+          <!-- Role Dropdown -->
+          <div class="relative">
+            <button id="roleDropdownBtn"
+              class="flex items-center justify-between gap-2 px-4 py-3 border border-gray-300 rounded-xl text-sm bg-white
+                     hover:border-orange-500 hover:shadow-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200">
+              <span id="roleDropdownLabel">Semua Role</span>
+              <i class="fa-solid fa-chevron-down text-orange-500"></i>
+            </button>
+            <div id="roleDropdownMenu" 
+              class="hidden absolute right-0 mt-2 w-48 bg-white border border-orange-200 rounded-lg shadow-lg z-10">
+              <ul class="text-sm text-gray-700">
+                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-role="all">Semua Role</button></li>
+                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-role="HMSI">HMSI</button></li>
+                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-role="DPA">DPA</button></li>
+                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-role="Admin">Admin</button></li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Divisi Dropdown (hanya untuk HMSI) -->
+          <div id="divisiFilterWrapper" class="relative hidden">
+            <button id="divisiDropdownBtn"
+              class="flex items-center justify-between gap-2 px-4 py-3 border border-gray-300 rounded-xl text-sm bg-white
+                     hover:border-orange-500 hover:shadow-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200">
+              <span id="divisiDropdownLabel">Semua Divisi</span>
+              <i class="fa-solid fa-chevron-down text-orange-500"></i>
+            </button>
+            <div id="divisiDropdownMenu" 
+              class="hidden absolute right-0 mt-2 w-48 bg-white border border-orange-200 rounded-lg shadow-lg z-10 max-h-56 overflow-y-auto">
+              <ul class="text-sm text-gray-700">
+                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-divisi="all">Semua Divisi</button></li>
+                <% ["Internal","Medkraf","Eksternal","Bikraf","PSI","PSDM","RTK"].forEach(d => { %>
+                  <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-divisi="<%= d %>"><%= d %></button></li>
+                <% }) %>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Table -->
+        <div class="overflow-x-auto bg-white-50 p-2 shadow-sm rounded-xl">
+          <table class="min-w-full text-sm text-center border border-orange-200 rounded-xl overflow-hidden border-separate border-spacing-0">
+            <thead class="bg-orange-100 text-gray-700">
+              <tr>
+                <th class="py-3 px-4 font-semibold border border-orange-200">NIM</th>
+                <th class="py-3 px-4 font-semibold border border-orange-200 text-left">Nama</th>
+                <th class="py-3 px-4 font-semibold border border-orange-200 text-left">Email</th>
+                <th class="py-3 px-4 font-semibold border border-orange-200">Role</th>
+                <th class="py-3 px-4 font-semibold border border-orange-200">Divisi</th>
+                <th class="py-3 px-4 font-semibold border border-orange-200">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="userTable">
+              <% if (!users || users.length === 0) { %>
+                <tr>
+                  <td colspan="6" class="py-8 text-gray-500 text-center border border-orange-100">
+                    Belum ada user terdaftar
+                  </td>
+                </tr>
+              <% } else { %>
+                <% users.forEach(u => { %>
+                  <tr class="hover:bg-orange-50 transition" 
+                      data-role="<%= u.role %>" data-divisi="<%= u.divisi || '' %>">
+                    <td class="py-3 px-4 border border-orange-100"><%= u.id_anggota %></td>
+                    <td class="py-3 px-4 font-medium text-gray-800 border border-orange-100 text-left"><%= u.nama %></td>
+                    <td class="py-3 px-4 text-gray-600 border border-orange-100 text-left"><%= u.email %></td>
+                    <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= u.role %></td>
+                    <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= u.divisi || '-' %></td>
+                    <td class="py-3 px-4 flex justify-center gap-4 border border-orange-100">
+                      <a href="/admin/user/edit/<%= u.id_anggota %>" 
+                        class="text-orange-500 hover:text-orange-700 transition transform hover:scale-110" title="Edit">
+                        <i class="fa-solid fa-pen-to-square text-lg"></i>
+                      </a>
+                      <form action="/admin/user/delete/<%= u.id_anggota %>" method="POST" class="inline" onsubmit="return confirm('Hapus user ini?')">
+                        <button type="submit" class="text-orange-500 hover:text-orange-700 transition transform hover:scale-110" title="Hapus">
+                          <i class="fa-solid fa-trash text-lg"></i>
+                        </button>
+                      </form>
+                    </td>
+                  </tr>
+                <% }) %>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="flex justify-center items-center gap-2 mt-6" id="pagination">
+          <button id="prevPage" class="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 disabled:opacity-50">Prev</button>
+          <span id="pageInfo" class="text-gray-700"></span>
+          <button id="nextPage" class="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 disabled:opacity-50">Next</button>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <%- include('../partials/footer') %>
+
+  <!-- Script Search + Filter + Pagination -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const searchInput = document.getElementById("searchInput");
+      const tbody = document.getElementById("userTable");
+      let rows = tbody ? Array.from(tbody.querySelectorAll("tr[data-role]")) : [];
+
+      const rowsPerPage = 10;
+      let currentPage = 1;
+      let selectedRole = "all";
+      let selectedDivisi = "all";
+
+      // Search
+      function filterRows() {
+        const q = searchInput.value.toLowerCase();
+        rows.forEach(r => {
+          const text = r.textContent.toLowerCase();
+          r.dataset.visible = text.includes(q) ? "true" : "false";
+        });
+        applyFilters();
+      }
+
+      // Apply filters
+      function applyFilters() {
+        rows.forEach(r => {
+          const role = r.dataset.role;
+          const divisi = r.dataset.divisi || "";
+          let visible = r.dataset.visible !== "false";
+
+          if (selectedRole !== "all" && role !== selectedRole) visible = false;
+          if (selectedRole === "HMSI" && selectedDivisi !== "all" && divisi !== selectedDivisi) visible = false;
+
+          r.dataset.show = visible ? "true" : "false";
+        });
+        paginate();
+      }
+
+      // Pagination
+      function paginate() {
+        let visibleRows = rows.filter(r => r.dataset.show === "true");
+        let totalPages = Math.ceil(visibleRows.length / rowsPerPage);
+        if (currentPage > totalPages) currentPage = totalPages || 1;
+
+        rows.forEach(r => r.style.display = "none");
+        visibleRows.forEach((r, i) => {
+          if (i >= (currentPage - 1) * rowsPerPage && i < currentPage * rowsPerPage) {
+            r.style.display = "";
+          }
+        });
+
+        document.getElementById("pageInfo").textContent = `Halaman ${currentPage} dari ${totalPages || 1}`;
+        document.getElementById("prevPage").disabled = currentPage === 1;
+        document.getElementById("nextPage").disabled = currentPage === totalPages || totalPages === 0;
+      }
+
+      // Search input
+      searchInput?.addEventListener("input", filterRows);
+
+      // Role filter
+      const roleBtn = document.getElementById("roleDropdownBtn");
+      const roleMenu = document.getElementById("roleDropdownMenu");
+      const roleLabel = document.getElementById("roleDropdownLabel");
+      const divisiWrapper = document.getElementById("divisiFilterWrapper");
+
+      roleBtn.addEventListener("click", () => roleMenu.classList.toggle("hidden"));
+      roleMenu.querySelectorAll("button").forEach(btn => {
+        btn.addEventListener("click", () => {
+          selectedRole = btn.dataset.role;
+          roleLabel.textContent = btn.textContent;
+          roleMenu.classList.add("hidden");
+
+          if (selectedRole === "HMSI") {
+            divisiWrapper.classList.remove("hidden");
+          } else {
+            divisiWrapper.classList.add("hidden");
+            selectedDivisi = "all";
+            document.getElementById("divisiDropdownLabel").textContent = "Semua Divisi";
+          }
+          applyFilters();
+        });
+      });
+      window.addEventListener("click", (e) => {
+        if (!roleBtn.contains(e.target) && !roleMenu.contains(e.target)) roleMenu.classList.add("hidden");
+      });
+
+      // Divisi filter
+      const divisiBtn = document.getElementById("divisiDropdownBtn");
+      const divisiMenu = document.getElementById("divisiDropdownMenu");
+      const divisiLabel = document.getElementById("divisiDropdownLabel");
+
+      divisiBtn?.addEventListener("click", () => divisiMenu.classList.toggle("hidden"));
+      divisiMenu?.querySelectorAll("button").forEach(btn => {
+        btn.addEventListener("click", () => {
+          selectedDivisi = btn.dataset.divisi;
+          divisiLabel.textContent = btn.textContent;
+          divisiMenu.classList.add("hidden");
+          applyFilters();
+        });
+      });
+      window.addEventListener("click", (e) => {
+        if (!divisiBtn?.contains(e.target) && !divisiMenu?.contains(e.target)) divisiMenu?.classList.add("hidden");
+      });
+
+      // Init
+      if (rows.length > 0) filterRows();
+
+      // Pagination buttons
+      document.getElementById("prevPage")?.addEventListener("click", () => { currentPage--; paginate(); });
+      document.getElementById("nextPage")?.addEventListener("click", () => { currentPage++; paginate(); });
+    });
+  </script>
+</body>
+</html>
