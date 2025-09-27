@@ -150,6 +150,8 @@ exports.createLaporan = async (req, res) => {
       dana_terpakai,
       persentase_kualitatif,
       persentase_kuantitatif,
+      deskripsi_target_kualitatif,
+      deskripsi_target_kuantitatif,
       kendala,
       solusi,
       id_ProgramKerja,
@@ -167,7 +169,6 @@ exports.createLaporan = async (req, res) => {
     let danaDigunakanNum = dana_digunakan ? parseFloat(String(dana_digunakan).replace(/[^\d.-]/g, "")) : 0;
     let danaTerpakaiNum = dana_terpakai ? parseFloat(String(dana_terpakai).replace(/[^\d.-]/g, "")) : 0;
 
-    // Samakan jika salah satu kosong
     if (danaDigunakanNum > 0 && danaTerpakaiNum === 0) danaTerpakaiNum = danaDigunakanNum;
     if (danaTerpakaiNum > 0 && danaDigunakanNum === 0) danaDigunakanNum = danaTerpakaiNum;
 
@@ -178,8 +179,10 @@ exports.createLaporan = async (req, res) => {
       `INSERT INTO Laporan 
         (id_laporan, judul_laporan, deskripsi_kegiatan, sasaran, waktu_tempat, dana_digunakan, 
          sumber_dana, sumber_dana_lainnya, dana_terpakai,
-         persentase_kualitatif, persentase_kuantitatif, kendala, solusi, dokumentasi, id_ProgramKerja, divisi, tanggal)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURDATE())`,
+         persentase_kualitatif, persentase_kuantitatif, 
+         deskripsi_target_kualitatif, deskripsi_target_kuantitatif, 
+         kendala, solusi, dokumentasi, id_ProgramKerja, divisi, tanggal)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURDATE())`,
       [
         idLaporan,
         judul_laporan,
@@ -192,6 +195,8 @@ exports.createLaporan = async (req, res) => {
         danaTerpakaiNum,
         persentase_kualitatif,
         persentase_kuantitatif,
+        deskripsi_target_kualitatif || null,
+        deskripsi_target_kuantitatif || null,
         kendala,
         solusi,
         dokumentasi,
@@ -337,6 +342,8 @@ exports.updateLaporan = async (req, res) => {
       dana_terpakai,
       persentase_kualitatif,
       persentase_kuantitatif,
+      deskripsi_target_kualitatif,
+      deskripsi_target_kuantitatif,
       kendala,
       solusi,
       id_ProgramKerja,
@@ -349,7 +356,6 @@ exports.updateLaporan = async (req, res) => {
     let danaDigunakanNum = dana_digunakan ? parseFloat(String(dana_digunakan).replace(/[^\d.-]/g, "")) : 0;
     let danaTerpakaiNum = dana_terpakai ? parseFloat(String(dana_terpakai).replace(/[^\d.-]/g, "")) : 0;
 
-    // Samakan jika salah satu kosong
     if (danaDigunakanNum > 0 && danaTerpakaiNum === 0) danaTerpakaiNum = danaDigunakanNum;
     if (danaTerpakaiNum > 0 && danaDigunakanNum === 0) danaDigunakanNum = danaTerpakaiNum;
 
@@ -382,6 +388,8 @@ exports.updateLaporan = async (req, res) => {
         dana_terpakai=?,
         persentase_kualitatif=?, 
         persentase_kuantitatif=?, 
+        deskripsi_target_kualitatif=?,
+        deskripsi_target_kuantitatif=?,
         kendala=?, 
         solusi=?, 
         id_ProgramKerja=?, 
@@ -397,6 +405,8 @@ exports.updateLaporan = async (req, res) => {
       danaTerpakaiNum,
       persentase_kualitatif,
       persentase_kuantitatif,
+      deskripsi_target_kualitatif || null,
+      deskripsi_target_kuantitatif || null,
       kendala,
       solusi,
       id_ProgramKerja || null,

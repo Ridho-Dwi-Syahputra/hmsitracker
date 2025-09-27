@@ -91,7 +91,9 @@ exports.getDetailLaporanDPA = async (req, res) => {
   try {
     const [rows] = await db.query(
       `SELECT l.*, 
-              p.Nama_ProgramKerja AS namaProker
+              p.Nama_ProgramKerja AS namaProker,
+              l.deskripsi_target_kuantitatif,
+              l.deskripsi_target_kualitatif
        FROM Laporan l
        LEFT JOIN Program_kerja p ON l.id_ProgramKerja = p.id_ProgramKerja
        WHERE l.id_laporan = ?`,
@@ -154,7 +156,9 @@ exports.getFormEvaluasi = async (req, res) => {
   try {
     const [rows] = await db.query(
       `SELECT l.*, 
-              p.Nama_ProgramKerja AS namaProker
+              p.Nama_ProgramKerja AS namaProker,
+              l.deskripsi_target_kuantitatif,
+              l.deskripsi_target_kualitatif
        FROM Laporan l
        LEFT JOIN Program_kerja p ON l.id_ProgramKerja = p.id_ProgramKerja
        WHERE l.id_laporan = ?`,

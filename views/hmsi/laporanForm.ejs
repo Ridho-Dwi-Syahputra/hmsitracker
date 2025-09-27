@@ -155,28 +155,64 @@
 </div>
 
 
-          <!-- Target Pencapaian -->
-          <div>
-            <h4 class="text-lg font-semibold text-gray-700 mb-4">Target Pencapaian</h4>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition-colors">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Target Kuantitatif (%) <span class="text-red-500">*</span></label>
-                <input type="number" name="persentase_kuantitatif" id="persentase_kuantitatif"
-                  value="<%= old?.persentase_kuantitatif || '' %>" required
-                  min="0" max="100" placeholder="Persentase target peserta..."
-                  class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100 hover:border-gray-400 transition-all">
-                <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
-              </div>
-              <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition-colors">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Target Kualitatif (%) <span class="text-red-500">*</span></label>
-                <input type="number" name="persentase_kualitatif" id="persentase_kualitatif"
-                  value="<%= old?.persentase_kualitatif || '' %>" required
-                  min="0" max="100" placeholder="Penilaian kualitas pelaksanaan..."
-                  class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100 hover:border-gray-400 transition-all">
-                <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
-              </div>
-            </div>
-          </div>
+                    <!-- Target Pencapaian -->
+                    <div>
+                      <h4 class="text-lg font-semibold text-gray-700 mb-4">Target Pencapaian</h4>
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          
+                        <!-- Target Kuantitatif (%) -->
+                        <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition-colors">
+                          <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Target Kuantitatif (%) <span class="text-red-500">*</span>
+                          </label>
+                          <input type="number" name="persentase_kuantitatif" id="persentase_kuantitatif"
+                            value="<%= old?.persentase_kuantitatif || '' %>" required
+                            min="0" max="100" placeholder="Persentase target peserta..."
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm 
+                                   focus:border-orange-500 focus:ring-2 focus:ring-orange-100 hover:border-gray-400 transition-all">
+                          <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
+                        </div>
+          
+                        <!-- Target Kualitatif (%) -->
+                        <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition-colors">
+                          <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Target Kualitatif (%) <span class="text-red-500">*</span>
+                          </label>
+                          <input type="number" name="persentase_kualitatif" id="persentase_kualitatif"
+                            value="<%= old?.persentase_kualitatif || '' %>" required
+                            min="0" max="100" placeholder="Penilaian kualitas pelaksanaan..."
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm 
+                                   focus:border-orange-500 focus:ring-2 focus:ring-orange-100 hover:border-gray-400 transition-all">
+                          <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
+                        </div>
+          
+                        <!-- Deskripsi Target Kuantitatif -->
+                        <div class="md:col-span-2 bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition-colors">
+                          <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Deskripsi Target Kuantitatif
+                          </label>
+                          <textarea name="deskripsi_target_kuantitatif" id="deskripsi_target_kuantitatif" rows="3"
+                            placeholder="Tuliskan detail target kuantitatif (contoh: jumlah peserta minimal 100 orang)..."
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm resize-none
+                                   focus:border-orange-500 focus:ring-2 focus:ring-orange-100 hover:border-gray-400 transition-all"><%= old?.deskripsi_target_kuantitatif || '' %></textarea>
+                          <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
+                        </div>
+          
+                        <!-- Deskripsi Target Kualitatif -->
+                        <div class="md:col-span-2 bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition-colors">
+                          <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Deskripsi Target Kualitatif
+                          </label>
+                          <textarea name="deskripsi_target_kualitatif" id="deskripsi_target_kualitatif" rows="3"
+                            placeholder="Tuliskan detail target kualitatif (contoh: kepuasan peserta > 80%)..."
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm resize-none
+                                   focus:border-orange-500 focus:ring-2 focus:ring-orange-100 hover:border-gray-400 transition-all"><%= old?.deskripsi_target_kualitatif || '' %></textarea>
+                          <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
+                        </div>
+          
+                      </div>
+                    </div>
+          
 
           <!-- Kendala dan Solusi -->
           <div>
