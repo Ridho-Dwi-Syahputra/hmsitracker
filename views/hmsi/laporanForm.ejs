@@ -14,6 +14,106 @@
   <!-- Sidebar -->
   <%- include('../partials/sidebarHMSI', { activeNav: 'Laporan', user: user }) %>
 
+  <!-- Success Modal -->
+  <div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="successModalContent">
+      <div class="text-center">
+        <!-- Success Icon -->
+        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+        </div>
+        
+        <!-- Title -->
+        <h3 class="text-xl font-bold text-gray-900 mb-2">Laporan Berhasil Disimpan!</h3>
+        
+        <!-- Message -->
+        <p class="text-gray-600 mb-6">Laporan kegiatan telah berhasil dikirim dan akan diproses lebih lanjut.</p>
+        
+        <!-- Button -->
+        <button id="closeSuccessModal" class="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-3 px-6 rounded-xl transition-colors duration-200">
+          Kembali ke Kelola Laporan
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error Modal -->
+  <div id="errorModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="errorModalContent">
+      <div class="text-center">
+        <!-- Error Icon -->
+        <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </div>
+        
+        <!-- Title -->
+        <h3 class="text-xl font-bold text-gray-900 mb-2">Gagal Menyimpan Laporan!</h3>
+        
+        <!-- Message -->
+        <p id="errorMessage" class="text-gray-600 mb-6">Mohon periksa kembali data yang Anda masukkan.</p>
+        
+        <!-- Button -->
+        <button id="closeErrorModal" class="w-full bg-red-500 hover:bg-red-600 text-white font-medium py-3 px-6 rounded-xl transition-colors duration-200">
+          Tutup
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Validation Modal -->
+  <div id="validationModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="validationModalContent">
+      <div class="text-center">
+        <!-- Warning Icon -->
+        <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+          </svg>
+        </div>
+        
+        <!-- Title -->
+        <h3 class="text-xl font-bold text-gray-900 mb-2">Data Tidak Lengkap!</h3>
+        
+        <!-- Message -->
+        <p id="validationMessage" class="text-gray-600 mb-6">Mohon lengkapi semua field yang wajib diisi sebelum mengirim laporan.</p>
+        
+        <!-- Button -->
+        <button id="closeValidationModal" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-3 px-6 rounded-xl transition-colors duration-200">
+          Mengerti
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- File Size Error Modal -->
+  <div id="fileSizeModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="fileSizeModalContent">
+      <div class="text-center">
+        <!-- Warning Icon -->
+        <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+          </svg>
+        </div>
+        
+        <!-- Title -->
+        <h3 class="text-xl font-bold text-gray-900 mb-2">File Terlalu Besar!</h3>
+        
+        <!-- Message -->
+        <p class="text-gray-600 mb-6">Ukuran file maksimal yang diperbolehkan adalah 5MB. Silakan pilih file yang lebih kecil.</p>
+        
+        <!-- Button -->
+        <button id="closeFileSizeModal" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-3 px-6 rounded-xl transition-colors duration-200">
+          Mengerti
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Wrapper -->
   <main class="lg:ml-80 px-6 pt-20 pb-8 flex-grow">
     <div class="max-w-5xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-200">
@@ -295,6 +395,61 @@
 
   <!-- Script -->
   <script>
+    // Modal functions
+    function showModal(modalId) {
+      const modal = document.getElementById(modalId);
+      const content = document.getElementById(modalId + 'Content');
+      
+      modal.classList.remove('hidden');
+      
+      // Trigger animation
+      setTimeout(() => {
+        content.classList.remove('scale-95', 'opacity-0');
+        content.classList.add('scale-100', 'opacity-100');
+      }, 10);
+    }
+
+    function hideModal(modalId) {
+      const modal = document.getElementById(modalId);
+      const content = document.getElementById(modalId + 'Content');
+      
+      content.classList.remove('scale-100', 'opacity-100');
+      content.classList.add('scale-95', 'opacity-0');
+      
+      setTimeout(() => {
+        modal.classList.add('hidden');
+      }, 300);
+    }
+
+    // Modal event listeners
+    document.getElementById('closeSuccessModal').addEventListener('click', () => {
+      hideModal('successModal');
+      setTimeout(() => {
+        window.location.href = '/hmsi/laporan';
+      }, 300);
+    });
+
+    document.getElementById('closeErrorModal').addEventListener('click', () => {
+      hideModal('errorModal');
+    });
+
+    document.getElementById('closeValidationModal').addEventListener('click', () => {
+      hideModal('validationModal');
+    });
+
+    document.getElementById('closeFileSizeModal').addEventListener('click', () => {
+      hideModal('fileSizeModal');
+    });
+
+    // Close modal when clicking outside
+    ['successModal', 'errorModal', 'validationModal', 'fileSizeModal'].forEach(modalId => {
+      document.getElementById(modalId).addEventListener('click', (e) => {
+        if (e.target.id === modalId) {
+          hideModal(modalId);
+        }
+      });
+    });
+
     // Dropdown Proker
     const btn = document.getElementById("prokerDropdownBtn");
     const menu = document.getElementById("prokerDropdownMenu");
@@ -353,7 +508,7 @@
       const files = e.dataTransfer.files;
       if (files.length > 0) {
         if (files[0].size > 5 * 1024 * 1024) {
-          alert('Ukuran file maksimal 5MB!');
+          showModal('fileSizeModal');
           return;
         }
         fileInput.files = files;
@@ -365,7 +520,7 @@
     fileInput.addEventListener('change', (e) => {
       if (e.target.files.length > 0) {
         if (e.target.files[0].size > 5 * 1024 * 1024) {
-          alert('Ukuran file maksimal 5MB!');
+          showModal('fileSizeModal');
           fileInput.value = '';
           fileName.textContent = '';
           return;
@@ -449,36 +604,72 @@
 
     function validateAllFields() {
       let allValid = true;
+      let emptyFields = [];
+      
       const requiredFields = [
-        'judul_laporan', 'waktu_tempat', 'deskripsi_kegiatan',
-        'dana_digunakan', 'dana_terpakai', 'persentase_kuantitatif',
-        'persentase_kualitatif', 'kendala', 'solusi', 'sasaran'
+        { id: 'judul_laporan', name: 'Judul Laporan' },
+        { id: 'waktu_tempat', name: 'Waktu & Tempat' },
+        { id: 'deskripsi_kegiatan', name: 'Deskripsi Kegiatan' },
+        { id: 'dana_digunakan', name: 'Total Dana Kegiatan' },
+        { id: 'persentase_kuantitatif', name: 'Target Kuantitatif' },
+        { id: 'persentase_kualitatif', name: 'Target Kualitatif' },
+        { id: 'kendala', name: 'Kendala yang Dihadapi' },
+        { id: 'solusi', name: 'Solusi yang Diterapkan' },
+        { id: 'sasaran', name: 'Sasaran Kegiatan' }
       ];
 
-      requiredFields.forEach(fieldId => {
-        const field = document.getElementById(fieldId);
-        if (field && !validateField(field)) {
-          allValid = false;
+      requiredFields.forEach(fieldInfo => {
+        const field = document.getElementById(fieldInfo.id);
+        if (field) {
+          if (field.value.trim() === '') {
+            allValid = false;
+            emptyFields.push(fieldInfo.name);
+            validateField(field);
+          }
         }
       });
 
+      // Validate program kerja dropdown
       const prokerInput = document.getElementById('prokerInput');
-      if (!validateField(prokerInput)) {
+      if (!prokerInput.value) {
         allValid = false;
+        emptyFields.push('Program Kerja');
+        validateField(prokerInput);
       }
 
+      // Validate sumber dana
       if (!validateSumberDana()) {
         allValid = false;
+        emptyFields.push('Sumber Dana');
       }
 
+      // Validate file upload
       const fileInput = document.getElementById('fileUpload');
-      if (!validateField(fileInput)) {
+      if (fileInput.files.length === 0) {
         allValid = false;
+        emptyFields.push('File Dokumentasi');
+        validateField(fileInput);
+      }
+
+      // Update validation modal message if there are empty fields
+      if (!allValid) {
+        let message = '';
+        if (emptyFields.length === 1) {
+          message = `Field "${emptyFields[0]}" wajib diisi.`;
+        } else if (emptyFields.length === 2) {
+          message = `Field "${emptyFields[0]}" dan "${emptyFields[1]}" wajib diisi.`;
+        } else if (emptyFields.length > 2) {
+          const lastField = emptyFields.pop();
+          message = `Field ${emptyFields.join(', ')} dan ${lastField} wajib diisi.`;
+        }
+        
+        document.getElementById('validationMessage').textContent = message;
       }
 
       return allValid;
     }
 
+    // Add real-time validation
     document.querySelectorAll('input[required], textarea[required]').forEach(field => {
       field.addEventListener('blur', () => validateField(field));
       field.addEventListener('input', () => {
@@ -499,11 +690,14 @@
 
     form.addEventListener('submit', (e) => {
       e.preventDefault();
+      
+      // Validate all fields before submission
       if (!validateAllFields()) {
-        alert('Mohon lengkapi semua field yang wajib diisi!');
+        showModal('validationModal');
         return;
       }
 
+      // Show loading state
       submitBtn.disabled = true;
       btnText.textContent = 'Menyimpan...';
       btnSpinner.classList.remove('hidden');
@@ -526,8 +720,7 @@
       })
       .then(response => {
         if (response.ok) {
-          alert('Laporan berhasil disimpan!');
-          window.location.href = '/hmsi/laporan';
+          showModal('successModal');
         } else {
           return response.text().then(text => {
             throw new Error(text);
@@ -536,11 +729,12 @@
       })
       .catch(error => {
         console.error('Error:', error);
-        alert('Terjadi kesalahan: ' + error.message);
+        document.getElementById('errorMessage').textContent = 'Terjadi kesalahan: ' + error.message;
+        showModal('errorModal');
       })
       .finally(() => {
         submitBtn.disabled = false;
-        btnText.textContent = 'Simpan';
+        btnText.textContent = 'Kirim';
         btnSpinner.classList.add('hidden');
       });
     });

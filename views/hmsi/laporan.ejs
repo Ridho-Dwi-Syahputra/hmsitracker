@@ -16,6 +16,88 @@
   <!-- ✅ Sidebar -->
   <%- include('../partials/sidebarHMSI', { user: user, activeNav: activeNav }) %>
 
+  <!-- Delete Confirmation Modal -->
+  <div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="deleteModalContent">
+      <div class="text-center">
+        <!-- Warning Icon -->
+        <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+          </svg>
+        </div>
+        
+        <!-- Title -->
+        <h3 class="text-xl font-bold text-gray-900 mb-2">Hapus Laporan?</h3>
+        
+        <!-- Message -->
+        <p class="text-gray-600 mb-2">Apakah Anda yakin ingin menghapus laporan</p>
+        <p id="deleteLaporanName" class="font-semibold text-gray-800 mb-4">"[Nama Laporan]"</p>
+        <p class="text-sm text-red-600 mb-6">Tindakan ini tidak dapat dibatalkan!</p>
+        
+        <!-- Buttons -->
+        <div class="flex gap-3 justify-center">
+          <button id="cancelDelete" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors duration-200 font-medium">
+            Batal
+          </button>
+          <button id="confirmDelete" class="px-6 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors duration-200 font-medium">
+            Ya, Hapus
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Delete Modal -->
+  <div id="successDeleteModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="successDeleteModalContent">
+      <div class="text-center">
+        <!-- Success Icon -->
+        <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+        </div>
+        
+        <!-- Title -->
+        <h3 class="text-xl font-bold text-gray-900 mb-2">Berhasil Dihapus!</h3>
+        
+        <!-- Message -->
+        <p class="text-gray-600 mb-6">Laporan telah berhasil dihapus dari sistem.</p>
+        
+        <!-- Button -->
+        <button id="closeSuccessDeleteModal" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-3 px-6 rounded-xl transition-colors duration-200">
+          Mengerti
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error Delete Modal -->
+  <div id="errorDeleteModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="errorDeleteModalContent">
+      <div class="text-center">
+        <!-- Error Icon -->
+        <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </div>
+        
+        <!-- Title -->
+        <h3 class="text-xl font-bold text-gray-900 mb-2">Gagal Menghapus!</h3>
+        
+        <!-- Message -->
+        <p id="errorDeleteMessage" class="text-gray-600 mb-6">Terjadi kesalahan saat menghapus laporan.</p>
+        
+        <!-- Button -->
+        <button id="closeErrorDeleteModal" class="w-full bg-red-500 hover:bg-red-600 text-white font-medium py-3 px-6 rounded-xl transition-colors duration-200">
+          Tutup
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Wrapper (Konten Utama) -->
   <main class="lg:ml-80 px-6 pt-20 pb-8 flex-grow">
     <div class="max-w-6xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-orange-200">
@@ -80,7 +162,7 @@
               </thead>
               <tbody id="laporanTable">
                 <% laporan.forEach(function(l, i) { %>
-                  <tr class="hover:bg-orange-50 transition">
+                  <tr class="hover:bg-orange-50 transition" data-visible="true">
                     <td class="py-3 px-4 border border-orange-100"><%= i + 1 %></td>
                     <td class="py-3 px-4 font-medium text-gray-800 border border-orange-100 text-left"><%= l.judul_laporan %></td>
                     <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= l.namaProker %></td>
@@ -89,11 +171,13 @@
                       <a href="/hmsi/laporan/edit/<%= l.id_laporan %>" class="text-orange-500 hover:text-orange-700 transition transform hover:scale-110" title="Edit">
                         <i class="fa-solid fa-pen-to-square text-lg"></i>
                       </a>
-                      <form action="/hmsi/laporan/delete/<%= l.id_laporan %>" method="POST" class="inline" onsubmit="return confirm('Yakin hapus laporan ini?')">
-                        <button type="submit" class="text-orange-500 hover:text-orange-700 transition transform hover:scale-110" title="Hapus">
-                          <i class="fa-solid fa-trash text-lg"></i>
-                        </button>
-                      </form>
+                      <button type="button" 
+                              class="delete-btn text-orange-500 hover:text-orange-700 transition transform hover:scale-110" 
+                              title="Hapus"
+                              data-id="<%= l.id_laporan %>"
+                              data-name="<%= l.judul_laporan %>">
+                        <i class="fa-solid fa-trash text-lg"></i>
+                      </button>
                     </td>
                   </tr>
                 <% }); %>
@@ -116,8 +200,133 @@
   <!-- Footer -->
   <%- include('../partials/footer') %>
 
-  <!-- Script Pagination + Search -->
+  <!-- Script Pagination + Search + Delete Modal -->
   <script>
+    // Modal functions
+    function showModal(modalId) {
+      const modal = document.getElementById(modalId);
+      const content = document.getElementById(modalId + 'Content');
+      
+      modal.classList.remove('hidden');
+      
+      // Trigger animation
+      setTimeout(() => {
+        content.classList.remove('scale-95', 'opacity-0');
+        content.classList.add('scale-100', 'opacity-100');
+      }, 10);
+    }
+
+    function hideModal(modalId) {
+      const modal = document.getElementById(modalId);
+      const content = document.getElementById(modalId + 'Content');
+      
+      content.classList.remove('scale-100', 'opacity-100');
+      content.classList.add('scale-95', 'opacity-0');
+      
+      setTimeout(() => {
+        modal.classList.add('hidden');
+      }, 300);
+    }
+
+    // Delete functionality
+    let currentDeleteId = null;
+    let currentDeleteAction = null;
+
+    // Modal event listeners
+    document.getElementById('cancelDelete').addEventListener('click', () => {
+      hideModal('deleteModal');
+      currentDeleteId = null;
+      currentDeleteAction = null;
+    });
+
+    document.getElementById('confirmDelete').addEventListener('click', () => {
+      if (currentDeleteAction && currentDeleteId) {
+        hideModal('deleteModal');
+        
+        // Submit delete request
+        fetch(currentDeleteAction, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          }
+        })
+        .then(response => {
+          if (response.ok) {
+            showModal('successDeleteModal');
+            // Remove the row from table
+            const row = document.querySelector(`button[data-id="${currentDeleteId}"]`).closest('tr');
+            if (row) {
+              row.remove();
+            }
+            // Update row numbers
+            updateRowNumbers();
+          } else {
+            return response.text().then(text => {
+              throw new Error(text);
+            });
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          document.getElementById('errorDeleteMessage').textContent = 'Terjadi kesalahan: ' + error.message;
+          showModal('errorDeleteModal');
+        })
+        .finally(() => {
+          currentDeleteId = null;
+          currentDeleteAction = null;
+        });
+      }
+    });
+
+    document.getElementById('closeSuccessDeleteModal').addEventListener('click', () => {
+      hideModal('successDeleteModal');
+    });
+
+    document.getElementById('closeErrorDeleteModal').addEventListener('click', () => {
+      hideModal('errorDeleteModal');
+    });
+
+    // Close modal when clicking outside
+    ['deleteModal', 'successDeleteModal', 'errorDeleteModal'].forEach(modalId => {
+      document.getElementById(modalId).addEventListener('click', (e) => {
+        if (e.target.id === modalId) {
+          hideModal(modalId);
+        }
+      });
+    });
+
+    // Add event listeners to delete buttons
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('.delete-btn')) {
+        const deleteBtn = e.target.closest('.delete-btn');
+        const laporanName = deleteBtn.dataset.name;
+        const laporanId = deleteBtn.dataset.id;
+        
+        currentDeleteId = laporanId;
+        currentDeleteAction = `/hmsi/laporan/delete/${laporanId}`;
+        
+        document.getElementById('deleteLaporanName').textContent = `"${laporanName}"`;
+        showModal('deleteModal');
+      }
+    });
+
+    // Function to update row numbers after deletion
+    function updateRowNumbers() {
+      const tbody = document.getElementById("laporanTable");
+      const rows = tbody ? Array.from(tbody.querySelectorAll("tr")) : [];
+      
+      rows.forEach((row, index) => {
+        if (row.style.display !== 'none') {
+          const numberCell = row.cells[0];
+          if (numberCell) {
+            // Get all visible rows before this one
+            const visibleRowsBefore = rows.slice(0, index).filter(r => r.style.display !== 'none');
+            numberCell.textContent = visibleRowsBefore.length + 1;
+          }
+        }
+      });
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
       const searchInput = document.getElementById("searchInput");
       const tbody = document.getElementById("laporanTable");
@@ -146,6 +355,8 @@
         visibleRows.forEach((row, index) => {
           if (index >= (currentPage-1)*rowsPerPage && index < currentPage*rowsPerPage) {
             row.style.display = "";
+            // Update row number
+            row.cells[0].textContent = index + 1;
           }
         });
 
