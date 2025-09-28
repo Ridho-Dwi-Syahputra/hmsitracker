@@ -5,6 +5,7 @@
 
 const db = require("../../config/db");
 const { v4: uuidv4 } = require("uuid"); // untuk id notifikasi
+const { deleteOldProkerNotif } = require("../HMSI/notifikasiController");
 
 // =====================================================
 // helper: format tanggal ke format Indonesia
@@ -21,15 +22,16 @@ function formatTanggal(dateValue) {
 }
 
 // =====================================================
-// helper: hitung status otomatis (fallback)
+// helper: hitung status otomatis (fallback untuk Belum Dimulai/Sedang Berjalan)
 // =====================================================
 function calculateStatus(start, end) {
   const today = new Date();
-  start = start ? new Date(start) : null;
-  end = end ? new Date(end) : null;
+  const startDate = start ? new Date(start) : null;
+  const endDate = end ? new Date(end) : null;
 
-  if (start && today < start) return "Belum Dimulai";
-  if (start && end && today >= start && today <= end) return "Sedang Berjalan";
+  if (startDate && today < startDate) return "Belum Dimulai";
+  if (startDate && endDate && today >= startDate && today <= endDate) return "Sedang Berjalan";
+  if (endDate && today > endDate) return "Selesai";
   return "Belum Dimulai";
 }
 
@@ -55,9 +57,9 @@ exports.getAllProkerDPA = async (req, res) => {
     `);
 
     const programs = rows.map(r => {
-      // Jika status sudah ditentukan DPA → pakai itu
+      // Gunakan status dari DB kalau sudah "Selesai"/"Tidak Selesai"
       let status = r.status_db;
-      if (!status || status === "Belum Dimulai" || status === "Sedang Berjalan") {
+      if (!status || ["Belum Dimulai", "Sedang Berjalan"].includes(status)) {
         status = calculateStatus(r.tanggal_mulai, r.tanggal_selesai);
       }
 
@@ -122,10 +124,9 @@ exports.getDetailProkerDPA = async (req, res) => {
     if (!rows.length) return res.status(404).send("Program Kerja tidak ditemukan");
 
     const r = rows[0];
-    let status = r.status_db;
-    if (!status || status === "Belum Dimulai" || status === "Sedang Berjalan") {
-      status = calculateStatus(r.tanggal_mulai, r.tanggal_selesai);
-    }
+    const status = r.status_db && ["Sedang Berjalan","Selesai","Tidak Selesai"].includes(r.status_db)
+      ? r.status_db
+      : calculateStatus(r.tanggal_mulai, r.tanggal_selesai);
 
     const proker = {
       id: r.id,
@@ -161,10 +162,11 @@ exports.getDetailProkerDPA = async (req, res) => {
 exports.updateStatusProker = async (req, res) => {
   try {
     const { id } = req.params;
-    const { status } = req.body; // "Selesai" atau "Gagal"
+    const { status } = req.body;
 
-    if (!["Selesai", "Gagal"].includes(status)) {
-      return res.status(400).send("Status tidak valid");
+    const validStatus = ["Sedang Berjalan", "Selesai", "Tidak Selesai"];
+    if (!validStatus.includes(status)) {
+      return res.status(400).json({ success: false, message: "Status tidak valid" });
     }
 
     // 🔹 Ambil info proker dulu untuk notifikasi
@@ -176,7 +178,7 @@ exports.updateStatusProker = async (req, res) => {
       [id]
     );
 
-    if (!rows.length) return res.status(404).send("Proker tidak ditemukan");
+    if (!rows.length) return res.status(404).json({ success: false, message: "Proker tidak ditemukan" });
 
     const proker = rows[0];
 
@@ -185,6 +187,9 @@ exports.updateStatusProker = async (req, res) => {
       "UPDATE Program_kerja SET Status=? WHERE id_ProgramKerja=?",
       [status, id]
     );
+
+    // 🔴 Hapus notifikasi lama sebelum menambah yang baru
+    await deleteOldProkerNotif(id);
 
     // 🟠 Tambahkan notifikasi ke HMSI divisi terkait
     const idNotifikasi = uuidv4();

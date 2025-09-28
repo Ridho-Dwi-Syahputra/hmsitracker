@@ -1,9 +1,10 @@
 // controllers/HMSI/notifikasiController.js
 // =====================================================
 // Controller untuk Notifikasi HMSI
-// - Hanya menampilkan notifikasi evaluasi dari DPA
-// - Juga menampilkan notifikasi update status Proker dari DPA
+// - Menampilkan notifikasi evaluasi dari DPA
+// - Menampilkan notifikasi update status Proker dari DPA
 // - Klik notifikasi = otomatis tandai sudah dibaca + redirect
+// - Jika status Proker berubah, notifikasi lama dihapus
 // =====================================================
 
 const db = require("../../config/db");
@@ -28,13 +29,12 @@ exports.getAllNotifikasi = async (req, res) => {
        LEFT JOIN User u ON e.pemberi_evaluasi = u.id_anggota
        WHERE n.divisi = ?
          AND (
-              (n.role = 'HMSI')         -- 🔹 notif untuk HMSI (status Proker dari DPA)
-              OR (n.id_evaluasi IS NOT NULL) -- 🔹 evaluasi dari DPA
+              (n.role = 'HMSI')             -- notif untuk HMSI (status Proker dari DPA)
+              OR (n.id_evaluasi IS NOT NULL) -- evaluasi dari DPA
              )
        ORDER BY n.created_at DESC`,
       [user.divisi]
     );
-    
 
     const notifikasi = rows.map(n => {
       let tanggalFormatted = "-";
@@ -49,14 +49,14 @@ exports.getAllNotifikasi = async (req, res) => {
         }
       }
 
-      // Default: link evaluasi
       let linkUrl = `/hmsi/evaluasi/${n.id_evaluasi}`;
       let linkLabel = "Lihat Evaluasi";
 
-      // 🔹 Jika ini notifikasi terkait Proker (status update dari DPA)
+      // 🔹 Kalau notifikasi ini terkait status Proker
       if (n.id_ProgramKerja && !n.id_evaluasi) {
-        linkUrl = `/hmsi/proker/${n.id_ProgramKerja}`;
-        linkLabel = "Lihat Program Kerja";
+        // langsung arahkan ke halaman kelola-proker
+        linkUrl = "/hmsi/kelola-proker";
+        linkLabel = "Kelola Program Kerja";
       }
 
       return {
@@ -80,7 +80,7 @@ exports.getAllNotifikasi = async (req, res) => {
 };
 
 // =====================================================
-// ✅ Tandai notifikasi sebagai sudah dibaca (simple)
+// ✅ Tandai notifikasi sebagai sudah dibaca
 // =====================================================
 exports.markAsRead = async (req, res) => {
   try {
@@ -97,16 +97,26 @@ exports.markAsRead = async (req, res) => {
 };
 
 // =====================================================
-// 🚀 Klik notifikasi = tandai sudah dibaca + redirect ke tujuan
+// 🚀 Klik notifikasi = tandai sudah dibaca + redirect
 // =====================================================
 exports.readAndRedirect = async (req, res) => {
   try {
     const { id } = req.params;
-    let redirectUrl = req.query.to ? decodeURIComponent(req.query.to) : "/hmsi/notifikasi";
 
-    // hanya izinkan redirect ke /hmsi/*
-    if (!(typeof redirectUrl === "string" && redirectUrl.startsWith("/hmsi"))) {
-      redirectUrl = "/hmsi/notifikasi";
+    // ambil notifikasi
+    const [rows] = await db.query(
+      "SELECT * FROM Notifikasi WHERE id_notifikasi = ?",
+      [id]
+    );
+    if (!rows.length) return res.redirect("/hmsi/notifikasi");
+
+    const notif = rows[0];
+    let redirectUrl = "/hmsi/notifikasi";
+
+    if (notif.id_evaluasi) {
+      redirectUrl = `/hmsi/evaluasi/${notif.id_evaluasi}`;
+    } else if (notif.id_ProgramKerja) {
+      redirectUrl = "/hmsi/kelola-proker"; // 🔹 fix: pakai dash
     }
 
     await db.query(
@@ -118,5 +128,19 @@ exports.readAndRedirect = async (req, res) => {
   } catch (err) {
     console.error("❌ Error readAndRedirect HMSI:", err.message);
     res.status(500).send("Gagal membaca notifikasi");
+  }
+};
+
+// =====================================================
+// 🗑️ Hapus notifikasi lama kalau status Proker berubah
+// =====================================================
+exports.deleteOldProkerNotif = async (idProker) => {
+  try {
+    await db.query(
+      "DELETE FROM Notifikasi WHERE id_ProgramKerja = ? AND role = 'HMSI'",
+      [idProker]
+    );
+  } catch (err) {
+    console.error("❌ Error deleteOldProkerNotif HMSI:", err.message);
   }
 };

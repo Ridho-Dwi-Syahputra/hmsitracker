@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title><%= title %></title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://kit.fontawesome.com/your-fa-kit.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col">
 
@@ -24,13 +27,13 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
           </svg>
         </div>
-        
+
         <!-- Title -->
         <h3 class="text-xl font-bold text-gray-900 mb-2">Berhasil!</h3>
-        
+
         <!-- Message -->
         <p class="text-gray-600 mb-6">Program kerja berhasil dikirim dan akan diproses lebih lanjut.</p>
-        
+
         <!-- Button -->
         <button id="closeSuccessModal" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-3 px-6 rounded-xl transition-colors duration-200">
           Kembali ke Kelola Proker
@@ -49,13 +52,13 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
           </svg>
         </div>
-        
+
         <!-- Title -->
         <h3 class="text-xl font-bold text-gray-900 mb-2">Terjadi Kesalahan!</h3>
-        
+
         <!-- Message -->
         <p id="errorMessage" class="text-gray-600 mb-6">Mohon periksa kembali data yang Anda masukkan.</p>
-        
+
         <!-- Button -->
         <button id="closeErrorModal" class="w-full bg-red-500 hover:bg-red-600 text-white font-medium py-3 px-6 rounded-xl transition-colors duration-200">
           Tutup
@@ -74,15 +77,40 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
           </svg>
         </div>
-        
+
         <!-- Title -->
         <h3 class="text-xl font-bold text-gray-900 mb-2">Data Tidak Lengkap!</h3>
-        
+
         <!-- Message -->
         <p id="validationMessage" class="text-gray-600 mb-6">Mohon lengkapi semua field yang wajib diisi sebelum mengirim form.</p>
-        
+
         <!-- Button -->
         <button id="closeValidationModal" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-3 px-6 rounded-xl transition-colors duration-200">
+          Mengerti
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- File Size Error Modal (maks 5MB) -->
+  <div id="fileSizeModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="fileSizeModalContent">
+      <div class="text-center">
+        <!-- Warning Icon -->
+        <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+          </svg>
+        </div>
+
+        <!-- Title -->
+        <h3 class="text-xl font-bold text-gray-900 mb-2">File Terlalu Besar!</h3>
+
+        <!-- Message -->
+        <p class="text-gray-600 mb-6">Ukuran file maksimal yang diperbolehkan adalah 5MB. Silakan pilih file yang lebih kecil.</p>
+
+        <!-- Button -->
+        <button id="closeFileSizeModal" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-3 px-6 rounded-xl transition-colors duration-200">
           Mengerti
         </button>
       </div>
@@ -224,14 +252,13 @@
 
   <!-- Script -->
   <script>
-    // Modal functions
+    // Modal functions (shared)
     function showModal(modalId) {
       const modal = document.getElementById(modalId);
       const content = document.getElementById(modalId + 'Content');
-      
+      if (!modal || !content) return;
       modal.classList.remove('hidden');
-      
-      // Trigger animation
+      // small delay to trigger CSS transition
       setTimeout(() => {
         content.classList.remove('scale-95', 'opacity-0');
         content.classList.add('scale-100', 'opacity-100');
@@ -241,77 +268,113 @@
     function hideModal(modalId) {
       const modal = document.getElementById(modalId);
       const content = document.getElementById(modalId + 'Content');
-      
+      if (!modal || !content) return;
       content.classList.remove('scale-100', 'opacity-100');
       content.classList.add('scale-95', 'opacity-0');
-      
       setTimeout(() => {
         modal.classList.add('hidden');
       }, 300);
     }
 
     // Modal event listeners
-    document.getElementById('closeSuccessModal').addEventListener('click', () => {
+    document.getElementById('closeSuccessModal')?.addEventListener('click', () => {
       hideModal('successModal');
       setTimeout(() => {
         window.location.href = '/hmsi/kelola-proker';
       }, 300);
     });
 
-    document.getElementById('closeErrorModal').addEventListener('click', () => {
+    document.getElementById('closeErrorModal')?.addEventListener('click', () => {
       hideModal('errorModal');
     });
 
-    document.getElementById('closeValidationModal').addEventListener('click', () => {
+    document.getElementById('closeValidationModal')?.addEventListener('click', () => {
       hideModal('validationModal');
     });
 
+    document.getElementById('closeFileSizeModal')?.addEventListener('click', () => {
+      hideModal('fileSizeModal');
+    });
+
     // Close modal when clicking outside
-    ['successModal', 'errorModal', 'validationModal'].forEach(modalId => {
-      document.getElementById(modalId).addEventListener('click', (e) => {
+    ['successModal', 'errorModal', 'validationModal', 'fileSizeModal'].forEach(modalId => {
+      const el = document.getElementById(modalId);
+      if (!el) return;
+      el.addEventListener('click', (e) => {
         if (e.target.id === modalId) {
           hideModal(modalId);
         }
       });
     });
 
-    // File upload functionality
+    // File upload drag/drop + size validation
     const dropzone = document.getElementById('dropzone');
     const fileInput = document.getElementById('fileUpload');
     const fileName = document.getElementById('fileName');
+    const MAX_FILE_BYTES = 5 * 1024 * 1024; // 5MB
 
-    dropzone.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      dropzone.classList.add('border-orange-400', 'bg-orange-50');
-    });
-    
-    dropzone.addEventListener('dragleave', () => {
-      dropzone.classList.remove('border-orange-400', 'bg-orange-50');
-    });
-    
-    dropzone.addEventListener('drop', (e) => {
-      e.preventDefault();
-      dropzone.classList.remove('border-orange-400', 'bg-orange-50');
-      const files = e.dataTransfer.files;
-      if (files.length > 0) {
-        fileInput.files = files;
-        fileName.textContent = `File dipilih: ${files[0].name}`;
-        validateField(fileInput);
-      }
-    });
+    if (dropzone) {
+      dropzone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropzone.classList.add('border-orange-400', 'bg-orange-50');
+      });
 
-    fileInput.addEventListener('change', (e) => {
-      if (e.target.files.length > 0) {
-        fileName.textContent = `File dipilih: ${e.target.files[0].name}`;
-        validateField(fileInput);
-      }
-    });
+      dropzone.addEventListener('dragleave', () => {
+        dropzone.classList.remove('border-orange-400', 'bg-orange-50');
+      });
 
-    // Date validation
+      dropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('border-orange-400', 'bg-orange-50');
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+          // Check size
+          if (files[0].size > MAX_FILE_BYTES) {
+            // Show file size modal and DO NOT assign the file
+            showModal('fileSizeModal');
+            // clear any previously selected file
+            if (fileInput) {
+              fileInput.value = '';
+              fileName.textContent = '';
+            }
+            return;
+          }
+          // assign
+          if (fileInput) {
+            fileInput.files = files;
+            fileName.textContent = `File dipilih: ${files[0].name}`;
+            validateField(fileInput);
+          }
+        }
+      });
+    }
+
+    if (fileInput) {
+      fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+          const f = e.target.files[0];
+          if (f.size > MAX_FILE_BYTES) {
+            // show modal, clear input
+            showModal('fileSizeModal');
+            fileInput.value = '';
+            fileName.textContent = '';
+            validateField(fileInput);
+            return;
+          }
+          fileName.textContent = `File dipilih: ${f.name}`;
+          validateField(fileInput);
+        } else {
+          fileName.textContent = '';
+        }
+      });
+    }
+
+    // Date validation (synchronize min end date)
     const tglMulai = document.getElementById("tanggal_mulai");
     const tglSelesai = document.getElementById("tanggal_selesai");
 
     function syncTanggal() {
+      if (!tglMulai || !tglSelesai) return;
       if (tglMulai.value) {
         tglSelesai.min = tglMulai.value;
         if (tglSelesai.value && tglSelesai.value < tglMulai.value) {
@@ -319,43 +382,42 @@
         }
       }
     }
+    tglMulai?.addEventListener("change", syncTanggal);
+    syncTanggal();
 
-    tglMulai.addEventListener("change", syncTanggal);
-    syncTanggal(); // Run once on load
-
-    // Validation functions
+    // Validation helpers (kept logic consistent with yang ada)
     function validateField(field) {
-      const errorDiv = field.closest('.bg-gray-50')?.querySelector('.error-message') || 
-                      field.closest('div')?.querySelector('.error-message');
-      
+      if (!field) return true;
+      const errorDiv = field.closest('.bg-gray-50')?.querySelector('.error-message') ||
+                       field.closest('div')?.querySelector('.error-message');
+
       if (!errorDiv) return true;
 
       let isValid = true;
       let errorMessage = '';
 
-      // Check if field is required and empty
+      // Check required
       if (field.hasAttribute('required')) {
         if (field.type === 'file') {
-          isValid = field.files.length > 0;
+          isValid = field.files && field.files.length > 0;
           errorMessage = 'File dokumen pendukung wajib diunggah';
         } else if (field.type === 'date') {
           isValid = field.value !== '';
           errorMessage = 'Tanggal wajib diisi';
-        } else if (field.value.trim() === '') {
+        } else if (field.value.trim && field.value.trim() === '') {
           isValid = false;
           errorMessage = 'Field ini wajib diisi';
         }
       }
 
-      // Date validation
+      // Date range
       if (field.type === 'date' && field.value !== '') {
-        if (field.id === 'tanggal_selesai' && tglMulai.value && field.value < tglMulai.value) {
+        if (field.id === 'tanggal_selesai' && tglMulai && tglMulai.value && field.value < tglMulai.value) {
           isValid = false;
           errorMessage = 'Tanggal selesai tidak boleh lebih awal dari tanggal mulai';
         }
       }
 
-      // Show/hide error message
       if (!isValid) {
         errorDiv.textContent = errorMessage;
         errorDiv.classList.remove('hidden');
@@ -373,7 +435,7 @@
     function validateAllFields() {
       let allValid = true;
       let emptyFields = [];
-      
+
       const requiredFields = [
         { id: 'namaProker', name: 'Nama Program Kerja' },
         { id: 'tanggal_mulai', name: 'Tanggal Mulai' },
@@ -385,24 +447,34 @@
       requiredFields.forEach(fieldInfo => {
         const field = document.getElementById(fieldInfo.id);
         if (field) {
-          if (field.value.trim() === '') {
+          if ((field.value || '').toString().trim() === '') {
             allValid = false;
             emptyFields.push(fieldInfo.name);
-            // Show individual field error
             validateField(field);
           }
         }
       });
 
-      // Validate file upload
-      const fileInput = document.getElementById('fileUpload');
-      if (fileInput.files.length === 0) {
-        allValid = false;
-        emptyFields.push('File Dokumen Pendukung');
-        validateField(fileInput);
+      // Validate file
+      const fileEl = document.getElementById('fileUpload');
+      if (fileEl) {
+        if (!fileEl.files || fileEl.files.length === 0) {
+          allValid = false;
+          emptyFields.push('File Dokumen Pendukung');
+          validateField(fileEl);
+        } else {
+          // also double-check size before sending
+          const f = fileEl.files[0];
+          if (f && f.size > MAX_FILE_BYTES) {
+            allValid = false;
+            emptyFields.push('File Dokumen (terlalu besar)');
+            showModal('fileSizeModal');
+            validateField(fileEl);
+          }
+        }
       }
 
-      // Update validation modal message if there are empty fields
+      // Build validation message like laporanForm
       if (!allValid) {
         let message = '';
         if (emptyFields.length === 1) {
@@ -410,10 +482,9 @@
         } else if (emptyFields.length === 2) {
           message = `Field "${emptyFields[0]}" dan "${emptyFields[1]}" wajib diisi.`;
         } else if (emptyFields.length > 2) {
-          const lastField = emptyFields.pop();
-          message = `Field ${emptyFields.join(', ')} dan ${lastField} wajib diisi.`;
+          const last = emptyFields.pop();
+          message = `Field ${emptyFields.join(', ')} dan ${last} wajib diisi.`;
         }
-        
         document.getElementById('validationMessage').textContent = message;
       }
 
@@ -430,18 +501,24 @@
       });
     });
 
-    // Form submission with validation
+    // Form submit
     const form = document.getElementById('prokerForm');
     const submitBtn = document.getElementById('submitBtn');
     const btnText = document.getElementById('btnText');
     const btnSpinner = document.getElementById('btnSpinner');
 
-    form.addEventListener('submit', (e) => {
+    form?.addEventListener('submit', (e) => {
       e.preventDefault();
-      
-      // Validate all fields before submission
+
       if (!validateAllFields()) {
         showModal('validationModal');
+        return;
+      }
+
+      // extra check: file size (safety)
+      const fileEl = document.getElementById('fileUpload');
+      if (fileEl && fileEl.files && fileEl.files[0] && fileEl.files[0].size > MAX_FILE_BYTES) {
+        showModal('fileSizeModal');
         return;
       }
 
@@ -450,25 +527,24 @@
       btnText.textContent = 'Menyimpan...';
       btnSpinner.classList.remove('hidden');
 
-      // Submit form
       const formData = new FormData(form);
 
       fetch(form.action, {
         method: 'POST',
         body: formData
       })
-      .then(response => {
+      .then(async (response) => {
         if (response.ok) {
           showModal('successModal');
         } else {
-          return response.text().then(text => {
-            throw new Error(text);
-          });
+          // try to read text message from server
+          const text = await response.text();
+          throw new Error(text || 'Server error');
         }
       })
       .catch(error => {
         console.error('Error:', error);
-        document.getElementById('errorMessage').textContent = 'Terjadi kesalahan: ' + error.message;
+        document.getElementById('errorMessage').textContent = 'Terjadi kesalahan: ' + (error.message || error);
         showModal('errorModal');
       })
       .finally(() => {

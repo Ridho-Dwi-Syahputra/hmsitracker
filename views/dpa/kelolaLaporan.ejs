@@ -8,6 +8,25 @@
   <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
         crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <style>
+    /* Custom styles untuk tabel */
+    .table-fixed {
+      table-layout: fixed;
+    }
+    .table-fixed th:nth-child(1) { width: 60px; }  /* No */
+    .table-fixed th:nth-child(2) { width: 25%; }   /* Judul */
+    .table-fixed th:nth-child(3) { width: 18%; }   /* Program Kerja */
+    .table-fixed th:nth-child(4) { width: 12%; }   /* Divisi */
+    .table-fixed th:nth-child(5) { width: 12%; }   /* Tanggal */
+    .table-fixed th:nth-child(6) { width: 13%; }   /* Status */
+    .table-fixed th:nth-child(7) { width: 80px; }  /* Aksi */
+
+    .text-ellipsis {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
   <!-- Navbar -->
@@ -20,7 +39,7 @@
   <div class="lg:ml-80 pt-20 px-6 pb-10">
     <div class="max-w-7xl mx-auto bg-white rounded-2xl border border-orange-200 shadow-md overflow-hidden">
 
-      <!-- Header (Judul) -->
+      <!-- Header -->
       <div class="bg-orange-500 px-6 py-4">
         <h1 class="text-2xl font-bold text-white"><%= title %></h1>
         <p class="text-sm text-orange-100">Daftar laporan kegiatan dari HMSI</p>
@@ -123,7 +142,7 @@
         <% } else { %>
           <!-- Tabel -->
           <div class="overflow-x-auto p-2 shadow-sm rounded-xl">
-            <table class="min-w-full text-sm text-center border border-orange-200 rounded-xl overflow-hidden border-separate border-spacing-0 divide-x divide-gray-200">
+            <table class="min-w-full text-sm text-center border border-orange-200 rounded-xl overflow-hidden border-separate border-spacing-0 divide-x divide-gray-200 table-fixed">
               <thead class="bg-orange-100 text-gray-700">
                 <tr>
                   <th class="py-3 px-4 font-semibold border border-orange-200">No</th>
@@ -139,24 +158,30 @@
                 <% laporan.forEach(function(l, i) { %>
                   <tr class="hover:bg-orange-50 transition">
                     <td class="py-3 px-4 border border-orange-100"><%= i + 1 %></td>
-                    <td class="py-3 px-4 font-medium text-gray-800 border border-orange-100 text-left"><%= l.judul_laporan %></td>
-                    <td class="py-3 px-4 text-gray-600 border border-orange-100" data-col="proker"><%= l.namaProker || "-" %></td>
+                    <td class="py-3 px-4 font-medium text-gray-800 border border-orange-100 text-left">
+                      <div class="text-ellipsis" title="<%= l.judul_laporan %>"><%= l.judul_laporan %></div>
+                    </td>
+                    <td class="py-3 px-4 text-gray-600 border border-orange-100" data-col="proker">
+                      <div class="text-ellipsis" title="<%= l.namaProker || '-' %>"><%= l.namaProker || "-" %></div>
+                    </td>
                     <td class="py-3 px-4 text-gray-600 border border-orange-100" data-col="divisi"><%= l.divisi || "-" %></td>
                     <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= l.tanggalFormatted %></td>
                     <td class="py-3 px-4 border border-orange-100" data-col="status">
                       <% if (l.status === "Revisi") { %>
-                        <span class="px-3 py-1 bg-red-100 text-red-700 rounded-lg text-xs font-semibold">Revisi</span>
+                        <span class="px-3 py-1 bg-red-100 text-red-700 rounded-lg text-xs font-semibold whitespace-nowrap">Revisi</span>
                       <% } else if (l.status === "Disetujui") { %>
-                        <span class="px-3 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-semibold">Disetujui</span>
+                        <span class="px-3 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-semibold whitespace-nowrap">Disetujui</span>
                       <% } else { %>
-                        <span class="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg text-xs font-semibold">Belum Dievaluasi</span>
+                        <span class="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg text-xs font-semibold whitespace-nowrap">Belum Dievaluasi</span>
                       <% } %>
                     </td>
-                    <td class="py-3 px-4 flex justify-center gap-4 border border-orange-100">
-                      <a href="/dpa/laporan/<%= l.id_laporan %>" 
-                        class="text-orange-500 hover:text-orange-700 transition transform hover:scale-110" title="Detail">
-                        <i class="fa-solid fa-eye text-lg"></i>
-                      </a>
+                    <td class="py-3 px-4 border border-orange-100">
+                      <div class="flex justify-center">
+                        <a href="/dpa/laporan/<%= l.id_laporan %>" 
+                          class="text-orange-500 hover:text-orange-700 transition transform hover:scale-110 p-1" title="Detail">
+                          <i class="fa-solid fa-eye text-lg"></i>
+                        </a>
+                      </div>
                     </td>
                   </tr>
                 <% }); %>
@@ -197,15 +222,41 @@
       const rowsPerPage = 10;
       let currentPage = 1;
 
-      // toggle dropdowns
-      statusBtn.addEventListener("click", () => statusMenu.classList.toggle("hidden"));
-      divisiBtn.addEventListener("click", () => divisiMenu.classList.toggle("hidden"));
-      prokerBtn.addEventListener("click", () => prokerMenu.classList.toggle("hidden"));
+      // Close dropdowns when clicking outside
+      document.addEventListener("click", (e) => {
+        if (!statusBtn.contains(e.target)) statusMenu.classList.add("hidden");
+        if (!divisiBtn.contains(e.target)) divisiMenu.classList.add("hidden");
+        if (!prokerBtn.contains(e.target)) prokerMenu.classList.add("hidden");
+      });
 
+      // Toggle dropdowns
+      statusBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        statusMenu.classList.toggle("hidden");
+        divisiMenu.classList.add("hidden");
+        prokerMenu.classList.add("hidden");
+      });
+      
+      divisiBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        divisiMenu.classList.toggle("hidden");
+        statusMenu.classList.add("hidden");
+        prokerMenu.classList.add("hidden");
+      });
+      
+      prokerBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        prokerMenu.classList.toggle("hidden");
+        statusMenu.classList.add("hidden");
+        divisiMenu.classList.add("hidden");
+      });
+
+      // Dropdown select
       statusMenu.querySelectorAll("button").forEach(btn => {
         btn.addEventListener("click", () => {
           statusLabel.textContent = btn.dataset.value === "all" ? "Semua Status" : btn.dataset.value;
           statusMenu.classList.add("hidden");
+          currentPage = 1;
           filterRows();
         });
       });
@@ -214,6 +265,7 @@
         btn.addEventListener("click", () => {
           divisiLabel.textContent = btn.dataset.value === "all" ? "Semua Divisi" : btn.dataset.value;
           divisiMenu.classList.add("hidden");
+          currentPage = 1;
           filterRows();
         });
       });
@@ -222,6 +274,7 @@
         btn.addEventListener("click", () => {
           prokerLabel.textContent = btn.dataset.value === "all" ? "Semua Program Kerja" : btn.dataset.value;
           prokerMenu.classList.add("hidden");
+          currentPage = 1;
           filterRows();
         });
       });
@@ -265,14 +318,17 @@
         document.getElementById("nextPage").disabled = currentPage === totalPages || totalPages === 0;
       }
 
-      document.getElementById("prevPage").addEventListener("click", () => { currentPage--; paginate(); });
-      document.getElementById("nextPage").addEventListener("click", () => { currentPage++; paginate(); });
+      searchInput.addEventListener("input", () => { currentPage = 1; filterRows(); });
+      document.getElementById("prevPage").addEventListener("click", () => { if (currentPage > 1) { currentPage--; paginate(); } });
+      document.getElementById("nextPage").addEventListener("click", () => {
+        let visibleRows = rows.filter(row => row.dataset.visible !== "false");
+        let totalPages = Math.ceil(visibleRows.length / rowsPerPage);
+        if (currentPage < totalPages) { currentPage++; paginate(); }
+      });
 
-      searchInput.addEventListener("input", filterRows);
-
-      filterRows();
+      rows.forEach(row => row.dataset.visible = "true");
+      paginate();
     });
   </script>
-
 </body>
 </html>
