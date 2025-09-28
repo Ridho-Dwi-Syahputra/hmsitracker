@@ -16,6 +16,154 @@
   <!-- Sidebar DPA -->
   <%- include('../partials/sidebarDPA', { activeNav: 'Laporan', user: user }) %>
 
+  <!-- Success Modal -->
+  <div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="successModalContent">
+      <div class="text-center">
+        <!-- Success Icon -->
+        <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+        </div>
+        
+        <!-- Title -->
+        <h3 id="successModalTitle" class="text-xl font-bold text-gray-900 mb-2">Evaluasi Berhasil Disimpan!</h3>
+        
+        <!-- Message -->
+        <p id="successModalMessage" class="text-gray-600 mb-6">Komentar evaluasi telah berhasil disimpan dan status laporan telah diperbarui.</p>
+        
+        <!-- Button -->
+        <button id="closeSuccessModal" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-3 px-6 rounded-xl transition-colors duration-200">
+          Kembali ke Daftar Laporan
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error Modal -->
+  <div id="errorModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="errorModalContent">
+      <div class="text-center">
+        <!-- Error Icon -->
+        <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </div>
+        
+        <!-- Title -->
+        <h3 id="errorModalTitle" class="text-xl font-bold text-gray-900 mb-2">Gagal Menyimpan Evaluasi!</h3>
+        
+        <!-- Message -->
+        <p id="errorMessage" class="text-gray-600 mb-6">Terjadi kesalahan saat menyimpan evaluasi. Mohon coba lagi.</p>
+        
+        <!-- Button -->
+        <button id="closeErrorModal" class="w-full bg-red-500 hover:bg-red-600 text-white font-medium py-3 px-6 rounded-xl transition-colors duration-200">
+          Tutup
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Validation Modal -->
+  <div id="validationModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="validationModalContent">
+      <div class="text-center">
+        <!-- Warning Icon -->
+        <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+          </svg>
+        </div>
+        
+        <!-- Title -->
+        <h3 id="validationModalTitle" class="text-xl font-bold text-gray-900 mb-2">Data Tidak Lengkap!</h3>
+        
+        <!-- Message -->
+        <p id="validationMessage" class="text-gray-600 mb-6">Mohon lengkapi komentar evaluasi dan pilih status sebelum menyimpan.</p>
+        
+        <!-- Button -->
+        <button id="closeValidationModal" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-3 px-6 rounded-xl transition-colors duration-200">
+          Mengerti
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Info Modal -->
+  <div id="infoModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="infoModalContent">
+      <div class="text-center">
+        <!-- Info Icon -->
+        <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+        
+        <!-- Title -->
+        <h3 id="infoModalTitle" class="text-xl font-bold text-gray-900 mb-2">Informasi</h3>
+        
+        <!-- Message -->
+        <p id="infoModalMessage" class="text-gray-600 mb-6">Informasi penting untuk Anda.</p>
+        
+        <!-- Button -->
+        <button id="closeInfoModal" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-3 px-6 rounded-xl transition-colors duration-200">
+          Mengerti
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirmation Modal -->
+  <div id="confirmModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="confirmModalContent">
+      <div class="text-center">
+        <!-- Confirm Icon -->
+        <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+        
+        <!-- Title -->
+        <h3 id="confirmModalTitle" class="text-xl font-bold text-gray-900 mb-2">Konfirmasi</h3>
+        
+        <!-- Message -->
+        <p id="confirmModalMessage" class="text-gray-600 mb-6">Apakah Anda yakin ingin melanjutkan?</p>
+        
+        <!-- Buttons -->
+        <div class="flex gap-3">
+          <button id="cancelConfirmModal" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-3 px-6 rounded-xl transition-colors duration-200">
+            Batal
+          </button>
+          <button id="proceedConfirmModal" class="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-medium py-3 px-6 rounded-xl transition-colors duration-200">
+            Ya
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Modal -->
+  <div id="loadingModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="loadingModalContent">
+      <div class="text-center">
+        <!-- Loading Spinner -->
+        <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div class="w-8 h-8 border-4 border-blue-200 border-t-blue-500 rounded-full animate-spin"></div>
+        </div>
+        
+        <!-- Title -->
+        <h3 id="loadingModalTitle" class="text-xl font-bold text-gray-900 mb-2">Memproses...</h3>
+        
+        <!-- Message -->
+        <p id="loadingModalMessage" class="text-gray-600 mb-6">Mohon tunggu sebentar.</p>
+      </div>
+    </div>
+  </div>
+
   <!-- Wrapper -->
   <div class="lg:ml-80 opacity-0 animate-fade-in" style="animation-delay:150ms;">
 
@@ -101,7 +249,7 @@
         <% } %>
 
         <!-- Form Evaluasi -->
-        <form action="/dpa/laporan/<%= laporan.id_laporan %>/evaluasi" method="POST" class="space-y-6">
+        <form id="evaluationForm" action="/dpa/laporan/<%= laporan.id_laporan %>/evaluasi" method="POST" class="space-y-6">
 
           <!-- Komentar Evaluasi -->
           <div>
@@ -144,9 +292,10 @@
               class="px-6 py-3 bg-gray-200 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-300 transition">
               Batal
             </a>
-            <button type="submit"
-              class="px-6 py-3 bg-orange-500 text-white rounded-xl text-sm font-semibold hover:bg-orange-600 transition transform hover:scale-105 active:scale-95">
-              Simpan Evaluasi
+            <button type="submit" id="submitBtn"
+              class="flex items-center justify-center gap-2 px-6 py-3 bg-orange-500 text-white rounded-xl text-sm font-semibold hover:bg-orange-600 transition transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
+              <span id="btnText">Simpan Evaluasi</span>
+              <div id="btnSpinner" class="hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
             </button>
           </div>
         </form>
@@ -178,9 +327,213 @@
     }
   </style>
 
-  <!-- Script Dropdown -->
+  <!-- Script -->
   <script>
+    // Pop-up Message Utility Class
+    class PopupMessage {
+      // Modal Animation Functions
+      static showModal(modalId) {
+        const modal = document.getElementById(modalId);
+        const content = document.getElementById(modalId + 'Content');
+        
+        if (!modal || !content) return;
+        
+        modal.classList.remove('hidden');
+        
+        // Trigger animation
+        setTimeout(() => {
+          content.classList.remove('scale-95', 'opacity-0');
+          content.classList.add('scale-100', 'opacity-100');
+        }, 10);
+      }
+
+      static hideModal(modalId, callback = null) {
+        const modal = document.getElementById(modalId);
+        const content = document.getElementById(modalId + 'Content');
+        
+        if (!modal || !content) return;
+        
+        content.classList.remove('scale-100', 'opacity-100');
+        content.classList.add('scale-95', 'opacity-0');
+        
+        setTimeout(() => {
+          modal.classList.add('hidden');
+          if (callback) callback();
+        }, 300);
+      }
+
+      // Success Message
+      static showSuccess(title = 'Berhasil!', message = 'Operasi berhasil dilakukan.', buttonText = 'OK', callback = null) {
+        document.getElementById('successModalTitle').textContent = title;
+        document.getElementById('successModalMessage').textContent = message;
+        
+        const button = document.getElementById('closeSuccessModal');
+        button.textContent = buttonText;
+        
+        // Remove existing event listeners
+        button.replaceWith(button.cloneNode(true));
+        const newButton = document.getElementById('closeSuccessModal');
+        
+        newButton.addEventListener('click', () => {
+          this.hideModal('successModal', callback);
+        });
+        
+        this.showModal('successModal');
+      }
+
+      // Error Message
+      static showError(title = 'Gagal!', message = 'Terjadi kesalahan saat memproses data.', buttonText = 'Tutup', callback = null) {
+        document.getElementById('errorModalTitle').textContent = title;
+        document.getElementById('errorMessage').textContent = message;
+        
+        const button = document.getElementById('closeErrorModal');
+        button.textContent = buttonText;
+        
+        // Remove existing event listeners
+        button.replaceWith(button.cloneNode(true));
+        const newButton = document.getElementById('closeErrorModal');
+        
+        newButton.addEventListener('click', () => {
+          this.hideModal('errorModal', callback);
+        });
+        
+        this.showModal('errorModal');
+      }
+
+      // Warning/Validation Message
+      static showWarning(title = 'Peringatan!', message = 'Data tidak lengkap atau tidak valid.', buttonText = 'Mengerti', callback = null) {
+        document.getElementById('validationModalTitle').textContent = title;
+        document.getElementById('validationMessage').textContent = message;
+        
+        const button = document.getElementById('closeValidationModal');
+        button.textContent = buttonText;
+        
+        // Remove existing event listeners
+        button.replaceWith(button.cloneNode(true));
+        const newButton = document.getElementById('closeValidationModal');
+        
+        newButton.addEventListener('click', () => {
+          this.hideModal('validationModal', callback);
+        });
+        
+        this.showModal('validationModal');
+      }
+
+      // Info Message
+      static showInfo(title = 'Informasi', message = 'Informasi penting untuk Anda.', buttonText = 'Mengerti', callback = null) {
+        document.getElementById('infoModalTitle').textContent = title;
+        document.getElementById('infoModalMessage').textContent = message;
+        
+        const button = document.getElementById('closeInfoModal');
+        button.textContent = buttonText;
+        
+        // Remove existing event listeners
+        button.replaceWith(button.cloneNode(true));
+        const newButton = document.getElementById('closeInfoModal');
+        
+        newButton.addEventListener('click', () => {
+          this.hideModal('infoModal', callback);
+        });
+        
+        this.showModal('infoModal');
+      }
+
+      // Confirmation Dialog
+      static showConfirm(title = 'Konfirmasi', message = 'Apakah Anda yakin ingin melanjutkan?', onConfirm = null, onCancel = null, confirmText = 'Ya', cancelText = 'Batal') {
+        document.getElementById('confirmModalTitle').textContent = title;
+        document.getElementById('confirmModalMessage').textContent = message;
+        
+        const confirmButton = document.getElementById('proceedConfirmModal');
+        const cancelButton = document.getElementById('cancelConfirmModal');
+        
+        confirmButton.textContent = confirmText;
+        cancelButton.textContent = cancelText;
+        
+        // Remove existing event listeners
+        confirmButton.replaceWith(confirmButton.cloneNode(true));
+        cancelButton.replaceWith(cancelButton.cloneNode(true));
+        
+        const newConfirmButton = document.getElementById('proceedConfirmModal');
+        const newCancelButton = document.getElementById('cancelConfirmModal');
+        
+        newConfirmButton.addEventListener('click', () => {
+          this.hideModal('confirmModal', onConfirm);
+        });
+        
+        newCancelButton.addEventListener('click', () => {
+          this.hideModal('confirmModal', onCancel);
+        });
+        
+        this.showModal('confirmModal');
+      }
+
+      // Loading Message
+      static showLoading(title = 'Memproses...', message = 'Mohon tunggu sebentar.') {
+        document.getElementById('loadingModalTitle').textContent = title;
+        document.getElementById('loadingModalMessage').textContent = message;
+        
+        this.showModal('loadingModal');
+      }
+
+      // Hide Loading
+      static hideLoading(callback = null) {
+        this.hideModal('loadingModal', callback);
+      }
+    }
+
+    // Original Modal functions (tetap menggunakan yang sudah ada)
+    function showModal(modalId) {
+      const modal = document.getElementById(modalId);
+      const content = document.getElementById(modalId + 'Content');
+      
+      modal.classList.remove('hidden');
+      
+      // Trigger animation
+      setTimeout(() => {
+        content.classList.remove('scale-95', 'opacity-0');
+        content.classList.add('scale-100', 'opacity-100');
+      }, 10);
+    }
+
+    function hideModal(modalId) {
+      const modal = document.getElementById(modalId);
+      const content = document.getElementById(modalId + 'Content');
+      
+      content.classList.remove('scale-100', 'opacity-100');
+      content.classList.add('scale-95', 'opacity-0');
+      
+      setTimeout(() => {
+        modal.classList.add('hidden');
+      }, 300);
+    }
+
+    // Modal event listeners
+    document.getElementById('closeSuccessModal').addEventListener('click', () => {
+      hideModal('successModal');
+      setTimeout(() => {
+        window.location.href = '/dpa/laporan';
+      }, 300);
+    });
+
+    document.getElementById('closeErrorModal').addEventListener('click', () => {
+      hideModal('errorModal');
+    });
+
+    document.getElementById('closeValidationModal').addEventListener('click', () => {
+      hideModal('validationModal');
+    });
+
+    // Close modal when clicking outside
+    ['successModal', 'errorModal', 'validationModal'].forEach(modalId => {
+      document.getElementById(modalId).addEventListener('click', (e) => {
+        if (e.target.id === modalId) {
+          hideModal(modalId);
+        }
+      });
+    });
+
     document.addEventListener("DOMContentLoaded", () => {
+      // Dropdown functionality
       const dropdownButton = document.getElementById("dropdownButton");
       const dropdownMenu = document.getElementById("dropdownMenu");
       const dropdownLabel = document.getElementById("dropdownLabel");
@@ -197,7 +550,161 @@
           dropdownMenu.classList.add("hidden");
         });
       });
+
+      // Close dropdown when clicking outside
+      window.addEventListener('click', (e) => {
+        if (!dropdownButton.contains(e.target) && !dropdownMenu.contains(e.target)) {
+          dropdownMenu.classList.add('hidden');
+        }
+      });
+
+      // Form submission with validation and popup menggunakan PopupMessage class
+      const form = document.getElementById('evaluationForm');
+      const submitBtn = document.getElementById('submitBtn');
+      const btnText = document.getElementById('btnText');
+      const btnSpinner = document.getElementById('btnSpinner');
+      const komentarField = document.getElementById('komentar');
+
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        // Validation
+        const komentar = komentarField.value.trim();
+        const status = statusInput.value;
+        
+        if (!komentar) {
+          PopupMessage.showWarning('Data Tidak Lengkap!', 'Mohon isi komentar evaluasi sebelum menyimpan.');
+          return;
+        }
+        
+        if (!status) {
+          PopupMessage.showWarning('Data Tidak Lengkap!', 'Mohon pilih status evaluasi sebelum menyimpan.');
+          return;
+        }
+        
+        // Show loading popup
+        PopupMessage.showLoading('Menyimpan Evaluasi...', 'Mohon tunggu sebentar, evaluasi sedang diproses.');
+        
+        // Show loading state on button
+        submitBtn.disabled = true;
+        btnText.textContent = 'Menyimpan...';
+        btnSpinner.classList.remove('hidden');
+        
+        // Prepare form data
+        const formData = new FormData(form);
+        
+        // Convert FormData to URLSearchParams untuk compatibility dengan server
+        const formParams = new URLSearchParams();
+        formParams.append('komentar', komentarField.value.trim());
+        formParams.append('status_konfirmasi', statusInput.value);
+        formParams.append('id_anggota', form.querySelector('input[name="id_anggota"]').value);
+
+        // Submit form menggunakan fetch dengan proper headers
+        fetch(form.action, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: formParams
+        })
+        .then(response => {
+          // Hide loading modal first
+          PopupMessage.hideLoading(() => {
+            if (response.ok || response.redirected) {
+              // Show success popup
+              PopupMessage.showSuccess(
+                'Evaluasi Berhasil Disimpan!', 
+                'Komentar evaluasi telah berhasil disimpan dan status laporan telah diperbarui.',
+                'Kembali ke Daftar Laporan',
+                () => {
+                  window.location.href = '/dpa/kelolaLaporan';
+                }
+              );
+            } else {
+              return response.text().then(text => {
+                throw new Error(text || 'Terjadi kesalahan saat menyimpan evaluasi');
+              });
+            }
+          });
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          // Hide loading modal first, then show error
+          PopupMessage.hideLoading(() => {
+            PopupMessage.showError(
+              'Gagal Menyimpan Evaluasi!', 
+              'Terjadi kesalahan: ' + error.message
+            );
+          });
+        })
+        .finally(() => {
+          submitBtn.disabled = false;
+          btnText.textContent = 'Simpan Evaluasi';
+          btnSpinner.classList.add('hidden');
+        });
+      });
+
+      // Initialize PopupMessage event listeners
+      PopupMessage.init();
     });
+
+    // Extended PopupMessage class with init method
+    PopupMessage.init = function() {
+      // Close modal when clicking outside
+      const modals = ['successModal', 'errorModal', 'validationModal', 'infoModal', 'confirmModal'];
+      
+      modals.forEach(modalId => {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+          modal.addEventListener('click', (e) => {
+            if (e.target.id === modalId) {
+              this.hideModal(modalId);
+            }
+          });
+        }
+      });
+
+      // ESC key to close modals
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          modals.forEach(modalId => {
+            const modal = document.getElementById(modalId);
+            if (modal && !modal.classList.contains('hidden')) {
+              this.hideModal(modalId);
+            }
+          });
+        }
+      });
+    };
+
+    // Alias functions for easier usage
+    function showSuccessMessage(title, message, buttonText, callback) {
+      PopupMessage.showSuccess(title, message, buttonText, callback);
+    }
+
+    function showErrorMessage(title, message, buttonText, callback) {
+      PopupMessage.showError(title, message, buttonText, callback);
+    }
+
+    function showWarningMessage(title, message, buttonText, callback) {
+      PopupMessage.showWarning(title, message, buttonText, callback);
+    }
+
+    function showInfoMessage(title, message, buttonText, callback) {
+      PopupMessage.showInfo(title, message, buttonText, callback);
+    }
+
+    function showConfirmDialog(title, message, onConfirm, onCancel, confirmText, cancelText) {
+      PopupMessage.showConfirm(title, message, onConfirm, onCancel, confirmText, cancelText);
+    }
+
+    function showLoadingMessage(title, message) {
+      PopupMessage.showLoading(title, message);
+    }
+
+    function hideLoadingMessage(callback) {
+      PopupMessage.hideLoading(callback);
+    }
   </script>
 
 </body>

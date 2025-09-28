@@ -2,19 +2,140 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Detail Evaluasi</title>
+  <title><%= title || 'Detail Evaluasi' %></title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col">
+
+  <!-- Navbar -->
+  <%- include('../partials/navbarHMSI', { user: user, unreadCount: unreadCount }) %>
 
   <!-- Sidebar -->
   <%- include('../partials/sidebarHMSI', { activeNav: 'Evaluasi DPA', user: user }) %>
 
-  <%- include('../partials/navbarHMSI', { user: user, unreadCount: unreadCount }) %>
+  <!-- Success Modal -->
+  <div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="successModalContent">
+      <div class="text-center">
+        <!-- Success Icon -->
+        <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+        </div>
+        
+        <!-- Title -->
+        <h3 id="successModalTitle" class="text-xl font-bold text-gray-900 mb-2">Komentar Berhasil Disimpan!</h3>
+        
+        <!-- Message -->
+        <p id="successModalMessage" class="text-gray-600 mb-6">Komentar tambahan Anda telah berhasil ditambahkan ke evaluasi ini.</p>
+        
+        <!-- Button -->
+        <button id="closeSuccessModal" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-3 px-6 rounded-xl transition-colors duration-200">
+          Kembali ke Evaluasi
+        </button>
+      </div>
+    </div>
+  </div>
 
-   <!-- Wrapper -->
-<div class="lg:ml-80 px-6 pt-20 pb-8 px-6">
+  <!-- Error Modal -->
+  <div id="errorModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="errorModalContent">
+      <div class="text-center">
+        <!-- Error Icon -->
+        <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </div>
+        
+        <!-- Title -->
+        <h3 id="errorModalTitle" class="text-xl font-bold text-gray-900 mb-2">Gagal Menyimpan!</h3>
+        
+        <!-- Message -->
+        <p id="errorMessage" class="text-gray-600 mb-6">Terjadi kesalahan saat menyimpan komentar.</p>
+        
+        <!-- Button -->
+        <button id="closeErrorModal" class="w-full bg-red-500 hover:bg-red-600 text-white font-medium py-3 px-6 rounded-xl transition-colors duration-200">
+          Tutup
+        </button>
+      </div>
+    </div>
+  </div>
 
+  <!-- Validation Modal -->
+  <div id="validationModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="validationModalContent">
+      <div class="text-center">
+        <!-- Warning Icon -->
+        <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+          </svg>
+        </div>
+        
+        <!-- Title -->
+        <h3 id="validationModalTitle" class="text-xl font-bold text-gray-900 mb-2">Komentar Kosong!</h3>
+        
+        <!-- Message -->
+        <p id="validationModalMessage" class="text-gray-600 mb-6">Mohon tulis komentar terlebih dahulu sebelum menyimpan.</p>
+        
+        <!-- Button -->
+        <button id="closeValidationModal" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-3 px-6 rounded-xl transition-colors duration-200">
+          Mengerti
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Info Modal -->
+  <div id="infoModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="infoModalContent">
+      <div class="text-center">
+        <!-- Info Icon -->
+        <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+        
+        <!-- Title -->
+        <h3 id="infoModalTitle" class="text-xl font-bold text-gray-900 mb-2">Informasi</h3>
+        
+        <!-- Message -->
+        <p id="infoModalMessage" class="text-gray-600 mb-6">Informasi penting untuk Anda.</p>
+        
+        <!-- Button -->
+        <button id="closeInfoModal" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-3 px-6 rounded-xl transition-colors duration-200">
+          Mengerti
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Modal -->
+  <div id="loadingModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="loadingModalContent">
+      <div class="text-center">
+        <!-- Loading Spinner -->
+        <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div class="w-8 h-8 border-4 border-blue-200 border-t-blue-500 rounded-full animate-spin"></div>
+        </div>
+        
+        <!-- Title -->
+        <h3 id="loadingModalTitle" class="text-xl font-bold text-gray-900 mb-2">Memproses...</h3>
+        
+        <!-- Message -->
+        <p id="loadingModalMessage" class="text-gray-600 mb-6">Mohon tunggu sebentar.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Wrapper -->
+  <main class="lg:ml-80 px-6 pt-20 pb-8 flex-grow">
     <div class="max-w-3xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-orange-200">
 
       <!-- Header Card -->
@@ -80,23 +201,377 @@
             <p class="text-gray-400 text-sm mt-2">Belum ada komentar tambahan.</p>
           <% } %>
 
-          <!-- Form komentar -->
-          <form action="/hmsi/evaluasi/<%= evaluasi.id_evaluasi %>/komentar" method="POST" class="mt-4 space-y-3">
-            <textarea name="komentar_hmsi" rows="3" class="w-full border rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400"><%= evaluasi.komentar_hmsi || '' %></textarea>
-            
-            <div class="flex justify-between items-center gap-3 pt-4 border-t">
-              <a href="/hmsi/evaluasi" class="px-4 py-2 border border-gray-400 text-gray-600 rounded-xl hover:bg-gray-100">Kembali</a>
-              <button type="submit" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-xl font-medium">
-                Tambahkan Komentar
-              </button>
+          <!-- Status Check untuk Form -->
+          <% const isCompleted = evaluasi.status_konfirmasi === 'Selesai'; %>
+          
+          <% if (isCompleted) { %>
+            <!-- Info Message untuk Status Selesai -->
+            <div class="mt-4 p-4 bg-green-50 border border-green-200 rounded-xl flex items-center gap-3">
+              <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+              </div>
+              <div>
+                <p class="text-sm font-medium text-green-800">Evaluasi Telah Selesai</p>
+                <p class="text-xs text-green-600">Evaluasi ini telah selesai diproses dan tidak dapat diubah lagi.</p>
+              </div>
             </div>
-          </form>
+          <% } else { %>
+            <!-- Form komentar (hanya tampil jika status bukan Selesai) -->
+            <form id="commentForm" action="/hmsi/evaluasi/<%= evaluasi.id_evaluasi %>/komentar" method="POST" class="mt-4 space-y-3">
+              <textarea name="komentar_hmsi" id="komentarTextarea" rows="3" 
+                placeholder="Tulis komentar tambahan Anda di sini..."
+                class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400 hover:border-gray-400 transition-all"><%= evaluasi.komentar_hmsi || '' %></textarea>
+              <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
+              
+              <div class="flex justify-between items-center gap-3 pt-4 border-t">
+                <a href="/hmsi/evaluasi" 
+                  class="px-6 py-2 border border-gray-400 text-gray-600 rounded-xl hover:bg-gray-100 font-medium transition-colors duration-200">
+                  Kembali
+                </a>
+                <button type="submit" id="submitCommentBtn"
+                  class="flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-xl font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                  <span id="submitBtnText">Tambahkan Komentar</span>
+                  <div id="submitBtnSpinner" class="hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                </button>
+              </div>
+            </form>
+          <% } %>
+
+          <!-- Jika status Selesai, tampilkan hanya tombol Kembali -->
+          <% if (isCompleted) { %>
+            <div class="flex justify-center items-center gap-3 pt-4 border-t mt-4">
+              <a href="/hmsi/evaluasi" 
+                class="px-8 py-3 bg-orange-500 text-white rounded-xl hover:bg-orange-600 font-medium transition-colors duration-200 flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Kembali ke Daftar Evaluasi
+              </a>
+            </div>
+          <% } %>
         </div>
       </div>
     </div>
-  </div>
+  </main>
+
   <!-- Footer -->
   <%- include('../partials/footer') %>
+
+  <script>
+    // Pop-up Message Utility Class
+    class PopupMessage {
+      // Modal Animation Functions
+      static showModal(modalId) {
+        const modal = document.getElementById(modalId);
+        const content = document.getElementById(modalId + 'Content');
+        
+        if (!modal || !content) return;
+        
+        modal.classList.remove('hidden');
+        
+        // Trigger animation
+        setTimeout(() => {
+          content.classList.remove('scale-95', 'opacity-0');
+          content.classList.add('scale-100', 'opacity-100');
+        }, 10);
+      }
+
+      static hideModal(modalId, callback = null) {
+        const modal = document.getElementById(modalId);
+        const content = document.getElementById(modalId + 'Content');
+        
+        if (!modal || !content) return;
+        
+        content.classList.remove('scale-100', 'opacity-100');
+        content.classList.add('scale-95', 'opacity-0');
+        
+        setTimeout(() => {
+          modal.classList.add('hidden');
+          if (callback) callback();
+        }, 300);
+      }
+
+      // Success Message
+      static showSuccess(title = 'Berhasil!', message = 'Operasi berhasil dilakukan.', buttonText = 'OK', callback = null) {
+        document.getElementById('successModalTitle').textContent = title;
+        document.getElementById('successModalMessage').textContent = message;
+        
+        const button = document.getElementById('closeSuccessModal');
+        button.textContent = buttonText;
+        
+        // Remove existing event listeners
+        button.replaceWith(button.cloneNode(true));
+        const newButton = document.getElementById('closeSuccessModal');
+        
+        newButton.addEventListener('click', () => {
+          this.hideModal('successModal', callback);
+        });
+        
+        this.showModal('successModal');
+      }
+
+      // Error Message
+      static showError(title = 'Gagal!', message = 'Terjadi kesalahan saat memproses data.', buttonText = 'Tutup', callback = null) {
+        document.getElementById('errorModalTitle').textContent = title;
+        document.getElementById('errorMessage').textContent = message;
+        
+        const button = document.getElementById('closeErrorModal');
+        button.textContent = buttonText;
+        
+        // Remove existing event listeners
+        button.replaceWith(button.cloneNode(true));
+        const newButton = document.getElementById('closeErrorModal');
+        
+        newButton.addEventListener('click', () => {
+          this.hideModal('errorModal', callback);
+        });
+        
+        this.showModal('errorModal');
+      }
+
+      // Warning/Validation Message
+      static showWarning(title = 'Peringatan!', message = 'Data tidak lengkap atau tidak valid.', buttonText = 'Mengerti', callback = null) {
+        document.getElementById('validationModalTitle').textContent = title;
+        document.getElementById('validationModalMessage').textContent = message;
+        
+        const button = document.getElementById('closeValidationModal');
+        button.textContent = buttonText;
+        
+        // Remove existing event listeners
+        button.replaceWith(button.cloneNode(true));
+        const newButton = document.getElementById('closeValidationModal');
+        
+        newButton.addEventListener('click', () => {
+          this.hideModal('validationModal', callback);
+        });
+        
+        this.showModal('validationModal');
+      }
+
+      // Info Message
+      static showInfo(title = 'Informasi', message = 'Informasi penting untuk Anda.', buttonText = 'Mengerti', callback = null) {
+        document.getElementById('infoModalTitle').textContent = title;
+        document.getElementById('infoModalMessage').textContent = message;
+        
+        const button = document.getElementById('closeInfoModal');
+        button.textContent = buttonText;
+        
+        // Remove existing event listeners
+        button.replaceWith(button.cloneNode(true));
+        const newButton = document.getElementById('closeInfoModal');
+        
+        newButton.addEventListener('click', () => {
+          this.hideModal('infoModal', callback);
+        });
+        
+        this.showModal('infoModal');
+      }
+
+      // Loading Message
+      static showLoading(title = 'Memproses...', message = 'Mohon tunggu sebentar.') {
+        document.getElementById('loadingModalTitle').textContent = title;
+        document.getElementById('loadingModalMessage').textContent = message;
+        
+        this.showModal('loadingModal');
+      }
+
+      // Hide Loading
+      static hideLoading(callback = null) {
+        this.hideModal('loadingModal', callback);
+      }
+    }
+
+    // Modal functions (backward compatibility)
+    function showModal(modalId) {
+      PopupMessage.showModal(modalId);
+    }
+
+    function hideModal(modalId) {
+      PopupMessage.hideModal(modalId);
+    }
+
+    // Modal event listeners
+    document.getElementById('closeSuccessModal').addEventListener('click', () => {
+      hideModal('successModal');
+      setTimeout(() => {
+        window.location.reload();
+      }, 300);
+    });
+
+    document.getElementById('closeErrorModal').addEventListener('click', () => {
+      hideModal('errorModal');
+    });
+
+    document.getElementById('closeValidationModal').addEventListener('click', () => {
+      hideModal('validationModal');
+    });
+
+    document.getElementById('closeInfoModal').addEventListener('click', () => {
+      hideModal('infoModal');
+    });
+
+    // Close modal when clicking outside
+    ['successModal', 'errorModal', 'validationModal', 'infoModal'].forEach(modalId => {
+      document.getElementById(modalId).addEventListener('click', (e) => {
+        if (e.target.id === modalId) {
+          hideModal(modalId);
+        }
+      });
+    });
+
+    // ESC key to close modals
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        ['successModal', 'errorModal', 'validationModal', 'infoModal'].forEach(modalId => {
+          const modal = document.getElementById(modalId);
+          if (modal && !modal.classList.contains('hidden')) {
+            hideModal(modalId);
+          }
+        });
+      }
+    });
+
+    // Form submission (hanya jika form ada - status bukan Selesai)
+    const commentForm = document.getElementById('commentForm');
+    if (commentForm) {
+      // Function to clear form after successful submission
+      function clearCommentForm() {
+        const textarea = document.getElementById('komentarTextarea');
+        const errorDiv = document.querySelector('.error-message');
+        
+        if (textarea && errorDiv) {
+          // Clear textarea value
+          textarea.value = '';
+          
+          // Reset styling
+          textarea.classList.remove('border-red-500');
+          textarea.classList.add('border-gray-300');
+          
+          // Hide error message
+          errorDiv.classList.add('hidden');
+          
+          // Reset focus
+          textarea.blur();
+        }
+      }
+
+      // Form validation and submission
+      function validateCommentForm() {
+        const textarea = document.getElementById('komentarTextarea');
+        const errorDiv = document.querySelector('.error-message');
+        const komentar = textarea.value.trim();
+
+        if (!komentar) {
+          errorDiv.textContent = 'Komentar wajib diisi';
+          errorDiv.classList.remove('hidden');
+          textarea.classList.add('border-red-500');
+          textarea.classList.remove('border-gray-300');
+          return false;
+        }
+
+        // Reset error styling
+        errorDiv.classList.add('hidden');
+        textarea.classList.remove('border-red-500');
+        textarea.classList.add('border-gray-300');
+        return true;
+      }
+
+      // Real-time validation
+      const komentarTextarea = document.getElementById('komentarTextarea');
+      if (komentarTextarea) {
+        komentarTextarea.addEventListener('input', (e) => {
+          const textarea = e.target;
+          const errorDiv = document.querySelector('.error-message');
+          
+          if (textarea.classList.contains('border-red-500') && textarea.value.trim() !== '') {
+            errorDiv.classList.add('hidden');
+            textarea.classList.remove('border-red-500');
+            textarea.classList.add('border-gray-300');
+          }
+        });
+      }
+
+      // Form submission
+      commentForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        if (!validateCommentForm()) {
+          PopupMessage.showWarning('Komentar Kosong!', 'Mohon tulis komentar terlebih dahulu sebelum menyimpan.');
+          return;
+        }
+
+        const submitBtn = document.getElementById('submitCommentBtn');
+        const submitText = document.getElementById('submitBtnText');
+        const submitSpinner = document.getElementById('submitBtnSpinner');
+
+        // Show loading popup
+        PopupMessage.showLoading('Menyimpan Komentar...', 'Mohon tunggu sebentar...');
+
+        // Show loading state on button
+        if (submitBtn && submitText && submitSpinner) {
+          submitBtn.disabled = true;
+          submitText.textContent = 'Menyimpan...';
+          submitSpinner.classList.remove('hidden');
+        }
+
+        // Get form data
+        const komentarValue = document.getElementById('komentarTextarea').value.trim();
+
+        // Convert to URLSearchParams for compatibility
+        const formParams = new URLSearchParams();
+        formParams.append('komentar_hmsi', komentarValue);
+
+        // Send request
+        fetch(e.target.action, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: formParams
+        })
+        .then(response => {
+          // Hide loading modal first
+          PopupMessage.hideLoading(() => {
+            if (response.ok || response.redirected) {
+              // Clear form before showing success modal
+              clearCommentForm();
+              PopupMessage.showSuccess(
+                'Komentar Berhasil Disimpan!', 
+                'Komentar tambahan Anda telah berhasil ditambahkan ke evaluasi ini.',
+                'OK',
+                () => {
+                  window.location.reload();
+                }
+              );
+            } else {
+              return response.text().then(text => {
+                throw new Error(text || 'Terjadi kesalahan saat menyimpan komentar');
+              });
+            }
+          });
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          // Hide loading modal first, then show error
+          PopupMessage.hideLoading(() => {
+            PopupMessage.showError(
+              'Gagal Menyimpan!', 
+              'Terjadi kesalahan: ' + error.message
+            );
+          });
+        })
+        .finally(() => {
+          if (submitBtn && submitText && submitSpinner) {
+            submitBtn.disabled = false;
+            submitText.textContent = 'Tambahkan Komentar';
+            submitSpinner.classList.add('hidden');
+          }
+        });
+      });
+    }
+  </script>
 
 </body>
 </html>
