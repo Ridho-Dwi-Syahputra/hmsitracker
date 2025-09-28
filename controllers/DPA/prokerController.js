@@ -5,6 +5,7 @@
 
 const db = require("../../config/db");
 const { v4: uuidv4 } = require("uuid"); // untuk id notifikasi
+const { deleteOldProkerNotif } = require("../HMSI/notifikasiController");
 
 // =====================================================
 // helper: format tanggal ke format Indonesia
@@ -55,7 +56,6 @@ exports.getAllProkerDPA = async (req, res) => {
     `);
 
     const programs = rows.map(r => {
-      // Jika status sudah ditentukan DPA → pakai itu
       let status = r.status_db;
       if (!status || status === "Belum Dimulai" || status === "Sedang Berjalan") {
         status = calculateStatus(r.tanggal_mulai, r.tanggal_selesai);
@@ -185,6 +185,9 @@ exports.updateStatusProker = async (req, res) => {
       "UPDATE Program_kerja SET Status=? WHERE id_ProgramKerja=?",
       [status, id]
     );
+
+    // 🔴 Hapus notifikasi lama sebelum menambah yang baru
+    await deleteOldProkerNotif(id);
 
     // 🟠 Tambahkan notifikasi ke HMSI divisi terkait
     const idNotifikasi = uuidv4();

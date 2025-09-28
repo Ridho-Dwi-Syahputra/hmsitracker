@@ -30,7 +30,13 @@
       <div class="p-6 sm:p-8 space-y-4">
         <% if (notifikasi && notifikasi.length > 0) { %>
           <% notifikasi.forEach(function(n) { %>
-            <% const targetUrl = n.linkUrl; %>
+            <% 
+              let targetUrl = n.linkUrl;
+              // 🔹 Jika ini notifikasi status Program Kerja dari DPA → arahkan ke kelola-proker
+              if (n.id_ProgramKerja && !n.id_evaluasi) {
+                targetUrl = "/hmsi/kelola-proker";
+              }
+            %>
 
             <!-- Card Notifikasi -->
             <a href="/hmsi/notifikasi/read/<%= n.id_notifikasi %>?to=<%= encodeURIComponent(targetUrl) %>"
@@ -49,7 +55,7 @@
                     <%= n.pesan || 'Ada evaluasi pada laporan Anda' %>
                   </p>
 
-                  <!-- Info tambahan jika ada laporan -->
+                  <!-- Info tambahan -->
                   <% if (n.id_evaluasi) { %>
                     <p class="text-gray-600 text-xs mt-1">
                       <span class="font-semibold">Judul Laporan:</span> <%= n.judul_laporan || '-' %><br>
