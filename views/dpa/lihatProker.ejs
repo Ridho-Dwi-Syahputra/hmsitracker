@@ -2,114 +2,80 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title><%= title %></title>
+  <title>Daftar Program Kerja</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- FontAwesome -->
   <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
         crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <style>
-    .table-fixed {
-      table-layout: fixed;
-    }
-    .table-fixed th:nth-child(1) { width: 50px; }   /* No */
-    .table-fixed th:nth-child(2) { width: 30%; }    /* Nama Program */
-    .table-fixed th:nth-child(3) { width: 15%; }    /* Divisi */
-    .table-fixed th:nth-child(4) { width: 20%; }    /* Penanggung Jawab */
-    .table-fixed th:nth-child(5) { width: 15%; }    /* Status */
-    .table-fixed th:nth-child(6) { width: 120px; }  /* Aksi */
-    
-    .text-ellipsis {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-  </style>
 </head>
-<body class="bg-orange-50 min-h-screen flex flex-col">
+<body class="bg-gray-50 min-h-screen flex flex-col">
 
-  <!-- ✅ Navbar -->
-  <%- include('../partials/navbarDPA', { user: user, unreadCount: unreadCount }) %>
-  
-  <!-- ✅ Sidebar -->
-  <%- include('../partials/sidebarDPA', { user: user, activeNav: 'Daftar Program Kerja' }) %>
+  <!-- Sidebar -->
+  <%- include('../partials/sidebarHMSI', { activeNav: 'Program Kerja', user: user }) %>
+
+  <!-- Navbar -->
+  <%- include('../partials/navbarHMSI', { user: user, unreadCount: unreadCount }) %>
 
   <!-- Wrapper -->
-  <main class="lg:ml-80 px-6 pt-20 pb-8 flex-grow">
-    <div class="max-w-7xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-orange-200">
-
+  <div class="lg:ml-80 px-6 pt-20 pb-8">
+    <div class="max-w-6xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-orange-200">
       <!-- Header Card -->
-      <div class="bg-orange-500 text-white px-6 py-6 flex items-center justify-between">
-        <div>
-          <h1 class="text-2xl font-bold">Daftar Program Kerja</h1>
-          <p class="text-sm text-orange-100">Lihat & kelola program kerja HMSI</p>
-        </div>
+      <div class="bg-orange-500 text-white px-6 py-6">
+        <h1 class="text-2xl font-bold">Daftar Program Kerja</h1>
+        <p class="text-sm text-orange-100">Kelola status dan detail program kerja</p>
       </div>
 
-      <!-- Body Card -->
+      <!-- Body -->
       <div class="p-6 sm:p-8">
+        <table class="w-full border-collapse">
+          <thead>
+            <tr class="bg-gray-100">
+              <th class="px-4 py-3 border text-left">#</th>
+              <th class="px-4 py-3 border text-left">Nama Proker</th>
+              <th class="px-4 py-3 border text-left">Status</th>
+              <th class="px-4 py-3 border text-center">Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% proker.forEach((item, index) => { %>
+              <tr class="hover:bg-gray-50">
+                <td class="px-4 py-3 border"><%= index + 1 %></td>
+                <td class="px-4 py-3 border"><%= item.nama_proker %></td>
+                <td class="px-4 py-3 border"><%= item.status %></td>
+                <td class="px-4 py-3 border text-center space-x-2">
+                  <button onclick="ubahStatus('<%= item.id_proker %>', 'Selesai')" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded">Selesai</button>
+                  <button onclick="ubahStatus('<%= item.id_proker %>', 'Revisi')" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded">Revisi</button>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 
-        <!-- Search & Filter -->
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-          <!-- Search -->
-          <div class="flex-1">
-            <div class="relative">
-              <input id="searchInput" type="text" placeholder="Cari program kerja..."
-                class="w-full pl-10 pr-4 py-3 border rounded-xl text-sm
-                       border-gray-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-500
-                       focus:bg-orange-50 focus:text-orange-700 
-                       placeholder-gray-400 focus:placeholder-orange-400
-                       transition-all duration-300">
-              <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-            </div>
-          </div>
-
-          <!-- Dropdown Status -->
-          <div class="relative">
-            <button id="dropdownButton" 
-              class="flex items-center justify-between gap-2 px-4 py-3 border border-gray-300 rounded-xl text-sm bg-white
-                     hover:border-orange-500 hover:shadow-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200">
-              <span id="dropdownLabel">Semua Status</span>
-              <i class="fa-solid fa-chevron-down text-orange-500"></i>
-            </button>
-            <div id="dropdownMenu" 
-              class="hidden absolute right-0 mt-2 w-48 bg-white border border-orange-200 rounded-lg shadow-lg z-10">
-              <ul class="text-sm text-gray-700">
-                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="all">Semua Status</button></li>
-                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="Belum Dimulai">Belum Dimulai</button></li>
-                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="Sedang Berjalan">Sedang Berjalan</button></li>
-                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="Selesai">Selesai</button></li>
-                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="Gagal">Gagal</button></li>
-              </ul>
-            </div>
-          </div>
-
-          <!-- Dropdown Divisi -->
-          <div class="relative">
-            <button id="divisiDropdownBtn" 
-              class="flex items-center justify-between gap-2 px-4 py-3 border border-gray-300 rounded-xl text-sm bg-white
-                     hover:border-orange-500 hover:shadow-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200">
-              <span id="divisiDropdownLabel">Semua Divisi</span>
-              <i class="fa-solid fa-chevron-down text-orange-500"></i>
-            </button>
-            <div id="divisiDropdownMenu" 
-              class="hidden absolute right-0 mt-2 w-48 bg-white border border-orange-200 rounded-lg shadow-lg z-10">
-              <ul class="text-sm text-gray-700">
-                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="all">Semua Divisi</button></li>
-                <% 
-                  const uniqueDivisi = [...new Set(programs.map(p => p.divisi))];
-                  uniqueDivisi.forEach(div => { 
-                %>
-                  <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="<%= div %>"><%= div %></button></li>
-                <% }) %>
-              </ul>
-            </div>
-          </div>
+  <!-- ✅ Success Modal -->
+  <div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="successModalContent">
+      <div class="text-center">
+        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+          </svg>
         </div>
+        <h3 class="text-xl font-bold text-gray-900 mb-2">Berhasil!</h3>
+        <p id="successMessage" class="text-gray-600 mb-6">Status program kerja berhasil diperbarui.</p>
+        <button onclick="hideModal('successModal', true)" class="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-3 px-6 rounded-xl transition-colors duration-200">
+          OK
+        </button>
+      </div>
+    </div>
+  </div>
 
         <!-- Tabel -->
         <div class="overflow-x-auto bg-white-50 p-2 shadow-sm rounded-xl">
-          <table class="min-w-full text-sm text-center border border-orange-200 rounded-xl overflow-hidden border-separate border-spacing-0 table-fixed">
+          <table class="min-w-full text-sm text-center border border-orange-200 rounded-xl overflow-hidden border-separate border-spacing-0">
             <thead class="bg-orange-100 text-gray-700">
               <tr>
                 <th class="py-3 px-4 font-semibold border border-orange-200">No</th>
@@ -125,48 +91,44 @@
                 <% programs.forEach((proker, index) => { %>
                   <tr class="hover:bg-orange-50 transition" data-status="<%= proker.status %>">
                     <td class="py-3 px-4 border border-orange-100"><%= index + 1 %></td>
-                    <td class="py-3 px-4 font-medium text-gray-800 border border-orange-100 text-left">
-                      <div class="text-ellipsis" title="<%= proker.namaProker %>"><%= proker.namaProker %></div>
-                    </td>
-                    <td class="py-3 px-4 text-gray-600 border border-orange-100">
-                      <div class="text-ellipsis" title="<%= proker.divisi %>"><%= proker.divisi %></div>
-                    </td>
-                    <td class="py-3 px-4 text-gray-600 border border-orange-100">
-                      <div class="text-ellipsis" title="<%= proker.penanggungJawab %>"><%= proker.penanggungJawab %></div>
-                    </td>
+                    <td class="py-3 px-4 font-medium text-gray-800 border border-orange-100 text-left"><%= proker.namaProker %></td>
+                    <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= proker.divisi %></td>
+                    <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= proker.penanggungJawab %></td>
                     <td class="py-3 px-4 border border-orange-100">
                       <% if (proker.status === "Belum Dimulai") { %>
-                        <span class="px-3 py-1 text-xs rounded-full bg-yellow-100 text-yellow-700 font-medium whitespace-nowrap"><%= proker.status %></span>
+                        <span class="px-3 py-1 text-xs rounded-full bg-yellow-100 text-yellow-700 font-medium"><%= proker.status %></span>
                       <% } else if (proker.status === "Sedang Berjalan") { %>
-                        <span class="px-3 py-1 text-xs rounded-full bg-blue-100 text-blue-700 font-medium whitespace-nowrap"><%= proker.status %></span>
+                        <span class="px-3 py-1 text-xs rounded-full bg-blue-100 text-blue-700 font-medium"><%= proker.status %></span>
                       <% } else if (proker.status === "Selesai") { %>
-                        <span class="px-3 py-1 text-xs rounded-full bg-green-100 text-green-700 font-medium whitespace-nowrap"><%= proker.status %></span>
+                        <span class="px-3 py-1 text-xs rounded-full bg-green-100 text-green-700 font-medium"><%= proker.status %></span>
                       <% } else if (proker.status === "Gagal") { %>
-                        <span class="px-3 py-1 text-xs rounded-full bg-red-100 text-red-700 font-medium whitespace-nowrap"><%= proker.status %></span>
+                        <span class="px-3 py-1 text-xs rounded-full bg-red-100 text-red-700 font-medium"><%= proker.status %></span>
                       <% } else { %>
-                        <span class="px-3 py-1 text-xs rounded-full bg-gray-100 text-gray-600 font-medium whitespace-nowrap"><%= proker.status %></span>
+                        <span class="px-3 py-1 text-xs rounded-full bg-gray-100 text-gray-600 font-medium"><%= proker.status %></span>
                       <% } %>
                     </td>
-                    <td class="py-3 px-4 border border-orange-100">
-                      <div class="flex justify-center items-center gap-2">
-                        <!-- Detail Button Only -->
-                        <a href="/dpa/proker/<%= proker.id %>/detail" 
-                           class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-orange-100 text-orange-600 hover:bg-orange-200 hover:text-orange-700 transition-all duration-200" 
-                           title="Lihat Detail">
-                          <i class="fa-solid fa-eye text-sm"></i>
-                        </a>
-                      </div>
+                    <td class="py-3 px-4 flex justify-center gap-4 border border-orange-100">
+                      <a href="/dpa/proker/<%= proker.id %>/detail" class="text-orange-500 hover:text-orange-700 transition transform hover:scale-110" title="Lihat Detail">
+                        <i class="fa-solid fa-eye text-lg"></i>
+                      </a>
+                      <% if (proker.status !== "Selesai") { %>
+                        <button onclick="ubahStatus('<%= proker.id %>', 'Selesai')" 
+                          class="text-green-600 hover:text-green-800" title="Tandai Selesai">
+                          <i class="fa-solid fa-check-circle text-lg"></i>
+                        </button>
+                      <% } %>
+                      <% if (proker.status !== "Gagal") { %>
+                        <button onclick="ubahStatus('<%= proker.id %>', 'Gagal')" 
+                          class="text-red-600 hover:text-red-800" title="Tandai Gagal">
+                          <i class="fa-solid fa-xmark-circle text-lg"></i>
+                        </button>
+                      <% } %>
                     </td>
                   </tr>
                 <% }) %>
               <% } else { %>
                 <tr>
-                  <td colspan="6" class="py-8 text-center text-gray-500 border border-orange-100">
-                    <div class="flex flex-col items-center gap-2">
-                      <i class="fa-solid fa-folder-open text-2xl text-gray-300"></i>
-                      <span>Tidak ada program kerja ditemukan.</span>
-                    </div>
-                  </td>
+                  <td colspan="6" class="py-6 text-center text-gray-500 border border-orange-100">Tidak ada program kerja ditemukan.</td>
                 </tr>
               <% } %>
             </tbody>
@@ -175,16 +137,18 @@
 
         <!-- Pagination -->
         <div class="flex justify-center items-center gap-2 mt-6" id="pagination">
-          <button id="prevPage" class="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 disabled:opacity-50 disabled:cursor-not-allowed">Prev</button>
-          <span id="pageInfo" class="text-gray-700 mx-4"></span>
-          <button id="nextPage" class="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 disabled:opacity-50 disabled:cursor-not-allowed">Next</button>
+          <button id="prevPage" class="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 disabled:opacity-50">Prev</button>
+          <span id="pageInfo" class="text-gray-700"></span>
+          <button id="nextPage" class="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 disabled:opacity-50">Next</button>
         </div>
 
       </div>
     </div>
-  </main>
+  </div>
 
-  <!-- Script -->
+  <!-- Footer -->
+  <%- include('../partials/footer') %>
+
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const searchInput = document.getElementById("searchInput");
@@ -204,17 +168,9 @@
       const rowsPerPage = 10;
       let currentPage = 1;
 
-      // Close dropdowns when clicking outside
-      document.addEventListener("click", (e) => {
-        if (!dropdownButton.contains(e.target)) dropdownMenu.classList.add("hidden");
-        if (!divisiDropdownBtn.contains(e.target)) divisiDropdownMenu.classList.add("hidden");
-      });
-
       // Toggle dropdown status
-      dropdownButton.addEventListener("click", (e) => {
-        e.stopPropagation();
+      dropdownButton.addEventListener("click", () => {
         dropdownMenu.classList.toggle("hidden");
-        divisiDropdownMenu.classList.add("hidden");
       });
 
       dropdownMenu.querySelectorAll("button").forEach(btn => {
@@ -222,16 +178,13 @@
           statusValue = btn.dataset.value;
           dropdownLabel.textContent = btn.textContent;
           dropdownMenu.classList.add("hidden");
-          currentPage = 1;
           filterRows();
         });
       });
 
       // Toggle dropdown divisi
-      divisiDropdownBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
+      divisiDropdownBtn.addEventListener("click", () => {
         divisiDropdownMenu.classList.toggle("hidden");
-        dropdownMenu.classList.add("hidden");
       });
 
       divisiDropdownMenu.querySelectorAll("button").forEach(btn => {
@@ -239,7 +192,6 @@
           divisiValue = btn.dataset.value;
           divisiDropdownLabel.textContent = btn.textContent;
           divisiDropdownMenu.classList.add("hidden");
-          currentPage = 1;
           filterRows();
         });
       });
@@ -281,29 +233,36 @@
         document.getElementById("nextPage").disabled = currentPage === totalPages || totalPages === 0;
       }
 
-      document.getElementById("prevPage").addEventListener("click", () => { 
-        if (currentPage > 1) {
-          currentPage--; 
-          paginate(); 
-        }
-      });
-      
-      document.getElementById("nextPage").addEventListener("click", () => { 
-        let visibleRows = rows.filter(row => row.dataset.visible === "true");
-        let totalPages = Math.ceil(visibleRows.length / rowsPerPage);
-        if (currentPage < totalPages) {
-          currentPage++; 
-          paginate(); 
-        }
-      });
+      document.getElementById("prevPage").addEventListener("click", () => { currentPage--; paginate(); });
+      document.getElementById("nextPage").addEventListener("click", () => { currentPage++; paginate(); });
 
-      searchInput.addEventListener("input", () => {
-        currentPage = 1;
-        filterRows();
-      });
+      searchInput.addEventListener("input", filterRows);
 
       filterRows();
     });
+
+    function ubahStatus(id, status) {
+      if (!confirm(`Apakah Anda yakin ingin mengubah status menjadi ${status}?`)) return;
+
+      fetch(`/dpa/proker/${id}/status`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          alert(data.message);
+          location.reload();
+        } else {
+          alert("Gagal mengubah status: " + data.message);
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        alert("Terjadi kesalahan saat mengubah status.");
+      });
+    }
   </script>
 </body>
 </html>
