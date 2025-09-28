@@ -1,3 +1,704 @@
-(node:6372) [DEP0044] DeprecationWarning: The `util.isArray` API is deprecated. Please use `Array.isArray()` instead.
-(Use `node --trace-deprecation ...` to show where the warning was created)
-❌ Error addKomentar: Cannot destructure property 'komentar_hmsi' of 'req.body' as it is undefined.
+<% var old = typeof old !== 'undefined' ? old : {}; %>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title><%= title %></title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://kit.fontawesome.com/your-fa-kit.js" crossorigin="anonymous"></script>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+
+  <!-- Navbar -->
+  <%- include('../partials/navbarHMSI', { user: user, unreadCount: unreadCount }) %>
+
+  <!-- Sidebar -->
+  <%- include('../partials/sidebarHMSI', { activeNav: 'Laporan', user: user }) %>
+
+  <!-- Success Modal -->
+  <div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="successModalContent">
+      <div class="text-center">
+        <!-- Success Icon -->
+        <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+        </div>
+        
+        <!-- Title -->
+        <h3 class="text-xl font-bold text-gray-900 mb-2">Berhasil Diperbarui!</h3>
+        
+        <!-- Message -->
+        <p class="text-gray-600 mb-6">Laporan berhasil diperbarui dan perubahan telah disimpan.</p>
+        
+        <!-- Button -->
+        <button id="closeSuccessModal" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-3 px-6 rounded-xl transition-colors duration-200">
+          Kembali ke Daftar Laporan
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error Modal -->
+  <div id="errorModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="errorModalContent">
+      <div class="text-center">
+        <!-- Error Icon -->
+        <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </div>
+        
+        <!-- Title -->
+        <h3 class="text-xl font-bold text-gray-900 mb-2">Gagal Memperbarui!</h3>
+        
+        <!-- Message -->
+        <p id="errorMessage" class="text-gray-600 mb-6">Mohon periksa kembali data yang Anda masukkan.</p>
+        
+        <!-- Button -->
+        <button id="closeErrorModal" class="w-full bg-red-500 hover:bg-red-600 text-white font-medium py-3 px-6 rounded-xl transition-colors duration-200">
+          Tutup
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Validation Modal -->
+  <div id="validationModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="validationModalContent">
+      <div class="text-center">
+        <!-- Warning Icon -->
+        <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+          </svg>
+        </div>
+        
+        <!-- Title -->
+        <h3 class="text-xl font-bold text-gray-900 mb-2">Data Tidak Lengkap!</h3>
+        
+        <!-- Message -->
+        <p id="validationMessage" class="text-gray-600 mb-6">Mohon lengkapi semua field yang wajib diisi sebelum memperbarui data.</p>
+        
+        <!-- Button -->
+        <button id="closeValidationModal" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-3 px-6 rounded-xl transition-colors duration-200">
+          Mengerti
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Wrapper -->
+  <main class="lg:ml-80 px-6 pt-20 pb-8 flex-grow">
+    <div class="max-w-5xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-200">
+
+      <!-- Header -->
+      <div class="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-6">
+        <h1 class="text-2xl font-bold">Edit Laporan</h1>
+        <p class="text-sm text-orange-100">Perbarui detail laporan kegiatan</p>
+      </div>
+
+      <!-- Body -->
+      <div class="p-6 sm:p-8">
+        <%- include('../partials/alert', { errorMsg: errorMsg, successMsg: successMsg }) %>
+
+        <!-- Form -->
+        <form id="editLaporanForm" action="/hmsi/laporan/edit/<%= laporan.id_laporan %>" method="POST" enctype="multipart/form-data" class="space-y-10">
+
+          <!-- Informasi Dasar -->
+          <div>
+            <h4 class="text-lg font-semibold text-gray-700 mb-4">Informasi Dasar</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+              <!-- Judul -->
+              <div class="md:col-span-2 bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition-colors">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Judul Laporan <span class="text-red-500">*</span></label>
+                <input type="text" name="judul_laporan" id="judul_laporan"
+                  value="<%= old.judul_laporan || laporan.judul_laporan %>" required
+                  placeholder="Masukkan judul laporan..."
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100 hover:border-gray-400 transition-all">
+                <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
+              </div>
+
+              <!-- Program Kerja -->
+              <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 relative hover:bg-gray-100/50 transition-colors">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Program Kerja <span class="text-red-500">*</span></label>
+                <button type="button" id="prokerDropdownBtn"
+                  class="flex items-center justify-between w-full px-4 py-3 border border-gray-300 rounded-lg bg-white hover:border-gray-400 transition-all">
+                  <span id="prokerDropdownLabel" class="text-gray-700">
+                    <%= old.id_ProgramKerja 
+                          ? programs.find(p => p.id == old.id_ProgramKerja)?.namaProker 
+                          : programs.find(p => p.id == laporan.id_ProgramKerja)?.namaProker 
+                          || 'Pilih Program Kerja' %>
+                  </span>
+                  <i class="fa-solid fa-chevron-down text-gray-400"></i>
+                </button>
+                <div id="prokerDropdownMenu" class="hidden absolute left-0 mt-2 w-full bg-white border rounded-lg shadow-lg z-10">
+                  <ul class="max-h-48 overflow-y-auto text-sm text-gray-700">
+                    <% programs.forEach(p => { %>
+                      <li>
+                        <button type="button" class="w-full text-left px-4 py-2 hover:bg-gray-100" data-value="<%= p.id %>"><%= p.namaProker %></button>
+                      </li>
+                    <% }) %>
+                  </ul>
+                </div>
+                <input type="hidden" name="id_ProgramKerja" id="prokerInput" value="<%= old.id_ProgramKerja || laporan.id_ProgramKerja %>">
+                <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
+              </div>
+
+              <!-- Waktu & Tempat -->
+              <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition-colors">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Waktu & Tempat <span class="text-red-500">*</span></label>
+                <input type="text" name="waktu_tempat" id="waktu_tempat"
+                  value="<%= old.waktu_tempat || laporan.waktu_tempat %>" required
+                  placeholder="Contoh: 09:00 - 12:00 WIB, Gedung A"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100 hover:border-gray-400 transition-all">
+                <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
+              </div>
+
+              <!-- Deskripsi -->
+              <div class="md:col-span-2 bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition-colors">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Deskripsi Kegiatan <span class="text-red-500">*</span></label>
+                <textarea name="deskripsi_kegiatan" id="deskripsi_kegiatan" rows="4" required
+                  placeholder="Tuliskan deskripsi kegiatan..."
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm resize-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100 hover:border-gray-400 transition-all"><%= old.deskripsi_kegiatan || laporan.deskripsi_kegiatan %></textarea>
+                <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Informasi Keuangan -->
+          <div>
+            <h4 class="text-lg font-semibold text-gray-700 mb-4">Informasi Keuangan</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+              <!-- Sumber Dana -->
+              <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition-colors">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Sumber Dana</label>
+                <div class="flex flex-col gap-3">
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" name="sumber_dana_radio" value="uang_kas"
+                      <%= (old.sumber_dana || laporan.sumber_dana) === 'Uang Kas HMSI' ? 'checked' : '' %>>
+                    <span>Uang Kas HMSI</span>
+                  </label>
+                  <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="radio" name="sumber_dana_radio" value="lainnya"
+                      <%= (old.sumber_dana || laporan.sumber_dana) && (old.sumber_dana || laporan.sumber_dana) !== 'Uang Kas HMSI' ? 'checked' : '' %>>
+                    <span>Lainnya:</span>
+                  </label>
+                  <input type="text" name="sumber_dana_text" id="sumber_dana_text"
+                    value="<%= (old.sumber_dana || laporan.sumber_dana) !== 'Uang Kas HMSI' ? (old.sumber_dana || laporan.sumber_dana) : '' %>"
+                    placeholder="Contoh: Departemen SI"
+                    class="mt-2 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm hover:border-gray-400 transition-all"
+                    <%= (old.sumber_dana || laporan.sumber_dana) === 'Uang Kas HMSI' ? 'disabled' : '' %>>
+                </div>
+              </div>
+
+              <!-- Total Dana -->
+              <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition-colors">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Total Dana Kegiatan (Rp)</label>
+                <input type="number" name="dana_digunakan" id="dana_digunakan"
+                  value="<%= old.dana_digunakan || laporan.dana_digunakan %>"
+                  placeholder="3000000"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm hover:border-gray-400 transition-all">
+              </div>
+
+              <!-- Dana Terpakai -->
+              <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 md:col-span-2 hover:bg-gray-100/50 transition-colors">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Dana Terpakai dari Uang Kas HMSI (Rp)</label>
+                <input type="number" name="dana_terpakai" id="dana_terpakai"
+                  value="<%= old.dana_terpakai || laporan.dana_terpakai %>"
+                  placeholder="1500000"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm hover:border-gray-400 transition-all">
+              </div>
+            </div>
+          </div>
+
+          <!-- Target Pencapaian -->
+          <div>
+            <h4 class="text-lg font-semibold text-gray-700 mb-4">Target Pencapaian</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+              <!-- Target Kuantitatif (%) -->
+              <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition-colors">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Target Kuantitatif (%)</label>
+                <input type="number" name="persentase_kuantitatif" id="persentase_kuantitatif"
+                  value="<%= old.persentase_kuantitatif || laporan.persentase_kuantitatif %>"
+                  min="0" max="100" 
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm hover:border-gray-400 transition-all">
+              </div>
+
+              <!-- Target Kualitatif (%) -->
+              <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition-colors">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Target Kualitatif (%)</label>
+                <input type="number" name="persentase_kualitatif" id="persentase_kualitatif"
+                  value="<%= old.persentase_kualitatif || laporan.persentase_kualitatif %>"
+                  min="0" max="100" 
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm hover:border-gray-400 transition-all">
+              </div>
+
+              <!-- Deskripsi Target Kuantitatif -->
+              <div class="md:col-span-2 bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition-colors">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Deskripsi Target Kuantitatif</label>
+                <textarea name="deskripsi_target_kuantitatif" id="deskripsi_target_kuantitatif" rows="3"
+                  placeholder="Tuliskan detail target kuantitatif (contoh: jumlah peserta minimal 100 orang)..."
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm resize-none hover:border-gray-400 transition-all"><%= old.deskripsi_target_kuantitatif || laporan.deskripsi_target_kuantitatif %></textarea>
+              </div>
+
+              <!-- Deskripsi Target Kualitatif -->
+              <div class="md:col-span-2 bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition-colors">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Deskripsi Target Kualitatif</label>
+                <textarea name="deskripsi_target_kualitatif" id="deskripsi_target_kualitatif" rows="3"
+                  placeholder="Tuliskan detail target kualitatif (contoh: kepuasan peserta > 80%)..."
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm resize-none hover:border-gray-400 transition-all"><%= old.deskripsi_target_kualitatif || laporan.deskripsi_target_kualitatif %></textarea>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Kendala & Solusi -->
+          <div>
+            <h4 class="text-lg font-semibold text-gray-700 mb-4">Kendala & Solusi</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition-colors">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Kendala</label>
+                <textarea name="kendala" id="kendala" rows="3" 
+                  placeholder="Tuliskan kendala yang dihadapi..."
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm resize-none hover:border-gray-400 transition-all"><%= old.kendala || laporan.kendala %></textarea>
+              </div>
+              <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition-colors">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Solusi</label>
+                <textarea name="solusi" id="solusi" rows="3" 
+                  placeholder="Tuliskan solusi yang diterapkan..."
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm resize-none hover:border-gray-400 transition-all"><%= old.solusi || laporan.solusi %></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sasaran -->
+          <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition-colors">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Sasaran Kegiatan</label>
+            <input type="text" name="sasaran" id="sasaran"
+              value="<%= old.sasaran || laporan.sasaran %>"
+              placeholder="Contoh: Mahasiswa Sistem Informasi"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm hover:border-gray-400 transition-all">
+          </div>
+
+          <!-- Dokumentasi -->
+          <div>
+            <h4 class="text-lg font-semibold text-gray-700 mb-1">File Dokumentasi <span class="text-red-500">*</span></h4>
+            <p class="text-sm text-gray-500 mb-4">Upload file pendukung laporan kegiatan (opsional - kosongkan jika tidak ingin mengubah)</p>
+            
+            <div id="dropzone"
+              class="border-2 border-dashed border-gray-300 rounded-xl p-10 bg-gray-50/50 text-center cursor-pointer 
+                     transition duration-200 hover:border-orange-400 hover:bg-orange-50/30 flex flex-col items-center gap-4">
+              <input type="file" name="dokumentasi" id="fileUpload" class="hidden"
+                accept=".pdf,.jpg,.jpeg,.png" />
+              <div class="text-4xl text-gray-400">📄</div>
+              <label for="fileUpload" class="cursor-pointer">
+                <span class="px-6 py-3 bg-orange-500 text-white rounded-lg text-sm font-medium 
+                           transition duration-200 hover:bg-orange-600 hover:shadow-md active:scale-95">
+                  Pilih File atau Drag & Drop
+                </span>
+              </label>
+              <p class="text-sm text-gray-600">
+                Format yang didukung: <span class="font-medium">PDF, JPG, JPEG, PNG</span><br>
+                Maksimal ukuran file: <span class="font-medium">5MB</span>
+              </p>
+            </div>
+
+            <p id="fileName" class="text-sm text-gray-600 mt-3"></p>
+
+            <% if (laporan && laporan.dokumentasi) { %>
+              <div class="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <h5 class="text-sm font-semibold text-blue-800 mb-2 flex items-center">
+                  <i class="fas fa-file text-blue-600 mr-2"></i>
+                  File Saat Ini:
+                </h5>
+                <div class="flex items-center justify-between">
+                  <span class="text-sm text-blue-700"><%= laporan.dokumentasi %></span>
+                  <% if (/\.(jpg|jpeg|png)$/i.test(laporan.dokumentasi)) { %>
+                    <button type="button" onclick="togglePreview()" class="text-xs bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition-colors">
+                      Lihat Preview
+                    </button>
+                  <% } else if (/\.pdf$/i.test(laporan.dokumentasi)) { %>
+                    <a href="/uploads/<%= laporan.dokumentasi %>" target="_blank" 
+                       class="text-xs bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition-colors">
+                      Buka File
+                    </a>
+                  <% } %>
+                </div>
+                
+                <!-- Image preview (hidden by default) -->
+                <% if (/\.(jpg|jpeg|png)$/i.test(laporan.dokumentasi)) { %>
+                  <div id="imagePreview" class="mt-3 hidden">
+                    <img src="/uploads/<%= laporan.dokumentasi %>" alt="Preview" 
+                         class="max-h-48 rounded-lg shadow-md border">
+                  </div>
+                <% } %>
+              </div>
+            <% } %>
+            
+            <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
+          </div>
+
+          <!-- Keterangan Wajib -->
+          <p class="text-sm text-red-500 mt-4">
+            * Semua field wajib diisi
+          </p>
+
+          <!-- Tombol -->
+          <div class="pt-6 border-t border-gray-200 flex justify-end gap-4">
+            <a href="/hmsi/laporan" 
+              class="px-8 py-3 border border-gray-300 rounded-xl text-sm font-medium bg-white text-gray-700 transition-all duration-200 hover:shadow-md hover:border-gray-400">
+              Batal
+            </a>
+            <button type="submit" id="submitBtn"
+              class="flex items-center justify-center gap-2 px-8 py-3 text-white bg-orange-500 rounded-xl text-sm font-semibold transition-all duration-200 hover:bg-orange-600 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed">
+              <span id="btnText">Perbarui</span>
+              <div id="btnSpinner" class="hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <%- include('../partials/footer') %>
+
+  <script>
+    // Modal functions
+    function showModal(modalId) {
+      const modal = document.getElementById(modalId);
+      const content = document.getElementById(modalId + 'Content');
+      
+      modal.classList.remove('hidden');
+      
+      // Trigger animation
+      setTimeout(() => {
+        content.classList.remove('scale-95', 'opacity-0');
+        content.classList.add('scale-100', 'opacity-100');
+      }, 10);
+    }
+
+    function hideModal(modalId) {
+      const modal = document.getElementById(modalId);
+      const content = document.getElementById(modalId + 'Content');
+      
+      content.classList.remove('scale-100', 'opacity-100');
+      content.classList.add('scale-95', 'opacity-0');
+      
+      setTimeout(() => {
+        modal.classList.add('hidden');
+      }, 300);
+    }
+
+    // Modal event listeners
+    document.getElementById('closeSuccessModal').addEventListener('click', () => {
+      hideModal('successModal');
+      setTimeout(() => {
+        window.location.href = '/hmsi/laporan';
+      }, 300);
+    });
+
+    document.getElementById('closeErrorModal').addEventListener('click', () => {
+      hideModal('errorModal');
+    });
+
+    document.getElementById('closeValidationModal').addEventListener('click', () => {
+      hideModal('validationModal');
+    });
+
+    // Close modal when clicking outside
+    ['successModal', 'errorModal', 'validationModal'].forEach(modalId => {
+      document.getElementById(modalId).addEventListener('click', (e) => {
+        if (e.target.id === modalId) {
+          hideModal(modalId);
+        }
+      });
+    });
+
+    // Toggle image preview function
+    function togglePreview() {
+      const preview = document.getElementById('imagePreview');
+      if (preview) {
+        preview.classList.toggle('hidden');
+      }
+    }
+
+    // Dropdown Proker
+    const btn = document.getElementById("prokerDropdownBtn");
+    const menu = document.getElementById("prokerDropdownMenu");
+    const input = document.getElementById("prokerInput");
+    const label = document.getElementById("prokerDropdownLabel");
+    btn.addEventListener("click", () => menu.classList.toggle("hidden"));
+    menu.querySelectorAll("button").forEach(item => {
+      item.addEventListener("click", () => {
+        input.value = item.dataset.value;
+        label.textContent = item.textContent;
+        menu.classList.add("hidden");
+      });
+    });
+    window.addEventListener("click", (e) => {
+      if (!btn.contains(e.target) && !menu.contains(e.target)) menu.classList.add("hidden");
+    });
+
+    // File upload functionality
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('fileUpload');
+    const fileName = document.getElementById('fileName');
+
+    dropzone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropzone.classList.add('border-orange-400', 'bg-orange-50');
+    });
+    
+    dropzone.addEventListener('dragleave', () => {
+      dropzone.classList.remove('border-orange-400', 'bg-orange-50');
+    });
+    
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('border-orange-400', 'bg-orange-50');
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        fileInput.files = files;
+        fileName.textContent = `File baru dipilih: ${files[0].name}`;
+        validateField(fileInput);
+      }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        fileName.textContent = `File baru dipilih: ${e.target.files[0].name}`;
+        validateField(fileInput);
+      }
+    });
+
+    // Sumber dana radio button functionality
+    const radioButtons = document.querySelectorAll('input[name="sumber_dana_radio"]');
+    const textInput = document.getElementById('sumber_dana_text');
+
+    radioButtons.forEach(radio => {
+      radio.addEventListener('change', function() {
+        if (this.value === 'uang_kas') {
+          textInput.disabled = true;
+          textInput.value = '';
+          textInput.classList.add('bg-gray-100', 'cursor-not-allowed');
+        } else {
+          textInput.disabled = false;
+          textInput.classList.remove('bg-gray-100', 'cursor-not-allowed');
+          textInput.focus();
+        }
+      });
+    });
+
+    // Validation functions
+    function validateField(field) {
+      const errorDiv = field.closest('.bg-gray-50')?.querySelector('.error-message') || 
+                      field.closest('div')?.querySelector('.error-message');
+      
+      if (!errorDiv) return true;
+
+      let isValid = true;
+      let errorMessage = '';
+
+      // Check if field is required and empty
+      if (field.hasAttribute('required')) {
+        if (field.type === 'file') {
+          // File is optional in edit mode, but check file size and type if provided
+          if (field.files.length > 0) {
+            const file = field.files[0];
+            const maxSize = 5 * 1024 * 1024; // 5MB
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+            
+            if (file.size > maxSize) {
+              isValid = false;
+              errorMessage = 'Ukuran file maksimal 5MB';
+            } else if (!allowedTypes.includes(file.type)) {
+              isValid = false;
+              errorMessage = 'Format file harus PDF, JPG, JPEG, atau PNG';
+            }
+          }
+        } else if (field.value.trim() === '') {
+          isValid = false;
+          errorMessage = 'Field ini wajib diisi';
+        }
+      }
+
+      // Special validation for dropdown
+      if (field.id === 'prokerInput' && field.value === '') {
+        isValid = false;
+        errorMessage = 'Program Kerja wajib dipilih';
+      }
+
+      // Show/hide error message
+      if (!isValid) {
+        errorDiv.textContent = errorMessage;
+        errorDiv.classList.remove('hidden');
+        if (field.type !== 'hidden') {
+          field.classList.add('border-red-500');
+          field.classList.remove('border-gray-300');
+        } else {
+          // For dropdown, highlight the button
+          const dropdownBtn = document.getElementById('prokerDropdownBtn');
+          if (dropdownBtn) {
+            dropdownBtn.classList.add('border-red-500');
+            dropdownBtn.classList.remove('border-gray-300');
+          }
+        }
+      } else {
+        errorDiv.classList.add('hidden');
+        if (field.type !== 'hidden') {
+          field.classList.remove('border-red-500');
+          field.classList.add('border-gray-300');
+        } else {
+          // For dropdown, remove highlight from button
+          const dropdownBtn = document.getElementById('prokerDropdownBtn');
+          if (dropdownBtn) {
+            dropdownBtn.classList.remove('border-red-500');
+            dropdownBtn.classList.add('border-gray-300');
+          }
+        }
+      }
+
+      return isValid;
+    }
+
+    function validateAllFields() {
+      let allValid = true;
+      let emptyFields = [];
+      
+      const requiredFields = [
+        { id: 'judul_laporan', name: 'Judul Laporan' },
+        { id: 'prokerInput', name: 'Program Kerja' },
+        { id: 'waktu_tempat', name: 'Waktu & Tempat' },
+        { id: 'deskripsi_kegiatan', name: 'Deskripsi Kegiatan' }
+      ];
+
+      requiredFields.forEach(fieldInfo => {
+        const field = document.getElementById(fieldInfo.id);
+        if (field) {
+          if (field.value.trim() === '') {
+            allValid = false;
+            emptyFields.push(fieldInfo.name);
+            validateField(field);
+          } else {
+            validateField(field);
+          }
+        }
+      });
+
+      // Also validate file upload
+      const fileField = document.getElementById('fileUpload');
+      if (fileField && !validateField(fileField)) {
+        allValid = false;
+      }
+
+      // Update validation modal message if there are empty fields
+      if (emptyFields.length > 0) {
+        let message = '';
+        if (emptyFields.length === 1) {
+          message = `Field "${emptyFields[0]}" wajib diisi.`;
+        } else if (emptyFields.length === 2) {
+          message = `Field "${emptyFields[0]}" dan "${emptyFields[1]}" wajib diisi.`;
+        } else if (emptyFields.length > 2) {
+          const lastField = emptyFields.pop();
+          message = `Field ${emptyFields.join(', ')} dan ${lastField} wajib diisi.`;
+        }
+        
+        document.getElementById('validationMessage').textContent = message;
+      }
+
+      return allValid;
+    }
+
+    // Add real-time validation
+    document.querySelectorAll('input[required], textarea[required]').forEach(field => {
+      field.addEventListener('blur', () => validateField(field));
+      field.addEventListener('input', () => {
+        if (field.classList.contains('border-red-500')) {
+          validateField(field);
+        }
+      });
+    });
+
+    // Also validate dropdown when changed
+    document.getElementById('prokerInput').addEventListener('change', () => {
+      validateField(document.getElementById('prokerInput'));
+    });
+
+    // Form submission with validation
+    const form = document.getElementById('editLaporanForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const btnText = document.getElementById('btnText');
+    const btnSpinner = document.getElementById('btnSpinner');
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      // Validate all fields before submission
+      if (!validateAllFields()) {
+        showModal('validationModal');
+        return;
+      }
+
+      // Show loading state
+      submitBtn.disabled = true;
+      btnText.textContent = 'Menyimpan...';
+      btnSpinner.classList.remove('hidden');
+
+      // Prepare form data
+      const formData = new FormData(form);
+      
+      // Handle sumber dana logic
+      const sumberDanaRadio = document.querySelector('input[name="sumber_dana_radio"]:checked');
+      if (sumberDanaRadio) {
+        if (sumberDanaRadio.value === 'uang_kas') {
+          formData.set('sumber_dana', 'Uang Kas HMSI');
+        } else {
+          const sumberDanaText = document.getElementById('sumber_dana_text').value;
+          formData.set('sumber_dana', sumberDanaText || '');
+        }
+      }
+
+      // Submit form
+      fetch(form.action, {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => {
+        if (response.ok) {
+          showModal('successModal');
+        } else {
+          return response.text().then(text => {
+            throw new Error(text || 'Terjadi kesalahan saat memperbarui laporan');
+          });
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('errorMessage').textContent = 'Terjadi kesalahan: ' + error.message;
+        showModal('errorModal');
+      })
+      .finally(() => {
+        submitBtn.disabled = false;
+        btnText.textContent = 'Perbarui';
+        btnSpinner.classList.add('hidden');
+      });
+    });
+
+    // Initialize sumber dana state on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      const checkedRadio = document.querySelector('input[name="sumber_dana_radio"]:checked');
+      if (checkedRadio && checkedRadio.value === 'uang_kas') {
+        textInput.disabled = true;
+        textInput.classList.add('bg-gray-100', 'cursor-not-allowed');
+      }
+    });
+  </script>
+</body>
+</html>
