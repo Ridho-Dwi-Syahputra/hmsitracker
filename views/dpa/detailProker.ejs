@@ -4,8 +4,11 @@
   <meta charset="UTF-8">
   <title><%= title %></title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="bg-gray-50 min-h-screen flex flex-col font-sans">
 
   <!-- Navbar -->
   <%- include('../partials/navbarDPA', { user: user, unreadCount: unreadCount }) %>
@@ -13,176 +16,149 @@
   <!-- Sidebar -->
   <%- include('../partials/sidebarDPA', { activeNav: 'Daftar Program Kerja', user: user }) %>
 
-  <!-- Wrapper -->
-  <div class="lg:ml-80 opacity-0 animate-fade-in" style="animation-delay:150ms;">
+  <!-- Main Wrapper -->
+  <main class="lg:ml-80 px-6 pt-20 pb-10 flex-grow">
+    <div class="max-w-4xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-200">
 
-    <!-- Header -->
-    <div class="bg-white border-b border-gray-200">
-      <div class="max-w-5xl mx-auto px-6 py-6 flex items-center justify-between">
-        <!-- Judul -->
-        <h1 class="text-2xl font-bold text-gray-800">Detail Program Kerja</h1>
+      <!-- Header -->
+      <div class="bg-gradient-to-r from-orange-500 to-orange-600 px-6 py-6 flex items-center justify-between">
+        <div>
+          <h1 class="text-2xl font-bold text-white">Detail Program Kerja</h1>
+          <p class="text-sm text-orange-100">Informasi lengkap program kerja HMSI</p>
+        </div>
         <a href="/dpa/lihatProker"
-          class="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-all duration-200 transform hover:scale-105 active:scale-95 hover:shadow-md">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-          </svg>
+           class="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-all duration-200">
+          <i class="fa-solid fa-arrow-left text-sm"></i>
           <span class="font-medium">Kembali</span>
         </a>
       </div>
-    </div>
 
-    <!-- Main -->
-    <div class="px-6 py-10">
-      <div id="prokerContent" class="max-w-5xl mx-auto bg-white rounded-2xl border border-gray-200 shadow-sm p-8">
+      <!-- Main Content -->
+      <div class="p-6 sm:p-8 space-y-8">
 
-        <!-- Card Header -->
-        <div class="mb-8 border-b border-gray-100 pb-6 flex justify-between items-center">
-          <div>
-            <h3 class="text-2xl font-bold text-gray-800 mb-2">Informasi Program Kerja</h3>
-            <p class="text-base text-gray-600 m-0">Detail lengkap program kerja</p>
-          </div>
-          <!-- Tombol Aksi Ubah Status -->
-          <div class="flex gap-3">
-            <% if (proker.status !== "Selesai") { %>
-              <button onclick="ubahStatus('<%= proker.id %>', 'Selesai')" 
-                class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white text-sm rounded-lg shadow transition">
-                Tandai Selesai
-              </button>
-            <% } %>
-            <% if (proker.status !== "Gagal") { %>
-              <button onclick="ubahStatus('<%= proker.id %>', 'Gagal')" 
-                class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-sm rounded-lg shadow transition">
-                Tandai Gagal
-              </button>
-            <% } %>
-          </div>
-        </div>
+        <!-- Informasi Program Kerja -->
+        <section class="bg-gray-100 p-5 rounded-xl">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
 
-        <!-- ALERT POPUP -->
-        <%- include('../partials/alert', { errorMsg: errorMsg, successMsg: successMsg }) %>
-
-        <!-- Konten -->
-        <div class="space-y-8">
-
-          <!-- Informasi Dasar -->
-          <div>
-            <h4 class="text-lg font-semibold text-orange-600 mb-4">Informasi Dasar</h4>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-              <div>
-                <p class="font-medium text-gray-700">Nama Program Kerja</p>
-                <p class="text-gray-800"><%= proker.namaProker || '-' %></p>
-              </div>
-              <div>
-                <p class="font-medium text-gray-700">Divisi</p>
-                <p class="text-gray-800"><%= proker.divisi || '-' %></p>
-              </div>
-              <div>
-                <p class="font-medium text-gray-700">Tanggal Mulai</p>
-                <p class="text-gray-800"><%= proker.tanggalMulaiFormatted || '-' %></p>
-              </div>
-              <div>
-                <p class="font-medium text-gray-700">Tanggal Selesai</p>
-                <p class="text-gray-800"><%= proker.tanggalSelesaiFormatted || '-' %></p>
-              </div>
-              <div>
-                <p class="font-medium text-gray-700">Penanggung Jawab</p>
-                <p class="text-gray-800"><%= proker.penanggungJawab || '-' %></p>
-              </div>
-              <div class="md:col-span-2">
-                <p class="font-medium text-gray-700">Deskripsi</p>
-                <p class="text-gray-800 whitespace-pre-line"><%= proker.deskripsi || '-' %></p>
-              </div>
-              <div>
-                <p class="font-medium text-gray-700">Status</p>
-                <% if (proker.status === "Belum Dimulai") { %>
-                  <span class="px-3 py-1 text-sm rounded-full bg-yellow-100 text-yellow-700 font-medium"><%= proker.status %></span>
-                <% } else if (proker.status === "Sedang Berjalan") { %>
-                  <span class="px-3 py-1 text-sm rounded-full bg-blue-100 text-blue-700 font-medium"><%= proker.status %></span>
-                <% } else if (proker.status === "Selesai") { %>
-                  <span class="px-3 py-1 text-sm rounded-full bg-green-100 text-green-700 font-medium"><%= proker.status %></span>
-                <% } else if (proker.status === "Gagal") { %>
-                  <span class="px-3 py-1 text-sm rounded-full bg-red-100 text-red-700 font-medium"><%= proker.status %></span>
-                <% } else { %>
-                  <span class="px-3 py-1 text-sm rounded-full bg-gray-100 text-gray-600 font-medium"><%= proker.status %></span>
-                <% } %>
-              </div>
+            <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-300">
+              <p class="font-medium text-gray-600 mb-1">Nama Program Kerja</p>
+              <p class="text-gray-800 font-semibold"><%= proker.namaProker || '-' %></p>
             </div>
-          </div>
 
-          <!-- Dokumen Pendukung -->
-          <div>
-            <h4 class="text-lg font-semibold text-orange-600 mb-4">Dokumen Pendukung</h4>
+            <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-300">
+              <p class="font-medium text-gray-600 mb-1">Divisi</p>
+              <p class="text-gray-800 font-semibold"><%= proker.divisi || '-' %></p>
+            </div>
+
+            <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-300">
+              <p class="font-medium text-gray-600 mb-1">Penanggung Jawab</p>
+              <p class="text-gray-800 font-semibold"><%= proker.penanggungJawab || '-' %></p>
+            </div>
+
+            <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-300">
+              <p class="font-medium text-gray-600 mb-1">Tanggal Mulai</p>
+              <p class="text-gray-800 font-semibold"><%= proker.tanggalMulaiFormatted || '-' %></p>
+            </div>
+
+            <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-300">
+              <p class="font-medium text-gray-600 mb-1">Tanggal Selesai</p>
+              <p class="text-gray-800 font-semibold"><%= proker.tanggalSelesaiFormatted || '-' %></p>
+            </div>
+
+            <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-300">
+              <p class="font-medium text-gray-600 mb-1">Status</p>
+              <span id="status-label" class="px-3 py-1 text-sm rounded-full font-medium
+                <% if (proker.status === 'Sedang Berjalan') { %> bg-blue-100 text-blue-700
+                <% } else if (proker.status === 'Selesai') { %> bg-green-100 text-green-700
+                <% } else if (proker.status === 'Tidak Selesai') { %> bg-red-100 text-red-700
+                <% } else { %> bg-gray-100 text-gray-600 <% } %>">
+                <%= proker.status %>
+              </span>
+            </div>
+
+            <!-- Deskripsi -->
+            <div class="md:col-span-2 bg-white p-6 rounded-lg shadow-lg border border-gray-300">
+              <p class="font-medium text-gray-600 mb-3 text-lg">Deskripsi</p>
+              <p class="text-gray-800 whitespace-pre-line leading-relaxed text-md"><%= proker.deskripsi || '-' %></p>
+            </div>
+
+            <!-- Dokumen Pendukung -->
             <% if (proker.dokumen_pendukung) { %>
-              <div class="p-4 bg-gray-50 border rounded-xl space-y-3">
-                <% if (/\.(jpg|jpeg|png)$/i.test(proker.dokumen_pendukung)) { %>
-                  <img src="/uploads/<%= proker.dokumen_pendukung %>" alt="Dokumen Pendukung"
-                       class="max-h-80 rounded-lg shadow mx-auto">
-                <% } else if (/\.pdf$/i.test(proker.dokumen_pendukung)) { %>
-                  <!-- Preview PDF -->
-                  <iframe src="/uploads/<%= proker.dokumen_pendukung %>#toolbar=0"
-                          class="w-full h-96 border rounded-lg shadow"
-                          frameborder="0"></iframe>
-                  <!-- Tombol buka di tab baru -->
-                  <a href="/uploads/<%= proker.dokumen_pendukung %>" target="_blank"
-                     class="inline-block px-4 py-2 bg-orange-500 text-white text-sm font-medium rounded-lg shadow hover:bg-orange-600 transition">
-                    📄 Buka PDF di tab baru
-                  </a>
-                <% } else { %>
-                  <p class="text-gray-600">
-                    Tidak dapat menampilkan dokumen.
-                    <a href="/uploads/<%= proker.dokumen_pendukung %>" 
-                       class="text-orange-600 underline">Unduh file</a>
-                  </p>
-                <% } %>
+              <div class="md:col-span-2 bg-white p-6 rounded-lg shadow-lg border border-gray-300">
+                <p class="font-medium text-gray-600 mb-3 text-lg">Dokumen Pendukung</p>
+                <a href="/uploads/<%= proker.dokumen_pendukung %>" target="_blank"
+                   class="text-blue-600 hover:underline break-all">
+                   <i class="fa-solid fa-file-arrow-down"></i> <%= proker.dokumen_pendukung %>
+                </a>
               </div>
-            <% } else { %>
-              <p class="text-gray-500">Tidak ada dokumen pendukung.</p>
             <% } %>
-          </div>
 
+          </div>
+        </section>
+
+        <!-- Tombol Ubah Status -->
+        <div class="flex gap-3 justify-end mt-6">
+          <% if (proker.status !== "Sedang Berjalan") { %>
+            <button onclick="ubahStatus('<%= proker.id %>', 'Sedang Berjalan')"
+                    class="px-5 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg shadow transition">
+              🔵 Sedang Berjalan
+            </button>
+          <% } %>
+          <% if (proker.status !== "Selesai") { %>
+            <button onclick="ubahStatus('<%= proker.id %>', 'Selesai')"
+                    class="px-5 py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg shadow transition">
+              ✅ Selesai
+            </button>
+          <% } %>
+          <% if (proker.status !== "Tidak Selesai") { %>
+            <button onclick="ubahStatus('<%= proker.id %>', 'Tidak Selesai')"
+                    class="px-5 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg shadow transition">
+              ❌ Tidak Selesai
+            </button>
+          <% } %>
         </div>
 
       </div>
     </div>
-  </div>
+  </main>
 
-  <!-- Animasi -->
-  <style>
-    @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
-    .animate-fade-in { animation: fadeIn 0.7s ease-out forwards; }
+<script>
+async function ubahStatus(id, status) {
+  if (!confirm(`Apakah yakin ingin mengubah status menjadi "${status}"?`)) return;
 
-    @media print {
-      body { background: white; }
-      .no-print, .lg\:ml-80, .animate-fade-in { display: none !important; }
-      #prokerContent { box-shadow: none; border: none; }
-    }
-  </style>
+  try {
+    const res = await fetch(`/dpa/proker/${id}/status`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status })
+    });
+    const data = await res.json();
 
-  <!-- Script ubah status -->
-  <script>
-    function ubahStatus(id, status) {
-      if (!confirm(`Apakah Anda yakin ingin mengubah status menjadi ${status}?`)) return;
+    if (data.success) {
+      alert(data.message);
 
-      fetch(`/dpa/proker/${id}/status`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status })
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          alert(data.message);
-          location.reload();
-        } else {
-          alert("Gagal mengubah status: " + data.message);
-        }
-      })
-      .catch(err => {
-        console.error(err);
-        alert("Terjadi kesalahan saat mengubah status.");
+      // update label status tanpa reload
+      const label = document.getElementById('status-label');
+      label.textContent = status;
+      label.className = "px-3 py-1 text-sm rounded-full font-medium";
+      if (status === "Sedang Berjalan") label.classList.add("bg-blue-100","text-blue-700");
+      else if (status === "Selesai") label.classList.add("bg-green-100","text-green-700");
+      else if (status === "Tidak Selesai") label.classList.add("bg-red-100","text-red-700");
+      else label.classList.add("bg-gray-100","text-gray-600");
+
+      // sembunyikan tombol yang sama
+      document.querySelectorAll('button').forEach(btn => {
+        if (btn.textContent.includes(status)) btn.style.display = 'none';
       });
-    }
-  </script>
 
+    } else {
+      alert("Gagal mengubah status: " + data.message);
+    }
+  } catch(err) {
+    console.error(err);
+    alert("Terjadi kesalahan saat mengubah status.");
+  }
+}
+</script>
 </body>
 </html>
