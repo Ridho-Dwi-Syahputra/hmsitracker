@@ -8,6 +8,23 @@
   <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
         crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <style>
+    .table-fixed {
+      table-layout: fixed;
+    }
+    .table-fixed th:nth-child(1) { width: 50px; }   /* No */
+    .table-fixed th:nth-child(2) { width: 30%; }    /* Nama Program */
+    .table-fixed th:nth-child(3) { width: 15%; }    /* Divisi */
+    .table-fixed th:nth-child(4) { width: 20%; }    /* Penanggung Jawab */
+    .table-fixed th:nth-child(5) { width: 15%; }    /* Status */
+    .table-fixed th:nth-child(6) { width: 120px; }  /* Aksi */
+    
+    .text-ellipsis {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  </style>
 </head>
 <body class="bg-orange-50 min-h-screen flex flex-col">
 
@@ -92,7 +109,7 @@
 
         <!-- Tabel -->
         <div class="overflow-x-auto bg-white-50 p-2 shadow-sm rounded-xl">
-          <table class="min-w-full text-sm text-center border border-orange-200 rounded-xl overflow-hidden border-separate border-spacing-0">
+          <table class="min-w-full text-sm text-center border border-orange-200 rounded-xl overflow-hidden border-separate border-spacing-0 table-fixed">
             <thead class="bg-orange-100 text-gray-700">
               <tr>
                 <th class="py-3 px-4 font-semibold border border-orange-200">No</th>
@@ -108,44 +125,48 @@
                 <% programs.forEach((proker, index) => { %>
                   <tr class="hover:bg-orange-50 transition" data-status="<%= proker.status %>">
                     <td class="py-3 px-4 border border-orange-100"><%= index + 1 %></td>
-                    <td class="py-3 px-4 font-medium text-gray-800 border border-orange-100 text-left"><%= proker.namaProker %></td>
-                    <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= proker.divisi %></td>
-                    <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= proker.penanggungJawab %></td>
+                    <td class="py-3 px-4 font-medium text-gray-800 border border-orange-100 text-left">
+                      <div class="text-ellipsis" title="<%= proker.namaProker %>"><%= proker.namaProker %></div>
+                    </td>
+                    <td class="py-3 px-4 text-gray-600 border border-orange-100">
+                      <div class="text-ellipsis" title="<%= proker.divisi %>"><%= proker.divisi %></div>
+                    </td>
+                    <td class="py-3 px-4 text-gray-600 border border-orange-100">
+                      <div class="text-ellipsis" title="<%= proker.penanggungJawab %>"><%= proker.penanggungJawab %></div>
+                    </td>
                     <td class="py-3 px-4 border border-orange-100">
                       <% if (proker.status === "Belum Dimulai") { %>
-                        <span class="px-3 py-1 text-xs rounded-full bg-yellow-100 text-yellow-700 font-medium"><%= proker.status %></span>
+                        <span class="px-3 py-1 text-xs rounded-full bg-yellow-100 text-yellow-700 font-medium whitespace-nowrap"><%= proker.status %></span>
                       <% } else if (proker.status === "Sedang Berjalan") { %>
-                        <span class="px-3 py-1 text-xs rounded-full bg-blue-100 text-blue-700 font-medium"><%= proker.status %></span>
+                        <span class="px-3 py-1 text-xs rounded-full bg-blue-100 text-blue-700 font-medium whitespace-nowrap"><%= proker.status %></span>
                       <% } else if (proker.status === "Selesai") { %>
-                        <span class="px-3 py-1 text-xs rounded-full bg-green-100 text-green-700 font-medium"><%= proker.status %></span>
+                        <span class="px-3 py-1 text-xs rounded-full bg-green-100 text-green-700 font-medium whitespace-nowrap"><%= proker.status %></span>
                       <% } else if (proker.status === "Gagal") { %>
-                        <span class="px-3 py-1 text-xs rounded-full bg-red-100 text-red-700 font-medium"><%= proker.status %></span>
+                        <span class="px-3 py-1 text-xs rounded-full bg-red-100 text-red-700 font-medium whitespace-nowrap"><%= proker.status %></span>
                       <% } else { %>
-                        <span class="px-3 py-1 text-xs rounded-full bg-gray-100 text-gray-600 font-medium"><%= proker.status %></span>
+                        <span class="px-3 py-1 text-xs rounded-full bg-gray-100 text-gray-600 font-medium whitespace-nowrap"><%= proker.status %></span>
                       <% } %>
                     </td>
-                    <td class="py-3 px-4 flex justify-center gap-4 border border-orange-100">
-                      <a href="/dpa/proker/<%= proker.id %>/detail" class="text-orange-500 hover:text-orange-700 transition transform hover:scale-110" title="Lihat Detail">
-                        <i class="fa-solid fa-eye text-lg"></i>
-                      </a>
-                      <% if (proker.status !== "Selesai") { %>
-                        <button onclick="ubahStatus('<%= proker.id %>', 'Selesai')" 
-                          class="text-green-600 hover:text-green-800" title="Tandai Selesai">
-                          <i class="fa-solid fa-check-circle text-lg"></i>
-                        </button>
-                      <% } %>
-                      <% if (proker.status !== "Gagal") { %>
-                        <button onclick="ubahStatus('<%= proker.id %>', 'Gagal')" 
-                          class="text-red-600 hover:text-red-800" title="Tandai Gagal">
-                          <i class="fa-solid fa-xmark-circle text-lg"></i>
-                        </button>
-                      <% } %>
+                    <td class="py-3 px-4 border border-orange-100">
+                      <div class="flex justify-center items-center gap-2">
+                        <!-- Detail Button Only -->
+                        <a href="/dpa/proker/<%= proker.id %>/detail" 
+                           class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-orange-100 text-orange-600 hover:bg-orange-200 hover:text-orange-700 transition-all duration-200" 
+                           title="Lihat Detail">
+                          <i class="fa-solid fa-eye text-sm"></i>
+                        </a>
+                      </div>
                     </td>
                   </tr>
                 <% }) %>
               <% } else { %>
                 <tr>
-                  <td colspan="6" class="py-6 text-center text-gray-500 border border-orange-100">Tidak ada program kerja ditemukan.</td>
+                  <td colspan="6" class="py-8 text-center text-gray-500 border border-orange-100">
+                    <div class="flex flex-col items-center gap-2">
+                      <i class="fa-solid fa-folder-open text-2xl text-gray-300"></i>
+                      <span>Tidak ada program kerja ditemukan.</span>
+                    </div>
+                  </td>
                 </tr>
               <% } %>
             </tbody>
@@ -154,9 +175,9 @@
 
         <!-- Pagination -->
         <div class="flex justify-center items-center gap-2 mt-6" id="pagination">
-          <button id="prevPage" class="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 disabled:opacity-50">Prev</button>
-          <span id="pageInfo" class="text-gray-700"></span>
-          <button id="nextPage" class="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 disabled:opacity-50">Next</button>
+          <button id="prevPage" class="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 disabled:opacity-50 disabled:cursor-not-allowed">Prev</button>
+          <span id="pageInfo" class="text-gray-700 mx-4"></span>
+          <button id="nextPage" class="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 disabled:opacity-50 disabled:cursor-not-allowed">Next</button>
         </div>
 
       </div>
@@ -183,9 +204,17 @@
       const rowsPerPage = 10;
       let currentPage = 1;
 
+      // Close dropdowns when clicking outside
+      document.addEventListener("click", (e) => {
+        if (!dropdownButton.contains(e.target)) dropdownMenu.classList.add("hidden");
+        if (!divisiDropdownBtn.contains(e.target)) divisiDropdownMenu.classList.add("hidden");
+      });
+
       // Toggle dropdown status
-      dropdownButton.addEventListener("click", () => {
+      dropdownButton.addEventListener("click", (e) => {
+        e.stopPropagation();
         dropdownMenu.classList.toggle("hidden");
+        divisiDropdownMenu.classList.add("hidden");
       });
 
       dropdownMenu.querySelectorAll("button").forEach(btn => {
@@ -193,13 +222,16 @@
           statusValue = btn.dataset.value;
           dropdownLabel.textContent = btn.textContent;
           dropdownMenu.classList.add("hidden");
+          currentPage = 1;
           filterRows();
         });
       });
 
       // Toggle dropdown divisi
-      divisiDropdownBtn.addEventListener("click", () => {
+      divisiDropdownBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
         divisiDropdownMenu.classList.toggle("hidden");
+        dropdownMenu.classList.add("hidden");
       });
 
       divisiDropdownMenu.querySelectorAll("button").forEach(btn => {
@@ -207,6 +239,7 @@
           divisiValue = btn.dataset.value;
           divisiDropdownLabel.textContent = btn.textContent;
           divisiDropdownMenu.classList.add("hidden");
+          currentPage = 1;
           filterRows();
         });
       });
@@ -248,36 +281,29 @@
         document.getElementById("nextPage").disabled = currentPage === totalPages || totalPages === 0;
       }
 
-      document.getElementById("prevPage").addEventListener("click", () => { currentPage--; paginate(); });
-      document.getElementById("nextPage").addEventListener("click", () => { currentPage++; paginate(); });
+      document.getElementById("prevPage").addEventListener("click", () => { 
+        if (currentPage > 1) {
+          currentPage--; 
+          paginate(); 
+        }
+      });
+      
+      document.getElementById("nextPage").addEventListener("click", () => { 
+        let visibleRows = rows.filter(row => row.dataset.visible === "true");
+        let totalPages = Math.ceil(visibleRows.length / rowsPerPage);
+        if (currentPage < totalPages) {
+          currentPage++; 
+          paginate(); 
+        }
+      });
 
-      searchInput.addEventListener("input", filterRows);
+      searchInput.addEventListener("input", () => {
+        currentPage = 1;
+        filterRows();
+      });
 
       filterRows();
     });
-
-    function ubahStatus(id, status) {
-      if (!confirm(`Apakah Anda yakin ingin mengubah status menjadi ${status}?`)) return;
-
-      fetch(`/dpa/proker/${id}/status`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status })
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          alert(data.message);
-          location.reload();
-        } else {
-          alert("Gagal mengubah status: " + data.message);
-        }
-      })
-      .catch(err => {
-        console.error(err);
-        alert("Terjadi kesalahan saat mengubah status.");
-      });
-    }
   </script>
 </body>
 </html>

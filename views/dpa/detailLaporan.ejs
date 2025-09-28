@@ -4,211 +4,199 @@
   <meta charset="UTF-8">
   <title><%= title %></title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome -->
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
-<body class="bg-gray-50 min-h-screen">
+<body class="bg-gray-50 min-h-screen flex flex-col font-sans">
+
   <!-- Navbar -->
   <%- include('../partials/navbarDPA', { user: user, unreadCount: unreadCount }) %>
 
   <!-- Sidebar -->
   <%- include('../partials/sidebarDPA', { activeNav: 'Daftar Laporan', user: user }) %>
 
-  <!-- Wrapper -->
-  <div class="lg:ml-80 pt-16 opacity-0 animate-fade-in" style="animation-delay:150ms;">
-    <!-- 🔹 pt-16 biar konten turun sejajar dengan tinggi navbar (h-14 = 56px) -->
+  <!-- Main Wrapper -->
+  <main class="lg:ml-80 px-6 pt-20 pb-10 flex-grow">
+    <div class="max-w-6xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-200">
 
-    <!-- Header -->
-    <div class="bg-white border-b border-gray-200">
-      <div class="max-w-5xl mx-auto px-6 py-6 flex items-center justify-between">
-        <h1 class="text-2xl font-bold text-gray-800 opacity-0 animate-slide-down" style="animation-delay:350ms;">
-          Detail Laporan
-        </h1>
+      <!-- Header -->
+      <div class="bg-gradient-to-r from-orange-500 to-orange-600 px-6 py-6 flex items-center justify-between">
+        <div>
+          <h1 class="text-2xl font-bold text-white">Detail Laporan</h1>
+          <p class="text-sm text-orange-100">Informasi lengkap laporan kegiatan HMSI</p>
+        </div>
         <a href="/dpa/kelolaLaporan"
-          class="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-all duration-200 transform hover:scale-105 active:scale-95 hover:shadow-md opacity-0 animate-slide-in-right"
-          style="animation-delay:600ms;">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-          </svg>
+          class="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-all duration-200">
+          <i class="fa-solid fa-arrow-left text-sm"></i>
           <span class="font-medium">Kembali</span>
         </a>
       </div>
-    </div>
 
-    <!-- Main -->
-    <div class="px-6 py-10 opacity-0 animate-slide-up" style="animation-delay:650ms;">
-      <div id="laporanContent" class="max-w-5xl mx-auto bg-white rounded-2xl border border-gray-200 shadow-sm p-8">
+      <!-- Main Content -->
+      <div class="p-6 sm:p-8 space-y-8">
 
-        <!-- Card Header -->
-        <div class="mb-8 border-b border-gray-100 pb-6">
-          <h3 class="text-2xl font-bold text-gray-800 mb-2">Informasi Laporan</h3>
-          <p class="text-base text-gray-600 m-0">Detail lengkap laporan kegiatan yang dipilih</p>
-        </div>
-
-        <!-- ALERT POPUP -->
-        <%- include('../partials/alert', { errorMsg: errorMsg, successMsg: successMsg }) %>
-
-        <!-- Konten -->
-        <div class="space-y-8">
-          <!-- Informasi Dasar -->
-          <div>
-            <h4 class="text-lg font-semibold text-orange-600 mb-4">Informasi Dasar</h4>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-              <div>
-                <p class="font-medium text-gray-700">Program Kerja</p>
-                <p class="text-gray-800"><%= laporan.namaProker || '-' %></p>
-              </div>
-              <div>
-                <p class="font-medium text-gray-700">Divisi</p>
-                <p class="text-gray-800"><%= laporan.divisi || '-' %></p>
-              </div>
-              <div>
-                <p class="font-medium text-gray-700">Tanggal Pelaksanaan</p>
-                <p class="text-gray-800"><%= laporan.tanggalFormatted || '-' %></p>
-              </div>
-              <div>
-                <p class="font-medium text-gray-700">Waktu & Tempat</p>
-                <p class="text-gray-800"><%= laporan.waktu_tempat || '-' %></p>
-              </div>
-              <div class="md:col-span-2">
-                <p class="font-medium text-gray-700">Deskripsi Kegiatan</p>
-                <p class="text-gray-800 whitespace-pre-line"><%= laporan.deskripsi_kegiatan || '-' %></p>
-              </div>
+        <!-- Informasi Dasar -->
+        <section class="bg-gray-100 p-5 rounded-xl">
+          <h4 class="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
+            <i class="fa-solid fa-info-circle text-gray-500"></i>
+            Informasi Dasar
+          </h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-white p-4 rounded-lg shadow-sm">
+              <p class="font-medium text-gray-600 mb-1">Program Kerja</p>
+              <p class="text-gray-800 font-semibold"><%= laporan.namaProker || '-' %></p>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-sm">
+              <p class="font-medium text-gray-600 mb-1">Divisi</p>
+              <p class="text-gray-800 font-semibold"><%= laporan.divisi || '-' %></p>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-sm">
+              <p class="font-medium text-gray-600 mb-1">Tanggal Pelaksanaan</p>
+              <p class="text-gray-800 font-semibold"><%= laporan.tanggalFormatted || '-' %></p>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-sm">
+              <p class="font-medium text-gray-600 mb-1">Waktu & Tempat</p>
+              <p class="text-gray-800 font-semibold"><%= laporan.waktu_tempat || '-' %></p>
+            </div>
+            <div class="md:col-span-2 bg-white p-4 rounded-lg shadow-sm">
+              <p class="font-medium text-gray-600 mb-1">Deskripsi Kegiatan</p>
+              <p class="text-gray-800 whitespace-pre-line leading-relaxed"><%= laporan.deskripsi_kegiatan || '-' %></p>
             </div>
           </div>
+        </section>
 
-          <!-- Informasi Keuangan -->
-          <div>
-            <h4 class="text-lg font-semibold text-green-600 mb-4">Informasi Keuangan</h4>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-              <div>
-                <p class="font-medium text-gray-700">Sumber Dana</p>
-                <p class="text-gray-800"><%= laporan.sumber_dana || '-' %></p>
-              </div>
-              <div>
-                <p class="font-medium text-gray-700">Dana Terpakai (Rp)</p>
-                <p class="text-gray-800"><%= laporan.dana_digunakan || '-' %></p>
-              </div>
+        <!-- Informasi Keuangan -->
+        <section class="bg-gray-100 p-5 rounded-xl">
+          <h4 class="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
+            <i class="fa-solid fa-coins text-gray-500"></i>
+            Informasi Keuangan
+          </h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-white p-4 rounded-lg shadow-sm">
+              <p class="font-medium text-gray-600 mb-1">Sumber Dana</p>
+              <p class="text-gray-800 font-semibold"><%= laporan.sumber_dana || '-' %></p>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-sm">
+              <p class="font-medium text-gray-600 mb-1">Dana Terpakai</p>
+              <p class="text-gray-800 font-semibold">
+                <% if (laporan.dana_digunakan) { %>
+                  Rp <%= parseInt(laporan.dana_digunakan).toLocaleString('id-ID') %>
+                <% } else { %> - <% } %>
+              </p>
             </div>
           </div>
+        </section>
 
-          <!-- Target Pencapaian -->
-          <div>
-            <h4 class="text-lg font-semibold text-blue-600 mb-4">Target Pencapaian</h4>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-              <div>
-                <p class="font-medium text-gray-700">Target Kuantitatif (%)</p>
-                <p class="text-gray-800"><%= laporan.persentase_kuantitatif || '-' %></p>
-              </div>
-              <div>
-                <p class="font-medium text-gray-700">Target Kualitatif (%)</p>
-                <p class="text-gray-800"><%= laporan.persentase_kualitatif || '-' %></p>
-              </div>
-              <div>
-                <p class="font-medium text-gray-700">Deskripsi Target Kuantitatif</p>
-                <p class="text-gray-800 whitespace-pre-line"><%= laporan.deskripsi_target_kuantitatif || '-' %></p>
-              </div>
-              <div>
-                <p class="font-medium text-gray-700">Deskripsi Target Kualitatif</p>
-                <p class="text-gray-800 whitespace-pre-line"><%= laporan.deskripsi_target_kualitatif || '-' %></p>
-              </div>
+        <!-- Target Pencapaian -->
+        <section class="bg-gray-100 p-5 rounded-xl">
+          <h4 class="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
+            <i class="fa-solid fa-bullseye text-gray-500"></i>
+            Target Pencapaian
+          </h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-white p-4 rounded-lg shadow-sm">
+              <p class="font-medium text-gray-600 mb-1">Target Kuantitatif</p>
+              <p class="text-gray-800"><%= laporan.deskripsi_target_kuantitatif || '-' %></p>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-sm">
+              <p class="font-medium text-gray-600 mb-1">Target Kualitatif</p>
+              <p class="text-gray-800"><%= laporan.deskripsi_target_kualitatif || '-' %></p>
             </div>
           </div>
+        </section>
 
-          <!-- Kendala dan Solusi -->
-          <div>
-            <h4 class="text-lg font-semibold text-purple-600 mb-4">Kendala dan Solusi</h4>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-              <div>
-                <p class="font-medium text-gray-700">Kendala</p>
-                <p class="text-gray-800 whitespace-pre-line"><%= laporan.kendala || '-' %></p>
-              </div>
-              <div>
-                <p class="font-medium text-gray-700">Solusi</p>
-                <p class="text-gray-800 whitespace-pre-line"><%= laporan.solusi || '-' %></p>
-              </div>
+        <!-- Kendala & Solusi -->
+        <section class="bg-gray-100 p-5 rounded-xl">
+          <h4 class="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
+            <i class="fa-solid fa-lightbulb text-gray-500"></i>
+            Kendala dan Solusi
+          </h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-white p-4 rounded-lg shadow-sm">
+              <p class="font-medium text-gray-600 mb-1">Kendala</p>
+              <p class="text-gray-800 whitespace-pre-line leading-relaxed"><%= laporan.kendala || '-' %></p>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-sm">
+              <p class="font-medium text-gray-600 mb-1">Solusi</p>
+              <p class="text-gray-800 whitespace-pre-line leading-relaxed"><%= laporan.solusi || '-' %></p>
             </div>
           </div>
+        </section>
 
-          <!-- Sasaran Kegiatan -->
-          <div>
-            <h4 class="text-lg font-semibold text-indigo-600 mb-4">Sasaran Kegiatan</h4>
+        <!-- Sasaran -->
+        <section class="bg-gray-100 p-5 rounded-xl">
+          <h4 class="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
+            <i class="fa-solid fa-users text-gray-500"></i>
+            Sasaran Kegiatan
+          </h4>
+          <div class="bg-white p-4 rounded-lg shadow-sm">
             <p class="text-gray-800"><%= laporan.sasaran || '-' %></p>
           </div>
+        </section>
 
-          <!-- Dokumentasi -->
-          <div>
-            <h4 class="text-lg font-semibold text-orange-600 mb-4">Dokumentasi</h4>
+        <!-- Dokumentasi -->
+        <section class="bg-gray-100 p-5 rounded-xl">
+          <h4 class="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
+            <i class="fa-solid fa-camera text-gray-500"></i>
+            Dokumentasi
+          </h4>
+          <div class="bg-white p-4 rounded-lg shadow-sm">
             <% if (laporan.dokumentasi) { %>
-              <div class="mt-2 space-y-3">
-                <p class="text-gray-600 text-sm">Dokumentasi tersedia:</p>
-                <% if (laporan.dokumentasi_mime === 'application/pdf') { %>
-                  <embed src="/uploads/<%= laporan.dokumentasi %>" type="application/pdf" width="100%" height="500px"/>
-                <% } else if (laporan.dokumentasi_mime === 'image/jpeg' || laporan.dokumentasi_mime === 'image/png') { %>
-                  <img src="/uploads/<%= laporan.dokumentasi %>" alt="Dokumentasi" 
-                       class="rounded-lg border max-h-96 object-contain mx-auto"/>
-                <% } else { %>
-                  <p class="text-sm text-gray-500">Preview tidak tersedia. Silakan unduh untuk melihat.</p>
-                <% } %>
-                <a href="/uploads/<%= laporan.dokumentasi %>"
-                  class="inline-block px-4 py-2 bg-orange-100 text-orange-700 rounded-lg text-sm font-medium hover:bg-orange-200 transition">
-                  Download Dokumentasi
-                </a>
-              </div>
+              <% if (laporan.dokumentasi_mime === 'application/pdf') { %>
+                <embed src="/uploads/<%= laporan.dokumentasi %>" type="application/pdf" width="100%" height="500px"/>
+              <% } else { %>
+                <img src="/uploads/<%= laporan.dokumentasi %>" class="w-full max-h-96 object-contain rounded-lg"/>
+              <% } %>
+              <a href="/uploads/<%= laporan.dokumentasi %>" target="_blank"
+                 class="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition-all shadow-md">
+                <i class="fa-solid fa-download"></i> Download Dokumentasi
+              </a>
             <% } else { %>
-              <p class="text-gray-500 text-sm">Belum ada dokumentasi diunggah</p>
+              <p class="text-gray-500 italic">Belum ada dokumentasi</p>
             <% } %>
           </div>
+        </section>
 
-          <!-- Evaluasi Laporan -->
-          <div>
-            <h4 class="text-lg font-semibold text-red-600 mb-4">Evaluasi DPA</h4>
+        <!-- Evaluasi -->
+        <section class="bg-gray-100 p-5 rounded-xl">
+          <h4 class="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
+            <i class="fa-solid fa-clipboard-check text-gray-500"></i>
+            Evaluasi DPA
+          </h4>
+          <div class="bg-white p-4 rounded-lg shadow-sm">
             <% if (evaluasi) { %>
-              <div class="p-4 bg-red-50 border border-red-200 rounded-lg space-y-2">
-                <p><span class="font-medium text-gray-700">Komentar:</span> <%= evaluasi.komentar %></p>
-                <p><span class="font-medium text-gray-700">Status Konfirmasi:</span> <%= evaluasi.status_konfirmasi %></p>
-                <p><span class="font-medium text-gray-700">Tanggal Evaluasi:</span> 
-                   <%= new Date(evaluasi.tanggal_evaluasi).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric'}) %></p>
-                <p><span class="font-medium text-gray-700">Evaluator:</span> <%= evaluasi.namaEvaluator || 'DPA' %></p>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div class="bg-gray-50 p-3 rounded-lg shadow-sm">
+                  <p class="font-medium text-gray-600 mb-1">Status Konfirmasi</p>
+                  <p class="text-gray-800 font-semibold"><%= evaluasi.status_konfirmasi || '-' %></p>
+                </div>
+                <div class="bg-gray-50 p-3 rounded-lg shadow-sm">
+                  <p class="font-medium text-gray-600 mb-1">Tanggal Evaluasi</p>
+                  <p class="text-gray-800 font-semibold"><%= evaluasi.tanggal_evaluasi || '-' %></p>
+                </div>
+              </div>
+              <div class="mt-4 bg-gray-50 p-3 rounded-lg shadow-sm">
+                <p class="font-medium text-gray-600 mb-1">Komentar Evaluasi</p>
+                <p class="text-gray-800"><%= evaluasi.komentar || '-' %></p>
               </div>
             <% } else { %>
-              <p class="text-gray-500 text-sm">Belum ada evaluasi dari DPA</p>
+              <p class="text-gray-500 italic">Belum ada evaluasi</p>
             <% } %>
           </div>
+        </section>
 
-          <!-- Komentar HMSI -->
-          <% if (evaluasi && evaluasi.komentar_hmsi) { %>
-          <div>
-            <h4 class="text-lg font-semibold text-teal-600 mb-4">Komentar HMSI</h4>
-            <div class="p-4 bg-teal-50 border border-teal-200 rounded-lg space-y-2">
-              <p class="text-gray-800 whitespace-pre-line"><%= evaluasi.komentar_hmsi %></p>
-            </div>
-          </div>
-          <% } %>
-
-          <!-- Tombol Evaluasi -->
-          <div class="mt-6 flex justify-end">
-            <a href="/dpa/kelolaLaporan/<%= laporan.id_laporan %>/evaluasi"
-              class="px-6 py-3 bg-orange-500 text-white rounded-xl text-sm font-semibold hover:bg-orange-600 transition transform hover:scale-105 active:scale-95">
-              Evaluasi Laporan
-            </a>
-          </div>
-
+        <!-- Tombol Evaluasi -->
+        <div class="flex justify-end">
+          <a href="/dpa/kelolaLaporan/<%= laporan.id_laporan %>/evaluasi"
+            class="inline-flex items-center gap-2 px-6 py-3 bg-orange-500 text-white rounded-xl text-sm font-semibold hover:bg-orange-600 transition transform hover:scale-105 shadow-lg">
+            <i class="fa-solid fa-edit"></i> <%= evaluasi ? 'Edit Evaluasi' : 'Beri Evaluasi' %>
+          </a>
         </div>
+
       </div>
     </div>
-  </div>
-
-  <!-- Animasi -->
-  <style>
-    @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
-    @keyframes slideDown { from {opacity:0; transform:translateY(-20px);} to {opacity:1; transform:translateY(0);} }
-    @keyframes slideUp { from {opacity:0; transform:translateY(20px);} to {opacity:1; transform:translateY(0);} }
-    @keyframes slideInRight { from {opacity:0; transform:translateX(30px);} to {opacity:1; transform:translateX(0);} }
-
-    .animate-fade-in { animation: fadeIn 0.7s ease-out forwards; }
-    .animate-slide-down { animation: slideDown 0.8s ease-out forwards; }
-    .animate-slide-up { animation: slideUp 0.6s ease-out forwards; }
-    .animate-slide-in-right { animation: slideInRight 0.8s ease-out forwards; }
-  </style>
-
+  </main>
 </body>
 </html>
