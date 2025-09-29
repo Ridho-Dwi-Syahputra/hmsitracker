@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title><%= title %></title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://kit.fontawesome.com/your-fa-kit.js" crossorigin="anonymous"></script>
@@ -22,20 +22,13 @@
   <div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
     <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="successModalContent">
       <div class="text-center">
-        <!-- Success Icon -->
         <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <svg class="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
           </svg>
         </div>
-        
-        <!-- Title -->
         <h3 class="text-xl font-bold text-gray-900 mb-2">Berhasil Disimpan!</h3>
-        
-        <!-- Message -->
-        <p class="text-gray-600 mb-6">Program kerja berhasil disimpan dan perubahan telah diterapkan.</p>
-
-        <!-- Button -->
+        <p class="text-gray-600 mb-6">Program kerja berhasil diperbarui.</p>
         <button id="closeSuccessModal" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-3 px-6 rounded-xl transition-colors duration-200">
           Kembali ke Kelola Proker
         </button>
@@ -47,20 +40,13 @@
   <div id="errorModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
     <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="errorModalContent">
       <div class="text-center">
-        <!-- Error Icon -->
         <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
           </svg>
         </div>
-        
-        <!-- Title -->
-        <h3 class="text-xl font-bold text-gray-900 mb-2">Gagal Menyimpan!</h3>
-        
-        <!-- Message -->
+        <h3 class="text-xl font-bold text-gray-900 mb-2">Terjadi Kesalahan!</h3>
         <p id="errorMessage" class="text-gray-600 mb-6">Mohon periksa kembali data yang Anda masukkan.</p>
-        
-        <!-- Button -->
         <button id="closeErrorModal" class="w-full bg-red-500 hover:bg-red-600 text-white font-medium py-3 px-6 rounded-xl transition-colors duration-200">
           Tutup
         </button>
@@ -72,21 +58,32 @@
   <div id="validationModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
     <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="validationModalContent">
       <div class="text-center">
-        <!-- Warning Icon -->
         <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <svg class="w-8 h-8 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
           </svg>
         </div>
-        
-        <!-- Title -->
         <h3 class="text-xl font-bold text-gray-900 mb-2">Data Tidak Lengkap!</h3>
-        
-        <!-- Message -->
-        <p id="validationMessage" class="text-gray-600 mb-6">Mohon lengkapi semua field yang wajib diisi sebelum memperbarui data.</p>
-        
-        <!-- Button -->
+        <p id="validationMessage" class="text-gray-600 mb-6">Mohon lengkapi semua field yang wajib diisi sebelum memperbarui.</p>
         <button id="closeValidationModal" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-3 px-6 rounded-xl transition-colors duration-200">
+          Mengerti
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- File Size Error Modal -->
+  <div id="fileSizeModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="fileSizeModalContent">
+      <div class="text-center">
+        <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+          </svg>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 mb-2">File Terlalu Besar!</h3>
+        <p class="text-gray-600 mb-6">Ukuran file maksimal adalah 5MB. Pilih file lain yang lebih kecil.</p>
+        <button id="closeFileSizeModal" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-3 px-6 rounded-xl transition-colors duration-200">
           Mengerti
         </button>
       </div>
@@ -97,163 +94,119 @@
   <main class="lg:ml-80 px-6 pt-20 pb-8 flex-grow">
     <div class="max-w-5xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-200">
 
-      <!-- Header Card -->
+      <!-- Header -->
       <div class="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-6">
         <h1 class="text-2xl font-bold">Edit Program Kerja</h1>
         <p class="text-sm text-orange-100">Perbarui detail program kerja di bawah</p>
       </div>
 
-      <!-- Body Card -->
+      <!-- Body -->
       <div class="p-6 sm:p-8">
-
-        <!-- Alert -->
         <%- include('../partials/alert', { errorMsg: errorMsg, successMsg: successMsg }) %>
 
-        <!-- Form -->
-        <form id="editProkerForm" action="/hmsi/proker/<%= proker.id_ProgramKerja %>/edit" method="POST" enctype="multipart/form-data" class="space-y-10" data-mode="edit">
+        <form id="editProkerForm" action="/hmsi/proker/<%= proker.id_ProgramKerja %>/edit" method="POST" enctype="multipart/form-data" class="space-y-10">
 
           <!-- Informasi Dasar -->
           <div>
             <h4 class="text-lg font-semibold text-gray-700 mb-4">Informasi Dasar</h4>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-              <!-- Nama Proker -->
-              <div class="md:col-span-2 bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition-colors">
-                <label class="block text-sm font-medium text-gray-700 mb-2">
-                  Nama Program Kerja <span class="text-red-500">*</span>
-                </label>
-                <input type="text" name="namaProker" id="namaProker"
-                  value="<%= old.namaProker || proker.Nama_ProgramKerja || '' %>" required
-                  placeholder="Masukkan nama program kerja..."
-                  class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100 hover:border-gray-400 transition-all">
+              <div class="md:col-span-2 bg-gray-50 border p-4 rounded-xl">
+                <label class="block text-sm font-medium mb-2">Nama Program Kerja <span class="text-red-500">*</span></label>
+                <input type="text" id="namaProker" name="namaProker" value="<%= old.namaProker || proker.Nama_ProgramKerja %>" required
+                       class="w-full px-4 py-3 border rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100">
                 <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
               </div>
 
-              <!-- Tanggal Mulai -->
-              <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition-colors">
-                <label class="block text-sm font-medium text-gray-700 mb-2">
-                  Tanggal Mulai <span class="text-red-500">*</span>
-                </label>
-                <input type="date" name="tanggal_mulai" id="tanggal_mulai"
-                  value="<%= old.tanggal_mulai || proker.tanggal_mulaiFormatted || '' %>" required
-                  class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100 hover:border-gray-400 transition-all">
+              <div class="bg-gray-50 border p-4 rounded-xl">
+                <label class="block text-sm font-medium mb-2">Tanggal Mulai <span class="text-red-500">*</span></label>
+                <input type="date" id="tanggal_mulai" name="tanggal_mulai" value="<%= old.tanggal_mulai || proker.tanggal_mulaiFormatted %>" required
+                       class="w-full px-4 py-3 border rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100">
                 <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
               </div>
 
-              <!-- Tanggal Selesai -->
-              <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition-colors">
-                <label class="block text-sm font-medium text-gray-700 mb-2">
-                  Tanggal Selesai <span class="text-red-500">*</span>
-                </label>
-                <input type="date" name="tanggal_selesai" id="tanggal_selesai"
-                  value="<%= old.tanggal_selesai || proker.tanggal_selesaiFormatted || '' %>" required
-                  class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100 hover:border-gray-400 transition-all">
+              <div class="bg-gray-50 border p-4 rounded-xl">
+                <label class="block text-sm font-medium mb-2">Tanggal Selesai <span class="text-red-500">*</span></label>
+                <input type="date" id="tanggal_selesai" name="tanggal_selesai" value="<%= old.tanggal_selesai || proker.tanggal_selesaiFormatted %>" required
+                       class="w-full px-4 py-3 border rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100">
                 <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
               </div>
 
-              <!-- Penanggung Jawab -->
-              <div class="md:col-span-2 bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition-colors">
-                <label class="block text-sm font-medium text-gray-700 mb-2">
-                  Penanggung Jawab <span class="text-red-500">*</span>
-                </label>
-                <input type="text" name="penanggungJawab" id="penanggungJawab"
-                  value="<%= old.penanggungJawab || proker.Penanggung_jawab || '' %>" required
-                  placeholder="Masukkan nama penanggung jawab..."
-                  class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100 hover:border-gray-400 transition-all">
+              <div class="md:col-span-2 bg-gray-50 border p-4 rounded-xl">
+                <label class="block text-sm font-medium mb-2">Penanggung Jawab <span class="text-red-500">*</span></label>
+                <input type="text" id="penanggungJawab" name="penanggungJawab" value="<%= old.penanggungJawab || proker.Penanggung_jawab %>" required
+                       class="w-full px-4 py-3 border rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100">
                 <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
               </div>
 
-              <!-- Deskripsi -->
-              <div class="md:col-span-2 bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition-colors">
-                <label class="block text-sm font-medium text-gray-700 mb-2">
-                  Deskripsi Program <span class="text-red-500">*</span>
-                </label>
-                <textarea name="deskripsi" id="deskripsi" rows="4" required
-                  placeholder="Tuliskan deskripsi program kerja..."
-                  class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm resize-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100 hover:border-gray-400 transition-all"><%= old.deskripsi || proker.Deskripsi || '' %></textarea>
+              <div class="md:col-span-2 bg-gray-50 border p-4 rounded-xl">
+                <label class="block text-sm font-medium mb-2">Deskripsi Program <span class="text-red-500">*</span></label>
+                <textarea id="deskripsi" name="deskripsi" rows="4" required
+                          class="w-full px-4 py-3 border rounded-lg text-sm resize-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100"><%= old.deskripsi || proker.Deskripsi %></textarea>
                 <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
               </div>
             </div>
           </div>
 
-          <!-- Dokumentasi -->
-          <div>
-            <h4 class="text-lg font-semibold text-gray-700 mb-1">File Dokumen Pendukung</h4>
-            <p class="text-sm text-gray-500 mb-4">Upload file rancangan program kerja (opsional - kosongkan jika tidak ingin mengubah)</p>
-            
-            <div id="dropzone"
-              class="border-2 border-dashed border-gray-300 rounded-xl p-10 bg-gray-50/50 text-center cursor-pointer 
-                     transition duration-200 hover:border-orange-400 hover:bg-orange-50/30 flex flex-col items-center gap-4">
-              <input type="file" id="fileUpload" class="hidden" accept=".pdf,.jpg,.jpeg,.png"/>
-              <div class="text-4xl text-gray-400">📄</div>
-              <label for="fileUpload" class="cursor-pointer">
-                <span class="px-6 py-3 bg-orange-500 text-white rounded-lg text-sm font-medium 
-                         transition duration-200 hover:bg-orange-600 hover:shadow-md active:scale-95">
-                  Pilih File atau Drag & Drop
-                </span>
-              </label>
-              <p class="text-sm text-gray-600">
-                Format didukung: <span class="font-medium">PDF, JPG, JPEG, PNG</span><br>
-                Maksimal ukuran: <span class="font-medium">5MB</span>
-              </p>
-            </div>
+          <!-- File Dokumen Pendukung -->
+<div>
+  <h4 class="text-lg font-semibold text-gray-700 mb-1">File Dokumen Pendukung</h4>
+  <p class="text-sm text-gray-500 mb-4">Kosongkan jika tidak ingin mengganti file</p>
+  <div id="dropzone"
+    class="border-2 border-dashed border-gray-300 rounded-xl p-10 bg-gray-50/50 text-center cursor-pointer 
+           transition duration-200 hover:border-orange-400 hover:bg-orange-50/30 flex flex-col items-center gap-4">
+    <input type="file" name="dokumen_pendukung" id="fileUpload" class="hidden"
+      accept=".pdf,.jpg,.jpeg,.png" />
+    <div class="text-4xl text-gray-400">📄</div>
+    <label for="fileUpload" class="cursor-pointer">
+      <span class="px-6 py-3 bg-orange-500 text-white rounded-lg text-sm font-medium 
+                   transition duration-200 hover:bg-orange-600 hover:shadow-md active:scale-95">
+        Pilih File atau Drag & Drop
+      </span>
+    </label>
+    <p class="text-sm text-gray-600">
+      Format yang didukung: <span class="font-medium">PDF, JPG, JPEG, PNG</span><br>
+      Maksimal ukuran file: <span class="font-medium">5MB</span>
+    </p>
+  </div>
+  <p id="fileName" class="text-sm text-gray-600 mt-3"></p>
+  <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
 
-            <p id="fileName" class="text-sm text-gray-600 mt-3"></p>
-
-            <!-- Current file display -->
-            <% if (proker && proker.Dokumen_pendukung) { %>
-              <div class="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <h5 class="text-sm font-semibold text-blue-800 mb-2 flex items-center">
-                  <i class="fas fa-file text-blue-600"></i>
-                  File Saat Ini:
-                </h5>
-                <div class="flex items-center justify-between">
-                  <span class="text-sm text-blue-700"><%= proker.Dokumen_pendukung %></span>
-                  <% if (/\.(jpg|jpeg|png)$/i.test(proker.Dokumen_pendukung)) { %>
-                    <button type="button" onclick="togglePreview()" class="text-xs bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition-colors">
-                      Lihat Preview
-                    </button>
-                  <% } else if (/\.pdf$/i.test(proker.Dokumen_pendukung)) { %>
-                    <a href="/uploads/<%= proker.Dokumen_pendukung %>" target="_blank" 
-                       class="text-xs bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition-colors">
-                      Buka File
-                    </a>
-                  <% } %>
-                </div>
-                
-                <!-- Image preview (hidden by default) -->
-                <% if (/\.(jpg|jpeg|png)$/i.test(proker.Dokumen_pendukung)) { %>
-                  <div id="imagePreview" class="mt-3 hidden">
-                    <img src="/uploads/<%= proker.Dokumen_pendukung %>" alt="Preview" 
-                         class="max-h-48 rounded-lg shadow-md border">
-                  </div>
-                <% } %>
-              </div>
-            <% } %>
-            
-            <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
-          </div>
-
-          <!-- Keterangan Wajib -->
-          <p class="text-sm text-red-500 mt-4">
-            * Semua field wajib diisi
-          </p>
+  <% if (proker.Dokumen_pendukung) { %>
+    <div class="mt-4 p-4 bg-blue-50 border rounded-lg">
+      <h5 class="text-sm font-semibold mb-2 text-blue-800">File Saat Ini:</h5>
+      <div class="flex justify-between items-center">
+        <span class="text-sm text-blue-700"><%= proker.Dokumen_pendukung %></span>
+        <% if (/\.(jpg|jpeg|png)$/i.test(proker.Dokumen_pendukung)) { %>
+          <button type="button" onclick="togglePreview()" 
+                  class="text-xs bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">
+            Lihat Preview
+          </button>
+        <% } else if (/\.pdf$/i.test(proker.Dokumen_pendukung)) { %>
+          <a href="/uploads/<%= proker.Dokumen_pendukung %>" target="_blank" 
+             class="text-xs bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">
+            Buka File
+          </a>
+        <% } %>
+      </div>
+      <% if (/\.(jpg|jpeg|png)$/i.test(proker.Dokumen_pendukung)) { %>
+        <div id="imagePreview" class="mt-3 hidden">
+          <img src="/uploads/<%= proker.Dokumen_pendukung %>" class="max-h-48 rounded-lg border shadow-md">
+        </div>
+      <% } %>
+    </div>
+  <% } %>
+</div>
 
           <!-- Tombol -->
-          <div class="pt-6 border-t border-gray-200 flex gap-4 justify-end">
-            <a href="/hmsi/kelola-proker"
-              class="px-8 py-3 border border-gray-300 rounded-xl text-sm font-medium bg-white text-gray-700 transition-all duration-200 hover:shadow-md hover:border-gray-400">
-              Batal
-            </a>
-            <button type="submit" id="submitBtn"
-              class="flex items-center justify-center gap-2 px-8 py-3 text-white bg-orange-500 rounded-xl text-sm font-semibold transition-all duration-200 hover:bg-orange-600 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed">
+          <div class="pt-6 border-t flex gap-4 justify-end">
+            <a href="/hmsi/kelola-proker" class="px-8 py-3 border rounded-xl text-sm font-medium bg-white text-gray-700 hover:shadow-md">Batal</a>
+            <button type="submit" id="submitBtn" class="flex items-center gap-2 px-8 py-3 text-white bg-orange-500 rounded-xl text-sm font-semibold hover:bg-orange-600">
               <span id="btnText">Simpan</span>
               <div id="btnSpinner" class="hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
             </button>
           </div>
-
         </form>
-
       </div>
     </div>
   </main>
@@ -261,262 +214,38 @@
   <!-- Footer -->
   <%- include('../partials/footer') %>
 
-  <!-- Script -->
   <script>
-    // Modal functions
-    function showModal(modalId) {
-      const modal = document.getElementById(modalId);
-      const content = document.getElementById(modalId + 'Content');
-      
-      modal.classList.remove('hidden');
-      
-      // Trigger animation
-      setTimeout(() => {
-        content.classList.remove('scale-95', 'opacity-0');
-        content.classList.add('scale-100', 'opacity-100');
-      }, 10);
-    }
+    // ===== MODAL =====
+    function showModal(id){const m=document.getElementById(id);const c=document.getElementById(id+"Content");if(!m||!c)return;m.classList.remove("hidden");setTimeout(()=>{c.classList.remove("scale-95","opacity-0");c.classList.add("scale-100","opacity-100")},10)}
+    function hideModal(id){const m=document.getElementById(id);const c=document.getElementById(id+"Content");if(!m||!c)return;c.classList.remove("scale-100","opacity-100");c.classList.add("scale-95","opacity-0");setTimeout(()=>{m.classList.add("hidden")},300)}
+    document.getElementById("closeSuccessModal")?.addEventListener("click",()=>{hideModal("successModal");setTimeout(()=>{window.location.href="/hmsi/kelola-proker"},300)});
+    document.getElementById("closeErrorModal")?.addEventListener("click",()=>hideModal("errorModal"));
+    document.getElementById("closeValidationModal")?.addEventListener("click",()=>hideModal("validationModal"));
+    document.getElementById("closeFileSizeModal")?.addEventListener("click",()=>hideModal("fileSizeModal"));
+    ["successModal","errorModal","validationModal","fileSizeModal"].forEach(id=>{document.getElementById(id)?.addEventListener("click",e=>{if(e.target.id===id)hideModal(id)})});
 
-    function hideModal(modalId) {
-      const modal = document.getElementById(modalId);
-      const content = document.getElementById(modalId + 'Content');
-      
-      content.classList.remove('scale-100', 'opacity-100');
-      content.classList.add('scale-95', 'opacity-0');
-      
-      setTimeout(() => {
-        modal.classList.add('hidden');
-      }, 300);
-    }
+    // ===== FILE UPLOAD =====
+    const drop=document.getElementById("dropzone"),fi=document.getElementById("fileUpload"),fn=document.getElementById("fileName"),MAX=5*1024*1024;
+    drop?.addEventListener("dragover",e=>{e.preventDefault();drop.classList.add("border-orange-400","bg-orange-50")});
+    drop?.addEventListener("dragleave",()=>drop.classList.remove("border-orange-400","bg-orange-50"));
+    drop?.addEventListener("drop",e=>{e.preventDefault();drop.classList.remove("border-orange-400","bg-orange-50");const f=e.dataTransfer.files;if(f.length>0){if(f[0].size>MAX){showModal("fileSizeModal");fi.value="";fn.textContent="";return}fi.files=f;fn.textContent=`File dipilih: ${f[0].name}`;validateField(fi)}});
+    fi?.addEventListener("change",e=>{if(e.target.files.length>0){const f=e.target.files[0];if(f.size>MAX){showModal("fileSizeModal");fi.value="";fn.textContent="";return}fn.textContent=`File dipilih: ${f.name}`;validateField(fi)}else fn.textContent=""});
 
-    // Modal event listeners
-    document.getElementById('closeSuccessModal').addEventListener('click', () => {
-      hideModal('successModal');
-      setTimeout(() => {
-        window.location.href = '/hmsi/kelola-proker';
-      }, 300);
-    });
+    // ===== DATE VALIDATION =====
+    const mulai=document.getElementById("tanggal_mulai"),selesai=document.getElementById("tanggal_selesai");
+    function sync(){if(mulai&&selesai&&mulai.value){selesai.min=mulai.value;if(selesai.value&&selesai.value<mulai.value)selesai.value=mulai.value}}
+    mulai?.addEventListener("change",sync);sync();
 
-    document.getElementById('closeErrorModal').addEventListener('click', () => {
-      hideModal('errorModal');
-    });
+    function togglePreview(){document.getElementById("imagePreview")?.classList.toggle("hidden")}
 
-    document.getElementById('closeValidationModal').addEventListener('click', () => {
-      hideModal('validationModal');
-    });
+    // ===== VALIDATION =====
+    function validateField(f){if(!f)return true;const err=f.closest(".bg-gray-50")?.querySelector(".error-message")||f.closest("div")?.querySelector(".error-message");if(!err)return true;let ok=true,msg="";if(f.hasAttribute("required")){if(f.type==="file"){ok=true}else if(f.type==="date"){ok=f.value!=="";msg="Tanggal wajib diisi"}else if(f.value.trim()===""){ok=false;msg="Field ini wajib diisi"}}if(f.type==="date"&&f.value!==""&&f.id==="tanggal_selesai"&&mulai&&mulai.value&&f.value<mulai.value){ok=false;msg="Tanggal selesai tidak boleh sebelum mulai"}if(!ok){err.textContent=msg;err.classList.remove("hidden");f.classList.add("border-red-500");f.classList.remove("border-gray-300")}else{err.classList.add("hidden");f.classList.remove("border-red-500");f.classList.add("border-gray-300")}return ok}
+    function validateAll(){let ok=true,emp=[];["namaProker","tanggal_mulai","tanggal_selesai","penanggungJawab","deskripsi"].forEach(id=>{const f=document.getElementById(id);if(f&&(f.value||"").trim()===""){ok=false;emp.push(f.name);validateField(f)}});if(!ok){let msg="";if(emp.length===1)msg=`Field "${emp[0]}" wajib diisi.`;else if(emp.length===2)msg=`Field "${emp[0]}" dan "${emp[1]}" wajib diisi.`;else if(emp.length>2){const last=emp.pop();msg=`Field ${emp.join(", ")} dan ${last} wajib diisi.`}document.getElementById("validationMessage").textContent=msg}return ok}
+    document.querySelectorAll("input[required],textarea[required]").forEach(f=>{f.addEventListener("blur",()=>validateField(f));f.addEventListener("input",()=>{if(f.classList.contains("border-red-500"))validateField(f)})});
 
-    // Close modal when clicking outside
-    ['successModal', 'errorModal', 'validationModal'].forEach(modalId => {
-      document.getElementById(modalId).addEventListener('click', (e) => {
-        if (e.target.id === modalId) {
-          hideModal(modalId);
-        }
-      });
-    });
-
-    // File upload functionality
-    const dropzone = document.getElementById('dropzone');
-    const fileInput = document.getElementById('fileUpload');
-    const fileName = document.getElementById('fileName');
-
-    dropzone.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      dropzone.classList.add('border-orange-400', 'bg-orange-50');
-    });
-    
-    dropzone.addEventListener('dragleave', () => {
-      dropzone.classList.remove('border-orange-400', 'bg-orange-50');
-    });
-    
-    dropzone.addEventListener('drop', (e) => {
-      e.preventDefault();
-      dropzone.classList.remove('border-orange-400', 'bg-orange-50');
-      const files = e.dataTransfer.files;
-      if (files.length > 0) {
-        fileInput.files = files;
-        fileName.textContent = `File baru dipilih: ${files[0].name}`;
-        validateField(fileInput);
-      }
-    });
-
-    fileInput.addEventListener('change', (e) => {
-      if (e.target.files.length > 0) {
-        fileName.textContent = `File baru dipilih: ${e.target.files[0].name}`;
-        validateField(fileInput);
-      }
-    });
-
-    // Date validation
-    const tglMulai = document.getElementById("tanggal_mulai");
-    const tglSelesai = document.getElementById("tanggal_selesai");
-
-    function syncTanggal() {
-      if (tglMulai.value) {
-        tglSelesai.min = tglMulai.value;
-        if (tglSelesai.value && tglSelesai.value < tglMulai.value) {
-          tglSelesai.value = tglMulai.value;
-        }
-      }
-    }
-
-    tglMulai.addEventListener("change", syncTanggal);
-    syncTanggal(); // Run once on load
-
-    // Toggle image preview function
-    function togglePreview() {
-      const preview = document.getElementById('imagePreview');
-      if (preview) {
-        preview.classList.toggle('hidden');
-      }
-    }
-
-    // Validation functions
-    function validateField(field) {
-      const errorDiv = field.closest('.bg-gray-50')?.querySelector('.error-message') || 
-                      field.closest('div')?.querySelector('.error-message');
-      
-      if (!errorDiv) return true;
-
-      let isValid = true;
-      let errorMessage = '';
-
-      // Check if field is required and empty
-      if (field.hasAttribute('required')) {
-        if (field.type === 'file') {
-          // File is optional in edit mode
-          isValid = true;
-        } else if (field.type === 'date') {
-          isValid = field.value !== '';
-          errorMessage = 'Tanggal wajib diisi';
-        } else if (field.value.trim() === '') {
-          isValid = false;
-          errorMessage = 'Field ini wajib diisi';
-        }
-      }
-
-      // Date validation
-      if (field.type === 'date' && field.value !== '') {
-        if (field.id === 'tanggal_selesai' && tglMulai.value && field.value < tglMulai.value) {
-          isValid = false;
-          errorMessage = 'Tanggal selesai tidak boleh lebih awal dari tanggal mulai';
-        }
-      }
-
-      // Show/hide error message
-      if (!isValid) {
-        errorDiv.textContent = errorMessage;
-        errorDiv.classList.remove('hidden');
-        field.classList.add('border-red-500');
-        field.classList.remove('border-gray-300');
-      } else {
-        errorDiv.classList.add('hidden');
-        field.classList.remove('border-red-500');
-        field.classList.add('border-gray-300');
-      }
-
-      return isValid;
-    }
-
-    function validateAllFields() {
-      let allValid = true;
-      let emptyFields = [];
-      
-      const requiredFields = [
-        { id: 'namaProker', name: 'Nama Program Kerja' },
-        { id: 'tanggal_mulai', name: 'Tanggal Mulai' },
-        { id: 'tanggal_selesai', name: 'Tanggal Selesai' },
-        { id: 'penanggungJawab', name: 'Penanggung Jawab' },
-        { id: 'deskripsi', name: 'Deskripsi Program' }
-      ];
-
-      requiredFields.forEach(fieldInfo => {
-        const field = document.getElementById(fieldInfo.id);
-        if (field) {
-          if (field.value.trim() === '') {
-            allValid = false;
-            emptyFields.push(fieldInfo.name);
-            // Show individual field error
-            validateField(field);
-          }
-        }
-      });
-
-      // Simpan validation modal message if there are empty fields
-      if (!allValid) {
-        let message = '';
-        if (emptyFields.length === 1) {
-          message = `Field "${emptyFields[0]}" wajib diisi.`;
-        } else if (emptyFields.length === 2) {
-          message = `Field "${emptyFields[0]}" dan "${emptyFields[1]}" wajib diisi.`;
-        } else if (emptyFields.length > 2) {
-          const lastField = emptyFields.pop();
-          message = `Field ${emptyFields.join(', ')} dan ${lastField} wajib diisi.`;
-        }
-        
-        document.getElementById('validationMessage').textContent = message;
-      }
-
-      return allValid;
-    }
-
-    // Add real-time validation
-    document.querySelectorAll('input[required], textarea[required]').forEach(field => {
-      field.addEventListener('blur', () => validateField(field));
-      field.addEventListener('input', () => {
-        if (field.classList.contains('border-red-500')) {
-          validateField(field);
-        }
-      });
-    });
-
-    // Form submission with validation
-    const form = document.getElementById('editProkerForm');
-    const submitBtn = document.getElementById('submitBtn');
-    const btnText = document.getElementById('btnText');
-    const btnSpinner = document.getElementById('btnSpinner');
-
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      
-      // Validate all fields before submission
-      if (!validateAllFields()) {
-        showModal('validationModal');
-        return;
-      }
-
-      // Show loading state
-      submitBtn.disabled = true;
-      btnText.textContent = 'Menyimpan...';
-      btnSpinner.classList.remove('hidden');
-
-      // Submit form
-      const formData = new FormData(form);
-
-      fetch(form.action, {
-        method: 'POST',
-        body: formData
-      })
-      .then(response => {
-        if (response.ok) {
-          showModal('successModal');
-        } else {
-          return response.text().then(text => {
-            throw new Error(text);
-          });
-        }
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        document.getElementById('errorMessage').textContent = 'Terjadi kesalahan: ' + error.message;
-        showModal('errorModal');
-      })
-      .finally(() => {
-        submitBtn.disabled = false;
-        btnText.textContent = 'Simpan';
-        btnSpinner.classList.add('hidden');
-      });
-    });
+    // ===== SUBMIT =====
+    const form=document.getElementById("editProkerForm"),btn=document.getElementById("submitBtn"),txt=document.getElementById("btnText"),sp=document.getElementById("btnSpinner");
+    form?.addEventListener("submit",e=>{e.preventDefault();if(!validateAll()){showModal("validationModal");return}if(fi&&fi.files&&fi.files[0]&&fi.files[0].size>MAX){showModal("fileSizeModal");return}btn.disabled=true;txt.textContent="Menyimpan...";sp.classList.remove("hidden");fetch(form.action,{method:"POST",body:new FormData(form)}).then(r=>{if(r.ok)showModal("successModal");else return r.text().then(t=>{throw new Error(t||"Server error")})}).catch(er=>{document.getElementById("errorMessage").textContent="Terjadi kesalahan: "+er.message;showModal("errorModal")}).finally(()=>{btn.disabled=false;txt.textContent="Simpan";sp.classList.add("hidden")})});
   </script>
-
 </body>
 </html>

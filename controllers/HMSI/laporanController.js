@@ -139,6 +139,8 @@ exports.getFormLaporan = async (req, res) => {
 exports.createLaporan = async (req, res) => {
   try {
     const user = req.session.user;
+    
+
     const {
       judul_laporan,
       deskripsi_kegiatan,
@@ -157,13 +159,17 @@ exports.createLaporan = async (req, res) => {
       id_ProgramKerja,
     } = req.body;
 
+   
+
     if (!judul_laporan || !id_ProgramKerja || !deskripsi_kegiatan) {
+      console.warn("⚠️ [DEBUG] Data wajib kosong:", { judul_laporan, id_ProgramKerja, deskripsi_kegiatan });
       return res.redirect("/hmsi/laporan?error=Judul, Proker, Deskripsi wajib diisi");
     }
 
     const sumberDana = sumber_dana_radio === "uang_kas"
       ? "Uang Kas HMSI"
       : (sumber_dana_text || null);
+    
 
     // Normalisasi angka
     let danaDigunakanNum = dana_digunakan ? parseFloat(String(dana_digunakan).replace(/[^\d.-]/g, "")) : 0;
@@ -172,8 +178,11 @@ exports.createLaporan = async (req, res) => {
     if (danaDigunakanNum > 0 && danaTerpakaiNum === 0) danaTerpakaiNum = danaDigunakanNum;
     if (danaTerpakaiNum > 0 && danaDigunakanNum === 0) danaDigunakanNum = danaTerpakaiNum;
 
+    
+
     const dokumentasi = req.file ? req.file.filename : null;
     const idLaporan = uuidv4();
+    
 
     await db.query(
       `INSERT INTO Laporan 
@@ -204,10 +213,13 @@ exports.createLaporan = async (req, res) => {
         user.divisi || null,
       ]
     );
+    
 
     // 🔗 Tambah keuangan jika pakai kas HMSI
     if (sumberDana === "Uang Kas HMSI" && danaTerpakaiNum > 0) {
       const id_keuangan = uuidv4();
+     
+
       await db.query(
         `INSERT INTO keuangan 
          (id_keuangan, tanggal, tipe, sumber, jumlah, id_laporan, id_anggota, created_at)
@@ -220,6 +232,7 @@ exports.createLaporan = async (req, res) => {
           user?.id_anggota || null
         ]
       );
+    
     }
 
     // ✅ Notifikasi ke DPA
@@ -229,6 +242,7 @@ exports.createLaporan = async (req, res) => {
        VALUES (?, ?, ?, NOW(), 0)`,
       [uuidv4(), pesanNotif, idLaporan]
     );
+    
 
     res.redirect("/hmsi/laporan?success=Laporan berhasil ditambahkan");
   } catch (err) {
@@ -331,6 +345,8 @@ exports.getEditLaporan = async (req, res) => {
 exports.updateLaporan = async (req, res) => {
   try {
     const user = req.session.user;
+    
+
     const {
       judul_laporan,
       deskripsi_kegiatan,
@@ -349,9 +365,12 @@ exports.updateLaporan = async (req, res) => {
       id_ProgramKerja,
     } = req.body;
 
+  
+
     const sumberDana = sumber_dana_radio === "uang_kas"
       ? "Uang Kas HMSI"
       : (sumber_dana_text || null);
+    
 
     let danaDigunakanNum = dana_digunakan ? parseFloat(String(dana_digunakan).replace(/[^\d.-]/g, "")) : 0;
     let danaTerpakaiNum = dana_terpakai ? parseFloat(String(dana_terpakai).replace(/[^\d.-]/g, "")) : 0;
@@ -359,7 +378,10 @@ exports.updateLaporan = async (req, res) => {
     if (danaDigunakanNum > 0 && danaTerpakaiNum === 0) danaTerpakaiNum = danaDigunakanNum;
     if (danaTerpakaiNum > 0 && danaDigunakanNum === 0) danaDigunakanNum = danaTerpakaiNum;
 
+    
+
     const newFile = req.file ? req.file.filename : null;
+    
 
     const [existingRows] = await db.query(
       `SELECT dokumentasi, divisi
@@ -367,15 +389,19 @@ exports.updateLaporan = async (req, res) => {
        WHERE id_laporan = ?`,
       [req.params.id]
     );
+
+
     if (!existingRows.length) return res.status(404).send("Laporan tidak ditemukan");
 
     const oldFile = existingRows[0].dokumentasi;
     const divisiLaporan = existingRows[0].divisi;
 
     if (user && user.role === "HMSI" && user.divisi !== divisiLaporan) {
+      console.warn("⛔ [DEBUG] User beda divisi, akses ditolak");
       return res.status(403).send("Tidak boleh update laporan divisi lain");
     }
 
+    // Update laporan
     let query = `
       UPDATE Laporan SET 
         judul_laporan=?, 
@@ -422,17 +448,21 @@ exports.updateLaporan = async (req, res) => {
     params.push(req.params.id);
 
     await db.query(query, params);
+   
 
     if (newFile && oldFile) {
       safeRemoveFile(oldFile);
+      
     }
 
     // 🔗 Sinkronisasi keuangan
     const [keuRows] = await db.query(`SELECT * FROM keuangan WHERE id_laporan=?`, [req.params.id]);
     const hasKeu = keuRows.length > 0;
+    
 
     if (sumberDana === "Uang Kas HMSI" && danaTerpakaiNum > 0) {
       if (hasKeu) {
+    
         await db.query(
           `UPDATE keuangan SET jumlah=?, sumber=?, tanggal=CURDATE() WHERE id_laporan=?`,
           [danaTerpakaiNum, `Pengeluaran dari Laporan: ${judul_laporan}`, req.params.id]
@@ -465,6 +495,7 @@ exports.updateLaporan = async (req, res) => {
        VALUES (?, ?, ?, NOW(), 0)`,
       [uuidv4(), pesanNotif, req.params.id]
     );
+
 
     res.redirect("/hmsi/laporan?success=Laporan berhasil diperbarui");
   } catch (err) {
