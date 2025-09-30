@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -37,83 +38,109 @@
       <div class="p-6 sm:p-8 space-y-8">
 
         <!-- Informasi Program Kerja -->
-        <section class="bg-gray-100 p-5 rounded-xl">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <section class="space-y-6">
+          <h4 class="text-lg font-semibold text-gray-700 mb-2">Informasi Program Kerja</h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-            <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-300">
+            <!-- Field -->
+            <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
               <p class="font-medium text-gray-600 mb-1">Nama Program Kerja</p>
-              <p class="text-gray-800 font-semibold"><%= proker.namaProker || '-' %></p>
+              <div class="bg-white border border-gray-200 p-3 rounded-lg">
+                <p class="text-gray-800 font-semibold"><%= proker.namaProker || '-' %></p>
+              </div>
             </div>
 
-            <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-300">
+            <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
               <p class="font-medium text-gray-600 mb-1">Divisi</p>
-              <p class="text-gray-800 font-semibold"><%= proker.divisi || '-' %></p>
+              <div class="bg-white border border-gray-200 p-3 rounded-lg">
+                <p class="text-gray-800 font-semibold"><%= proker.divisi || '-' %></p>
+              </div>
             </div>
 
-            <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-300">
+            <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
               <p class="font-medium text-gray-600 mb-1">Penanggung Jawab</p>
-              <p class="text-gray-800 font-semibold"><%= proker.penanggungJawab || '-' %></p>
+              <div class="bg-white border border-gray-200 p-3 rounded-lg">
+                <p class="text-gray-800 font-semibold"><%= proker.penanggungJawab || '-' %></p>
+              </div>
             </div>
 
-            <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-300">
+            <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
               <p class="font-medium text-gray-600 mb-1">Tanggal Mulai</p>
-              <p class="text-gray-800 font-semibold"><%= proker.tanggalMulaiFormatted || '-' %></p>
+              <div class="bg-white border border-gray-200 p-3 rounded-lg">
+                <p class="text-gray-800 font-semibold"><%= proker.tanggalMulaiFormatted || '-' %></p>
+              </div>
             </div>
 
-            <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-300">
+            <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
               <p class="font-medium text-gray-600 mb-1">Tanggal Selesai</p>
-              <p class="text-gray-800 font-semibold"><%= proker.tanggalSelesaiFormatted || '-' %></p>
+              <div class="bg-white border border-gray-200 p-3 rounded-lg">
+                <p class="text-gray-800 font-semibold"><%= proker.tanggalSelesaiFormatted || '-' %></p>
+              </div>
             </div>
 
-            <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-300">
+            <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
               <p class="font-medium text-gray-600 mb-1">Status</p>
-              <span id="status-label" class="px-3 py-1 text-sm rounded-full font-medium
-                <% if (proker.status === 'Sedang Berjalan') { %> bg-blue-100 text-blue-700
-                <% } else if (proker.status === 'Selesai') { %> bg-green-100 text-green-700
-                <% } else if (proker.status === 'Tidak Selesai') { %> bg-red-100 text-red-700
-                <% } else { %> bg-gray-100 text-gray-600 <% } %>">
-                <%= proker.status %>
-              </span>
+              <div class="bg-white border border-gray-200 p-3 rounded-lg">
+                <span id="status-label" class="px-3 py-1 text-sm rounded-full font-medium
+                  <% if (proker.status === 'Selesai') { %> bg-green-100 text-green-700
+                  <% } else if (proker.status === 'Gagal') { %> bg-red-100 text-red-700
+                  <% } else { %> bg-gray-100 text-gray-600 <% } %>">
+                  <%= proker.status %>
+                </span>
+              </div>
             </div>
 
             <!-- Deskripsi -->
-            <div class="md:col-span-2 bg-white p-6 rounded-lg shadow-lg border border-gray-300">
-              <p class="font-medium text-gray-600 mb-3 text-lg">Deskripsi</p>
-              <p class="text-gray-800 whitespace-pre-line leading-relaxed text-md"><%= proker.deskripsi || '-' %></p>
+            <div class="md:col-span-2 bg-gray-50 border border-gray-200 rounded-xl p-4">
+              <p class="font-medium text-gray-600 mb-2">Deskripsi</p>
+              <div class="bg-white border border-gray-200 p-4 rounded-lg">
+                <p class="text-gray-800 whitespace-pre-line leading-relaxed"><%= proker.deskripsi || '-' %></p>
+              </div>
             </div>
 
             <!-- Dokumen Pendukung -->
-            <% if (proker.dokumen_pendukung) { %>
-              <div class="md:col-span-2 bg-white p-6 rounded-lg shadow-lg border border-gray-300">
-                <p class="font-medium text-gray-600 mb-3 text-lg">Dokumen Pendukung</p>
-                <a href="/uploads/<%= proker.dokumen_pendukung %>" target="_blank"
-                   class="text-blue-600 hover:underline break-all">
-                   <i class="fa-solid fa-file-arrow-down"></i> <%= proker.dokumen_pendukung %>
-                </a>
+            <div class="md:col-span-2 bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-4">
+              <p class="font-medium text-gray-600 mb-2">Dokumen Pendukung</p>
+              <div class="bg-white border border-gray-200 p-4 rounded-lg space-y-6">
+                <% if (proker.dokumen_pendukung) { %>
+                  <% proker.dokumen_pendukung.split(',').forEach(file => {
+                       const f = file.trim();
+                       const ext = f.split('.').pop().toLowerCase();
+                  %>
+                    <div class="w-full bg-gray-50 rounded-lg border border-gray-300 shadow-sm p-2">
+                      <% if (['jpg','jpeg','png','gif'].includes(ext)) { %>
+                        <img src="/uploads/<%= f %>" alt="<%= f %>" class="w-full h-auto rounded-lg">
+                      <% } else if (ext === 'pdf') { %>
+                        <iframe src="/uploads/<%= f %>" class="w-full h-96 rounded-lg" frameborder="0"></iframe>
+                      <% } else if (['doc','docx','xls','xlsx','ppt','pptx'].includes(ext)) { %>
+                        <iframe src="https://view.officeapps.live.com/op/embed.aspx?src=<%= encodeURIComponent('http://'+req.headers.host+'/uploads/'+f) %>"
+                                class="w-full h-96 rounded-lg" frameborder="0"></iframe>
+                      <% } else { %>
+                        <p class="text-gray-500">File <%= f %> tidak dapat ditampilkan.</p>
+                      <% } %>
+                    </div>
+                  <% }) %>
+                <% } else { %>
+                  <p class="text-gray-500 italic">Tidak ada dokumen pendukung.</p>
+                <% } %>
               </div>
-            <% } %>
+            </div>
 
           </div>
         </section>
 
         <!-- Tombol Ubah Status -->
         <div class="flex gap-3 justify-end mt-6">
-          <% if (proker.status !== "Sedang Berjalan") { %>
-            <button onclick="ubahStatus('<%= proker.id %>', 'Sedang Berjalan')"
-                    class="px-5 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg shadow transition">
-              🔵 Sedang Berjalan
-            </button>
-          <% } %>
           <% if (proker.status !== "Selesai") { %>
             <button onclick="ubahStatus('<%= proker.id %>', 'Selesai')"
                     class="px-5 py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg shadow transition">
               ✅ Selesai
             </button>
           <% } %>
-          <% if (proker.status !== "Tidak Selesai") { %>
-            <button onclick="ubahStatus('<%= proker.id %>', 'Tidak Selesai')"
+          <% if (proker.status !== "Gagal") { %>
+            <button onclick="ubahStatus('<%= proker.id %>', 'Gagal')"
                     class="px-5 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg shadow transition">
-              ❌ Tidak Selesai
+              ❌ Gagal
             </button>
           <% } %>
         </div>
@@ -122,43 +149,42 @@
     </div>
   </main>
 
-<script>
-async function ubahStatus(id, status) {
-  if (!confirm(`Apakah yakin ingin mengubah status menjadi "${status}"?`)) return;
+  <script>
+  async function ubahStatus(id, status) {
+    if (!confirm(`Apakah yakin ingin mengubah status menjadi "${status}"?`)) return;
 
-  try {
-    const res = await fetch(`/dpa/proker/${id}/status`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status })
-    });
-    const data = await res.json();
-
-    if (data.success) {
-      alert(data.message);
-
-      // update label status tanpa reload
-      const label = document.getElementById('status-label');
-      label.textContent = status;
-      label.className = "px-3 py-1 text-sm rounded-full font-medium";
-      if (status === "Sedang Berjalan") label.classList.add("bg-blue-100","text-blue-700");
-      else if (status === "Selesai") label.classList.add("bg-green-100","text-green-700");
-      else if (status === "Tidak Selesai") label.classList.add("bg-red-100","text-red-700");
-      else label.classList.add("bg-gray-100","text-gray-600");
-
-      // sembunyikan tombol yang sama
-      document.querySelectorAll('button').forEach(btn => {
-        if (btn.textContent.includes(status)) btn.style.display = 'none';
+    try {
+      const res = await fetch(`/dpa/proker/${id}/status`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status })
       });
+      const data = await res.json();
 
-    } else {
-      alert("Gagal mengubah status: " + data.message);
+      if (data.success) {
+        alert(data.message);
+
+        // update label status tanpa reload
+        const label = document.getElementById('status-label');
+        label.textContent = status;
+        label.className = "px-3 py-1 text-sm rounded-full font-medium";
+        if (status === "Selesai") label.classList.add("bg-green-100","text-green-700");
+        else if (status === "Gagal") label.classList.add("bg-red-100","text-red-700");
+
+        // sembunyikan tombol yang sama
+        document.querySelectorAll('button').forEach(btn => {
+          if (btn.textContent.includes(status)) btn.style.display = 'none';
+        });
+
+      } else {
+        alert("Gagal mengubah status: " + data.message);
+      }
+    } catch(err) {
+      console.error(err);
+      alert("Terjadi kesalahan saat mengubah status.");
     }
-  } catch(err) {
-    console.error(err);
-    alert("Terjadi kesalahan saat mengubah status.");
   }
-}
-</script>
+  </script>
 </body>
 </html>
+```

@@ -17,7 +17,7 @@
     .table-fixed th:nth-child(3) { width: 15%; }    /* Divisi */
     .table-fixed th:nth-child(4) { width: 20%; }    /* Penanggung Jawab */
     .table-fixed th:nth-child(5) { width: 15%; }    /* Status */
-    .table-fixed th:nth-child(6) { width: 120px; }  /* Aksi */
+    .table-fixed th:nth-child(6) { width: 80px; }   /* Aksi */
     
     .text-ellipsis {
       overflow: hidden;
@@ -149,11 +149,11 @@
                     </td>
                     <td class="py-3 px-4 border border-orange-100">
                       <div class="flex justify-center items-center gap-2">
-                        <!-- Detail Button Only -->
+                        <!-- Detail Button Only (tanpa background kotak) -->
                         <a href="/dpa/proker/<%= proker.id %>/detail" 
-                           class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-orange-100 text-orange-600 hover:bg-orange-200 hover:text-orange-700 transition-all duration-200" 
+                           class="text-orange-600 hover:text-orange-700 transition-all duration-200" 
                            title="Lihat Detail">
-                          <i class="fa-solid fa-eye text-sm"></i>
+                          <i class="fa-solid fa-eye text-lg"></i>
                         </a>
                       </div>
                     </td>

@@ -45,7 +45,7 @@ exports.getAllProkerDPA = async (req, res) => {
       dokumen_pendukung: r.dokumen_pendukung,
       tanggalMulaiFormatted: formatTanggal(r.tanggal_mulai),
       tanggalSelesaiFormatted: formatTanggal(r.tanggal_selesai),
-      status: r.status_db && ["Sedang Berjalan","Selesai","Tidak Selesai"].includes(r.status_db)
+      status: ["Belum Dimulai","Sedang Berjalan","Selesai","Gagal"].includes(r.status_db)
         ? r.status_db
         : "Sedang Berjalan" // fallback default
     }));
@@ -96,8 +96,7 @@ exports.getDetailProkerDPA = async (req, res) => {
     if (!rows.length) return res.status(404).send("Program Kerja tidak ditemukan");
 
     const r = rows[0];
-
-    const status = r.status_db && ["Sedang Berjalan","Selesai","Tidak Selesai"].includes(r.status_db)
+    const status = ["Belum Dimulai","Sedang Berjalan","Selesai","Gagal"].includes(r.status_db)
       ? r.status_db
       : "Sedang Berjalan"; // fallback default
 
@@ -137,7 +136,8 @@ exports.updateStatusProker = async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
-    const validStatus = ["Sedang Berjalan", "Selesai", "Tidak Selesai"];
+    // Validasi status sesuai DB
+    const validStatus = ["Belum Dimulai", "Sedang Berjalan", "Selesai", "Gagal"];
     if (!validStatus.includes(status)) {
       return res.status(400).json({ success: false, message: "Status tidak valid" });
     }

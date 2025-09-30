@@ -1,15 +1,13 @@
+```html
 <!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
   <title><%= title %></title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- FontAwesome -->
-  <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <script src="https://kit.fontawesome.com/your-fa-kit.js" crossorigin="anonymous"></script>
 </head>
-<body class="bg-gray-50 min-h-screen flex flex-col font-sans">
+<body class="bg-gray-50 min-h-screen flex flex-col">
 
   <!-- Navbar -->
   <%- include('../partials/navbarDPA', { user: user, unreadCount: unreadCount }) %>
@@ -17,172 +15,124 @@
   <!-- Sidebar -->
   <%- include('../partials/sidebarDPA', { activeNav: 'Daftar Laporan', user: user }) %>
 
-  <!-- Main Wrapper -->
-  <main class="lg:ml-80 px-6 pt-20 pb-10 flex-grow">
-    <div class="max-w-6xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-200">
+  <!-- Wrapper -->
+  <main class="lg:ml-80 px-6 pt-20 pb-8 flex-grow">
+    <div class="max-w-5xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-200">
 
       <!-- Header -->
-      <div class="bg-gradient-to-r from-orange-500 to-orange-600 px-6 py-6 flex items-center justify-between">
+      <div class="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-6 flex items-center justify-between">
         <div>
-          <h1 class="text-2xl font-bold text-white">Detail Laporan</h1>
+          <h1 class="text-2xl font-bold">Detail Laporan</h1>
           <p class="text-sm text-orange-100">Informasi lengkap laporan kegiatan HMSI</p>
         </div>
         <a href="/dpa/kelolaLaporan"
-          class="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-all duration-200">
+          class="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-all">
           <i class="fa-solid fa-arrow-left text-sm"></i>
           <span class="font-medium">Kembali</span>
         </a>
       </div>
 
-      <!-- Main Content -->
-      <div class="p-6 sm:p-8 space-y-8">
+      <!-- Body -->
+      <div class="p-6 sm:p-8 space-y-10">
+
+        <!-- Reusable Component -->
+        <% function boxField(label, value) { %>
+          <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
+            <p class="font-medium text-gray-600 mb-2"><%= label %></p>
+            <div class="bg-white border border-gray-200 p-3 rounded-lg">
+              <p class="text-gray-800 whitespace-pre-line"><%= value || '-' %></p>
+            </div>
+          </div>
+        <% } %>
 
         <!-- Informasi Dasar -->
-        <section class="bg-gray-100 p-5 rounded-xl">
-          <h4 class="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
-            <i class="fa-solid fa-info-circle text-gray-500"></i>
-            Informasi Dasar
-          </h4>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="bg-white p-4 rounded-lg shadow-sm">
-              <p class="font-medium text-gray-600 mb-1">Program Kerja</p>
-              <p class="text-gray-800 font-semibold"><%= laporan.namaProker || '-' %></p>
-            </div>
-            <div class="bg-white p-4 rounded-lg shadow-sm">
-              <p class="font-medium text-gray-600 mb-1">Divisi</p>
-              <p class="text-gray-800 font-semibold"><%= laporan.divisi || '-' %></p>
-            </div>
-            <div class="bg-white p-4 rounded-lg shadow-sm">
-              <p class="font-medium text-gray-600 mb-1">Tanggal Pelaksanaan</p>
-              <p class="text-gray-800 font-semibold"><%= laporan.tanggalFormatted || '-' %></p>
-            </div>
-            <div class="bg-white p-4 rounded-lg shadow-sm">
-              <p class="font-medium text-gray-600 mb-1">Waktu & Tempat</p>
-              <p class="text-gray-800 font-semibold"><%= laporan.waktu_tempat || '-' %></p>
-            </div>
-            <div class="md:col-span-2 bg-white p-4 rounded-lg shadow-sm">
-              <p class="font-medium text-gray-600 mb-1">Deskripsi Kegiatan</p>
-              <p class="text-gray-800 whitespace-pre-line leading-relaxed"><%= laporan.deskripsi_kegiatan || '-' %></p>
+        <section>
+          <h4 class="text-lg font-semibold text-gray-700 mb-4">Informasi Dasar</h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <%= boxField("Program Kerja", laporan.namaProker) %>
+            <%= boxField("Divisi", laporan.divisi) %>
+            <%= boxField("Tanggal Pelaksanaan", laporan.tanggalFormatted) %>
+            <%= boxField("Waktu & Tempat", laporan.waktu_tempat) %>
+            <div class="md:col-span-2">
+              <%= boxField("Deskripsi Kegiatan", laporan.deskripsi_kegiatan) %>
             </div>
           </div>
         </section>
 
         <!-- Informasi Keuangan -->
-        <section class="bg-gray-100 p-5 rounded-xl">
-          <h4 class="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
-            <i class="fa-solid fa-coins text-gray-500"></i>
-            Informasi Keuangan
-          </h4>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="bg-white p-4 rounded-lg shadow-sm">
-              <p class="font-medium text-gray-600 mb-1">Sumber Dana</p>
-              <p class="text-gray-800 font-semibold"><%= laporan.sumber_dana || '-' %></p>
-            </div>
-            <div class="bg-white p-4 rounded-lg shadow-sm">
-              <p class="font-medium text-gray-600 mb-1">Dana Terpakai</p>
-              <p class="text-gray-800 font-semibold">
-                <% if (laporan.dana_digunakan) { %>
-                  Rp <%= parseInt(laporan.dana_digunakan).toLocaleString('id-ID') %>
-                <% } else { %> - <% } %>
-              </p>
-            </div>
+        <section>
+          <h4 class="text-lg font-semibold text-gray-700 mb-4">Informasi Keuangan</h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <%= boxField("Sumber Dana", laporan.sumber_dana) %>
+            <%= boxField("Dana Terpakai", laporan.dana_digunakan ? 
+              `Rp ${parseInt(laporan.dana_digunakan).toLocaleString('id-ID')}` : '-') %>
           </div>
         </section>
 
         <!-- Target Pencapaian -->
-        <section class="bg-gray-100 p-5 rounded-xl">
-          <h4 class="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
-            <i class="fa-solid fa-bullseye text-gray-500"></i>
-            Target Pencapaian
-          </h4>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="bg-white p-4 rounded-lg shadow-sm">
-              <p class="font-medium text-gray-600 mb-1">Target Kuantitatif</p>
-              <p class="text-gray-800"><%= laporan.deskripsi_target_kuantitatif || '-' %></p>
-            </div>
-            <div class="bg-white p-4 rounded-lg shadow-sm">
-              <p class="font-medium text-gray-600 mb-1">Target Kualitatif</p>
-              <p class="text-gray-800"><%= laporan.deskripsi_target_kualitatif || '-' %></p>
-            </div>
+        <section>
+          <h4 class="text-lg font-semibold text-gray-700 mb-4">Target Pencapaian</h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <%= boxField("Target Kuantitatif", laporan.deskripsi_target_kuantitatif) %>
+            <%= boxField("Target Kualitatif", laporan.deskripsi_target_kualitatif) %>
           </div>
         </section>
 
         <!-- Kendala & Solusi -->
-        <section class="bg-gray-100 p-5 rounded-xl">
-          <h4 class="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
-            <i class="fa-solid fa-lightbulb text-gray-500"></i>
-            Kendala dan Solusi
-          </h4>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="bg-white p-4 rounded-lg shadow-sm">
-              <p class="font-medium text-gray-600 mb-1">Kendala</p>
-              <p class="text-gray-800 whitespace-pre-line leading-relaxed"><%= laporan.kendala || '-' %></p>
-            </div>
-            <div class="bg-white p-4 rounded-lg shadow-sm">
-              <p class="font-medium text-gray-600 mb-1">Solusi</p>
-              <p class="text-gray-800 whitespace-pre-line leading-relaxed"><%= laporan.solusi || '-' %></p>
-            </div>
+        <section>
+          <h4 class="text-lg font-semibold text-gray-700 mb-4">Kendala dan Solusi</h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <%= boxField("Kendala", laporan.kendala) %>
+            <%= boxField("Solusi", laporan.solusi) %>
           </div>
         </section>
 
         <!-- Sasaran -->
-        <section class="bg-gray-100 p-5 rounded-xl">
-          <h4 class="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
-            <i class="fa-solid fa-users text-gray-500"></i>
-            Sasaran Kegiatan
-          </h4>
-          <div class="bg-white p-4 rounded-lg shadow-sm">
-            <p class="text-gray-800"><%= laporan.sasaran || '-' %></p>
-          </div>
+        <section>
+          <h4 class="text-lg font-semibold text-gray-700 mb-4">Sasaran Kegiatan</h4>
+          <%= boxField("Sasaran", laporan.sasaran) %>
         </section>
 
         <!-- Dokumentasi -->
-        <section class="bg-gray-100 p-5 rounded-xl">
-          <h4 class="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
-            <i class="fa-solid fa-camera text-gray-500"></i>
-            Dokumentasi
-          </h4>
-          <div class="bg-white p-4 rounded-lg shadow-sm">
+        <section>
+          <h4 class="text-lg font-semibold text-gray-700 mb-4">Dokumentasi</h4>
+          <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
             <% if (laporan.dokumentasi) { %>
-              <% if (laporan.dokumentasi_mime === 'application/pdf') { %>
-                <embed src="/uploads/<%= laporan.dokumentasi %>" type="application/pdf" width="100%" height="500px"/>
-              <% } else { %>
-                <img src="/uploads/<%= laporan.dokumentasi %>" class="w-full max-h-96 object-contain rounded-lg"/>
-              <% } %>
-              <a href="/uploads/<%= laporan.dokumentasi %>" target="_blank"
-                 class="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition-all shadow-md">
-                <i class="fa-solid fa-download"></i> Download Dokumentasi
-              </a>
+              <div class="bg-white border border-gray-200 p-3 rounded-lg">
+                <% if (laporan.dokumentasi_mime === 'application/pdf') { %>
+                  <embed src="/uploads/<%= laporan.dokumentasi %>" type="application/pdf" width="100%" height="500px"/>
+                <% } else { %>
+                  <img src="/uploads/<%= laporan.dokumentasi %>" class="w-full max-h-96 object-contain rounded-lg"/>
+                <% } %>
+                <a href="/uploads/<%= laporan.dokumentasi %>" target="_blank"
+                  class="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition">
+                  <i class="fa-solid fa-download"></i> Download Dokumentasi
+                </a>
+              </div>
             <% } else { %>
-              <p class="text-gray-500 italic">Belum ada dokumentasi</p>
+              <div class="bg-white border border-gray-200 p-3 rounded-lg">
+                <p class="text-gray-500 italic">Belum ada dokumentasi</p>
+              </div>
             <% } %>
           </div>
         </section>
 
         <!-- Evaluasi -->
-        <section class="bg-gray-100 p-5 rounded-xl">
-          <h4 class="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
-            <i class="fa-solid fa-clipboard-check text-gray-500"></i>
-            Evaluasi DPA
-          </h4>
-          <div class="bg-white p-4 rounded-lg shadow-sm">
+        <section>
+          <h4 class="text-lg font-semibold text-gray-700 mb-4">Evaluasi DPA</h4>
+          <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
             <% if (evaluasi) { %>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                <div class="bg-gray-50 p-3 rounded-lg shadow-sm">
-                  <p class="font-medium text-gray-600 mb-1">Status Konfirmasi</p>
-                  <p class="text-gray-800 font-semibold"><%= evaluasi.status_konfirmasi || '-' %></p>
-                </div>
-                <div class="bg-gray-50 p-3 rounded-lg shadow-sm">
-                  <p class="font-medium text-gray-600 mb-1">Tanggal Evaluasi</p>
-                  <p class="text-gray-800 font-semibold"><%= evaluasi.tanggal_evaluasi || '-' %></p>
-                </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <%= boxField("Status Konfirmasi", evaluasi.status_konfirmasi) %>
+                <%= boxField("Tanggal Evaluasi", evaluasi.tanggal_evaluasi) %>
               </div>
-              <div class="mt-4 bg-gray-50 p-3 rounded-lg shadow-sm">
-                <p class="font-medium text-gray-600 mb-1">Komentar Evaluasi</p>
-                <p class="text-gray-800"><%= evaluasi.komentar || '-' %></p>
+              <div class="mt-4">
+                <%= boxField("Komentar Evaluasi", evaluasi.komentar) %>
               </div>
             <% } else { %>
-              <p class="text-gray-500 italic">Belum ada evaluasi</p>
+              <div class="bg-white border border-gray-200 p-3 rounded-lg">
+                <p class="text-gray-500 italic">Belum ada evaluasi</p>
+              </div>
             <% } %>
           </div>
         </section>
@@ -190,7 +140,7 @@
         <!-- Tombol Evaluasi -->
         <div class="flex justify-end">
           <a href="/dpa/kelolaLaporan/<%= laporan.id_laporan %>/evaluasi"
-            class="inline-flex items-center gap-2 px-6 py-3 bg-orange-500 text-white rounded-xl text-sm font-semibold hover:bg-orange-600 transition transform hover:scale-105 shadow-lg">
+            class="inline-flex items-center gap-2 px-6 py-3 bg-orange-500 text-white rounded-xl text-sm font-semibold hover:bg-orange-600 transition transform hover:scale-105">
             <i class="fa-solid fa-edit"></i> <%= evaluasi ? 'Edit Evaluasi' : 'Beri Evaluasi' %>
           </a>
         </div>
@@ -200,3 +150,4 @@
   </main>
 </body>
 </html>
+```

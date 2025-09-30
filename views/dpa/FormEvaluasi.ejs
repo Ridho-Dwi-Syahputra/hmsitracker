@@ -1,8 +1,9 @@
+```ejs
 <!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title><%= title %></title>
+  <title>Evaluasi Laporan</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col">
@@ -16,40 +17,40 @@
   <!-- Wrapper -->
   <main class="lg:ml-80 px-6 pt-20 pb-8 flex-grow animate-fade-in">
 
-    <!-- Header Card -->
-    <div class="max-w-4xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-200">
-      <div class="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-6 flex items-center justify-between">
-        <h1 class="text-2xl font-bold">Evaluasi Laporan</h1>
-        <a href="/dpa/laporan/<%= laporan.id_laporan %>" 
-           class="flex items-center gap-2 px-4 py-2 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-xl text-white transition">
-          <span>Kembali</span>
-        </a>
+    <div class="max-w-3xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-orange-200">
+
+      <!-- Header Card -->
+      <div class="bg-orange-500 text-white px-6 py-6 flex justify-between items-center">
+        <div>
+          <h1 class="text-2xl font-bold">Form Evaluasi Laporan</h1>
+          <p class="text-sm text-orange-100">Detail laporan & evaluasi</p>
+        </div>
       </div>
 
-      <!-- Body Card -->
+      <!-- Body -->
       <div class="p-6 sm:p-8 space-y-6">
-
         <!-- Alert -->
         <%- include('../partials/alert', { errorMsg: errorMsg, successMsg: successMsg }) %>
 
-        <!-- Info Laporan Kotak -->
-        <div class="space-y-4">
-          <div class="bg-white border-2 border-gray-300 rounded-xl p-4">
-            <p class="text-sm font-medium text-gray-700">Judul Laporan</p>
-            <p class="text-gray-800 mt-1"><%= laporan.judul_laporan || '-' %></p>
-          </div>
-          <div class="bg-white border-2 border-gray-300 rounded-xl p-4">
-            <p class="text-sm font-medium text-gray-700">Program Kerja</p>
-            <p class="text-gray-800 mt-1"><%= laporan.namaProker || '-' %></p>
-          </div>
-          <div class="bg-white border-2 border-gray-300 rounded-xl p-4">
-            <p class="text-sm font-medium text-gray-700">Divisi HMSI</p>
-            <p class="text-gray-800 mt-1"><%= laporan.divisi || '-' %></p>
-          </div>
-          <div class="bg-white border-2 border-gray-300 rounded-xl p-4">
-            <p class="text-sm font-medium text-gray-700">Tanggal Upload</p>
-            <p class="text-gray-800 mt-1"><%= laporan.tanggalFormatted || '-' %></p>
-          </div>
+        <!-- Info Laporan -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Judul Laporan</label>
+          <input type="text" readonly class="w-full px-4 py-3 border rounded-xl bg-gray-50" value="<%= laporan.judul_laporan || '-' %>">
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Program Kerja</label>
+          <input type="text" readonly class="w-full px-4 py-3 border rounded-xl bg-gray-50" value="<%= laporan.namaProker || '-' %>">
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Divisi HMSI</label>
+          <input type="text" readonly class="w-full px-4 py-3 border rounded-xl bg-gray-50" value="<%= laporan.divisi || '-' %>">
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Tanggal Upload</label>
+          <input type="text" readonly class="w-full px-4 py-3 border rounded-xl bg-gray-50" value="<%= laporan.tanggalFormatted || '-' %>">
         </div>
 
         <!-- Preview Dokumentasi -->
@@ -57,28 +58,27 @@
           <h4 class="text-lg font-semibold text-orange-600 mb-4">Preview Dokumentasi</h4>
           <% if (laporan.dokumentasi) { %>
             <% if (laporan.dokumentasi_mime === 'application/pdf') { %>
-              <embed src="/uploads/<%= laporan.dokumentasi %>" type="application/pdf" width="100%" height="420px" class="rounded-lg border-2 border-gray-300"/>
+              <embed src="/uploads/<%= laporan.dokumentasi %>" type="application/pdf" width="100%" height="420px" class="rounded-lg border"/>
             <% } else if (laporan.dokumentasi_mime.startsWith('image/')) { %>
               <img src="/uploads/<%= laporan.dokumentasi %>" alt="Dokumentasi" class="w-full max-h-96 object-contain rounded-lg border shadow"/>
-              <a href="/uploads/<%= laporan.dokumentasi %>" class="mt-3 inline-block px-4 py-2 bg-orange-100 text-orange-700 rounded-lg text-sm font-medium hover:bg-orange-200 transition">Download Gambar</a>
             <% } else { %>
               <div class="p-4 bg-gray-50 border rounded-lg flex items-center justify-between">
                 <div>
                   <p class="font-medium"><%= laporan.dokumentasi %></p>
-                  <p class="text-xs text-gray-500">Tipe file tidak dapat dipreview — silakan unduh.</p>
+                  <p class="text-xs text-gray-500">Tipe file tidak dapat dipreview, silakan unduh.</p>
                 </div>
                 <a href="/uploads/<%= laporan.dokumentasi %>" class="px-3 py-2 bg-orange-100 text-orange-700 rounded-lg text-sm font-medium">Download</a>
               </div>
             <% } %>
           <% } else { %>
-            <p class="text-gray-600 text-sm">Tidak ada dokumentasi diunggah.</p>
+            <p class="text-gray-500 text-sm">Tidak ada dokumentasi diunggah.</p>
           <% } %>
         </div>
 
         <!-- Komentar HMSI -->
         <% if (laporan.komentar_hmsi) { %>
           <div>
-            <h4 class="text-lg font-semibold text-teal-600 mb-4">Komentar HMSI</h4>
+            <h4 class="text-lg font-semibold text-teal-600 mb-3">Komentar HMSI</h4>
             <div class="p-4 bg-teal-50 border border-teal-200 rounded-xl">
               <p class="text-gray-800 whitespace-pre-line"><%= laporan.komentar_hmsi %></p>
             </div>
@@ -87,26 +87,22 @@
 
         <!-- Form Evaluasi -->
         <form action="/dpa/laporan/<%= laporan.id_laporan %>/evaluasi" method="POST" class="space-y-6">
-
+          <!-- Komentar -->
           <div>
-            <label for="komentar" class="block text-sm font-medium text-gray-700">Komentar Evaluasi</label>
-            <textarea id="komentar" name="komentar" rows="5" required
-              class="mt-2 block w-full rounded-xl border border-gray-300 shadow-sm 
-                     focus:border-orange-500 focus:ring-2 focus:ring-orange-500 
-                     focus:bg-orange-50 text-gray-900 placeholder-gray-400 focus:placeholder-orange-400
-                     transition-all duration-300 ease-in-out p-3 outline-none"
-              placeholder="Tulis komentar evaluasi di sini..."></textarea>
+            <label for="komentar" class="block text-sm font-semibold text-gray-700">Komentar Evaluasi</label>
+            <textarea id="komentar" name="komentar" rows="4" required
+              class="mt-2 w-full px-4 py-3 border rounded-xl shadow-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-orange-50"></textarea>
           </div>
 
+          <!-- Dropdown Status -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Status Evaluasi</label>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Status Evaluasi</label>
             <div class="relative w-60">
               <button id="dropdownButton" type="button"
-                class="flex items-center justify-between w-full px-4 py-3 border border-gray-300 rounded-xl text-sm bg-white
-                       hover:border-orange-500 hover:shadow-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200">
+                class="flex items-center justify-between w-full px-4 py-3 border rounded-xl text-sm bg-white hover:border-orange-500 focus:ring-2 focus:ring-orange-500 transition">
                 <span id="dropdownLabel">Pilih Status</span>
               </button>
-              <div id="dropdownMenu" class="hidden absolute left-0 mt-2 w-full bg-white border border-gray-300 rounded-xl shadow-lg z-10">
+              <div id="dropdownMenu" class="hidden absolute left-0 mt-2 w-full bg-white border rounded-xl shadow-lg z-10">
                 <ul class="text-sm text-gray-700">
                   <li><button type="button" class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="Revisi">Revisi</button></li>
                   <li><button type="button" class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="Selesai">Selesai</button></li>
@@ -116,14 +112,17 @@
             <input type="hidden" name="status_konfirmasi" id="statusInput" required>
           </div>
 
+          <!-- Hidden evaluator -->
           <input type="hidden" name="id_anggota" value="<%= user.id_anggota %>">
 
-          <div class="flex justify-end gap-3">
-            <a href="/dpa/laporan/<%= laporan.id_laporan %>" class="px-6 py-3 bg-gray-200 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-300 transition">Batal</a>
-            <button type="submit" class="px-6 py-3 bg-orange-500 text-white rounded-xl text-sm font-semibold hover:bg-orange-600 transition transform hover:scale-105 active:scale-95">Simpan Evaluasi</button>
+          <!-- Tombol aksi -->
+          <div class="flex justify-end items-center gap-3 pt-4 border-t">
+            <a href="/dpa/laporan/<%= laporan.id_laporan %>" 
+               class="px-6 py-3 bg-gray-400 text-white rounded-xl hover:bg-gray-500 transition">Batal</a>
+            <button type="submit" 
+               class="px-6 py-3 bg-orange-500 text-white rounded-xl font-semibold hover:bg-orange-600 transition">Simpan Evaluasi</button>
           </div>
         </form>
-
       </div>
     </div>
   </main>
@@ -148,10 +147,12 @@
     });
   </script>
 
+  <!-- Animasi -->
   <style>
     @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
-    .animate-fade-in { animation: fadeIn 0.7s ease-out forwards; }
+    .animate-fade-in { animation: fadeIn 0.6s ease-out forwards; }
   </style>
 
 </body>
 </html>
+```
