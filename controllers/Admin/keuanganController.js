@@ -1,14 +1,10 @@
-// =====================================================
 // controllers/Admin/keuanganController.js
 // Manajemen Keuangan HMSI (Pemasukan & Pengeluaran)
-// =====================================================
 
 const db = require("../../config/db"); // koneksi database MySQL
 const { v4: uuidv4 } = require("uuid");
 
-// =====================================================
 // Helper: format tanggal Indonesia
-// =====================================================
 function formatTanggal(dateValue) {
   if (!dateValue) return "-";
   const d = new Date(dateValue);
@@ -20,11 +16,9 @@ function formatTanggal(dateValue) {
   });
 }
 
-// =====================================================
 // ================== PEMASUKAN ========================
-// =====================================================
 
-// 📄 Halaman kelola kas (pemasukan)
+// Halaman kelola kas (pemasukan)
 exports.getPemasukan = async (req, res) => {
   try {
     const [rows] = await db.query(`
@@ -58,7 +52,7 @@ exports.getPemasukan = async (req, res) => {
   }
 };
 
-// ➕ Form tambah pemasukan
+// Form tambah pemasukan
 exports.getTambahPemasukan = (req, res) => {
   res.render("admin/tambahKas", {
     title: "Tambah Pemasukan Kas",
@@ -67,7 +61,7 @@ exports.getTambahPemasukan = (req, res) => {
   });
 };
 
-// 💾 Simpan pemasukan baru
+// Simpan pemasukan baru
 exports.postTambahPemasukan = async (req, res) => {
   try {
     const { sumber, jumlah } = req.body;
@@ -90,7 +84,7 @@ exports.postTambahPemasukan = async (req, res) => {
   }
 };
 
-// ✏️ Form edit pemasukan
+// Form edit pemasukan
 exports.getEditPemasukan = async (req, res) => {
   try {
     const { id } = req.params;
@@ -115,7 +109,7 @@ exports.getEditPemasukan = async (req, res) => {
   }
 };
 
-// 💾 Simpan edit pemasukan
+// Simpan edit pemasukan
 exports.postEditPemasukan = async (req, res) => {
   try {
     const { id } = req.params;
@@ -137,7 +131,7 @@ exports.postEditPemasukan = async (req, res) => {
   }
 };
 
-// 🗑️ Hapus pemasukan
+// Hapus pemasukan
 exports.deletePemasukan = async (req, res) => {
   try {
     const { id } = req.params;
@@ -152,38 +146,58 @@ exports.deletePemasukan = async (req, res) => {
   }
 };
 
-// =====================================================
 // ================== PENGELUARAN ======================
-// =====================================================
 
-// 📄 Halaman pengeluaran kas (dari laporan HMSI)
+// Halaman pengeluaran kas (dari laporan HMSI)
 exports.getPengeluaran = async (req, res) => {
   try {
-    const [rows] = await db.query(`
+
+    // NOTE: gunakan nama tabel Program_kerja (sesuai struktur DB) — bukan ProgramKerja
+    const query = `
       SELECT 
         k.id_keuangan,
         k.tanggal,
-        k.jumlah AS dana_terpakai,
+        k.jumlah,
+        k.id_laporan,
         l.divisi,
         l.judul_laporan,
+        p.Nama_ProgramKerja AS program_kerja,
         k.sumber
       FROM keuangan k
       LEFT JOIN laporan l ON k.id_laporan = l.id_laporan
+      LEFT JOIN Program_kerja p ON l.id_ProgramKerja = p.id_ProgramKerja
       WHERE k.tipe = 'Pengeluaran'
       ORDER BY k.tanggal DESC, k.created_at DESC
-    `);
+    `;
+
+
+    const [rows] = await db.query(query);
+
+
 
     let totalPengeluaran = 0;
-    const pengeluaran = rows.map((row) => {
-      const jumlah = parseFloat(row.dana_terpakai) || 0;
+    const pengeluaran = rows.map((row, i) => {
+      const jumlah = parseFloat(row.jumlah) || 0;
       totalPengeluaran += jumlah;
-      return {
+
+      const result = {
+        no: i + 1,
+        id_keuangan: row.id_keuangan,
+        id_laporan: row.id_laporan,
         divisi: row.divisi || "-",
-        program_kerja: row.judul_laporan || row.sumber || "-",
+        // program_kerja: pakai nama proker bila ada, fallback ke sumber
+        program_kerja: row.program_kerja || row.sumber || "-",
+        // judul_laporan: tetap ambil judul laporan (boleh kosong jika tidak terkait laporan)
+        judul_laporan: row.judul_laporan || "-",
         dana_terpakai: jumlah,
         tanggal_pengeluaran: formatTanggal(row.tanggal),
       };
+
+      
+      return result;
     });
+
+
 
     res.render("admin/pengeluaran", {
       title: "Pengeluaran Kas HMSI",
@@ -198,11 +212,9 @@ exports.getPengeluaran = async (req, res) => {
   }
 };
 
-// =====================================================
 // ============ RINGKASAN UNTUK DASHBOARD ==============
-// =====================================================
 
-// 🔢 Ambil total kas saat ini untuk dashboard admin
+// Ambil total kas saat ini untuk dashboard admin
 exports.getTotalKas = async (callback) => {
   try {
     const [rows] = await db.query(`

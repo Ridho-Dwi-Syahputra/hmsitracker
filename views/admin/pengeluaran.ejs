@@ -18,7 +18,7 @@
 
   <!-- Konten Utama -->
   <main class="lg:ml-80 px-6 pt-20 pb-8 flex-grow">
-    <div class="max-w-6xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-orange-200">
+    <div class="max-w-7xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-orange-200">
 
       <!-- Header -->
       <div class="bg-orange-500 text-white px-6 py-6 flex items-center justify-between">
@@ -69,6 +69,7 @@
                   <th class="py-3 px-4 font-semibold border border-orange-200">No</th>
                   <th class="py-3 px-4 font-semibold border border-orange-200">Divisi</th>
                   <th class="py-3 px-4 font-semibold border border-orange-200">Program Kerja</th>
+                  <th class="py-3 px-4 font-semibold border border-orange-200">Judul Laporan</th>
                   <th class="py-3 px-4 font-semibold border border-orange-200">Dana Terpakai</th>
                   <th class="py-3 px-4 font-semibold border border-orange-200">Tanggal Pengeluaran</th>
                 </tr>
@@ -81,17 +82,18 @@
                     <td class="py-3 px-4 border border-orange-100"><%= i + 1 %></td>
                     <td class="py-3 px-4 font-medium text-gray-800 border border-orange-100"><%= p.divisi %></td>
                     <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= p.program_kerja %></td>
+                    <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= p.judul_laporan %></td>
                     <td class="py-3 px-4 text-gray-600 border border-orange-100">Rp <%= Number(p.dana_terpakai).toLocaleString('id-ID') %></td>
                     <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= p.tanggal_pengeluaran %></td>
                   </tr>
                 <% }); %>
                 <!-- Total -->
-<tr class="bg-orange-50 font-bold">
-  <td colspan="4" class="py-3 px-4 text-right border-t border-orange-300">Total Pengeluaran</td>
-  <td class="py-3 px-4 text-orange-700 text-right border-t border-orange-300">
-    Rp <%= Number(totalPengeluaran).toLocaleString('id-ID') %>
-  </td>
-</tr>
+                <tr class="bg-orange-50 font-bold">
+                  <td colspan="5" class="py-3 px-4 text-right border-t border-orange-300">Total Pengeluaran</td>
+                  <td class="py-3 px-4 text-orange-700 text-right border-t border-orange-300">
+                    Rp <%= Number(totalPengeluaran).toLocaleString('id-ID') %>
+                  </td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -126,7 +128,8 @@
         rows.forEach(row => {
           const divisi = row.cells[1]?.innerText.toLowerCase() || "";
           const program = row.cells[2]?.innerText.toLowerCase() || "";
-          let matchSearch = divisi.includes(searchValue) || program.includes(searchValue);
+          const judul = row.cells[3]?.innerText.toLowerCase() || "";
+          let matchSearch = divisi.includes(searchValue) || program.includes(searchValue) || judul.includes(searchValue);
           row.dataset.visible = matchSearch ? "true" : "false";
         });
         paginate();

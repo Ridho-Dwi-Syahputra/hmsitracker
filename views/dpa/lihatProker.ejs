@@ -9,15 +9,13 @@
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
         crossorigin="anonymous" referrerpolicy="no-referrer" />
   <style>
-    .table-fixed {
-      table-layout: fixed;
-    }
+    .table-fixed { table-layout: fixed; }
     .table-fixed th:nth-child(1) { width: 50px; }   /* No */
     .table-fixed th:nth-child(2) { width: 30%; }    /* Nama Program */
     .table-fixed th:nth-child(3) { width: 15%; }    /* Divisi */
     .table-fixed th:nth-child(4) { width: 20%; }    /* Penanggung Jawab */
     .table-fixed th:nth-child(5) { width: 15%; }    /* Status */
-    .table-fixed th:nth-child(6) { width: 80px; }   /* Aksi */
+    .table-fixed th:nth-child(6) { width: 120px; }  /* Aksi */
     
     .text-ellipsis {
       overflow: hidden;
@@ -50,7 +48,8 @@
       <div class="p-6 sm:p-8">
 
         <!-- Search & Filter -->
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6 flex-wrap">
+
           <!-- Search -->
           <div class="flex-1">
             <div class="relative">
@@ -96,16 +95,17 @@
               class="hidden absolute right-0 mt-2 w-48 bg-white border border-orange-200 rounded-lg shadow-lg z-10">
               <ul class="text-sm text-gray-700">
                 <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="all">Semua Divisi</button></li>
-                <% 
-                  const uniqueDivisi = [...new Set(programs.map(p => p.divisi))];
-                  uniqueDivisi.forEach(div => { 
-                %>
-                  <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="<%= div %>"><%= div %></button></li>
-                <% }) %>
+                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="Internal">Internal</button></li>
+                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="Medkraf">Medkraf</button></li>
+                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="Eksternal">Eksternal</button></li>
+                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="Bikraf">Bikraf</button></li>
+                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="PSI">PSI</button></li>
+                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="PSDM">PSDM</button></li>
+                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="RTK">RTK</button></li>
               </ul>
             </div>
           </div>
-        </div>
+        </div> <!-- ⬅️ penutup flex filter -->
 
         <!-- Tabel -->
         <div class="overflow-x-auto bg-white-50 p-2 shadow-sm rounded-xl">
@@ -123,18 +123,18 @@
             <tbody id="programTable">
               <% if (programs && programs.length > 0) { %>
                 <% programs.forEach((proker, index) => { %>
-                  <tr class="hover:bg-orange-50 transition" data-status="<%= proker.status %>">
+                  <tr class="hover:bg-orange-50 transition">
                     <td class="py-3 px-4 border border-orange-100"><%= index + 1 %></td>
                     <td class="py-3 px-4 font-medium text-gray-800 border border-orange-100 text-left">
                       <div class="text-ellipsis" title="<%= proker.namaProker %>"><%= proker.namaProker %></div>
                     </td>
-                    <td class="py-3 px-4 text-gray-600 border border-orange-100">
+                    <td class="py-3 px-4 text-gray-600 border border-orange-100" data-col="divisi">
                       <div class="text-ellipsis" title="<%= proker.divisi %>"><%= proker.divisi %></div>
                     </td>
                     <td class="py-3 px-4 text-gray-600 border border-orange-100">
                       <div class="text-ellipsis" title="<%= proker.penanggungJawab %>"><%= proker.penanggungJawab %></div>
                     </td>
-                    <td class="py-3 px-4 border border-orange-100">
+                    <td class="py-3 px-4 border border-orange-100" data-col="status">
                       <% if (proker.status === "Belum Dimulai") { %>
                         <span class="px-3 py-1 text-xs rounded-full bg-yellow-100 text-yellow-700 font-medium whitespace-nowrap"><%= proker.status %></span>
                       <% } else if (proker.status === "Sedang Berjalan") { %>
@@ -149,11 +149,11 @@
                     </td>
                     <td class="py-3 px-4 border border-orange-100">
                       <div class="flex justify-center items-center gap-2">
-                        <!-- Detail Button Only (tanpa background kotak) -->
+                        <!-- Detail Button Only -->
                         <a href="/dpa/proker/<%= proker.id %>/detail" 
-                           class="text-orange-600 hover:text-orange-700 transition-all duration-200" 
+                           class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-orange-100 text-orange-600 hover:bg-orange-200 hover:text-orange-700 transition-all duration-200" 
                            title="Lihat Detail">
-                          <i class="fa-solid fa-eye text-lg"></i>
+                          <i class="fa-solid fa-eye text-sm"></i>
                         </a>
                       </div>
                     </td>
@@ -188,75 +188,75 @@
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const searchInput = document.getElementById("searchInput");
-      const dropdownButton = document.getElementById("dropdownButton");
-      const dropdownMenu = document.getElementById("dropdownMenu");
-      const dropdownLabel = document.getElementById("dropdownLabel");
-
-      const divisiDropdownBtn = document.getElementById("divisiDropdownBtn");
-      const divisiDropdownMenu = document.getElementById("divisiDropdownMenu");
-      const divisiDropdownLabel = document.getElementById("divisiDropdownLabel");
-
       const tbody = document.getElementById("programTable");
-      let rows = Array.from(tbody.querySelectorAll("tr"));
+      let rows = Array.from(tbody?.querySelectorAll("tr") || []);
 
-      let statusValue = "all";
-      let divisiValue = "all";
+      // Dropdown status
+      const statusBtn = document.getElementById("dropdownButton");
+      const statusMenu = document.getElementById("dropdownMenu");
+      const statusLabel = document.getElementById("dropdownLabel");
+
+      // Dropdown divisi
+      const divisiBtn = document.getElementById("divisiDropdownBtn");
+      const divisiMenu = document.getElementById("divisiDropdownMenu");
+      const divisiLabel = document.getElementById("divisiDropdownLabel");
+
       const rowsPerPage = 10;
       let currentPage = 1;
 
       // Close dropdowns when clicking outside
       document.addEventListener("click", (e) => {
-        if (!dropdownButton.contains(e.target)) dropdownMenu.classList.add("hidden");
-        if (!divisiDropdownBtn.contains(e.target)) divisiDropdownMenu.classList.add("hidden");
+        if (!statusBtn.contains(e.target)) statusMenu.classList.add("hidden");
+        if (!divisiBtn.contains(e.target)) divisiMenu.classList.add("hidden");
       });
 
       // Toggle dropdown status
-      dropdownButton.addEventListener("click", (e) => {
+      statusBtn.addEventListener("click", (e) => {
         e.stopPropagation();
-        dropdownMenu.classList.toggle("hidden");
-        divisiDropdownMenu.classList.add("hidden");
+        statusMenu.classList.toggle("hidden");
+        divisiMenu.classList.add("hidden");
       });
 
-      dropdownMenu.querySelectorAll("button").forEach(btn => {
+      // Toggle dropdown divisi
+      divisiBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        divisiMenu.classList.toggle("hidden");
+        statusMenu.classList.add("hidden");
+      });
+
+      // Dropdown select
+      statusMenu.querySelectorAll("button").forEach(btn => {
         btn.addEventListener("click", () => {
-          statusValue = btn.dataset.value;
-          dropdownLabel.textContent = btn.textContent;
-          dropdownMenu.classList.add("hidden");
+          statusLabel.textContent = btn.dataset.value === "all" ? "Semua Status" : btn.dataset.value;
+          statusMenu.classList.add("hidden");
           currentPage = 1;
           filterRows();
         });
       });
 
-      // Toggle dropdown divisi
-      divisiDropdownBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        divisiDropdownMenu.classList.toggle("hidden");
-        dropdownMenu.classList.add("hidden");
-      });
-
-      divisiDropdownMenu.querySelectorAll("button").forEach(btn => {
+      divisiMenu.querySelectorAll("button").forEach(btn => {
         btn.addEventListener("click", () => {
-          divisiValue = btn.dataset.value;
-          divisiDropdownLabel.textContent = btn.textContent;
-          divisiDropdownMenu.classList.add("hidden");
+          divisiLabel.textContent = btn.dataset.value === "all" ? "Semua Divisi" : btn.dataset.value;
+          divisiMenu.classList.add("hidden");
           currentPage = 1;
           filterRows();
         });
       });
 
       function filterRows() {
-        rows = Array.from(tbody.querySelectorAll("tr"));
         const searchValue = searchInput.value.toLowerCase();
+        const selectedStatus = statusLabel.textContent.trim();
+        const selectedDivisi = divisiLabel.textContent.trim();
 
         rows.forEach(row => {
           const namaProker = row.cells[1]?.innerText.toLowerCase() || "";
-          const divisi = row.cells[2]?.innerText.toLowerCase() || "";
+          const divisi = row.querySelector("td[data-col='divisi']")?.innerText.trim() || "";
           const pj = row.cells[3]?.innerText.toLowerCase() || "";
-          const status = row.cells[4]?.innerText.trim() || "";
+          const status = row.querySelector("td[data-col='status']")?.innerText.trim() || "";
 
-          let matchSearch = namaProker.includes(searchValue) || divisi.includes(searchValue) || pj.includes(searchValue);
-          let matchStatus = (statusValue === "all" || status === statusValue);
-          let matchDivisi = (divisiValue === "all" || divisi === divisiValue.toLowerCase());
+          let matchSearch = namaProker.includes(searchValue) || pj.includes(searchValue) || divisi.toLowerCase().includes(searchValue);
+          let matchStatus = selectedStatus === "Semua Status" || status === selectedStatus;
+          let matchDivisi = selectedDivisi === "Semua Divisi" || divisi === selectedDivisi;
 
           row.dataset.visible = (matchSearch && matchStatus && matchDivisi) ? "true" : "false";
         });
@@ -265,7 +265,7 @@
       }
 
       function paginate() {
-        let visibleRows = rows.filter(row => row.dataset.visible === "true");
+        let visibleRows = rows.filter(row => row.dataset.visible !== "false");
         let totalPages = Math.ceil(visibleRows.length / rowsPerPage);
         if (currentPage > totalPages) currentPage = totalPages || 1;
 
@@ -281,27 +281,15 @@
         document.getElementById("nextPage").disabled = currentPage === totalPages || totalPages === 0;
       }
 
-      document.getElementById("prevPage").addEventListener("click", () => { 
-        if (currentPage > 1) {
-          currentPage--; 
-          paginate(); 
-        }
-      });
-      
-      document.getElementById("nextPage").addEventListener("click", () => { 
-        let visibleRows = rows.filter(row => row.dataset.visible === "true");
+      searchInput.addEventListener("input", () => { currentPage = 1; filterRows(); });
+      document.getElementById("prevPage").addEventListener("click", () => { if (currentPage > 1) { currentPage--; paginate(); } });
+      document.getElementById("nextPage").addEventListener("click", () => {
+        let visibleRows = rows.filter(row => row.dataset.visible !== "false");
         let totalPages = Math.ceil(visibleRows.length / rowsPerPage);
-        if (currentPage < totalPages) {
-          currentPage++; 
-          paginate(); 
-        }
+        if (currentPage < totalPages) { currentPage++; paginate(); }
       });
 
-      searchInput.addEventListener("input", () => {
-        currentPage = 1;
-        filterRows();
-      });
-
+      rows.forEach(row => row.dataset.visible = "true");
       filterRows();
     });
   </script>

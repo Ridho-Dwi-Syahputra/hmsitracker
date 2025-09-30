@@ -6,6 +6,9 @@
   <title><%= title %></title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://kit.fontawesome.com/your-fa-kit.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col">
 
@@ -25,13 +28,14 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
           </svg>
         </div>
+
         
         <!-- Title -->
-        <h3 class="text-xl font-bold text-gray-900 mb-2">Berhasil Diperbarui!</h3>
+        <h3 class="text-xl font-bold text-gray-900 mb-2">Berhasil Disimpan!</h3>
         
         <!-- Message -->
-        <p class="text-gray-600 mb-6">Laporan berhasil diperbarui dan perubahan telah disimpan.</p>
-        
+        <p class="text-gray-600 mb-6">Laporan berhasil disimpan dan perubahan telah diterapkan.</p>
+
         <!-- Button -->
         <button id="closeSuccessModal" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-3 px-6 rounded-xl transition-colors duration-200">
           Kembali ke Daftar Laporan
@@ -52,7 +56,7 @@
         </div>
         
         <!-- Title -->
-        <h3 class="text-xl font-bold text-gray-900 mb-2">Gagal Memperbarui!</h3>
+        <h3 class="text-xl font-bold text-gray-900 mb-2">Gagal Meyimpan!</h3>
         
         <!-- Message -->
         <p id="errorMessage" class="text-gray-600 mb-6">Mohon periksa kembali data yang Anda masukkan.</p>
@@ -64,6 +68,31 @@
       </div>
     </div>
   </div>
+
+  <!-- File Size Error Modal -->
+<div id="fileSizeModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+  <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="fileSizeModalContent">
+    <div class="text-center">
+      <!-- Warning Icon -->
+      <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <svg class="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+        </svg>
+      </div>
+      
+      <!-- Title -->
+      <h3 class="text-xl font-bold text-gray-900 mb-2">File Terlalu Besar!</h3>
+      
+      <!-- Message -->
+      <p class="text-gray-600 mb-6">Ukuran file maksimal yang diperbolehkan adalah <span class="font-semibold">5MB</span>. Silakan pilih file lain.</p>
+      
+      <!-- Button -->
+      <button id="closeFileSizeModal" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-3 px-6 rounded-xl transition-colors duration-200">
+        Mengerti
+      </button>
+    </div>
+  </div>
+</div>
 
   <!-- Validation Modal -->
   <div id="validationModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
@@ -205,14 +234,6 @@
                   class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm hover:border-gray-400 transition-all">
               </div>
 
-              <!-- Dana Terpakai -->
-              <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 md:col-span-2 hover:bg-gray-100/50 transition-colors">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Dana Terpakai dari Uang Kas HMSI (Rp)</label>
-                <input type="number" name="dana_terpakai" id="dana_terpakai"
-                  value="<%= old.dana_terpakai || laporan.dana_terpakai %>"
-                  placeholder="1500000"
-                  class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm hover:border-gray-400 transition-all">
-              </div>
             </div>
           </div>
 
@@ -357,7 +378,7 @@
             </a>
             <button type="submit" id="submitBtn"
               class="flex items-center justify-center gap-2 px-8 py-3 text-white bg-orange-500 rounded-xl text-sm font-semibold transition-all duration-200 hover:bg-orange-600 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed">
-              <span id="btnText">Perbarui</span>
+              <span id="btnText">Simpan</span>
               <div id="btnSpinner" class="hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
             </button>
           </div>
@@ -383,7 +404,7 @@
         content.classList.add('scale-100', 'opacity-100');
       }, 10);
     }
-
+  
     function hideModal(modalId) {
       const modal = document.getElementById(modalId);
       const content = document.getElementById(modalId + 'Content');
@@ -395,7 +416,7 @@
         modal.classList.add('hidden');
       }, 300);
     }
-
+  
     // Modal event listeners
     document.getElementById('closeSuccessModal').addEventListener('click', () => {
       hideModal('successModal');
@@ -403,24 +424,31 @@
         window.location.href = '/hmsi/laporan';
       }, 300);
     });
-
+  
     document.getElementById('closeErrorModal').addEventListener('click', () => {
       hideModal('errorModal');
     });
-
+  
     document.getElementById('closeValidationModal').addEventListener('click', () => {
       hideModal('validationModal');
     });
-
-    // Close modal when clicking outside
-    ['successModal', 'errorModal', 'validationModal'].forEach(modalId => {
-      document.getElementById(modalId).addEventListener('click', (e) => {
-        if (e.target.id === modalId) {
-          hideModal(modalId);
-        }
-      });
+  
+    document.getElementById('closeFileSizeModal').addEventListener('click', () => {
+      hideModal('fileSizeModal');
     });
-
+  
+    // Close modal when clicking outside
+    ['successModal', 'errorModal', 'validationModal', 'fileSizeModal'].forEach(modalId => {
+      const modal = document.getElementById(modalId);
+      if (modal) {
+        modal.addEventListener('click', (e) => {
+          if (e.target.id === modalId) {
+            hideModal(modalId);
+          }
+        });
+      }
+    });
+  
     // Toggle image preview function
     function togglePreview() {
       const preview = document.getElementById('imagePreview');
@@ -428,7 +456,7 @@
         preview.classList.toggle('hidden');
       }
     }
-
+  
     // Dropdown Proker
     const btn = document.getElementById("prokerDropdownBtn");
     const menu = document.getElementById("prokerDropdownMenu");
@@ -445,43 +473,50 @@
     window.addEventListener("click", (e) => {
       if (!btn.contains(e.target) && !menu.contains(e.target)) menu.classList.add("hidden");
     });
-
+  
     // File upload functionality
     const dropzone = document.getElementById('dropzone');
     const fileInput = document.getElementById('fileUpload');
     const fileName = document.getElementById('fileName');
-
-    dropzone.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      dropzone.classList.add('border-orange-400', 'bg-orange-50');
-    });
-    
-    dropzone.addEventListener('dragleave', () => {
-      dropzone.classList.remove('border-orange-400', 'bg-orange-50');
-    });
-    
+  
     dropzone.addEventListener('drop', (e) => {
       e.preventDefault();
       dropzone.classList.remove('border-orange-400', 'bg-orange-50');
       const files = e.dataTransfer.files;
       if (files.length > 0) {
+        const file = files[0];
+        if (file.size > 5 * 1024 * 1024) {
+          // 🚨 pakai modal khusus file size
+          showModal('fileSizeModal');
+          fileInput.value = ''; // reset
+          fileName.textContent = '';
+          return;
+        }
         fileInput.files = files;
-        fileName.textContent = `File baru dipilih: ${files[0].name}`;
+        fileName.textContent = `File baru dipilih: ${file.name}`;
         validateField(fileInput);
       }
     });
-
+  
     fileInput.addEventListener('change', (e) => {
       if (e.target.files.length > 0) {
-        fileName.textContent = `File baru dipilih: ${e.target.files[0].name}`;
+        const file = e.target.files[0];
+        if (file.size > 5 * 1024 * 1024) {
+          // 🚨 pakai modal khusus file size
+          showModal('fileSizeModal');
+          fileInput.value = ''; // reset
+          fileName.textContent = '';
+          return;
+        }
+        fileName.textContent = `File baru dipilih: ${file.name}`;
         validateField(fileInput);
       }
     });
-
+  
     // Sumber dana radio button functionality
     const radioButtons = document.querySelectorAll('input[name="sumber_dana_radio"]');
     const textInput = document.getElementById('sumber_dana_text');
-
+  
     radioButtons.forEach(radio => {
       radio.addEventListener('change', function() {
         if (this.value === 'uang_kas') {
@@ -495,21 +530,20 @@
         }
       });
     });
-
+  
     // Validation functions
     function validateField(field) {
       const errorDiv = field.closest('.bg-gray-50')?.querySelector('.error-message') || 
                       field.closest('div')?.querySelector('.error-message');
       
       if (!errorDiv) return true;
-
+  
       let isValid = true;
       let errorMessage = '';
-
+  
       // Check if field is required and empty
       if (field.hasAttribute('required')) {
         if (field.type === 'file') {
-          // File is optional in edit mode, but check file size and type if provided
           if (field.files.length > 0) {
             const file = field.files[0];
             const maxSize = 5 * 1024 * 1024; // 5MB
@@ -528,13 +562,13 @@
           errorMessage = 'Field ini wajib diisi';
         }
       }
-
+  
       // Special validation for dropdown
       if (field.id === 'prokerInput' && field.value === '') {
         isValid = false;
         errorMessage = 'Program Kerja wajib dipilih';
       }
-
+  
       // Show/hide error message
       if (!isValid) {
         errorDiv.textContent = errorMessage;
@@ -543,7 +577,6 @@
           field.classList.add('border-red-500');
           field.classList.remove('border-gray-300');
         } else {
-          // For dropdown, highlight the button
           const dropdownBtn = document.getElementById('prokerDropdownBtn');
           if (dropdownBtn) {
             dropdownBtn.classList.add('border-red-500');
@@ -556,7 +589,6 @@
           field.classList.remove('border-red-500');
           field.classList.add('border-gray-300');
         } else {
-          // For dropdown, remove highlight from button
           const dropdownBtn = document.getElementById('prokerDropdownBtn');
           if (dropdownBtn) {
             dropdownBtn.classList.remove('border-red-500');
@@ -564,10 +596,10 @@
           }
         }
       }
-
+  
       return isValid;
     }
-
+  
     function validateAllFields() {
       let allValid = true;
       let emptyFields = [];
@@ -578,7 +610,7 @@
         { id: 'waktu_tempat', name: 'Waktu & Tempat' },
         { id: 'deskripsi_kegiatan', name: 'Deskripsi Kegiatan' }
       ];
-
+  
       requiredFields.forEach(fieldInfo => {
         const field = document.getElementById(fieldInfo.id);
         if (field) {
@@ -591,14 +623,13 @@
           }
         }
       });
-
+  
       // Also validate file upload
       const fileField = document.getElementById('fileUpload');
       if (fileField && !validateField(fileField)) {
         allValid = false;
       }
-
-      // Update validation modal message if there are empty fields
+  
       if (emptyFields.length > 0) {
         let message = '';
         if (emptyFields.length === 1) {
@@ -609,13 +640,12 @@
           const lastField = emptyFields.pop();
           message = `Field ${emptyFields.join(', ')} dan ${lastField} wajib diisi.`;
         }
-        
         document.getElementById('validationMessage').textContent = message;
       }
-
+  
       return allValid;
     }
-
+  
     // Add real-time validation
     document.querySelectorAll('input[required], textarea[required]').forEach(field => {
       field.addEventListener('blur', () => validateField(field));
@@ -625,36 +655,32 @@
         }
       });
     });
-
-    // Also validate dropdown when changed
+  
     document.getElementById('prokerInput').addEventListener('change', () => {
       validateField(document.getElementById('prokerInput'));
     });
-
+  
     // Form submission with validation
     const form = document.getElementById('editLaporanForm');
     const submitBtn = document.getElementById('submitBtn');
     const btnText = document.getElementById('btnText');
     const btnSpinner = document.getElementById('btnSpinner');
-
+  
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       
-      // Validate all fields before submission
       if (!validateAllFields()) {
         showModal('validationModal');
         return;
       }
-
-      // Show loading state
+  
       submitBtn.disabled = true;
       btnText.textContent = 'Menyimpan...';
       btnSpinner.classList.remove('hidden');
-
-      // Prepare form data
+  
       const formData = new FormData(form);
       
-      // Handle sumber dana logic
+      // Handle sumber dana
       const sumberDanaRadio = document.querySelector('input[name="sumber_dana_radio"]:checked');
       if (sumberDanaRadio) {
         if (sumberDanaRadio.value === 'uang_kas') {
@@ -664,8 +690,7 @@
           formData.set('sumber_dana', sumberDanaText || '');
         }
       }
-
-      // Submit form
+  
       fetch(form.action, {
         method: 'POST',
         body: formData
@@ -675,7 +700,7 @@
           showModal('successModal');
         } else {
           return response.text().then(text => {
-            throw new Error(text || 'Terjadi kesalahan saat memperbarui laporan');
+            throw new Error(text || 'Terjadi kesalahan saat menyimpan laporan');
           });
         }
       })
@@ -686,12 +711,12 @@
       })
       .finally(() => {
         submitBtn.disabled = false;
-        btnText.textContent = 'Perbarui';
+        btnText.textContent = 'Simpan';
         btnSpinner.classList.add('hidden');
       });
     });
-
-    // Initialize sumber dana state on page load
+  
+    // Initialize sumber dana on load
     document.addEventListener('DOMContentLoaded', function() {
       const checkedRadio = document.querySelector('input[name="sumber_dana_radio"]:checked');
       if (checkedRadio && checkedRadio.value === 'uang_kas') {
@@ -700,5 +725,6 @@
       }
     });
   </script>
+  
 </body>
 </html>
