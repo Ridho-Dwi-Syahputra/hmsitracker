@@ -57,7 +57,7 @@ exports.getAllProkerDPA = async (req, res) => {
     `);
  
     const programs = rows.map(r => {
-      // Gunakan status dari DB kalau sudah "Selesai"/"Tidak Selesai"
+      // Gunakan status dari DB kalau sudah "Selesai"/"Gagal"
       let status = r.status_db;
       if (!status || ["Belum Dimulai", "Sedang Berjalan"].includes(status)) {
         status = calculateStatus(r.tanggal_mulai, r.tanggal_selesai);
@@ -121,10 +121,21 @@ exports.getDetailProkerDPA = async (req, res) => {
       [req.params.id]
     );
 
-    if (!rows.length) return res.status(404).send("Program Kerja tidak ditemukan");
+    if (!rows.length) {
+      return res.status(404).send("Program Kerja tidak ditemukan");
+    }
 
     const r = rows[0];
-    const status = ["Belum Dimulai","Sedang Berjalan","Selesai","Gagal"].includes(r.status_db)
+    
+    // ✅ PERBAIKAN: Gunakan status dari DB jika valid, atau hitung otomatis
+    let status = r.status_db;
+    if (!status || !["Belum Dimulai", "Sedang Berjalan", "Selesai", "Gagal"].includes(status)) {
+      status = calculateStatus(r.tanggal_mulai, r.tanggal_selesai);
+    }
+    
+    console.log('📊 Status dari database:', r.status_db); // Debug log
+    console.log('📊 Status yang digunakan:', status); // Debug log
+
     const proker = {
       id: r.id,
       namaProker: r.namaProker,
@@ -136,7 +147,7 @@ exports.getDetailProkerDPA = async (req, res) => {
       dokumen_pendukung: r.dokumen_pendukung,
       tanggalMulaiFormatted: formatTanggal(r.tanggal_mulai),
       tanggalSelesaiFormatted: formatTanggal(r.tanggal_selesai),
-      status
+      status  // ✅ Ini sekarang berisi string status yang benar
     };
 
     res.render("dpa/detailProker", {
@@ -161,10 +172,15 @@ exports.updateStatusProker = async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
+    console.log('📝 Request update status - ID:', id, 'Status:', status);
+
     // Validasi status sesuai DB
     const validStatus = ["Belum Dimulai", "Sedang Berjalan", "Selesai", "Gagal"];
     if (!validStatus.includes(status)) {
-      return res.status(400).json({ success: false, message: "Status tidak valid" });
+      return res.status(400).json({ 
+        success: false, 
+        message: "Status tidak valid. Harus salah satu dari: Belum Dimulai, Sedang Berjalan, Selesai, Gagal" 
+      });
     }
 
     // 🔹 Ambil info proker dulu untuk notifikasi
@@ -176,15 +192,29 @@ exports.updateStatusProker = async (req, res) => {
       [id]
     );
 
-    if (!rows.length) return res.status(404).json({ success: false, message: "Proker tidak ditemukan" });
+    if (!rows.length) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "Program kerja tidak ditemukan" 
+      });
+    }
 
     const proker = rows[0];
 
-    // Update status
-    await db.query(
-      "UPDATE Program_kerja SET Status=? WHERE id_ProgramKerja=?",
+    // ✅ Update status di database
+    const [result] = await db.query(
+      "UPDATE Program_kerja SET Status = ? WHERE id_ProgramKerja = ?",
       [status, id]
     );
+
+    console.log('✅ Update result - Rows affected:', result.affectedRows);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "Program kerja tidak ditemukan atau tidak ada perubahan" 
+      });
+    }
 
     // 🔴 Hapus notifikasi lama sebelum menambah yang baru
     await deleteOldProkerNotif(id);
@@ -198,9 +228,19 @@ exports.updateStatusProker = async (req, res) => {
       [idNotifikasi, pesan, proker.divisi, id]
     );
 
-    res.json({ success: true, message: `Status program kerja diubah menjadi ${status}` });
+    console.log('✅ Status berhasil diubah dan notifikasi terkirim');
+
+    res.json({ 
+      success: true, 
+      message: `Status program kerja berhasil diubah menjadi ${status}` 
+    });
+
   } catch (err) {
     console.error("❌ Error updateStatusProker:", err.message);
-    res.status(500).json({ success: false, message: "Gagal mengubah status proker" });
+    console.error("❌ Stack trace:", err.stack);
+    res.status(500).json({ 
+      success: false, 
+      message: "Gagal mengubah status program kerja: " + err.message 
+    });
   }
 };

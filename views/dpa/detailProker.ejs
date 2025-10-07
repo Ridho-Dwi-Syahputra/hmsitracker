@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -10,6 +9,78 @@
         crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col font-sans">
+
+  <!-- Success Modal -->
+  <div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="successModalContent">
+      <div class="text-center">
+        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+        </div>
+        <h3 id="successModalTitle" class="text-xl font-bold text-gray-900 mb-2">Status Berhasil Diubah!</h3>
+        <p id="successModalMessage" class="text-gray-600 mb-6">Status program kerja telah berhasil diperbarui.</p>
+        <button id="closeSuccessModal" class="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-3 px-6 rounded-xl transition-colors duration-200">
+          Mengerti
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error Modal -->
+  <div id="errorModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="errorModalContent">
+      <div class="text-center">
+        <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </div>
+        <h3 id="errorModalTitle" class="text-xl font-bold text-gray-900 mb-2">Gagal Mengubah Status!</h3>
+        <p id="errorMessage" class="text-gray-600 mb-6">Terjadi kesalahan saat mengubah status. Mohon coba lagi.</p>
+        <button id="closeErrorModal" class="w-full bg-red-500 hover:bg-red-600 text-white font-medium py-3 px-6 rounded-xl transition-colors duration-200">
+          Tutup
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirmation Modal -->
+  <div id="confirmModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="confirmModalContent">
+      <div class="text-center">
+        <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+        <h3 id="confirmModalTitle" class="text-xl font-bold text-gray-900 mb-2">Konfirmasi Perubahan Status</h3>
+        <p id="confirmModalMessage" class="text-gray-600 mb-6">Apakah Anda yakin ingin mengubah status?</p>
+        <div class="flex gap-3">
+          <button id="cancelConfirmModal" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-3 px-6 rounded-xl transition-colors duration-200">
+            Batal
+          </button>
+          <button id="proceedConfirmModal" class="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-medium py-3 px-6 rounded-xl transition-colors duration-200">
+            Ya, Ubah
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Modal -->
+  <div id="loadingModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="loadingModalContent">
+      <div class="text-center">
+        <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div class="w-8 h-8 border-4 border-blue-200 border-t-blue-500 rounded-full animate-spin"></div>
+        </div>
+        <h3 id="loadingModalTitle" class="text-xl font-bold text-gray-900 mb-2">Memproses...</h3>
+        <p id="loadingModalMessage" class="text-gray-600 mb-6">Mohon tunggu sebentar.</p>
+      </div>
+    </div>
+  </div>
 
   <!-- Navbar -->
   <%- include('../partials/navbarDPA', { user: user, unreadCount: unreadCount }) %>
@@ -42,7 +113,6 @@
           <h4 class="text-lg font-semibold text-gray-700 mb-2">Informasi Program Kerja</h4>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-            <!-- Field -->
             <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
               <p class="font-medium text-gray-600 mb-1">Nama Program Kerja</p>
               <div class="bg-white border border-gray-200 p-3 rounded-lg">
@@ -129,19 +199,37 @@
           </div>
         </section>
 
-        <!-- Tombol Ubah Status -->
-        <div class="flex gap-3 justify-end mt-6">
-          <% if (proker.status !== "Selesai") { %>
-            <button onclick="ubahStatus('<%= proker.id %>', 'Selesai')"
-                    class="px-5 py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg shadow transition">
-              ✅ Selesai
+        <!-- Tombol Ubah Status - HANYA MUNCUL JIKA STATUS BELUM SELESAI/GAGAL -->
+        <div id="statusButtons" class="flex gap-3 justify-end mt-6">
+          <% if (proker.status !== "Selesai" && proker.status !== "Gagal") { %>
+            <button onclick="ubahStatus('<%= proker.id %>', 'Selesai')" id="btnSelesai"
+                    class="group relative overflow-hidden px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 active:scale-95">
+              <span class="relative z-10 flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span>Selesai</span>
+              </span>
+              <div class="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
             </button>
-          <% } %>
-          <% if (proker.status !== "Gagal") { %>
-            <button onclick="ubahStatus('<%= proker.id %>', 'Gagal')"
-                    class="px-5 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg shadow transition">
-              ❌ Gagal
+            
+            <button onclick="ubahStatus('<%= proker.id %>', 'Gagal')" id="btnGagal"
+                    class="group relative overflow-hidden px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 active:scale-95">
+              <span class="relative z-10 flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span>Gagal</span>
+              </span>
+              <div class="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
             </button>
+          <% } else { %>
+            <div class="w-full text-center py-3 px-6 bg-gray-100 rounded-xl">
+              <p class="text-gray-600 text-sm">
+                <i class="fa-solid fa-info-circle mr-2"></i>
+                Status program kerja sudah final dan tidak dapat diubah.
+              </p>
+            </div>
           <% } %>
         </div>
 
@@ -150,41 +238,219 @@
   </main>
 
   <script>
-  async function ubahStatus(id, status) {
-    if (!confirm(`Apakah yakin ingin mengubah status menjadi "${status}"?`)) return;
+  // Pop-up Message Utility Class
+  class PopupMessage {
+    static showModal(modalId) {
+      const modal = document.getElementById(modalId);
+      const content = document.getElementById(modalId + 'Content');
+      
+      if (!modal || !content) return;
+      
+      modal.classList.remove('hidden');
+      setTimeout(() => {
+        content.classList.remove('scale-95', 'opacity-0');
+        content.classList.add('scale-100', 'opacity-100');
+      }, 10);
+    }
 
-    try {
-      const res = await fetch(`/dpa/proker/${id}/status`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status })
+    static hideModal(modalId, callback = null) {
+      const modal = document.getElementById(modalId);
+      const content = document.getElementById(modalId + 'Content');
+      
+      if (!modal || !content) return;
+      
+      content.classList.remove('scale-100', 'opacity-100');
+      content.classList.add('scale-95', 'opacity-0');
+      
+      setTimeout(() => {
+        modal.classList.add('hidden');
+        if (callback) callback();
+      }, 300);
+    }
+
+    static showSuccess(title = 'Berhasil!', message = 'Operasi berhasil dilakukan.', buttonText = 'OK', callback = null) {
+      document.getElementById('successModalTitle').textContent = title;
+      document.getElementById('successModalMessage').textContent = message;
+      
+      const button = document.getElementById('closeSuccessModal');
+      button.textContent = buttonText;
+      button.replaceWith(button.cloneNode(true));
+      const newButton = document.getElementById('closeSuccessModal');
+      
+      newButton.addEventListener('click', () => {
+        this.hideModal('successModal', callback);
       });
-      const data = await res.json();
+      
+      this.showModal('successModal');
+    }
 
-      if (data.success) {
-        alert(data.message);
+    static showError(title = 'Gagal!', message = 'Terjadi kesalahan saat memproses data.', buttonText = 'Tutup', callback = null) {
+      document.getElementById('errorModalTitle').textContent = title;
+      document.getElementById('errorMessage').textContent = message;
+      
+      const button = document.getElementById('closeErrorModal');
+      button.textContent = buttonText;
+      button.replaceWith(button.cloneNode(true));
+      const newButton = document.getElementById('closeErrorModal');
+      
+      newButton.addEventListener('click', () => {
+        this.hideModal('errorModal', callback);
+      });
+      
+      this.showModal('errorModal');
+    }
 
-        // update label status tanpa reload
-        const label = document.getElementById('status-label');
-        label.textContent = status;
-        label.className = "px-3 py-1 text-sm rounded-full font-medium";
-        if (status === "Selesai") label.classList.add("bg-green-100","text-green-700");
-        else if (status === "Gagal") label.classList.add("bg-red-100","text-red-700");
+    static showConfirm(title = 'Konfirmasi', message = 'Apakah Anda yakin ingin melanjutkan?', onConfirm = null, onCancel = null, confirmText = 'Ya', cancelText = 'Batal') {
+      document.getElementById('confirmModalTitle').textContent = title;
+      document.getElementById('confirmModalMessage').textContent = message;
+      
+      const confirmButton = document.getElementById('proceedConfirmModal');
+      const cancelButton = document.getElementById('cancelConfirmModal');
+      
+      confirmButton.textContent = confirmText;
+      cancelButton.textContent = cancelText;
+      
+      confirmButton.replaceWith(confirmButton.cloneNode(true));
+      cancelButton.replaceWith(cancelButton.cloneNode(true));
+      
+      const newConfirmButton = document.getElementById('proceedConfirmModal');
+      const newCancelButton = document.getElementById('cancelConfirmModal');
+      
+      newConfirmButton.addEventListener('click', () => {
+        this.hideModal('confirmModal', onConfirm);
+      });
+      
+      newCancelButton.addEventListener('click', () => {
+        this.hideModal('confirmModal', onCancel);
+      });
+      
+      this.showModal('confirmModal');
+    }
 
-        // sembunyikan tombol yang sama
-        document.querySelectorAll('button').forEach(btn => {
-          if (btn.textContent.includes(status)) btn.style.display = 'none';
-        });
+    static showLoading(title = 'Memproses...', message = 'Mohon tunggu sebentar.') {
+      document.getElementById('loadingModalTitle').textContent = title;
+      document.getElementById('loadingModalMessage').textContent = message;
+      this.showModal('loadingModal');
+    }
 
-      } else {
-        alert("Gagal mengubah status: " + data.message);
-      }
-    } catch(err) {
-      console.error(err);
-      alert("Terjadi kesalahan saat mengubah status.");
+    static hideLoading(callback = null) {
+      this.hideModal('loadingModal', callback);
     }
   }
+
+  // Initialize event listeners
+  document.addEventListener('DOMContentLoaded', () => {
+    const modals = ['successModal', 'errorModal', 'confirmModal', 'loadingModal'];
+    
+    modals.forEach(modalId => {
+      const modal = document.getElementById(modalId);
+      if (modal) {
+        modal.addEventListener('click', (e) => {
+          if (e.target.id === modalId) {
+            PopupMessage.hideModal(modalId);
+          }
+        });
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        modals.forEach(modalId => {
+          const modal = document.getElementById(modalId);
+          if (modal && !modal.classList.contains('hidden')) {
+            PopupMessage.hideModal(modalId);
+          }
+        });
+      }
+    });
+  });
+
+  // Fungsi ubah status - KEDUA BUTTON AKAN HILANG
+  async function ubahStatus(id, status) {
+    PopupMessage.showConfirm(
+      'Konfirmasi Perubahan Status',
+      `Apakah Anda yakin ingin mengubah status menjadi "${status}"?`,
+      async () => {
+        PopupMessage.showLoading('Mengubah Status...', 'Mohon tunggu sebentar.');
+
+        try {
+          const res = await fetch(`/dpa/proker/${id}/status`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status })
+          });
+
+          const data = await res.json();
+
+          PopupMessage.hideLoading(() => {
+            if (data.success) {
+              PopupMessage.showSuccess(
+                'Status Berhasil Diubah!',
+                data.message || `Status program kerja telah berhasil diubah menjadi "${status}".`,
+                'Mengerti'
+              );
+
+              // Update label status
+              const label = document.getElementById('status-label');
+              label.textContent = status;
+              label.className = "px-3 py-1 text-sm rounded-full font-medium";
+              if (status === "Selesai") {
+                label.classList.add("bg-green-100","text-green-700");
+              } else if (status === "Gagal") {
+                label.classList.add("bg-red-100","text-red-700");
+              }
+
+              // ✅ HILANGKAN KEDUA BUTTON SEKALIGUS
+              const statusButtons = document.getElementById('statusButtons');
+              if (statusButtons) {
+                // Fade out semua button
+                const buttons = statusButtons.querySelectorAll('button');
+                buttons.forEach(btn => {
+                  btn.style.opacity = '0';
+                  btn.style.transform = 'scale(0.9)';
+                });
+                
+                // Ganti dengan pesan info
+                setTimeout(() => {
+                  statusButtons.innerHTML = `
+                    <div class="w-full text-center py-3 px-6 bg-gray-100 rounded-xl animate-fade-in">
+                      <p class="text-gray-600 text-sm">
+                        <i class="fa-solid fa-info-circle mr-2"></i>
+                        Status program kerja sudah final dan tidak dapat diubah.
+                      </p>
+                    </div>
+                  `;
+                }, 300);
+              }
+
+            } else {
+              PopupMessage.showError(
+                'Gagal Mengubah Status!',
+                data.message || 'Terjadi kesalahan saat mengubah status.'
+              );
+            }
+          });
+        } catch(err) {
+          console.error('Error detail:', err);
+          PopupMessage.hideLoading(() => {
+            PopupMessage.showError(
+              'Terjadi Kesalahan!',
+              err.message || 'Terjadi kesalahan koneksi atau server. Mohon coba lagi.'
+            );
+          });
+        }
+      },
+      null,
+      'Ya, Ubah',
+      'Batal'
+    );
+  }
   </script>
+
+  <style>
+    @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
+    .animate-fade-in { animation: fadeIn 0.6s ease-out forwards; }
+    button { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+  </style>
 </body>
 </html>
-```
