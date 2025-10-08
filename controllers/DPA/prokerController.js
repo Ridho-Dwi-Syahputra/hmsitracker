@@ -5,7 +5,7 @@
 
 const db = require("../../config/db");
 const { v4: uuidv4 } = require("uuid"); // untuk id notifikasi
-const { deleteOldProkerNotif } = require("../HMSI/notifikasiController");
+const { deleteOldProkerNotif } = require("../hmsi/notifikasiController");
 
 // =====================================================
 // helper: format tanggal ke format Indonesia

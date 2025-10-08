@@ -16,14 +16,14 @@ const validateUpload = require("../../middleware/validateUpload");
 const rateLimiter = require("../../middleware/rateLimiter");
 
 // =====================================================
-// IMPORT CONTROLLERS
+// IMPORT CONTROLLERS (gunakan lowercase agar aman di semua OS)
 // =====================================================
-const prokerCtrl = require("../../controllers/HMSI/prokerController");
-const laporanCtrl = require("../../controllers/HMSI/laporanController");
-const evaluasiCtrl = require("../../controllers/HMSI/evaluasiController");
-const notifikasiCtrl = require("../../controllers/HMSI/notifikasiController");
-const profileCtrl = require("../../controllers/HMSI/profileController");
-const dashboardCtrl = require("../../controllers/HMSI/dashboardController");
+const prokerCtrl = require("../../controllers/hmsi/prokerController");
+const laporanCtrl = require("../../controllers/hmsi/laporanController");
+const evaluasiCtrl = require("../../controllers/hmsi/evaluasiController");
+const notifikasiCtrl = require("../../controllers/hmsi/notifikasiController");
+const profileCtrl = require("../../controllers/hmsi/profileController");
+const dashboardCtrl = require("../../controllers/hmsi/dashboardController");
 
 // =====================================================
 // MIDDLEWARE: Semua route di sini harus login + role HMSI
@@ -104,8 +104,6 @@ router.get("/laporan/:id", laporanCtrl.getDetailLaporan);
 // =====================================================
 router.get("/evaluasi", evaluasiCtrl.getAllEvaluasi);
 router.get("/evaluasi/:id", evaluasiCtrl.getDetailEvaluasi);
-
-// ⚡ HMSI menambahkan komentar evaluasi
 router.post("/evaluasi/:id/komentar", rateLimiter, evaluasiCtrl.addKomentar);
 
 // =====================================================
@@ -118,23 +116,24 @@ router.get("/notifikasi/read/:id", notifikasiCtrl.readAndRedirect);
 // PROFILE
 // =====================================================
 
-// 📄 Lihat profil
+// 📄 Lihat profil HMSI
 router.get("/profile", profileCtrl.getProfile);
 
-// ✏️ Form edit profil
+// ✏️ Form edit profil HMSI
 router.get("/profile/edit", profileCtrl.getEditProfile);
 
-// ⚡ Konfigurasi Multer untuk upload foto profil
+// ⚙️ Konfigurasi Multer untuk upload foto profil HMSI
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "public/uploads/profile");
+  destination: (req, file, cb) => {
+    cb(null, path.join("public/uploads/profile"));
   },
-  filename: function (req, file, cb) {
+  filename: (req, file, cb) => {
     const ext = path.extname(file.originalname);
     cb(null, Date.now() + "-" + Math.round(Math.random() * 1e9) + ext);
   },
 });
-const upload = multer({ storage: storage });
+
+const upload = multer({ storage });
 
 // 💾 Update profil (nama wajib, password & foto opsional)
 router.post(
@@ -143,9 +142,6 @@ router.post(
   upload.single("foto_profile"),
   profileCtrl.postEditProfile
 );
-
-// 🌙 Toggle Dark/Light Mode
-router.post("/profile/toggle-theme", rateLimiter, profileCtrl.toggleTheme);
 
 // =====================================================
 // EXPORT ROUTER

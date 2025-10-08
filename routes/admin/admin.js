@@ -12,10 +12,10 @@ const path = require("path");
 const { requireLogin, requireRole } = require("../../middleware/auth");
 
 // 📦 Controller
-const keuanganController = require("../../controllers/Admin/keuanganController");
-const profileController = require("../../controllers/Admin/profileController");
-const userController = require("../../controllers/Admin/userController");
-const divisiController = require("../../controllers/Admin/divisiController");
+const keuanganController = require("../../controllers/admin/keuanganController");
+const profileController = require("../../controllers/admin/profileController");
+const userController = require("../../controllers/admin/userController");
+const divisiController = require("../../controllers/admin/divisiController");
 
 // =====================================================
 // 🏠 Dashboard Admin
