@@ -19,24 +19,37 @@ exports.getAllNotifikasi = async (req, res) => {
       return res.status(401).send("Unauthorized");
     }
 
+    // 🔹 Query sudah diperbaiki:
+    // - Pakai n.id_divisi (bukan n.divisi)
+    // - Join tabel divisi untuk ambil nama_divisi
     const [rows] = await db.query(
-      `SELECT n.*, l.judul_laporan, p.Nama_ProgramKerja, u.nama AS evaluator
-       FROM Notifikasi n
-       LEFT JOIN Laporan l ON n.id_laporan = l.id_laporan
-       LEFT JOIN Program_kerja p ON 
-          (l.id_ProgramKerja = p.id_ProgramKerja OR n.id_ProgramKerja = p.id_ProgramKerja)
-       LEFT JOIN Evaluasi e ON n.id_evaluasi = e.id_evaluasi
-       LEFT JOIN User u ON e.pemberi_evaluasi = u.id_anggota
-       WHERE n.divisi = ?
-         AND (
-              (n.role = 'HMSI')             -- notif untuk HMSI (status Proker dari DPA)
-              OR (n.id_evaluasi IS NOT NULL) -- evaluasi dari DPA
-             )
-       ORDER BY n.created_at DESC`,
-      [user.divisi]
+      `
+      SELECT 
+        n.*, 
+        d.nama_divisi, 
+        l.judul_laporan, 
+        p.Nama_ProgramKerja, 
+        u.nama AS evaluator
+      FROM Notifikasi n
+      LEFT JOIN Laporan l ON n.id_laporan = l.id_laporan
+      LEFT JOIN Program_kerja p 
+        ON (l.id_ProgramKerja = p.id_ProgramKerja OR n.id_ProgramKerja = p.id_ProgramKerja)
+      LEFT JOIN Evaluasi e ON n.id_evaluasi = e.id_evaluasi
+      LEFT JOIN User u ON e.pemberi_evaluasi = u.id_anggota
+      LEFT JOIN Divisi d ON n.id_divisi = d.id_divisi
+      WHERE n.id_divisi = ?
+        AND (
+          (n.role = 'HMSI')            -- notif untuk HMSI (status Proker dari DPA)
+          OR (n.id_evaluasi IS NOT NULL) -- evaluasi dari DPA
+        )
+      ORDER BY n.created_at DESC
+      `,
+      [user.id_divisi]
     );
 
-    const notifikasi = rows.map(n => {
+    // 🔹 Format hasil data agar tampil lebih rapi di view
+    const notifikasi = rows.map((n) => {
+      // Format tanggal
       let tanggalFormatted = "-";
       if (n.created_at) {
         const d = new Date(n.created_at);
@@ -44,17 +57,16 @@ exports.getAllNotifikasi = async (req, res) => {
           tanggalFormatted = d.toLocaleDateString("id-ID", {
             day: "2-digit",
             month: "short",
-            year: "numeric"
+            year: "numeric",
           });
         }
       }
 
+      // Tentukan link redirect
       let linkUrl = `/hmsi/evaluasi/${n.id_evaluasi}`;
       let linkLabel = "Lihat Evaluasi";
 
-      // 🔹 Kalau notifikasi ini terkait status Proker
       if (n.id_ProgramKerja && !n.id_evaluasi) {
-        // langsung arahkan ke halaman kelola-proker
         linkUrl = "/hmsi/kelola-proker";
         linkLabel = "Kelola Program Kerja";
       }
@@ -63,14 +75,15 @@ exports.getAllNotifikasi = async (req, res) => {
         ...n,
         tanggalFormatted,
         linkUrl,
-        linkLabel
+        linkLabel,
       };
     });
 
+    // 🔹 Kirim ke view
     res.render("hmsi/hmsiNotifikasi", {
       title: "Notifikasi",
       user,
-      activeNav: "Notifikasi",
+      activeNav: "notifikasi",
       notifikasi,
     });
   } catch (err) {
@@ -103,7 +116,7 @@ exports.readAndRedirect = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // ambil notifikasi
+    // Ambil notifikasi
     const [rows] = await db.query(
       "SELECT * FROM Notifikasi WHERE id_notifikasi = ?",
       [id]
@@ -116,7 +129,7 @@ exports.readAndRedirect = async (req, res) => {
     if (notif.id_evaluasi) {
       redirectUrl = `/hmsi/evaluasi/${notif.id_evaluasi}`;
     } else if (notif.id_ProgramKerja) {
-      redirectUrl = "/hmsi/kelola-proker"; // 🔹 fix: pakai dash
+      redirectUrl = "/hmsi/kelola-proker";
     }
 
     await db.query(

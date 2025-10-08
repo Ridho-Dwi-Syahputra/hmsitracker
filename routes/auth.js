@@ -1,35 +1,42 @@
+// =====================================================
 // routes/auth.js
+// Modul autentikasi (Login & Logout)
+// =====================================================
 const express = require("express");
 const router = express.Router();
 const db = require("../config/db");
 const bcrypt = require("bcryptjs");
 
-// ==============================
-// GET: Form login
-// ==============================
+// =====================================================
+// GET: Form Login
+// =====================================================
 router.get("/login", (req, res) => {
-  // Kalau sudah login, langsung redirect ke dashboard sesuai role
+  // Jika sudah login, redirect sesuai role
   if (req.session.user) {
-    if (req.session.user.role === "Admin") return res.redirect("/admin/dashboard");
-    if (req.session.user.role === "DPA") return res.redirect("/dpa/dashboard");
-    if (req.session.user.role === "HMSI") return res.redirect("/hmsi/dashboard");
+    const { role } = req.session.user;
+    if (role === "Admin") return res.redirect("/admin/dashboard");
+    if (role === "DPA") return res.redirect("/dpa/dashboard");
+    if (role === "HMSI") return res.redirect("/hmsi/dashboard");
   }
 
   res.render("auth/login", { errorMsg: null });
 });
 
-// ==============================
-// POST: Proses login
-// ==============================
+// =====================================================
+// POST: Proses Login
+// =====================================================
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    // Cari user berdasarkan email
+    // 🔹 Cari user + JOIN tabel divisi
     const [rows] = await db.query(
-      `SELECT id_anggota, nama, email, password, role, divisi, foto_profile
-       FROM user
-       WHERE email = ?
+      `SELECT 
+          u.id_anggota, u.nama, u.email, u.password, u.role, 
+          u.id_divisi, u.foto_profile, d.nama_divisi
+       FROM user u
+       LEFT JOIN divisi d ON u.id_divisi = d.id_divisi
+       WHERE u.email = ?
        LIMIT 1`,
       [email]
     );
@@ -40,57 +47,51 @@ router.post("/login", async (req, res) => {
 
     const user = rows[0];
 
-    // ==============================
-    // 🔐 Cek password (bcrypt / plain)
-    // ==============================
+    // =====================================================
+    // 🔐 Cek password (bcrypt / fallback plain)
+    // =====================================================
     let isMatch = false;
     if (user.password && user.password.startsWith("$2b$")) {
-      // password tersimpan dengan bcrypt
       isMatch = await bcrypt.compare(password, user.password);
     } else {
-      // fallback untuk password lama (plain text)
-      isMatch = password === user.password;
+      isMatch = password === user.password; // fallback (lama)
     }
 
     if (!isMatch) {
       return res.render("auth/login", { errorMsg: "Email atau password salah!" });
     }
 
-    // ==============================
-    // 🔑 Simpan ke session
-    // ==============================
+    // =====================================================
+    // 🧠 Simpan user ke session
+    // =====================================================
     req.session.user = {
-      // field lama (biar controller lama tetap jalan)
-      id: user.id_anggota,
-      name: user.nama,
-      role: user.role,
-      divisi: user.divisi || null,
-
-      // field tambahan (konsistensi dengan profileController & sidebar)
+      id: user.id_anggota, // kompatibilitas lama
       id_anggota: user.id_anggota,
       nama: user.nama,
       email: user.email,
+      role: user.role,
+      id_divisi: user.id_divisi || null,
+      nama_divisi: user.nama_divisi || null,
       foto_profile: user.foto_profile || null,
     };
 
-    // ==============================
+    // =====================================================
     // 🚦 Redirect sesuai role
-    // ==============================
+    // =====================================================
     if (user.role === "Admin") return res.redirect("/admin/dashboard");
     if (user.role === "DPA") return res.redirect("/dpa/dashboard");
     if (user.role === "HMSI") return res.redirect("/hmsi/dashboard");
 
-    // fallback
     return res.redirect("/");
   } catch (err) {
-    console.error("❌ Error login:", err.message);
-    res.render("auth/login", { errorMsg: "Terjadi kesalahan server" });
+    console.error("❌ [auth.js] Error saat login:", err.message);
+    res.render("auth/login", { errorMsg: "Terjadi kesalahan server. Coba lagi nanti." });
   }
 });
 
-// ==============================
+// =====================================================
 // GET: Logout
-// ==============================
+// =====================================================
 router.get("/logout", (req, res) => {
   req.session.destroy(() => {
     res.redirect("/auth/login");

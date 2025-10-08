@@ -1,34 +1,33 @@
 // =====================================================
 // controllers/Admin/userController.js
-// CRUD User untuk Admin HMSI
+// CRUD User untuk Admin HMSI (versi relasional divisi)
 // =====================================================
 
 const db = require("../../config/db");
 const bcrypt = require("bcryptjs");
-
-// Divisi valid untuk HMSI
-const VALID_DIVISI = [
-  "Internal",
-  "Medkraf",
-  "Eksternal",
-  "Bikraf",
-  "PSI",
-  "PSDM",
-  "RTK",
-];
 
 // =====================================================
 // 📄 List user
 // =====================================================
 exports.getAllUsers = async (req, res) => {
   try {
-    const [rows] = await db.query("SELECT * FROM user ORDER BY updated_at DESC");
+    const [rows] = await db.query(`
+      SELECT u.*, d.nama_divisi
+      FROM user u
+      LEFT JOIN divisi d ON u.id_divisi = d.id_divisi
+      ORDER BY u.updated_at DESC
+    `);
+
+    const [divisiList] = await db.query("SELECT * FROM divisi ORDER BY nama_divisi ASC");
 
     res.render("admin/kelolaUser", {
       title: "Kelola User",
       user: req.session.user,
       activeNav: "users",
       users: rows,
+      divisiList, // <-- tambahkan ini
+      errorMsg: null,
+      successMsg: null
     });
   } catch (err) {
     console.error("❌ Error getAllUsers:", err.message);
@@ -36,19 +35,27 @@ exports.getAllUsers = async (req, res) => {
   }
 };
 
+
 // =====================================================
 // ➕ Form tambah user
 // =====================================================
-exports.getTambahUser = (req, res) => {
-  res.render("admin/tambahUser", {
-    title: "Tambah User",
-    user: req.session.user,
-    activeNav: "users",
-    old: {},
-    errorMsg: null,
-    successMsg: null,
-    validDivisi: VALID_DIVISI,
-  });
+exports.getTambahUser = async (req, res) => {
+  try {
+    const [divisiList] = await db.query("SELECT * FROM divisi ORDER BY nama_divisi ASC");
+
+    res.render("admin/tambahUser", {
+      title: "Tambah User",
+      user: req.session.user,
+      activeNav: "users",
+      old: {},
+      errorMsg: null,
+      successMsg: null,
+      divisiList,
+    });
+  } catch (err) {
+    console.error("❌ Error getTambahUser:", err.message);
+    res.status(500).send("Terjadi kesalahan server");
+  }
 };
 
 // =====================================================
@@ -56,9 +63,10 @@ exports.getTambahUser = (req, res) => {
 // =====================================================
 exports.postTambahUser = async (req, res) => {
   try {
-    const { id_anggota, nama, email, password, role, divisi } = req.body;
+    const { id_anggota, nama, email, password, role, id_divisi } = req.body;
 
     if (!id_anggota || !nama || !email || !password || !role) {
+      const [divisiList] = await db.query("SELECT * FROM divisi ORDER BY nama_divisi ASC");
       return res.render("admin/tambahUser", {
         title: "Tambah User",
         user: req.session.user,
@@ -66,31 +74,32 @@ exports.postTambahUser = async (req, res) => {
         old: req.body,
         errorMsg: "Semua field wajib diisi!",
         successMsg: null,
-        validDivisi: VALID_DIVISI,
+        divisiList,
       });
     }
 
-    // Validasi divisi kalau role = HMSI
+    // Divisi hanya untuk role HMSI
     let divisiValue = null;
     if (role === "HMSI") {
-      if (!divisi || !VALID_DIVISI.includes(divisi)) {
+      if (!id_divisi) {
+        const [divisiList] = await db.query("SELECT * FROM divisi ORDER BY nama_divisi ASC");
         return res.render("admin/tambahUser", {
           title: "Tambah User",
           user: req.session.user,
           activeNav: "users",
           old: req.body,
-          errorMsg: "Divisi tidak valid untuk role HMSI!",
+          errorMsg: "Pilih divisi untuk role HMSI!",
           successMsg: null,
-          validDivisi: VALID_DIVISI,
+          divisiList,
         });
       }
-      divisiValue = divisi;
+      divisiValue = id_divisi;
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
     await db.query(
-      `INSERT INTO user (id_anggota, nama, email, password, role, divisi)
+      `INSERT INTO user (id_anggota, nama, email, password, role, id_divisi)
        VALUES (?, ?, ?, ?, ?, ?)`,
       [id_anggota, nama, email, hashedPassword, role, divisiValue]
     );
@@ -108,9 +117,11 @@ exports.postTambahUser = async (req, res) => {
 exports.getEditUser = async (req, res) => {
   try {
     const { id } = req.params;
-    const [rows] = await db.query("SELECT * FROM user WHERE id_anggota = ?", [id]);
 
+    const [rows] = await db.query("SELECT * FROM user WHERE id_anggota = ?", [id]);
     if (!rows.length) return res.status(404).send("User tidak ditemukan");
+
+    const [divisiList] = await db.query("SELECT * FROM divisi ORDER BY nama_divisi ASC");
 
     res.render("admin/editUser", {
       title: "Edit User",
@@ -119,7 +130,7 @@ exports.getEditUser = async (req, res) => {
       userData: rows[0],
       errorMsg: null,
       successMsg: null,
-      validDivisi: VALID_DIVISI,
+      divisiList,
     });
   } catch (err) {
     console.error("❌ Error getEditUser:", err.message);
@@ -133,26 +144,23 @@ exports.getEditUser = async (req, res) => {
 exports.postEditUser = async (req, res) => {
   try {
     const { id } = req.params;
-    const { nama, email, password, role, divisi } = req.body;
+    const { nama, email, password, role, id_divisi } = req.body;
 
-    // Divisi hanya untuk HMSI
     let divisiValue = null;
     if (role === "HMSI") {
-      if (divisi && VALID_DIVISI.includes(divisi)) {
-        divisiValue = divisi;
-      }
+      divisiValue = id_divisi || null;
     }
 
     let query, params;
     if (password && password.trim() !== "") {
       const hashedPassword = await bcrypt.hash(password, 10);
       query = `UPDATE user 
-               SET nama=?, email=?, password=?, role=?, divisi=? 
+               SET nama=?, email=?, password=?, role=?, id_divisi=? 
                WHERE id_anggota=?`;
       params = [nama, email, hashedPassword, role, divisiValue, id];
     } else {
       query = `UPDATE user 
-               SET nama=?, email=?, role=?, divisi=? 
+               SET nama=?, email=?, role=?, id_divisi=? 
                WHERE id_anggota=?`;
       params = [nama, email, role, divisiValue, id];
     }

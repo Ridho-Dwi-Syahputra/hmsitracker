@@ -13,6 +13,7 @@ const multer = require("multer");
 // =====================================================
 const { requireLogin, requireRole } = require("../../middleware/auth");
 const validateUpload = require("../../middleware/validateUpload");
+const rateLimiter = require("../../middleware/rateLimiter");
 
 // =====================================================
 // IMPORT CONTROLLERS
@@ -52,18 +53,22 @@ router.get("/tambah-proker", (req, res) => {
 
 router.post(
   "/tambah-proker",
+  rateLimiter,
   validateUpload("create", "proker"),
   prokerCtrl.createProker
 );
 
 router.get("/proker/:id", prokerCtrl.getDetailProker);
 router.get("/proker/:id/edit", prokerCtrl.getEditProker);
+
 router.post(
   "/proker/:id/edit",
+  rateLimiter,
   validateUpload("edit", "proker"),
   prokerCtrl.updateProker
 );
-router.post("/proker/:id/delete", prokerCtrl.deleteProker);
+
+router.post("/proker/:id/delete", rateLimiter, prokerCtrl.deleteProker);
 router.get("/proker/download/:id", prokerCtrl.downloadDokumenPendukung);
 
 // =====================================================
@@ -71,21 +76,28 @@ router.get("/proker/download/:id", prokerCtrl.downloadDokumenPendukung);
 // =====================================================
 router.get("/laporan", laporanCtrl.getAllLaporan);
 router.get("/laporan/tambah", laporanCtrl.getFormLaporan);
+
 router.post(
   "/laporan/tambah",
+  rateLimiter,
   validateUpload("create", "laporan"),
   laporanCtrl.createLaporan
 );
 
-router.get("/laporan/:id", laporanCtrl.getDetailLaporan);
 router.get("/laporan/edit/:id", laporanCtrl.getEditLaporan);
+
 router.post(
   "/laporan/edit/:id",
+  rateLimiter,
   validateUpload("edit", "laporan"),
   laporanCtrl.updateLaporan
 );
-router.post("/laporan/delete/:id", laporanCtrl.deleteLaporan);
+
+router.post("/laporan/delete/:id", rateLimiter, laporanCtrl.deleteLaporan);
 router.get("/laporan/download/:id", laporanCtrl.downloadDokumentasi);
+
+// ⚠️ Letakkan paling bawah — karena ini wildcard
+router.get("/laporan/:id", laporanCtrl.getDetailLaporan);
 
 // =====================================================
 // EVALUASI
@@ -94,7 +106,7 @@ router.get("/evaluasi", evaluasiCtrl.getAllEvaluasi);
 router.get("/evaluasi/:id", evaluasiCtrl.getDetailEvaluasi);
 
 // ⚡ HMSI menambahkan komentar evaluasi
-router.post("/evaluasi/:id/komentar", evaluasiCtrl.addKomentar);
+router.post("/evaluasi/:id/komentar", rateLimiter, evaluasiCtrl.addKomentar);
 
 // =====================================================
 // NOTIFIKASI
@@ -124,16 +136,16 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
-// 💾 Update profil (nama wajib, password & foto opsional via file upload)
+// 💾 Update profil (nama wajib, password & foto opsional)
 router.post(
   "/profile/update",
+  rateLimiter,
   upload.single("foto_profile"),
   profileCtrl.postEditProfile
 );
 
 // 🌙 Toggle Dark/Light Mode
-router.post("/profile/toggle-theme", profileCtrl.toggleTheme);
-
+router.post("/profile/toggle-theme", rateLimiter, profileCtrl.toggleTheme);
 
 // =====================================================
 // EXPORT ROUTER

@@ -8,7 +8,9 @@ const path = require("path");
 const fs = require("fs");
 const bcrypt = require("bcryptjs");
 
-// Helper untuk flash / query param message
+// =====================================================
+// Helper: Ambil pesan dari flash atau query param
+// =====================================================
 function readMsgs(req, key) {
   if (req && typeof req.flash === "function") {
     try {
@@ -28,10 +30,18 @@ exports.getProfile = async (req, res) => {
     const userId = req.session.user?.id_anggota;
     if (!userId) return res.redirect("/auth/login");
 
-    const [rows] = await db.query(
-      "SELECT id_anggota, nama, email, divisi, role, foto_profile FROM user WHERE id_anggota = ?",
-      [userId]
-    );
+    const [rows] = await db.query(`
+      SELECT 
+        u.id_anggota, 
+        u.nama, 
+        u.email, 
+        COALESCE(d.nama_divisi, u.id_divisi) AS divisi, 
+        u.role, 
+        u.foto_profile
+      FROM user u
+      LEFT JOIN Divisi d ON u.id_divisi = d.id_divisi
+      WHERE u.id_anggota = ?
+    `, [userId]);
 
     if (!rows.length) return res.status(404).send("User tidak ditemukan");
 
@@ -56,10 +66,18 @@ exports.getEditProfile = async (req, res) => {
     const userId = req.session.user?.id_anggota;
     if (!userId) return res.redirect("/auth/login");
 
-    const [rows] = await db.query(
-      "SELECT id_anggota, nama, email, divisi, role, foto_profile FROM user WHERE id_anggota = ?",
-      [userId]
-    );
+    const [rows] = await db.query(`
+      SELECT 
+        u.id_anggota, 
+        u.nama, 
+        u.email, 
+        COALESCE(d.nama_divisi, u.id_divisi) AS divisi, 
+        u.role, 
+        u.foto_profile
+      FROM user u
+      LEFT JOIN Divisi d ON u.id_divisi = d.id_divisi
+      WHERE u.id_anggota = ?
+    `, [userId]);
 
     if (!rows.length) return res.status(404).send("User tidak ditemukan");
 
@@ -86,7 +104,7 @@ exports.postEditProfile = async (req, res) => {
 
     const { id_anggota, nama, password, confirm_password } = req.body || {};
 
-    // validasi
+    // 🔸 Validasi wajib
     if (!nama || nama.trim() === "") {
       if (req.flash) req.flash("error", "Nama wajib diisi");
       return res.redirect("/dpa/profile/edit");
@@ -98,33 +116,35 @@ exports.postEditProfile = async (req, res) => {
 
     let foto_profile = req.session.user.foto_profile;
 
-    // handle foto upload
+    // 🔸 Handle upload foto baru
     if (req.file) {
       const fileName = req.file.filename;
       const newPath = "uploads/profile/" + fileName;
 
-      // hapus foto lama
+      // Hapus foto lama jika ada
       if (req.session.user.foto_profile) {
         const oldPath = path.join("public", req.session.user.foto_profile);
         if (fs.existsSync(oldPath)) {
           try {
             fs.unlinkSync(oldPath);
-          } catch {}
+          } catch (err) {
+            console.warn("⚠️ Gagal hapus foto lama:", err.message);
+          }
         }
       }
 
       foto_profile = newPath;
     }
 
-    // validasi password
+    // 🔸 Validasi password baru
     if (password && password.trim() !== "" && password !== confirm_password) {
       if (req.flash) req.flash("error", "Password dan Konfirmasi Password tidak sama");
       return res.redirect("/dpa/profile/edit");
     }
 
-    // build query
+    // 🔸 Bangun query update
     let query = "UPDATE user SET id_anggota = ?, nama = ?, foto_profile = ?";
-    let values = [id_anggota, nama, foto_profile];
+    const values = [id_anggota, nama, foto_profile];
 
     if (password && password.trim() !== "") {
       const hashed = await bcrypt.hash(password, 10);
@@ -137,11 +157,20 @@ exports.postEditProfile = async (req, res) => {
 
     await db.query(query, values);
 
-    // update session
-    const [rows] = await db.query(
-      "SELECT id_anggota, nama, email, divisi, role, foto_profile FROM user WHERE id_anggota = ?",
-      [id_anggota]
-    );
+    // 🔸 Ambil ulang user terbaru untuk refresh session
+    const [rows] = await db.query(`
+      SELECT 
+        u.id_anggota, 
+        u.nama, 
+        u.email, 
+        COALESCE(d.nama_divisi, u.id_divisi) AS divisi, 
+        u.role, 
+        u.foto_profile
+      FROM user u
+      LEFT JOIN Divisi d ON u.id_divisi = d.id_divisi
+      WHERE u.id_anggota = ?
+    `, [id_anggota]);
+
     if (rows.length) {
       req.session.user = rows[0];
     }

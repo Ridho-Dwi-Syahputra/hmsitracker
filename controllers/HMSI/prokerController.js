@@ -86,7 +86,7 @@ exports.getAllProker = async (req, res) => {
       SELECT 
         p.id_ProgramKerja AS id, 
         p.Nama_ProgramKerja AS namaProker, 
-        u.divisi AS divisi,
+        d.nama_divisi AS divisi,
         p.Deskripsi AS deskripsi,
         p.Tanggal_mulai AS tanggal_mulai,
         p.Tanggal_selesai AS tanggal_selesai,
@@ -95,13 +95,14 @@ exports.getAllProker = async (req, res) => {
         p.Status AS status_db
       FROM Program_kerja p
       LEFT JOIN User u ON p.id_anggota = u.id_anggota
+      LEFT JOIN Divisi d ON u.id_divisi = d.id_divisi
     `;
     let params = [];
 
     // 🔹 HMSI hanya bisa lihat proker sesuai divisi
     if (user && user.role === "HMSI") {
-      query += " WHERE u.divisi = ?";
-      params.push(user.divisi);
+      query += " WHERE u.id_divisi = ?";
+      params.push(user.id_divisi);
     }
 
     query += " ORDER BY p.Tanggal_mulai DESC";
@@ -147,10 +148,11 @@ exports.getAllProker = async (req, res) => {
 exports.getDetailProker = async (req, res) => {
   try {
     const [rows] = await db.query(
-      `SELECT 
+      `
+      SELECT 
         p.id_ProgramKerja AS id,
         p.Nama_ProgramKerja AS namaProker,
-        u.divisi AS divisi,
+        d.nama_divisi AS divisi,
         p.Deskripsi AS deskripsi,
         p.Tanggal_mulai AS tanggal_mulai,
         p.Tanggal_selesai AS tanggal_selesai,
@@ -159,7 +161,9 @@ exports.getDetailProker = async (req, res) => {
         p.Status AS status_db
       FROM Program_kerja p
       LEFT JOIN User u ON p.id_anggota = u.id_anggota
-      WHERE p.id_ProgramKerja = ?`,
+      LEFT JOIN Divisi d ON u.id_divisi = d.id_divisi
+      WHERE p.id_ProgramKerja = ?
+      `,
       [req.params.id]
     );
 
@@ -168,7 +172,7 @@ exports.getDetailProker = async (req, res) => {
     const proker = rows[0];
 
     // 🔒 Validasi: HMSI hanya boleh akses proker divisi sendiri
-    if (req.session.user.role === "HMSI" && proker.divisi !== req.session.user.divisi) {
+    if (req.session.user.role === "HMSI" && req.session.user.id_divisi !== proker.id_divisi) {
       return res.status(403).send("Akses ditolak ke proker divisi lain");
     }
 
@@ -234,19 +238,23 @@ exports.createProker = async (req, res) => {
 
     // Insert Proker
     await db.query(
-      `INSERT INTO Program_kerja 
-        (id_ProgramKerja, Nama_ProgramKerja, Deskripsi, Tanggal_mulai, Tanggal_selesai, Penanggung_jawab, id_anggota, Dokumen_pendukung, Status)
-       VALUES (UUID(), ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [namaProker, deskripsi, tanggal_mulai, tanggal_selesai, penanggungJawab, id_anggota || user.id, dokumen, status]
+      `
+      INSERT INTO Program_kerja 
+        (id_ProgramKerja, Nama_ProgramKerja, Deskripsi, Tanggal_mulai, Tanggal_selesai, Penanggung_jawab, id_anggota, id_divisi, Dokumen_pendukung, Status)
+      VALUES (UUID(), ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `,
+      [namaProker, deskripsi, tanggal_mulai, tanggal_selesai, penanggungJawab, id_anggota || user.id, user.id_divisi, dokumen, status]
     );
 
     // 🟠 Tambahkan notifikasi
     const idNotifikasi = uuidv4();
-    const pesan = `HMSI (${user.divisi}) telah membuat Program Kerja baru: "${namaProker}"`;
+    const pesan = `HMSI (${user.nama_divisi || "Divisi"}) telah membuat Program Kerja baru: "${namaProker}"`;
     await db.query(
-      `INSERT INTO Notifikasi (id_notifikasi, pesan, status_baca, divisi, id_ProgramKerja, created_at)
-       VALUES (?, ?, 0, ?, (SELECT id_ProgramKerja FROM Program_kerja WHERE Nama_ProgramKerja=? ORDER BY Tanggal_mulai DESC LIMIT 1), NOW())`,
-      [idNotifikasi, pesan, user.divisi, namaProker]
+      `
+      INSERT INTO Notifikasi (id_notifikasi, pesan, status_baca, id_divisi, id_ProgramKerja, role, created_at)
+      VALUES (?, ?, 0, ?, (SELECT id_ProgramKerja FROM Program_kerja WHERE Nama_ProgramKerja=? ORDER BY Tanggal_mulai DESC LIMIT 1), 'HMSI', NOW())
+      `,
+      [idNotifikasi, pesan, user.id_divisi, namaProker]
     );
 
     res.redirect("/hmsi/kelola-proker?success=Program Kerja berhasil ditambahkan");
@@ -281,7 +289,7 @@ exports.getEditProker = async (req, res) => {
       if (!val) return "";
       const d = new Date(val);
       if (isNaN(d.getTime())) return "";
-      return d.toISOString().split("T")[0]; // yyyy-mm-dd
+      return d.toISOString().split("T")[0];
     };
 
     proker.tanggal_mulaiFormatted = formatDate(proker.Tanggal_mulai);
@@ -343,8 +351,9 @@ exports.updateProker = async (req, res) => {
         Tanggal_selesai=?, 
         Penanggung_jawab=?, 
         id_anggota=?, 
+        id_divisi=?, 
         Status=?`;
-    const params = [namaProker, deskripsi, tanggal_mulai, tanggal_selesai, penanggungJawab, id_anggota || user.id, status];
+    const params = [namaProker, deskripsi, tanggal_mulai, tanggal_selesai, penanggungJawab, id_anggota || user.id, user.id_divisi, status];
 
     if (newFile) {
       query += `, Dokumen_pendukung=?`;
@@ -360,11 +369,13 @@ exports.updateProker = async (req, res) => {
 
     // 🟠 Tambahkan notifikasi update
     const idNotifikasi = uuidv4();
-    const pesan = `HMSI (${user.divisi}) telah memperbarui Program Kerja: "${namaProker}"`;
+    const pesan = `HMSI (${user.nama_divisi || "Divisi"}) telah memperbarui Program Kerja: "${namaProker}"`;
     await db.query(
-      `INSERT INTO Notifikasi (id_notifikasi, pesan, status_baca, divisi, id_ProgramKerja, created_at)
-       VALUES (?, ?, 0, ?, ?, NOW())`,
-      [idNotifikasi, pesan, user.divisi, id]
+      `
+      INSERT INTO Notifikasi (id_notifikasi, pesan, status_baca, id_divisi, id_ProgramKerja, role, created_at)
+      VALUES (?, ?, 0, ?, ?, 'HMSI', NOW())
+      `,
+      [idNotifikasi, pesan, user.id_divisi, id]
     );
 
     res.redirect("/hmsi/kelola-proker?success=Program Kerja berhasil diperbarui");
