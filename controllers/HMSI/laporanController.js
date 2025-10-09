@@ -3,6 +3,7 @@
 // CRUD Laporan HMSI (simpan file ke /public/uploads) + role-based access
 // + Notifikasi otomatis untuk DPA
 // + Sinkronisasi otomatis keuangan (pengeluaran kas HMSI)
+// + Validasi laporan yang sudah disetujui tidak bisa diedit/dihapus
 // =====================================================
 
 const db = require("../../config/db");
@@ -61,16 +62,35 @@ function formatTanggal(dateValue) {
 }
 
 // =====================================================
-// 📄 Daftar semua laporan
+// helper: cek apakah laporan sudah disetujui DPA
+// =====================================================
+async function isLaporanApproved(idLaporan) {
+  try {
+    const [rows] = await db.query(
+      `SELECT status_konfirmasi FROM Evaluasi WHERE id_laporan = ? ORDER BY tanggal_evaluasi DESC LIMIT 1`,
+      [idLaporan]
+    );
+    return rows.length > 0 && rows[0].status_konfirmasi === 'Selesai';
+  } catch (err) {
+    console.error("❌ Error checking approval status:", err.message);
+    return false;
+  }
+}
+
+// =====================================================
+// 📄 Daftar semua laporan (DENGAN STATUS EVALUASI)
 // =====================================================
 exports.getAllLaporan = async (req, res) => {
   try {
     const user = req.session.user;
 
     let query = `
-      SELECT l.*, p.Nama_ProgramKerja AS namaProker
+      SELECT l.*, 
+             p.Nama_ProgramKerja AS namaProker,
+             e.status_konfirmasi
       FROM Laporan l
       LEFT JOIN Program_kerja p ON l.id_ProgramKerja = p.id_ProgramKerja
+      LEFT JOIN Evaluasi e ON e.id_laporan = l.id_laporan
     `;
     const params = [];
 
@@ -95,7 +115,7 @@ exports.getAllLaporan = async (req, res) => {
       activeNav: "Laporan",
       laporan,
       successMsg: req.query.success || null,
-      errorMsg: null,
+      errorMsg: req.query.error || null,
     });
   } catch (err) {
     console.error("❌ Error getAllLaporan:", err.message);
@@ -252,15 +272,18 @@ exports.createLaporan = async (req, res) => {
 };
 
 // =====================================================
-// 📄 Detail laporan
+// 📄 Detail laporan (DENGAN STATUS EVALUASI)
 // =====================================================
 exports.getDetailLaporan = async (req, res) => {
   try {
     const user = req.session.user;
     const [rows] = await db.query(
-      `SELECT l.*, p.Nama_ProgramKerja AS namaProker
+      `SELECT l.*, 
+              p.Nama_ProgramKerja AS namaProker,
+              e.status_konfirmasi
        FROM Laporan l
        LEFT JOIN Program_kerja p ON l.id_ProgramKerja = p.id_ProgramKerja
+       LEFT JOIN Evaluasi e ON e.id_laporan = l.id_laporan
        WHERE l.id_laporan = ?`,
       [req.params.id]
     );
@@ -281,8 +304,8 @@ exports.getDetailLaporan = async (req, res) => {
       user,
       activeNav: "Laporan",
       laporan,
-      errorMsg: null,
-      successMsg: null,
+      errorMsg: req.query.error || null,
+      successMsg: req.query.success || null,
     });
   } catch (err) {
     console.error("❌ Error getDetailLaporan:", err.message);
@@ -291,11 +314,17 @@ exports.getDetailLaporan = async (req, res) => {
 };
 
 // =====================================================
-// ✏️ Form edit laporan
+// ✏️ Form edit laporan (DENGAN VALIDASI APPROVAL)
 // =====================================================
 exports.getEditLaporan = async (req, res) => {
   try {
     const user = req.session.user;
+
+    // ✅ CEK APAKAH SUDAH DISETUJUI
+    const isApproved = await isLaporanApproved(req.params.id);
+    if (isApproved) {
+      return res.redirect("/hmsi/laporan?error=Laporan sudah disetujui DPA, tidak dapat diedit");
+    }
 
     const [rows] = await db.query(
       `SELECT l.*, p.Nama_ProgramKerja AS namaProker
@@ -340,11 +369,17 @@ exports.getEditLaporan = async (req, res) => {
 };
 
 // =====================================================
-// 💾 Update laporan + keuangan
+// 💾 Update laporan + keuangan (DENGAN VALIDASI APPROVAL)
 // =====================================================
 exports.updateLaporan = async (req, res) => {
   try {
     const user = req.session.user;
+
+    // ✅ CEK APAKAH SUDAH DISETUJUI
+    const isApproved = await isLaporanApproved(req.params.id);
+    if (isApproved) {
+      return res.redirect("/hmsi/laporan?error=Laporan sudah disetujui DPA, tidak dapat diupdate");
+    }
     
 
     const {
@@ -505,11 +540,18 @@ exports.updateLaporan = async (req, res) => {
 };
 
 // =====================================================
-// ❌ Hapus laporan
+// ❌ Hapus laporan (DENGAN VALIDASI APPROVAL)
 // =====================================================
 exports.deleteLaporan = async (req, res) => {
   try {
     const user = req.session.user;
+
+    // ✅ CEK APAKAH SUDAH DISETUJUI
+    const isApproved = await isLaporanApproved(req.params.id);
+    if (isApproved) {
+      return res.redirect("/hmsi/laporan?error=Laporan sudah disetujui DPA, tidak dapat dihapus");
+    }
+
     const [rows] = await db.query(
       `SELECT judul_laporan, dokumentasi, divisi
        FROM Laporan

@@ -4,44 +4,36 @@
   <meta charset="UTF-8">
   <title><%= title %></title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- FontAwesome -->
   <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
         crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col">
 
-  <!-- ✅ Navbar -->
+  <!-- Navbar -->
   <%- include('../partials/navbarHMSI', { user: user, unreadCount: unreadCount }) %>
 
-  <!-- ✅ Sidebar -->
+  <!-- Sidebar -->
   <%- include('../partials/sidebarHMSI', { user: user, activeNav: 'Program Kerja' }) %>
 
   <!-- Delete Confirmation Modal -->
   <div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
     <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="deleteModalContent">
       <div class="text-center">
-        <!-- Warning Icon -->
         <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
           </svg>
         </div>
-        
-        <!-- Title -->
         <h3 class="text-xl font-bold text-gray-900 mb-2">Hapus Program Kerja?</h3>
-        
-        <!-- Message -->
         <p class="text-gray-600 mb-2">Apakah Anda yakin ingin menghapus program kerja</p>
         <p id="deleteProkerName" class="font-semibold text-gray-800 mb-4">"[Nama Program Kerja]"</p>
         <p class="text-sm text-red-600 mb-6">Tindakan ini tidak dapat dibatalkan!</p>
-        
-        <!-- Buttons -->
         <div class="flex gap-3 justify-center">
           <button id="cancelDelete" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors duration-200 font-medium">
             Batal
           </button>
-          <button id="confirmDelete" class="px-6 py-2 bg-red-600 text-white rounded-xl hover:bg-red-600 transition-colors duration-200 font-medium">
+          <button id="confirmDelete" class="px-6 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors duration-200 font-medium">
             Ya, Hapus
           </button>
         </div>
@@ -53,20 +45,13 @@
   <div id="successDeleteModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
     <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="successDeleteModalContent">
       <div class="text-center">
-        <!-- Success Icon -->
         <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <svg class="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
           </svg>
         </div>
-        
-        <!-- Title -->
         <h3 class="text-xl font-bold text-gray-900 mb-2">Berhasil Dihapus!</h3>
-        
-        <!-- Message -->
         <p class="text-gray-600 mb-6">Program kerja telah berhasil dihapus.</p>
-        
-        <!-- Button -->
         <button id="closeSuccessDeleteModal" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-3 px-6 rounded-xl transition-colors duration-200">
           Mengerti
         </button>
@@ -78,22 +63,33 @@
   <div id="errorDeleteModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
     <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="errorDeleteModalContent">
       <div class="text-center">
-        <!-- Error Icon -->
         <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
           </svg>
         </div>
-        
-        <!-- Title -->
         <h3 class="text-xl font-bold text-gray-900 mb-2">Gagal Menghapus!</h3>
-        
-        <!-- Message -->
         <p id="errorDeleteMessage" class="text-gray-600 mb-6">Terjadi kesalahan saat menghapus program kerja.</p>
-        
-        <!-- Button -->
         <button id="closeErrorDeleteModal" class="w-full bg-red-500 hover:bg-red-600 text-white font-medium py-3 px-6 rounded-xl transition-colors duration-200">
           Tutup
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cannot Edit Modal -->
+  <div id="cannotEditModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="cannotEditModalContent">
+      <div class="text-center">
+        <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+          </svg>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 mb-2">Tidak Dapat Diubah</h3>
+        <p class="text-gray-600 mb-6">Program kerja dengan status "Selesai" atau "Gagal" tidak dapat diubah atau dihapus.</p>
+        <button id="closeCannotEditModal" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-3 px-6 rounded-xl transition-colors duration-200">
+          Mengerti
         </button>
       </div>
     </div>
@@ -122,7 +118,6 @@
 
         <!-- Search & Filter -->
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-          <!-- Search -->
           <div class="flex-1">
             <div class="relative">
               <input id="searchInput" type="text" placeholder="Cari program kerja..."
@@ -135,7 +130,6 @@
             </div>
           </div>
 
-          <!-- Dropdown Status -->
           <div class="relative">
             <button id="dropdownButton" 
               class="flex items-center justify-between gap-2 px-4 py-3 border border-gray-300 rounded-xl text-sm bg-white
@@ -182,7 +176,9 @@
                 </tr>
               </thead>
               <tbody id="programTable">
-                <% programs.forEach((proker, index) => { %>
+                <% programs.forEach((proker, index) => { 
+                  const isDisabled = proker.status === 'Selesai' || proker.status === 'Gagal';
+                %>
                   <tr class="hover:bg-orange-50 transition" data-visible="true">
                     <td class="py-3 px-4 border border-orange-100"><%= index + 1 %></td>
                     <td class="py-3 px-4 font-medium text-gray-800 border border-orange-100 text-left"><%= proker.namaProker %></td>
@@ -202,16 +198,37 @@
                       <% } %>
                     </td>
                     <td class="py-3 px-4 flex justify-center gap-4 border border-orange-100">
-                      <a href="/hmsi/proker/<%= proker.id %>/edit" class="text-orange-500 hover:text-orange-700 transition transform hover:scale-110" title="Edit">
-                        <i class="fa-solid fa-pen-to-square text-lg"></i>
-                      </a>
-                      <button type="button" 
-                              class="delete-btn text-orange-500 hover:text-orange-700 transition transform hover:scale-110" 
-                              title="Hapus"
-                              data-id="<%= proker.id %>"
-                              data-name="<%= proker.namaProker %>">
-                        <i class="fa-solid fa-trash text-lg"></i>
-                      </button>
+                      <% if (isDisabled) { %>
+                        <!-- Disabled Edit Button -->
+                        <button type="button" 
+                                class="text-gray-300 cursor-not-allowed" 
+                                title="Tidak dapat diubah"
+                                disabled>
+                          <i class="fa-solid fa-pen-to-square text-lg"></i>
+                        </button>
+                        <!-- Disabled Delete Button -->
+                        <button type="button" 
+                                class="text-gray-300 cursor-not-allowed" 
+                                title="Tidak dapat dihapus"
+                                disabled>
+                          <i class="fa-solid fa-trash text-lg"></i>
+                        </button>
+                      <% } else { %>
+                        <!-- Active Edit Button -->
+                        <a href="/hmsi/proker/<%= proker.id %>/edit" 
+                           class="text-orange-500 hover:text-orange-700 transition transform hover:scale-110" 
+                           title="Edit">
+                          <i class="fa-solid fa-pen-to-square text-lg"></i>
+                        </a>
+                        <!-- Active Delete Button -->
+                        <button type="button" 
+                                class="delete-btn text-orange-500 hover:text-orange-700 transition transform hover:scale-110" 
+                                title="Hapus"
+                                data-id="<%= proker.id %>"
+                                data-name="<%= proker.namaProker %>">
+                          <i class="fa-solid fa-trash text-lg"></i>
+                        </button>
+                      <% } %>
                     </td>
                   </tr>
                 <% }) %>
@@ -234,7 +251,6 @@
   <!-- Footer -->
   <%- include('../partials/footer') %>
 
-  <!-- Script Filter & Pagination -->
   <script>
     // Modal functions
     function showModal(modalId) {
@@ -243,7 +259,6 @@
       
       modal.classList.remove('hidden');
       
-      // Trigger animation
       setTimeout(() => {
         content.classList.remove('scale-95', 'opacity-0');
         content.classList.add('scale-100', 'opacity-100');
@@ -277,7 +292,6 @@
       if (currentDeleteAction && currentDeleteId) {
         hideModal('deleteModal');
         
-        // Submit delete request
         fetch(currentDeleteAction, {
           method: 'POST',
           headers: {
@@ -287,7 +301,6 @@
         .then(response => {
           if (response.ok) {
             showModal('successDeleteModal');
-            // Remove the row from table
             const row = document.querySelector(`button[data-id="${currentDeleteId}"]`).closest('tr');
             if (row) {
               row.remove();
@@ -318,8 +331,12 @@
       hideModal('errorDeleteModal');
     });
 
+    document.getElementById('closeCannotEditModal').addEventListener('click', () => {
+      hideModal('cannotEditModal');
+    });
+
     // Close modal when clicking outside
-    ['deleteModal', 'successDeleteModal', 'errorDeleteModal'].forEach(modalId => {
+    ['deleteModal', 'successDeleteModal', 'errorDeleteModal', 'cannotEditModal'].forEach(modalId => {
       document.getElementById(modalId).addEventListener('click', (e) => {
         if (e.target.id === modalId) {
           hideModal(modalId);
@@ -342,6 +359,7 @@
       }
     });
 
+    // Filter & Pagination
     document.addEventListener("DOMContentLoaded", () => {
       const searchInput = document.getElementById("searchInput");
       const dropdownButton = document.getElementById("dropdownButton");
