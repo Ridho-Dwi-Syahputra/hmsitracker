@@ -7,26 +7,32 @@ const db = require("../config/db");
 
 async function unreadNotif(req, res, next) {
   try {
-    // default selalu 0
-    res.locals.unreadCount = 0;
+    res.locals.unreadCount = 0; // default
 
-    // hanya kalau ada user HMSI yang login
+    // Jalankan hanya untuk user HMSI yang login
     if (req.session.user && req.session.user.role === "HMSI") {
-      const [rows] = await db.query(
-        `SELECT COUNT(*) AS unreadCount 
-         FROM Notifikasi 
-         WHERE role = 'HMSI' 
-           AND status_baca = 0 
-           AND divisi = ?`,
-        [req.session.user.divisi]
-      );
+      const idDivisi = req.session.user.id_divisi || null;
 
-      res.locals.unreadCount = rows[0]?.unreadCount || 0;
+      if (idDivisi) {
+        const [rows] = await db.query(
+          `SELECT COUNT(*) AS unreadCount
+           FROM Notifikasi n
+           WHERE n.role = 'HMSI'
+             AND n.status_baca = 0
+             AND n.id_divisi = ?`,
+          [idDivisi]
+        );
+
+        res.locals.unreadCount = rows[0]?.unreadCount || 0;
+      } else {
+        console.warn("⚠️ HMSI user tidak memiliki id_divisi di session");
+      }
     }
   } catch (err) {
     console.error("❌ Middleware unreadNotif error:", err.message);
-    res.locals.unreadCount = 0; // fallback
+    res.locals.unreadCount = 0;
   }
+
   next();
 }
 

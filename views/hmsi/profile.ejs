@@ -51,6 +51,7 @@
           <div class="text-center sm:text-left">
             <h2 class="text-xl font-semibold text-gray-800"><%= user.nama %></h2>
             <p class="text-sm text-gray-500">NIM: <%= user.id_anggota %></p>
+            <p class="text-sm text-gray-500 mt-1">Role: <%= user.role %></p>
           </div>
         </div>
 
@@ -62,7 +63,7 @@
           </div>
           <div class="p-4 bg-orange-50 border border-orange-200 rounded-xl">
             <p class="text-xs text-gray-500">Divisi</p>
-            <p class="text-sm font-medium text-gray-800"><%= user.divisi %></p>
+            <p class="text-sm font-medium text-gray-800"><%= user.nama_divisi || user.divisi || '-' %></p>
           </div>
         </div>
 
@@ -81,8 +82,8 @@
     </div>
   </main>
 
-   <!-- Footer -->
-   <%- include('../partials/footer') %>
+  <!-- Footer -->
+  <%- include('../partials/footer') %>
 
   <!-- Print-friendly -->
   <style>

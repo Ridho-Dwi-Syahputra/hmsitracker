@@ -3,6 +3,7 @@
 // Controller untuk DPA dalam mengelola laporan
 // DPA hanya bisa melihat laporan & memberi evaluasi
 // + menampilkan komentar HMSI bila ada
+// + sinkron dengan tabel divisi baru (pakai id_divisi)
 // =====================================================
 
 const db = require("../../config/db");
@@ -37,12 +38,15 @@ function getMimeFromFile(filename) {
 exports.getAllLaporanDPA = async (req, res) => {
   try {
     const [rows] = await db.query(
-      `SELECT l.*, 
-              p.Nama_ProgramKerja AS namaProker,
-              e.status_konfirmasi
+      `SELECT 
+          l.*, 
+          p.Nama_ProgramKerja AS namaProker,
+          d.nama_divisi AS namaDivisi,
+          e.status_konfirmasi
        FROM Laporan l
        LEFT JOIN Program_kerja p ON l.id_ProgramKerja = p.id_ProgramKerja
        LEFT JOIN Evaluasi e ON e.id_laporan = l.id_laporan
+       LEFT JOIN divisi d ON l.id_divisi = d.id_divisi
        ORDER BY l.tanggal DESC`
     );
 
@@ -61,7 +65,7 @@ exports.getAllLaporanDPA = async (req, res) => {
 
       let status = "Belum Dievaluasi";
       if (r.status_konfirmasi === "Revisi") status = "Revisi";
-      else if (r.status_konfirmasi === "Selesai") status = "Disetujui"; // ✅ ganti Approved → Disetujui
+      else if (r.status_konfirmasi === "Selesai") status = "Disetujui";
 
       return {
         ...r,
@@ -72,7 +76,7 @@ exports.getAllLaporanDPA = async (req, res) => {
 
     res.render("dpa/kelolaLaporan", {
       title: "Daftar Laporan",
-      user: req.session.user || { name: "Dummy User" },
+      user: req.session.user,
       activeNav: "Laporan",
       laporan,
       successMsg: req.query.success || null,
@@ -90,21 +94,22 @@ exports.getAllLaporanDPA = async (req, res) => {
 exports.getDetailLaporanDPA = async (req, res) => {
   try {
     const [rows] = await db.query(
-      `SELECT l.*, 
-              p.Nama_ProgramKerja AS namaProker,
-              l.deskripsi_target_kuantitatif,
-              l.deskripsi_target_kualitatif
+      `SELECT 
+          l.*, 
+          p.Nama_ProgramKerja AS namaProker,
+          d.nama_divisi AS namaDivisi,
+          l.deskripsi_target_kuantitatif,
+          l.deskripsi_target_kualitatif
        FROM Laporan l
        LEFT JOIN Program_kerja p ON l.id_ProgramKerja = p.id_ProgramKerja
+       LEFT JOIN divisi d ON l.id_divisi = d.id_divisi
        WHERE l.id_laporan = ?`,
       [req.params.id]
     );
 
     if (!rows.length) return res.status(404).send("Laporan tidak ditemukan");
+    const laporan = rows[0];
 
-    let laporan = rows[0];
-
-    // format tanggal
     let tanggalFormatted = "-";
     if (laporan.tanggal && laporan.tanggal !== "0000-00-00") {
       const d = new Date(laporan.tanggal);
@@ -117,11 +122,9 @@ exports.getDetailLaporanDPA = async (req, res) => {
       }
     }
     laporan.tanggalFormatted = tanggalFormatted;
-
-    // deteksi mime file dokumentasi
     laporan.dokumentasi_mime = getMimeFromFile(laporan.dokumentasi);
 
-    // ambil evaluasi terbaru (termasuk komentar HMSI kalau ada)
+    // ambil evaluasi terbaru (termasuk komentar HMSI)
     const [evaluasiRows] = await db.query(
       `SELECT e.*, u.nama AS namaEvaluator
        FROM Evaluasi e
@@ -136,7 +139,7 @@ exports.getDetailLaporanDPA = async (req, res) => {
 
     res.render("dpa/detailLaporan", {
       title: "Detail Laporan",
-      user: req.session.user || { name: "Dummy User" },
+      user: req.session.user,
       activeNav: "Laporan",
       laporan,
       evaluasi,
@@ -155,21 +158,22 @@ exports.getDetailLaporanDPA = async (req, res) => {
 exports.getFormEvaluasi = async (req, res) => {
   try {
     const [rows] = await db.query(
-      `SELECT l.*, 
-              p.Nama_ProgramKerja AS namaProker,
-              l.deskripsi_target_kuantitatif,
-              l.deskripsi_target_kualitatif
+      `SELECT 
+          l.*, 
+          p.Nama_ProgramKerja AS namaProker,
+          d.nama_divisi AS namaDivisi,
+          l.deskripsi_target_kuantitatif,
+          l.deskripsi_target_kualitatif
        FROM Laporan l
        LEFT JOIN Program_kerja p ON l.id_ProgramKerja = p.id_ProgramKerja
+       LEFT JOIN divisi d ON l.id_divisi = d.id_divisi
        WHERE l.id_laporan = ?`,
       [req.params.id]
     );
 
     if (!rows.length) return res.status(404).send("Laporan tidak ditemukan");
-
     const laporan = rows[0];
 
-    // format tanggal
     let tanggalFormatted = "-";
     if (laporan.tanggal && laporan.tanggal !== "0000-00-00") {
       const d = new Date(laporan.tanggal);
@@ -199,7 +203,7 @@ exports.getFormEvaluasi = async (req, res) => {
 
     res.render("dpa/formEvaluasi", {
       title: "Evaluasi Laporan",
-      user: req.session.user || { name: "Dummy User" },
+      user: req.session.user,
       activeNav: "Laporan",
       laporan,
       evaluasi,
@@ -214,7 +218,7 @@ exports.getFormEvaluasi = async (req, res) => {
 };
 
 // =====================================================
-// 💾 Simpan evaluasi + notifikasi HMSI
+// 💾 Simpan evaluasi + notifikasi ke HMSI (pakai id_divisi)
 // =====================================================
 exports.postEvaluasi = async (req, res) => {
   try {
@@ -229,9 +233,6 @@ exports.postEvaluasi = async (req, res) => {
           !komentar ? "Komentar wajib diisi" : "Status wajib dipilih"
         )}&oldData=${encodeURIComponent(JSON.stringify(oldData))}`
       );
-    }
-    if (!evaluatorId) {
-      return res.status(401).send("Unauthorized: Login sebagai DPA dulu.");
     }
 
     const [cek] = await db.query(
@@ -257,20 +258,19 @@ exports.postEvaluasi = async (req, res) => {
       );
     }
 
-    // ambil detail laporan
+    // ambil detail laporan termasuk id_divisi
     const [laporanRows] = await db.query(
-      `SELECT judul_laporan, divisi FROM Laporan WHERE id_laporan = ?`,
+      `SELECT judul_laporan, id_divisi FROM Laporan WHERE id_laporan = ?`,
       [laporanId]
     );
     const laporan = laporanRows[0];
 
-    // notifikasi HMSI
+    // kirim notifikasi ke HMSI (pakai id_divisi)
     const pesan = `DPA memberi evaluasi pada laporan "${laporan.judul_laporan}"`;
-    const idNotifikasi = uuidv4();
     await db.query(
-      `INSERT INTO Notifikasi (id_notifikasi, pesan, role, status_baca, divisi, id_laporan, id_evaluasi, created_at)
+      `INSERT INTO Notifikasi (id_notifikasi, pesan, role, status_baca, id_divisi, id_laporan, id_evaluasi, created_at)
        VALUES (?, ?, 'HMSI', 0, ?, ?, ?, NOW())`,
-      [idNotifikasi, pesan, laporan.divisi, laporanId, idEvaluasi]
+      [uuidv4(), pesan, laporan.id_divisi, laporanId, idEvaluasi]
     );
 
     res.redirect(`/dpa/kelolaLaporan?success=Evaluasi berhasil disimpan`);
@@ -286,10 +286,15 @@ exports.postEvaluasi = async (req, res) => {
 exports.getAllEvaluasiDPA = async (req, res) => {
   try {
     const [rows] = await db.query(
-      `SELECT e.*, l.judul_laporan, l.divisi, u.nama AS namaEvaluator
+      `SELECT 
+          e.*, 
+          l.judul_laporan, 
+          d.nama_divisi AS namaDivisi,
+          u.nama AS namaEvaluator
        FROM Evaluasi e
        LEFT JOIN Laporan l ON e.id_laporan = l.id_laporan
        LEFT JOIN User u ON e.pemberi_evaluasi = u.id_anggota
+       LEFT JOIN divisi d ON l.id_divisi = d.id_divisi
        ORDER BY e.tanggal_evaluasi DESC`
     );
 
@@ -310,7 +315,7 @@ exports.getAllEvaluasiDPA = async (req, res) => {
 
     res.render("dpa/kelolaEvaluasi", {
       title: "Kelola Evaluasi",
-      user: req.session.user || { name: "Dummy User" },
+      user: req.session.user,
       activeNav: "Evaluasi",
       evaluasi,
       successMsg: req.query.success || null,

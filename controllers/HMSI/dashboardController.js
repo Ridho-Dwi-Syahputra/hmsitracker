@@ -17,14 +17,18 @@ function calculateStatusWithLock(start, end, status_db) {
   return "Belum Dimulai";
 }
 
+// =====================================================
+// 📊 Dashboard HMSI (berdasarkan divisi login)
+// =====================================================
 exports.getDashboardStats = async (req, res) => {
   try {
-    if (!req.session.user || !req.session.user.divisi) {
-      console.error("Dashboard Gagal: Session user/divisi tidak ditemukan.");
+    const user = req.session.user;
+    const idDivisi = user?.id_divisi || null;
+
+    if (!user || !idDivisi) {
+      console.error("Dashboard Gagal: Session user/id_divisi tidak ditemukan.");
       return res.redirect("/auth/login?error=Sesi Anda tidak valid.");
     }
-
-    const userDivisi = req.session.user.divisi;
 
     // 🔹 Ambil semua proker milik divisi user
     const [rows] = await db.query(
@@ -33,11 +37,13 @@ exports.getDashboardStats = async (req, res) => {
         pk.Nama_ProgramKerja AS namaProker,
         pk.Tanggal_mulai AS tanggal_mulai,
         pk.Tanggal_selesai AS tanggal_selesai,
-        pk.Status AS status_db
+        pk.Status AS status_db,
+        d.nama_divisi
        FROM Program_kerja pk
        JOIN User u ON pk.id_anggota = u.id_anggota
-       WHERE u.divisi = ?`,
-      [userDivisi]
+       LEFT JOIN divisi d ON u.id_divisi = d.id_divisi
+       WHERE u.id_divisi = ?`,
+      [idDivisi]
     );
 
     let totalProker = 0;
@@ -53,14 +59,14 @@ exports.getDashboardStats = async (req, res) => {
 
     // 🔹 Hitung total laporan
     const [laporanRows] = await db.query(
-      `SELECT COUNT(*) AS total FROM Laporan WHERE divisi = ?`,
-      [userDivisi]
+      `SELECT COUNT(*) AS total FROM Laporan WHERE id_divisi = ?`,
+      [idDivisi]
     );
     const totalLaporan = laporanRows[0]?.total || 0;
 
     res.render("hmsi/hmsiDashboard", {
       title: "Dashboard HMSI",
-      user: req.session.user,
+      user,
       activeNav: "Dashboard",
       totalProker,
       prokerSelesai,

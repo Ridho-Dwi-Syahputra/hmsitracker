@@ -4,19 +4,20 @@
   <meta charset="UTF-8">
   <title><%= title %></title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- FontAwesome -->
   <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
         crossorigin="anonymous" referrerpolicy="no-referrer" />
   <style>
     .table-fixed { table-layout: fixed; }
     .table-fixed th:nth-child(1) { width: 50px; }   /* No */
-    .table-fixed th:nth-child(2) { width: 30%; }    /* Nama Program */
-    .table-fixed th:nth-child(3) { width: 15%; }    /* Divisi */
-    .table-fixed th:nth-child(4) { width: 20%; }    /* Penanggung Jawab */
-    .table-fixed th:nth-child(5) { width: 15%; }    /* Status */
-    .table-fixed th:nth-child(6) { width: 120px; }  /* Aksi */
-    
+    .table-fixed th:nth-child(2) { width: 25%; }    /* Nama Program */
+    .table-fixed th:nth-child(3) { width: 13%; }    /* Divisi */
+    .table-fixed th:nth-child(4) { width: 12%; }    /* Penanggung Jawab */
+    .table-fixed th:nth-child(5) { width: 10%; }    /* Tanggal Mulai */
+    .table-fixed th:nth-child(6) { width: 10%; }    /* Tanggal Selesai */
+    .table-fixed th:nth-child(7) { width: 10%; }    /* Status */
+    .table-fixed th:nth-child(8) { width: 100px; }  /* Aksi */
+
     .text-ellipsis {
       overflow: hidden;
       text-overflow: ellipsis;
@@ -24,27 +25,24 @@
     }
   </style>
 </head>
+
 <body class="bg-orange-50 min-h-screen flex flex-col">
 
-  <!-- ✅ Navbar -->
+  <!-- Navbar -->
   <%- include('../partials/navbarDPA', { user: user, unreadCount: unreadCount }) %>
-  
-  <!-- ✅ Sidebar -->
+  <!-- Sidebar -->
   <%- include('../partials/sidebarDPA', { user: user, activeNav: 'Daftar Program Kerja' }) %>
 
-  <!-- Wrapper -->
   <main class="lg:ml-80 px-6 pt-20 pb-8 flex-grow">
     <div class="max-w-7xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-orange-200">
-
-      <!-- Header Card -->
+      
       <div class="bg-orange-500 text-white px-6 py-6 flex items-center justify-between">
         <div>
           <h1 class="text-2xl font-bold">Daftar Program Kerja</h1>
-          <p class="text-sm text-orange-100">Lihat & kelola program kerja HMSI</p>
+          <p class="text-sm text-orange-100">Lihat & kelola seluruh program kerja HMSI</p>
         </div>
       </div>
 
-      <!-- Body Card -->
       <div class="p-6 sm:p-8">
 
         <!-- Search & Filter -->
@@ -63,15 +61,15 @@
             </div>
           </div>
 
-          <!-- Dropdown Status -->
+          <!-- Filter Status -->
           <div class="relative">
-            <button id="dropdownButton" 
+            <button id="statusBtn"
               class="flex items-center justify-between gap-2 px-4 py-3 border border-gray-300 rounded-xl text-sm bg-white
-                     hover:border-orange-500 hover:shadow-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200">
-              <span id="dropdownLabel">Semua Status</span>
+                     hover:border-orange-500 hover:shadow-md focus:ring-2 focus:ring-orange-500 transition-all duration-200">
+              <span id="statusLabel">Semua Status</span>
               <i class="fa-solid fa-chevron-down text-orange-500"></i>
             </button>
-            <div id="dropdownMenu" 
+            <div id="statusMenu"
               class="hidden absolute right-0 mt-2 w-48 bg-white border border-orange-200 rounded-lg shadow-lg z-10">
               <ul class="text-sm text-gray-700">
                 <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="all">Semua Status</button></li>
@@ -83,31 +81,30 @@
             </div>
           </div>
 
-          <!-- Dropdown Divisi -->
+          <!-- Filter Divisi -->
           <div class="relative">
-            <button id="divisiDropdownBtn" 
+            <button id="divisiBtn"
               class="flex items-center justify-between gap-2 px-4 py-3 border border-gray-300 rounded-xl text-sm bg-white
-                     hover:border-orange-500 hover:shadow-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200">
-              <span id="divisiDropdownLabel">Semua Divisi</span>
+                     hover:border-orange-500 hover:shadow-md focus:ring-2 focus:ring-orange-500 transition-all duration-200">
+              <span id="divisiLabel">Semua Divisi</span>
               <i class="fa-solid fa-chevron-down text-orange-500"></i>
             </button>
-            <div id="divisiDropdownMenu" 
+            <div id="divisiMenu"
               class="hidden absolute right-0 mt-2 w-48 bg-white border border-orange-200 rounded-lg shadow-lg z-10">
               <ul class="text-sm text-gray-700">
                 <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="all">Semua Divisi</button></li>
-                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="Internal">Internal</button></li>
-                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="Medkraf">Medkraf</button></li>
-                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="Eksternal">Eksternal</button></li>
-                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="Bikraf">Bikraf</button></li>
-                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="PSI">PSI</button></li>
-                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="PSDM">PSDM</button></li>
-                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="RTK">RTK</button></li>
+                <% 
+                  const uniqueDivisi = [...new Set(programs.map(p => p.divisi).filter(Boolean))];
+                  uniqueDivisi.forEach(d => { %>
+                    <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="<%= d %>"><%= d %></button></li>
+                <% }); %>
               </ul>
             </div>
           </div>
-        </div> <!-- ⬅️ penutup flex filter -->
 
-        <!-- Tabel -->
+        </div>
+
+        <!-- Table -->
         <div class="overflow-x-auto bg-white-50 p-2 shadow-sm rounded-xl">
           <table class="min-w-full text-sm text-center border border-orange-200 rounded-xl overflow-hidden border-separate border-spacing-0 table-fixed">
             <thead class="bg-orange-100 text-gray-700">
@@ -116,41 +113,38 @@
                 <th class="py-3 px-4 font-semibold border border-orange-200 text-left">Nama Program</th>
                 <th class="py-3 px-4 font-semibold border border-orange-200">Divisi</th>
                 <th class="py-3 px-4 font-semibold border border-orange-200">Penanggung Jawab</th>
+                <th class="py-3 px-4 font-semibold border border-orange-200">Mulai</th>
+                <th class="py-3 px-4 font-semibold border border-orange-200">Selesai</th>
                 <th class="py-3 px-4 font-semibold border border-orange-200">Status</th>
                 <th class="py-3 px-4 font-semibold border border-orange-200">Aksi</th>
               </tr>
             </thead>
             <tbody id="programTable">
               <% if (programs && programs.length > 0) { %>
-                <% programs.forEach((proker, index) => { %>
+                <% programs.forEach((p, index) => { %>
                   <tr class="hover:bg-orange-50 transition">
                     <td class="py-3 px-4 border border-orange-100"><%= index + 1 %></td>
-                    <td class="py-3 px-4 font-medium text-gray-800 border border-orange-100 text-left">
-                      <div class="text-ellipsis" title="<%= proker.namaProker %>"><%= proker.namaProker %></div>
-                    </td>
-                    <td class="py-3 px-4 text-gray-600 border border-orange-100" data-col="divisi">
-                      <div class="text-ellipsis" title="<%= proker.divisi %>"><%= proker.divisi %></div>
-                    </td>
-                    <td class="py-3 px-4 text-gray-600 border border-orange-100">
-                      <div class="text-ellipsis" title="<%= proker.penanggungJawab %>"><%= proker.penanggungJawab %></div>
-                    </td>
+                    <td class="py-3 px-4 text-left text-gray-800 border border-orange-100 text-ellipsis" title="<%= p.namaProker %>"><%= p.namaProker %></td>
+                    <td class="py-3 px-4 text-gray-600 border border-orange-100" data-col="divisi"><%= p.divisi %></td>
+                    <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= p.penanggungJawab %></td>
+                    <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= p.tanggalMulaiFormatted %></td>
+                    <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= p.tanggalSelesaiFormatted %></td>
                     <td class="py-3 px-4 border border-orange-100" data-col="status">
-                      <% if (proker.status === "Belum Dimulai") { %>
-                        <span class="px-3 py-1 text-xs rounded-full bg-yellow-100 text-yellow-700 font-medium whitespace-nowrap"><%= proker.status %></span>
-                      <% } else if (proker.status === "Sedang Berjalan") { %>
-                        <span class="px-3 py-1 text-xs rounded-full bg-blue-100 text-blue-700 font-medium whitespace-nowrap"><%= proker.status %></span>
-                      <% } else if (proker.status === "Selesai") { %>
-                        <span class="px-3 py-1 text-xs rounded-full bg-green-100 text-green-700 font-medium whitespace-nowrap"><%= proker.status %></span>
-                      <% } else if (proker.status === "Gagal") { %>
-                        <span class="px-3 py-1 text-xs rounded-full bg-red-100 text-red-700 font-medium whitespace-nowrap"><%= proker.status %></span>
+                      <% if (p.status === "Belum Dimulai") { %>
+                        <span class="px-3 py-1 text-xs rounded-full bg-yellow-100 text-yellow-700 font-medium whitespace-nowrap"><%= p.status %></span>
+                      <% } else if (p.status === "Sedang Berjalan") { %>
+                        <span class="px-3 py-1 text-xs rounded-full bg-blue-100 text-blue-700 font-medium whitespace-nowrap"><%= p.status %></span>
+                      <% } else if (p.status === "Selesai") { %>
+                        <span class="px-3 py-1 text-xs rounded-full bg-green-100 text-green-700 font-medium whitespace-nowrap"><%= p.status %></span>
+                      <% } else if (p.status === "Gagal") { %>
+                        <span class="px-3 py-1 text-xs rounded-full bg-red-100 text-red-700 font-medium whitespace-nowrap"><%= p.status %></span>
                       <% } else { %>
-                        <span class="px-3 py-1 text-xs rounded-full bg-gray-100 text-gray-600 font-medium whitespace-nowrap"><%= proker.status %></span>
+                        <span class="px-3 py-1 text-xs rounded-full bg-gray-100 text-gray-600 font-medium whitespace-nowrap"><%= p.status %></span>
                       <% } %>
                     </td>
                     <td class="py-3 px-4 border border-orange-100">
                       <div class="flex justify-center items-center gap-2">
-                        <!-- Detail Button Only -->
-                        <a href="/dpa/proker/<%= proker.id %>/detail" 
+                        <a href="/dpa/proker/<%= p.id %>/detail" 
                            class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-orange-100 text-orange-600 hover:bg-orange-200 hover:text-orange-700 transition-all duration-200" 
                            title="Lihat Detail">
                           <i class="fa-solid fa-eye text-sm"></i>
@@ -158,13 +152,13 @@
                       </div>
                     </td>
                   </tr>
-                <% }) %>
+                <% }); %>
               <% } else { %>
                 <tr>
-                  <td colspan="6" class="py-8 text-center text-gray-500 border border-orange-100">
+                  <td colspan="8" class="py-10 text-gray-500 text-center border border-orange-100">
                     <div class="flex flex-col items-center gap-2">
                       <i class="fa-solid fa-folder-open text-2xl text-gray-300"></i>
-                      <span>Tidak ada program kerja ditemukan.</span>
+                      <span>Tidak ada program kerja ditemukan</span>
                     </div>
                   </td>
                 </tr>
@@ -184,47 +178,40 @@
     </div>
   </main>
 
-  <!-- Script -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const searchInput = document.getElementById("searchInput");
       const tbody = document.getElementById("programTable");
       let rows = Array.from(tbody?.querySelectorAll("tr") || []);
 
-      // Dropdown status
-      const statusBtn = document.getElementById("dropdownButton");
-      const statusMenu = document.getElementById("dropdownMenu");
-      const statusLabel = document.getElementById("dropdownLabel");
+      const statusBtn = document.getElementById("statusBtn");
+      const statusMenu = document.getElementById("statusMenu");
+      const statusLabel = document.getElementById("statusLabel");
 
-      // Dropdown divisi
-      const divisiBtn = document.getElementById("divisiDropdownBtn");
-      const divisiMenu = document.getElementById("divisiDropdownMenu");
-      const divisiLabel = document.getElementById("divisiDropdownLabel");
+      const divisiBtn = document.getElementById("divisiBtn");
+      const divisiMenu = document.getElementById("divisiMenu");
+      const divisiLabel = document.getElementById("divisiLabel");
 
       const rowsPerPage = 10;
       let currentPage = 1;
 
-      // Close dropdowns when clicking outside
       document.addEventListener("click", (e) => {
         if (!statusBtn.contains(e.target)) statusMenu.classList.add("hidden");
         if (!divisiBtn.contains(e.target)) divisiMenu.classList.add("hidden");
       });
 
-      // Toggle dropdown status
       statusBtn.addEventListener("click", (e) => {
         e.stopPropagation();
         statusMenu.classList.toggle("hidden");
         divisiMenu.classList.add("hidden");
       });
 
-      // Toggle dropdown divisi
       divisiBtn.addEventListener("click", (e) => {
         e.stopPropagation();
         divisiMenu.classList.toggle("hidden");
         statusMenu.classList.add("hidden");
       });
 
-      // Dropdown select
       statusMenu.querySelectorAll("button").forEach(btn => {
         btn.addEventListener("click", () => {
           statusLabel.textContent = btn.dataset.value === "all" ? "Semua Status" : btn.dataset.value;
@@ -251,12 +238,12 @@
         rows.forEach(row => {
           const namaProker = row.cells[1]?.innerText.toLowerCase() || "";
           const divisi = row.querySelector("td[data-col='divisi']")?.innerText.trim() || "";
-          const pj = row.cells[3]?.innerText.toLowerCase() || "";
           const status = row.querySelector("td[data-col='status']")?.innerText.trim() || "";
+          const pj = row.cells[3]?.innerText.toLowerCase() || "";
 
-          let matchSearch = namaProker.includes(searchValue) || pj.includes(searchValue) || divisi.toLowerCase().includes(searchValue);
-          let matchStatus = selectedStatus === "Semua Status" || status === selectedStatus;
-          let matchDivisi = selectedDivisi === "Semua Divisi" || divisi === selectedDivisi;
+          const matchSearch = namaProker.includes(searchValue) || pj.includes(searchValue) || divisi.toLowerCase().includes(searchValue);
+          const matchStatus = selectedStatus === "Semua Status" || status === selectedStatus;
+          const matchDivisi = selectedDivisi === "Semua Divisi" || divisi === selectedDivisi;
 
           row.dataset.visible = (matchSearch && matchStatus && matchDivisi) ? "true" : "false";
         });
@@ -271,7 +258,7 @@
 
         rows.forEach(row => row.style.display = "none");
         visibleRows.forEach((row, index) => {
-          if (index >= (currentPage-1)*rowsPerPage && index < currentPage*rowsPerPage) {
+          if (index >= (currentPage - 1) * rowsPerPage && index < currentPage * rowsPerPage) {
             row.style.display = "";
           }
         });
@@ -284,8 +271,8 @@
       searchInput.addEventListener("input", () => { currentPage = 1; filterRows(); });
       document.getElementById("prevPage").addEventListener("click", () => { if (currentPage > 1) { currentPage--; paginate(); } });
       document.getElementById("nextPage").addEventListener("click", () => {
-        let visibleRows = rows.filter(row => row.dataset.visible !== "false");
-        let totalPages = Math.ceil(visibleRows.length / rowsPerPage);
+        const visibleRows = rows.filter(row => row.dataset.visible !== "false");
+        const totalPages = Math.ceil(visibleRows.length / rowsPerPage);
         if (currentPage < totalPages) { currentPage++; paginate(); }
       });
 

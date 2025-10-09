@@ -1,7 +1,6 @@
 <%
   // ✅ Data user
   var displayName = (user && (user.nama || user.name)) ? (user.nama || user.name) : 'HMSI Tracker';
-  var initial = displayName ? displayName.charAt(0).toUpperCase() : 'A';
   var fotoProfile = (user && user.foto_profile) 
     ? ('/' + user.foto_profile.replace(/^\/+/, '')) 
     : '/default-profile.png';
@@ -9,7 +8,8 @@
   // ✅ Menu utama
   var navItems = [
     { name: 'Dashboard', path: '/admin/dashboard', key: 'dashboard' },
-    { name: 'Kelola User', path: '/admin/kelola-user', key: 'users' }
+    { name: 'Kelola User', path: '/admin/kelola-user', key: 'users' },
+    { name: 'Kelola Divisi', path: '/admin/kelola-divisi', key: 'divisi' }
   ];
 
   // ✅ Submenu keuangan
@@ -48,7 +48,12 @@
 
         <div class="flex-1">
           <h3 class="text-sm font-semibold text-gray-800"><%= displayName %></h3>
-          <p class="text-xs text-gray-500 mt-0.5">Administrator</p>
+          <p class="text-xs text-gray-500 mt-0.5">
+            <%= user.role || 'Administrator' %>
+            <% if (user.nama_divisi) { %>
+              · <span class="text-orange-500 font-medium"><%= user.nama_divisi %></span>
+            <% } %>
+          </p>
         </div>
 
         <a href="/admin/profile" title="Profile"
@@ -74,7 +79,6 @@
 
     <!-- Navigation -->
     <nav id="admin-nav" class="flex-1 p-6 overflow-y-auto space-y-1">
-      <!-- Menu utama -->
       <% navItems.forEach(item => { 
            var isActive = activeNav === item.key;
       %>
@@ -128,7 +132,6 @@
   .slide-in { transform: translateX(0) !important; }
   .slide-out { transform: translateX(-100%) !important; }
 
-  /* 🔹 Default nav style */
   .nav-item {
     opacity: 0;
     transform: translateX(-20px);
@@ -141,14 +144,12 @@
     to { opacity: 1; transform: translateX(0); }
   }
 
-  /* 🔹 Hover effect */
   .nav-item:hover {
     transform: translateX(6px) scale(1.02);
     background: linear-gradient(to right, #fff7ed, #fff3e0);
     box-shadow: inset 4px 0 0 #f97316;
   }
 
-  /* 🔹 Active nav style */
   .nav-item.active {
     animation: fadeSlideIn 0.5s ease forwards, pulseOrange 1.5s ease-in-out infinite alternate;
     background: linear-gradient(to right, #fff7ed, #ffedd5);
@@ -162,7 +163,6 @@
     to   { box-shadow: inset 6px 0 0 #f97316, 0 0 10px rgba(249,115,22,0.28); }
   }
 
-  /* 🔹 Submenu style */
   .sub-item { 
     color: #4b5563; 
     transition: all 0.3s ease; 
@@ -181,7 +181,6 @@
     animation: pulseOrange 1.5s ease-in-out infinite alternate;
   }
 
-  /* 🔹 Gear icon */
   .gear-icon { transition: transform 0.4s ease, color 0.3s ease, filter 0.3s ease; }
   .gear-btn:hover .gear-icon {
     transform: rotate(90deg) scale(1.2);
@@ -211,9 +210,7 @@
     const overlay = document.getElementById("admin-sidebar-overlay");
     const toggle = document.getElementById("admin-sidebar-toggle");
 
-    if (window.innerWidth >= 1024) {
-      sidebar.classList.add("slide-in");
-    }
+    if (window.innerWidth >= 1024) sidebar.classList.add("slide-in");
 
     if (toggle) {
       toggle.addEventListener("click", () => {
@@ -237,7 +234,6 @@
       overlay.classList.add("hidden");
     });
 
-    // animasi menu
     document.querySelectorAll("#admin-nav .nav-item").forEach((el, i) => {
       el.style.animationDelay = (i * 100 + 300) + "ms";
     });

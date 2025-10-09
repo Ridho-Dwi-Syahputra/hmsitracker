@@ -44,7 +44,9 @@ exports.getAllProkerDPA = async (req, res) => {
       SELECT 
         p.id_ProgramKerja AS id,
         p.Nama_ProgramKerja AS namaProker,
-        u.divisi AS divisi,
+        u.id_divisi AS divisi,
+        d.nama_divisi AS nama_divisi,       -- 🧩 UPDATE: ambil nama divisi dari tabel divisi
+        d.id_divisi AS id_divisi,           -- 🧩 UPDATE: ambil id_divisi dari tabel divisi
         p.Deskripsi AS deskripsi,
         p.Tanggal_mulai AS tanggal_mulai,
         p.Tanggal_selesai AS tanggal_selesai,
@@ -53,6 +55,7 @@ exports.getAllProkerDPA = async (req, res) => {
         p.Status AS status_db
       FROM Program_kerja p
       LEFT JOIN User u ON p.id_anggota = u.id_anggota
+      LEFT JOIN divisi d ON u.id_divisi = d.id_divisi  -- 🧩 UPDATE: join tabel divisi
       ORDER BY p.Tanggal_mulai DESC
     `);
  
@@ -66,7 +69,8 @@ exports.getAllProkerDPA = async (req, res) => {
       return {
         id: r.id,
         namaProker: r.namaProker,
-        divisi: r.divisi,
+        divisi: r.nama_divisi || r.divisi,   // 🧩 UPDATE: fallback ke nama_divisi jika tersedia
+        id_divisi: r.id_divisi,              // 🧩 UPDATE: sertakan id_divisi untuk kebutuhan notifikasi
         deskripsi: r.deskripsi,
         tanggal_mulai: r.tanggal_mulai,
         tanggal_selesai: r.tanggal_selesai,
@@ -108,7 +112,9 @@ exports.getDetailProkerDPA = async (req, res) => {
       `SELECT 
         p.id_ProgramKerja AS id,
         p.Nama_ProgramKerja AS namaProker,
-        u.divisi AS divisi,
+        u.id_divisi AS divisi,
+        d.nama_divisi AS nama_divisi,     -- 🧩 UPDATE
+        d.id_divisi AS id_divisi,         -- 🧩 UPDATE
         p.Deskripsi AS deskripsi,
         p.Tanggal_mulai AS tanggal_mulai,
         p.Tanggal_selesai AS tanggal_selesai,
@@ -117,6 +123,7 @@ exports.getDetailProkerDPA = async (req, res) => {
         p.Status AS status_db
       FROM Program_kerja p
       LEFT JOIN User u ON p.id_anggota = u.id_anggota
+      LEFT JOIN divisi d ON u.id_divisi = d.id_divisi   -- 🧩 UPDATE
       WHERE p.id_ProgramKerja = ?`,
       [req.params.id]
     );
@@ -133,13 +140,14 @@ exports.getDetailProkerDPA = async (req, res) => {
       status = calculateStatus(r.tanggal_mulai, r.tanggal_selesai);
     }
     
-    console.log('📊 Status dari database:', r.status_db); // Debug log
-    console.log('📊 Status yang digunakan:', status); // Debug log
+    console.log('📊 Status dari database:', r.status_db);
+    console.log('📊 Status yang digunakan:', status);
 
     const proker = {
       id: r.id,
       namaProker: r.namaProker,
-      divisi: r.divisi,
+      divisi: r.nama_divisi || r.divisi,   // 🧩 UPDATE
+      id_divisi: r.id_divisi,              // 🧩 UPDATE
       deskripsi: r.deskripsi,
       tanggal_mulai: r.tanggal_mulai,
       tanggal_selesai: r.tanggal_selesai,
@@ -147,7 +155,7 @@ exports.getDetailProkerDPA = async (req, res) => {
       dokumen_pendukung: r.dokumen_pendukung,
       tanggalMulaiFormatted: formatTanggal(r.tanggal_mulai),
       tanggalSelesaiFormatted: formatTanggal(r.tanggal_selesai),
-      status  // ✅ Ini sekarang berisi string status yang benar
+      status
     };
 
     res.render("dpa/detailProker", {
@@ -174,7 +182,6 @@ exports.updateStatusProker = async (req, res) => {
 
     console.log('📝 Request update status - ID:', id, 'Status:', status);
 
-    // Validasi status sesuai DB
     const validStatus = ["Belum Dimulai", "Sedang Berjalan", "Selesai", "Gagal"];
     if (!validStatus.includes(status)) {
       return res.status(400).json({ 
@@ -185,9 +192,14 @@ exports.updateStatusProker = async (req, res) => {
 
     // 🔹 Ambil info proker dulu untuk notifikasi
     const [rows] = await db.query(
-      `SELECT p.Nama_ProgramKerja AS namaProker, u.divisi AS divisi
+      `SELECT 
+         p.Nama_ProgramKerja AS namaProker, 
+         u._iddivisi AS divisi,
+         d.id_divisi AS id_divisi,          -- 🧩 UPDATE
+         d.nama_divisi AS nama_divisi       -- 🧩 UPDATE
        FROM Program_kerja p
        LEFT JOIN User u ON p.id_anggota = u.id_anggota
+       LEFT JOIN divisi d ON u.id_divisi = d.id_divisi   -- 🧩 UPDATE
        WHERE p.id_ProgramKerja = ?`,
       [id]
     );
@@ -221,11 +233,13 @@ exports.updateStatusProker = async (req, res) => {
 
     // 🟠 Tambahkan notifikasi ke HMSI divisi terkait
     const idNotifikasi = uuidv4();
-    const pesan = `DPA telah mengubah status Program Kerja "${proker.namaProker}" milik divisi ${proker.divisi} menjadi ${status}`;
+    const pesan = `DPA telah mengubah status Program Kerja "${proker.namaProker}" milik divisi ${proker.nama_divisi || proker.divisi} menjadi ${status}`;
+    
+    // 🧩 UPDATE: gunakan id_divisi, bukan string divisi
     await db.query(
-      `INSERT INTO Notifikasi (id_notifikasi, pesan, role, divisi, status_baca, id_ProgramKerja, created_at)
+      `INSERT INTO Notifikasi (id_notifikasi, pesan, role, id_divisi, status_baca, id_ProgramKerja, created_at)
        VALUES (?, ?, 'HMSI', ?, 0, ?, NOW())`,
-      [idNotifikasi, pesan, proker.divisi, id]
+      [idNotifikasi, pesan, proker.id_divisi, id]
     );
 
     console.log('✅ Status berhasil diubah dan notifikasi terkirim');

@@ -1,9 +1,10 @@
 <%
-  // ✅ Ambil nama langsung dari session user
+  // ✅ Ambil nama & foto profil dari session user
   var displayName = (user && (user.nama || user.name)) ? (user.nama || user.name) : 'Admin HMSI';
   var initial = displayName ? displayName.charAt(0).toUpperCase() : 'A';
-  var fotoProfile = (user && user.foto_profile) ? ("/" + user.foto_profile) : '/default-profile.png';
+  var fotoProfile = (user && user.foto_profile) ? ("/" + user.foto_profile.replace(/^\/+/, '')) : '/default-profile.png';
 
+  // ✅ Menu navigasi HMSI
   var navItems = [
     { name: 'Dashboard', path: '/hmsi/dashboard' },
     { name: 'Program Kerja', path: '/hmsi/kelola-proker' },
@@ -38,7 +39,12 @@
 
         <div class="flex-1">
           <h3 class="text-sm font-semibold text-gray-800"><%= displayName %></h3>
-          <p class="text-xs text-gray-500 mt-0.5"><%= user.divisi || 'Pengurus HMSI' %></p>
+          <p class="text-xs text-gray-500 mt-0.5">
+            HMSI
+            <% if (user.nama_divisi) { %>
+              · <span class="text-orange-500 font-medium"><%= user.nama_divisi %></span>
+            <% } %>
+          </p>
         </div>
 
         <a href="/hmsi/profile" title="Profile"
@@ -64,8 +70,7 @@
 
     <!-- Navigation -->
     <nav id="hmsi-nav" class="flex-1 p-6 overflow-y-auto space-y-1">
-      <% for (var i = 0; i < navItems.length; i++) { 
-           var item = navItems[i];
+      <% navItems.forEach((item, i) => {
            var isActive = false;
            if (typeof activeNav !== 'undefined' && activeNav) {
              var av = String(activeNav).toLowerCase();
@@ -78,7 +83,7 @@
           <span class="w-1.5 h-1.5 rounded-full <%= isActive ? 'bg-orange-500' : 'bg-gray-300' %>"></span>
           <span><%= item.name %></span>
         </a>
-      <% } %>
+      <% }) %>
     </nav>
 
     <!-- Logout -->

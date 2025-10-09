@@ -15,9 +15,10 @@ const { requireLogin, requireRole } = require("../../middleware/auth");
 const keuanganController = require("../../controllers/Admin/keuanganController");
 const profileController = require("../../controllers/Admin/profileController");
 const userController = require("../../controllers/Admin/userController");
+const divisiController = require("../../controllers/Admin/divisiController");
 
 // =====================================================
-// 🏠 Dashboard Admin (Presidium Inti)
+// 🏠 Dashboard Admin
 // =====================================================
 router.get(
   "/dashboard",
@@ -94,7 +95,7 @@ router.get(
 // 👤 Kelola User
 // =====================================================
 
-// 📄 List user
+// 📄 Daftar user
 router.get(
   "/kelola-user",
   requireLogin,
@@ -139,6 +140,42 @@ router.post(
 );
 
 // =====================================================
+// 🧩 Kelola Divisi
+// =====================================================
+
+// 📄 Halaman kelola divisi
+router.get(
+  "/kelola-divisi",
+  requireLogin,
+  requireRole(["Admin"]),
+  divisiController.getKelolaDivisi
+);
+
+// ➕ Tambah divisi baru (cocok dengan form action="/admin/divisi/tambah")
+router.post(
+  "/divisi/tambah",
+  requireLogin,
+  requireRole(["Admin"]),
+  divisiController.addDivisi
+);
+
+// ✏️ Update divisi
+router.post(
+  "/divisi/update",
+  requireLogin,
+  requireRole(["Admin"]),
+  divisiController.updateDivisi
+);
+
+// 🗑️ Hapus divisi
+router.get(
+  "/divisi/delete/:id_divisi",
+  requireLogin,
+  requireRole(["Admin"]),
+  divisiController.deleteDivisi
+);
+
+// =====================================================
 // 👤 Profil Admin
 // =====================================================
 
@@ -166,12 +203,16 @@ const storage = multer.diskStorage({
   filename: (req, file, cb) => {
     cb(
       null,
-      Date.now() + "-" + Math.round(Math.random() * 1e9) + path.extname(file.originalname)
+      Date.now() +
+        "-" +
+        Math.round(Math.random() * 1e9) +
+        path.extname(file.originalname)
     );
   },
 });
 const upload = multer({ storage });
 
+// 💾 Update profil admin
 router.post(
   "/profile/update",
   requireLogin,

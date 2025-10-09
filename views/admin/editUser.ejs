@@ -40,10 +40,8 @@
               <!-- NIM -->
               <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
                 <label class="block text-sm font-medium text-orange-700 mb-2">NIM <span class="text-red-500">*</span></label>
-                <input type="text" name="id_anggota" value="<%= userData.id_anggota %>" required
-                  placeholder="Masukkan NIM"
-                  class="w-full px-4 py-3 border border-orange-200 rounded-lg text-sm 
-                         focus:border-orange-500 focus:ring-2 focus:ring-orange-200">
+                <input type="text" name="id_anggota" value="<%= userData.id_anggota %>" readonly
+                  class="w-full px-4 py-3 border border-orange-200 rounded-lg text-sm bg-gray-100 text-gray-600 cursor-not-allowed">
               </div>
 
               <!-- Nama -->
@@ -107,20 +105,24 @@
                 <button type="button" id="divisiDropdownBtn"
                   class="flex items-center justify-between w-full px-4 py-3 border border-orange-200 rounded-lg text-sm bg-white
                          hover:border-orange-500 hover:shadow-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200">
-                  <span id="divisiDropdownLabel"><%= userData.divisi || 'Pilih Divisi' %></span>
+                  <span id="divisiDropdownLabel">
+                    <%= (divisiList.find(d => d.id_divisi === userData.id_divisi)?.nama_divisi) || 'Pilih Divisi' %>
+                  </span>
                   <i class="fa-solid fa-chevron-down text-orange-500"></i>
                 </button>
                 <div id="divisiDropdownMenu"
                   class="hidden absolute left-0 mt-2 w-full bg-white border border-orange-200 rounded-lg shadow-lg z-10">
                   <ul class="text-sm text-gray-700 max-h-48 overflow-y-auto">
-                    <% validDivisi.forEach(d => { %>
+                    <% divisiList.forEach(d => { %>
                       <li>
-                        <button type="button" class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="<%= d %>"><%= d %></button>
+                        <button type="button" class="w-full text-left px-4 py-2 hover:bg-orange-100" data-id="<%= d.id_divisi %>">
+                          <%= d.nama_divisi %>
+                        </button>
                       </li>
                     <% }) %>
                   </ul>
                 </div>
-                <input type="hidden" name="divisi" id="divisiInput" value="<%= userData.divisi || '' %>">
+                <input type="hidden" name="id_divisi" id="divisiInput" value="<%= userData.id_divisi || '' %>">
               </div>
             </div>
           </div>
@@ -152,7 +154,7 @@
 
   <!-- Script -->
   <script>
-    // Dropdown Role
+    // ====== ROLE DROPDOWN ======
     const roleBtn = document.getElementById("roleDropdownBtn");
     const roleMenu = document.getElementById("roleDropdownMenu");
     const roleInput = document.getElementById("roleInput");
@@ -166,7 +168,6 @@
         roleLabel.textContent = btn.textContent;
         roleMenu.classList.add("hidden");
 
-        // Tampilkan divisi hanya untuk HMSI
         if (btn.dataset.value === "HMSI") {
           divisiWrapper.classList.remove("hidden");
         } else {
@@ -180,7 +181,7 @@
       if (!roleBtn.contains(e.target) && !roleMenu.contains(e.target)) roleMenu.classList.add("hidden");
     });
 
-    // Dropdown Divisi
+    // ====== DIVISI DROPDOWN ======
     const divisiBtn = document.getElementById("divisiDropdownBtn");
     const divisiMenu = document.getElementById("divisiDropdownMenu");
     const divisiInput = document.getElementById("divisiInput");
@@ -189,7 +190,7 @@
     divisiBtn?.addEventListener("click", () => divisiMenu.classList.toggle("hidden"));
     divisiMenu?.querySelectorAll("button").forEach(btn => {
       btn.addEventListener("click", () => {
-        divisiInput.value = btn.dataset.value;
+        divisiInput.value = btn.dataset.id;
         divisiLabel.textContent = btn.textContent;
         divisiMenu.classList.add("hidden");
       });

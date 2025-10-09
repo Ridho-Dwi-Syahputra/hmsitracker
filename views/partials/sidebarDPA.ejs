@@ -2,14 +2,13 @@
   // ✅ Ambil nama + foto profil
   var displayName = (user && (user.nama || user.name)) ? (user.nama || user.name) : 'Admin DPA';
   var initial = displayName ? displayName.charAt(0).toUpperCase() : 'A';
-  var fotoProfile = (user && user.foto_profile) ? ("/" + user.foto_profile) : '/default-profile.png';
+  var fotoProfile = (user && user.foto_profile) ? ("/" + user.foto_profile.replace(/^\/+/, '')) : '/default-profile.png';
 
   // Navigation untuk DPA
   var navItems = [
     { name: 'Dashboard', path: '/dpa/dashboard' },
     { name: 'Daftar Program Kerja', path: '/dpa/lihatProker' },
-    { name: 'Daftar Laporan', path: '/dpa/kelolaLaporan' },
-
+    { name: 'Daftar Laporan', path: '/dpa/kelolaLaporan' }
   ];
 %>
 
@@ -52,7 +51,12 @@
 
         <div class="flex-1">
           <h3 class="text-sm font-semibold text-gray-800"><%= displayName %></h3>
-          <p class="text-xs text-gray-500 mt-0.5">Pengurus DPA</p>
+          <p class="text-xs text-gray-500 mt-0.5">
+            <%= user.role || 'DPA' %>
+            <% if (user.nama_divisi) { %>
+              · <span class="text-orange-500 font-medium"><%= user.nama_divisi %></span>
+            <% } %>
+          </p>
         </div>
 
         <!-- Gear menuju profile -->
@@ -120,7 +124,6 @@
   .slide-in { transform: translateX(0) !important; }
   .slide-out { transform: translateX(-100%) !important; }
 
-  /* Hamburger */
   .hamburger .bar {
     display: block;
     width: 100%;
@@ -139,7 +142,6 @@
     transform: rotate(-45deg) translate(5px, -5px);
   }
 
-  /* Nav-item */
   .nav-item {
     opacity: 0;
     transform: translateX(-20px);
@@ -168,7 +170,6 @@
     to   { box-shadow: inset 6px 0 0 #f97316, 0 0 10px rgba(249,115,22,0.28); }
   }
 
-  /* Gear */
   .gear-icon {
     transition: transform 0.4s ease, color 0.3s ease, filter 0.3s ease;
   }

@@ -4,23 +4,18 @@
   <meta charset="UTF-8" />
   <title><%= title %></title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- FontAwesome -->
   <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
         crossorigin="anonymous" referrerpolicy="no-referrer" />
   <style>
-    /* Custom styles untuk tabel */
-    .table-fixed {
-      table-layout: fixed;
-    }
-    .table-fixed th:nth-child(1) { width: 60px; }  /* No */
-    .table-fixed th:nth-child(2) { width: 25%; }   /* Judul */
-    .table-fixed th:nth-child(3) { width: 18%; }   /* Program Kerja */
-    .table-fixed th:nth-child(4) { width: 12%; }   /* Divisi */
-    .table-fixed th:nth-child(5) { width: 12%; }   /* Tanggal */
-    .table-fixed th:nth-child(6) { width: 13%; }   /* Status */
-    .table-fixed th:nth-child(7) { width: 80px; }  /* Aksi */
-
+    .table-fixed { table-layout: fixed; }
+    .table-fixed th:nth-child(1) { width: 60px; }
+    .table-fixed th:nth-child(2) { width: 25%; }
+    .table-fixed th:nth-child(3) { width: 18%; }
+    .table-fixed th:nth-child(4) { width: 12%; }
+    .table-fixed th:nth-child(5) { width: 12%; }
+    .table-fixed th:nth-child(6) { width: 13%; }
+    .table-fixed th:nth-child(7) { width: 80px; }
     .text-ellipsis {
       overflow: hidden;
       text-overflow: ellipsis;
@@ -42,7 +37,7 @@
       <!-- Header -->
       <div class="bg-orange-500 px-6 py-4">
         <h1 class="text-2xl font-bold text-white"><%= title %></h1>
-        <p class="text-sm text-orange-100">Daftar laporan kegiatan dari HMSI</p>
+        <p class="text-sm text-orange-100">Daftar laporan kegiatan dari semua divisi HMSI</p>
       </div>
 
       <!-- Isi Konten -->
@@ -80,7 +75,7 @@
             </div>
           </div>
 
-          <!-- Filter Divisi -->
+          <!-- Filter Divisi (Dynamic) -->
           <div class="relative">
             <button id="divisiDropdownBtn"
               class="flex items-center justify-between gap-2 px-4 py-3 border border-gray-300 rounded-xl text-sm bg-white
@@ -92,22 +87,29 @@
               class="hidden absolute right-0 mt-2 w-48 bg-white border border-orange-200 rounded-lg shadow-lg z-10">
               <ul class="text-sm text-gray-700">
                 <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="all">Semua Divisi</button></li>
-                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="Internal">Internal</button></li>
-                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="Medkraf">Medkraf</button></li>
-                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="Eksternal">Eksternal</button></li>
-                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="Bikraf">Bikraf</button></li>
-                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="PSI">PSI</button></li>
-                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="PSDM">PSDM</button></li>
-                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="RTK">RTK</button></li>
+                <% 
+                  const uniqueDivisi = [...new Set(laporan.map(l => l.divisi).filter(Boolean))];
+                  if (uniqueDivisi.length > 0) {
+                    uniqueDivisi.forEach(div => { 
+                %>
+                  <li>
+                    <button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="<%= div %>"><%= div %></button>
+                  </li>
+                <% 
+                    });
+                  } else { 
+                %>
+                  <li><span class="block px-4 py-2 text-gray-400 italic">Tidak ada data divisi</span></li>
+                <% } %>
               </ul>
             </div>
           </div>
 
-          <!-- Filter Program Kerja -->
+          <!-- Filter Program Kerja (Dynamic) -->
           <div class="relative">
             <button id="prokerDropdownBtn"
               class="flex items-center justify-between gap-2 px-4 py-3 border border-gray-300 rounded-xl text-sm bg-white
-                     hover:border-orange-500 hover:shadow-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200">
+                     hover:border-orange-500 hover:shadow-md focus:ring-2 focus:ring-orange-500 transition-all duration-200">
               <span id="prokerDropdownLabel">Semua Program Kerja</span>
               <i class="fa-solid fa-chevron-down text-orange-500"></i>
             </button>
@@ -116,13 +118,19 @@
               <ul class="text-sm text-gray-700">
                 <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="all">Semua Program Kerja</button></li>
                 <% 
-                  const uniqueProker = [...new Set(laporan.map(l => l.namaProker).filter(Boolean))]; 
-                  uniqueProker.forEach(proker => { 
+                  const uniqueProker = [...new Set(laporan.map(l => l.namaProker).filter(Boolean))];
+                  if (uniqueProker.length > 0) {
+                    uniqueProker.forEach(proker => { 
                 %>
                   <li>
                     <button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="<%= proker %>"><%= proker %></button>
                   </li>
-                <% }) %>
+                <% 
+                    });
+                  } else { 
+                %>
+                  <li><span class="block px-4 py-2 text-gray-400 italic">Tidak ada data program kerja</span></li>
+                <% } %>
               </ul>
             </div>
           </div>
@@ -162,9 +170,9 @@
                       <div class="text-ellipsis" title="<%= l.judul_laporan %>"><%= l.judul_laporan %></div>
                     </td>
                     <td class="py-3 px-4 text-gray-600 border border-orange-100" data-col="proker">
-                      <div class="text-ellipsis" title="<%= l.namaProker || '-' %>"><%= l.namaProker || "-" %></div>
+                      <div class="text-ellipsis" title="<%= l.namaProker || '-' %>"><%= l.namaProker || '-' %></div>
                     </td>
-                    <td class="py-3 px-4 text-gray-600 border border-orange-100" data-col="divisi"><%= l.divisi || "-" %></td>
+                    <td class="py-3 px-4 text-gray-600 border border-orange-100" data-col="divisi"><%= l.divisi || '-' %></td>
                     <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= l.tanggalFormatted %></td>
                     <td class="py-3 px-4 border border-orange-100" data-col="status">
                       <% if (l.status === "Revisi") { %>
@@ -200,82 +208,49 @@
     </div>
   </div>
 
-  <!-- Script -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const searchInput = document.getElementById("searchInput");
       const tbody = document.getElementById("laporanTable");
       let rows = Array.from(tbody?.querySelectorAll("tr") || []);
-
       const statusBtn = document.getElementById("statusDropdownBtn");
       const statusMenu = document.getElementById("statusDropdownMenu");
       const statusLabel = document.getElementById("statusDropdownLabel");
-
       const divisiBtn = document.getElementById("divisiDropdownBtn");
       const divisiMenu = document.getElementById("divisiDropdownMenu");
       const divisiLabel = document.getElementById("divisiDropdownLabel");
-
       const prokerBtn = document.getElementById("prokerDropdownBtn");
       const prokerMenu = document.getElementById("prokerDropdownMenu");
       const prokerLabel = document.getElementById("prokerDropdownLabel");
-
       const rowsPerPage = 10;
       let currentPage = 1;
 
-      // Close dropdowns when clicking outside
       document.addEventListener("click", (e) => {
         if (!statusBtn.contains(e.target)) statusMenu.classList.add("hidden");
         if (!divisiBtn.contains(e.target)) divisiMenu.classList.add("hidden");
         if (!prokerBtn.contains(e.target)) prokerMenu.classList.add("hidden");
       });
 
-      // Toggle dropdowns
-      statusBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        statusMenu.classList.toggle("hidden");
-        divisiMenu.classList.add("hidden");
-        prokerMenu.classList.add("hidden");
-      });
-      
-      divisiBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        divisiMenu.classList.toggle("hidden");
-        statusMenu.classList.add("hidden");
-        prokerMenu.classList.add("hidden");
-      });
-      
-      prokerBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        prokerMenu.classList.toggle("hidden");
-        statusMenu.classList.add("hidden");
-        divisiMenu.classList.add("hidden");
-      });
-
-      // Dropdown select
-      statusMenu.querySelectorAll("button").forEach(btn => {
-        btn.addEventListener("click", () => {
-          statusLabel.textContent = btn.dataset.value === "all" ? "Semua Status" : btn.dataset.value;
-          statusMenu.classList.add("hidden");
-          currentPage = 1;
-          filterRows();
+      [statusBtn, divisiBtn, prokerBtn].forEach(btn => {
+        btn.addEventListener("click", e => {
+          e.stopPropagation();
+          const menu = btn.nextElementSibling;
+          document.querySelectorAll('[id$="DropdownMenu"]').forEach(m => m.classList.add("hidden"));
+          menu.classList.toggle("hidden");
         });
       });
 
-      divisiMenu.querySelectorAll("button").forEach(btn => {
-        btn.addEventListener("click", () => {
-          divisiLabel.textContent = btn.dataset.value === "all" ? "Semua Divisi" : btn.dataset.value;
-          divisiMenu.classList.add("hidden");
-          currentPage = 1;
-          filterRows();
-        });
-      });
-
-      prokerMenu.querySelectorAll("button").forEach(btn => {
-        btn.addEventListener("click", () => {
-          prokerLabel.textContent = btn.dataset.value === "all" ? "Semua Program Kerja" : btn.dataset.value;
-          prokerMenu.classList.add("hidden");
-          currentPage = 1;
-          filterRows();
+      [statusMenu, divisiMenu, prokerMenu].forEach(menu => {
+        menu.querySelectorAll("button").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const label = menu.previousElementSibling.querySelector("span");
+            label.textContent = btn.dataset.value === "all" ? 
+              (menu.id.includes("status") ? "Semua Status" : menu.id.includes("divisi") ? "Semua Divisi" : "Semua Program Kerja") 
+              : btn.dataset.value;
+            menu.classList.add("hidden");
+            currentPage = 1;
+            filterRows();
+          });
         });
       });
 

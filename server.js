@@ -31,7 +31,8 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 // Static files
 app.use(express.static(path.join(__dirname, "public")));
-app.use("/uploads", express.static(path.join(__dirname, "public/uploads")));
+// ✅ Pastikan route /uploads langsung mengarah ke folder yang sama (fix 404 image)
+app.use("/uploads", express.static(path.join(__dirname, "public", "uploads")));
 
 // Session Middleware
 app.use(

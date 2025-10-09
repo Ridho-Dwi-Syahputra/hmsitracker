@@ -24,7 +24,7 @@
       <div class="bg-orange-500 text-white px-6 py-6 flex justify-between items-center">
         <div>
           <h1 class="text-2xl font-bold">Kelola User</h1>
-          <p class="text-sm text-orange-100">Daftar semua user HMSI</p>
+          <p class="text-sm text-orange-100">Daftar semua user HMSI dan DPA</p>
         </div>
         <a href="/admin/user/tambah" 
           class="flex items-center space-x-2 px-4 py-2 bg-white text-orange-600 rounded-lg font-semibold
@@ -36,6 +36,9 @@
 
       <!-- Body -->
       <div class="p-6 sm:p-8">
+
+        <!-- Alert -->
+        <%- include('../partials/alert', { errorMsg: errorMsg, successMsg: successMsg }) %>
 
         <!-- Search & Filter -->
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
@@ -71,7 +74,7 @@
             </div>
           </div>
 
-          <!-- Divisi Dropdown (hanya untuk HMSI) -->
+          <!-- Divisi Dropdown (auto dari DB) -->
           <div id="divisiFilterWrapper" class="relative hidden">
             <button id="divisiDropdownBtn"
               class="flex items-center justify-between gap-2 px-4 py-3 border border-gray-300 rounded-xl text-sm bg-white
@@ -83,8 +86,12 @@
               class="hidden absolute right-0 mt-2 w-48 bg-white border border-orange-200 rounded-lg shadow-lg z-10 max-h-56 overflow-y-auto">
               <ul class="text-sm text-gray-700">
                 <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-divisi="all">Semua Divisi</button></li>
-                <% ["Internal","Medkraf","Eksternal","Bikraf","PSI","PSDM","RTK"].forEach(d => { %>
-                  <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-divisi="<%= d %>"><%= d %></button></li>
+                <% divisiList.forEach(d => { %>
+                  <li>
+                    <button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-divisi="<%= d.nama_divisi %>">
+                      <%= d.nama_divisi %>
+                    </button>
+                  </li>
                 <% }) %>
               </ul>
             </div>
@@ -114,12 +121,12 @@
               <% } else { %>
                 <% users.forEach(u => { %>
                   <tr class="hover:bg-orange-50 transition" 
-                      data-role="<%= u.role %>" data-divisi="<%= u.divisi || '' %>">
+                      data-role="<%= u.role %>" data-divisi="<%= u.nama_divisi || '' %>">
                     <td class="py-3 px-4 border border-orange-100"><%= u.id_anggota %></td>
                     <td class="py-3 px-4 font-medium text-gray-800 border border-orange-100 text-left"><%= u.nama %></td>
                     <td class="py-3 px-4 text-gray-600 border border-orange-100 text-left"><%= u.email %></td>
                     <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= u.role %></td>
-                    <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= u.divisi || '-' %></td>
+                    <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= u.nama_divisi || '-' %></td>
                     <td class="py-3 px-4 flex justify-center gap-4 border border-orange-100">
                       <a href="/admin/user/edit/<%= u.id_anggota %>" 
                         class="text-orange-500 hover:text-orange-700 transition transform hover:scale-110" title="Edit">
@@ -152,19 +159,19 @@
   <!-- Footer -->
   <%- include('../partials/footer') %>
 
-  <!-- Script Search + Filter + Pagination -->
+  <!-- Script -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const searchInput = document.getElementById("searchInput");
       const tbody = document.getElementById("userTable");
-      let rows = tbody ? Array.from(tbody.querySelectorAll("tr[data-role]")) : [];
+      let rows = Array.from(tbody.querySelectorAll("tr[data-role]"));
 
       const rowsPerPage = 10;
       let currentPage = 1;
       let selectedRole = "all";
       let selectedDivisi = "all";
 
-      // Search
+      // Filter by text
       function filterRows() {
         const q = searchInput.value.toLowerCase();
         rows.forEach(r => {
@@ -174,7 +181,7 @@
         applyFilters();
       }
 
-      // Apply filters
+      // Apply role/divisi filter
       function applyFilters() {
         rows.forEach(r => {
           const role = r.dataset.role;
@@ -191,15 +198,13 @@
 
       // Pagination
       function paginate() {
-        let visibleRows = rows.filter(r => r.dataset.show === "true");
-        let totalPages = Math.ceil(visibleRows.length / rowsPerPage);
+        const visibleRows = rows.filter(r => r.dataset.show === "true");
+        const totalPages = Math.ceil(visibleRows.length / rowsPerPage);
         if (currentPage > totalPages) currentPage = totalPages || 1;
 
-        rows.forEach(r => r.style.display = "none");
+        rows.forEach(r => (r.style.display = "none"));
         visibleRows.forEach((r, i) => {
-          if (i >= (currentPage - 1) * rowsPerPage && i < currentPage * rowsPerPage) {
-            r.style.display = "";
-          }
+          if (i >= (currentPage - 1) * rowsPerPage && i < currentPage * rowsPerPage) r.style.display = "";
         });
 
         document.getElementById("pageInfo").textContent = `Halaman ${currentPage} dari ${totalPages || 1}`;
@@ -207,10 +212,9 @@
         document.getElementById("nextPage").disabled = currentPage === totalPages || totalPages === 0;
       }
 
-      // Search input
       searchInput?.addEventListener("input", filterRows);
 
-      // Role filter
+      // Dropdown role
       const roleBtn = document.getElementById("roleDropdownBtn");
       const roleMenu = document.getElementById("roleDropdownMenu");
       const roleLabel = document.getElementById("roleDropdownLabel");
@@ -222,22 +226,15 @@
           selectedRole = btn.dataset.role;
           roleLabel.textContent = btn.textContent;
           roleMenu.classList.add("hidden");
-
-          if (selectedRole === "HMSI") {
-            divisiWrapper.classList.remove("hidden");
-          } else {
-            divisiWrapper.classList.add("hidden");
-            selectedDivisi = "all";
-            document.getElementById("divisiDropdownLabel").textContent = "Semua Divisi";
-          }
+          divisiWrapper.classList.toggle("hidden", selectedRole !== "HMSI");
           applyFilters();
         });
       });
-      window.addEventListener("click", (e) => {
+      window.addEventListener("click", e => {
         if (!roleBtn.contains(e.target) && !roleMenu.contains(e.target)) roleMenu.classList.add("hidden");
       });
 
-      // Divisi filter
+      // Dropdown divisi
       const divisiBtn = document.getElementById("divisiDropdownBtn");
       const divisiMenu = document.getElementById("divisiDropdownMenu");
       const divisiLabel = document.getElementById("divisiDropdownLabel");
@@ -251,14 +248,12 @@
           applyFilters();
         });
       });
-      window.addEventListener("click", (e) => {
+      window.addEventListener("click", e => {
         if (!divisiBtn?.contains(e.target) && !divisiMenu?.contains(e.target)) divisiMenu?.classList.add("hidden");
       });
 
       // Init
-      if (rows.length > 0) filterRows();
-
-      // Pagination buttons
+      filterRows();
       document.getElementById("prevPage")?.addEventListener("click", () => { currentPage--; paginate(); });
       document.getElementById("nextPage")?.addEventListener("click", () => { currentPage++; paginate(); });
     });
