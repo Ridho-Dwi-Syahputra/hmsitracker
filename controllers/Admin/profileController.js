@@ -86,15 +86,15 @@ exports.postEditProfile = async (req, res) => {
 
     if (!nama || nama.trim() === "") {
       req.flash("error", "Nama wajib diisi");
-      return res.redirect("/hmsi/profile/edit");
+      return res.redirect("/admin/profile/edit");
     }
     if (!id_anggota || id_anggota.trim() === "") {
       req.flash("error", "NIM wajib diisi");
-      return res.redirect("/hmsi/profile/edit");
+      return res.redirect("/admin/profile/edit");
     }
     if (!id_divisi || id_divisi.trim() === "") {
       req.flash("error", "Divisi wajib dipilih");
-      return res.redirect("/hmsi/profile/edit");
+      return res.redirect("/admin/profile/edit");
     }
 
     let foto_profile = req.session.user.foto_profile;
@@ -118,7 +118,7 @@ exports.postEditProfile = async (req, res) => {
 
     if (password && password.trim() !== "" && password !== confirm_password) {
       req.flash("error", "Password dan Konfirmasi Password tidak sama");
-      return res.redirect("/hmsi/profile/edit");
+      return res.redirect("/admin/profile/edit");
     }
 
     // Update data
@@ -157,11 +157,11 @@ exports.postEditProfile = async (req, res) => {
     }
 
     req.flash("success", "Profil berhasil diperbarui");
-    res.redirect("/hmsi/profile");
+    res.redirect("/admin/profile");
   } catch (err) {
     console.error("❌ Error postEditProfile:", err.message);
     req.flash("error", "Gagal menyimpan perubahan profil");
-    res.redirect("/hmsi/profile/edit");
+    res.redirect("/admin/profile/edit");
   }
 };
 

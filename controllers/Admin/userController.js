@@ -25,7 +25,7 @@ exports.getAllUsers = async (req, res) => {
       user: req.session.user,
       activeNav: "users",
       users: rows,
-      divisiList, // <-- tambahkan ini
+      divisiList,
       errorMsg: null,
       successMsg: null
     });
@@ -104,7 +104,8 @@ exports.postTambahUser = async (req, res) => {
       [id_anggota, nama, email, hashedPassword, role, divisiValue]
     );
 
-    res.redirect("/admin/kelola-user");
+    // ✅ REDIRECT DENGAN PARAMETER SUCCESS
+    res.redirect("/admin/user/tambah?success=true");
   } catch (err) {
     console.error("❌ Error postTambahUser:", err.message);
     res.status(500).send("Terjadi kesalahan server");
