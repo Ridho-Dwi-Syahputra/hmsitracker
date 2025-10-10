@@ -1,48 +1,63 @@
-// File: controllers/HMSI/dashboardController.js
+// =====================================================
+// controllers/HMSI/dashboardController.js
+// Dashboard HMSI berdasarkan divisi login
+// =====================================================
+
 const db = require("../../config/db");
 
-// 🔹 helper: hitung status otomatis dengan respect ke keputusan DPA
+// =====================================================
+// Helper: Hitung status otomatis dengan respect ke keputusan DPA
+// =====================================================
 function calculateStatusWithLock(start, end, status_db) {
-  if (status_db === "Selesai" || status_db === "Gagal") {
-    return status_db;
-  }
+  if (status_db === "Selesai" || status_db === "Gagal") return status_db;
 
   const today = new Date();
-  start = start ? new Date(start) : null;
-  end = end ? new Date(end) : null;
+  const s = start ? new Date(start) : null;
+  const e = end ? new Date(end) : null;
 
-  if (start && today < start) return "Belum Dimulai";
-  if (start && end && today >= start && today <= end) return "Sedang Berjalan";
-  if (end && today > end) return "Selesai";
+  if (s && today < s) return "Belum Dimulai";
+  if (s && e && today >= s && today <= e) return "Sedang Berjalan";
+  if (e && today > e) return "Selesai";
   return "Belum Dimulai";
 }
 
 // =====================================================
-// 📊 Dashboard HMSI (berdasarkan divisi login)
+// 📊 Dashboard HMSI
 // =====================================================
 exports.getDashboardStats = async (req, res) => {
   try {
     const user = req.session.user;
-    const idDivisi = user?.id_divisi || null;
+    if (!user) return res.redirect("/auth/login");
 
-    if (!user || !idDivisi) {
-      console.error("Dashboard Gagal: Session user/id_divisi tidak ditemukan.");
-      return res.redirect("/auth/login?error=Sesi Anda tidak valid.");
+    const idDivisi = user.id_divisi || null;
+    if (!idDivisi) {
+      console.warn(`⚠️ User ${user.nama} belum memiliki id_divisi.`);
+      return res.render("hmsi/hmsiDashboard", {
+        title: "Dashboard HMSI",
+        user,
+        activeNav: "Dashboard",
+        totalProker: 0,
+        prokerSelesai: 0,
+        prokerBerjalan: 0,
+        totalLaporan: 0,
+        unreadCount: res.locals.unreadCount || 0,
+      });
     }
 
-    // 🔹 Ambil semua proker milik divisi user
+    // =====================================================
+    // 🔹 Ambil semua proker milik divisi user (tanpa JOIN user)
+    // =====================================================
     const [rows] = await db.query(
-      `SELECT 
+      `
+      SELECT 
         pk.id_ProgramKerja AS id,
         pk.Nama_ProgramKerja AS namaProker,
-        pk.Tanggal_mulai AS tanggal_mulai,
-        pk.Tanggal_selesai AS tanggal_selesai,
-        pk.Status AS status_db,
-        d.nama_divisi
-       FROM Program_kerja pk
-       JOIN User u ON pk.id_anggota = u.id_anggota
-       LEFT JOIN divisi d ON u.id_divisi = d.id_divisi
-       WHERE u.id_divisi = ?`,
+        pk.Tanggal_mulai,
+        pk.Tanggal_selesai,
+        pk.Status AS status_db
+      FROM Program_kerja pk
+      WHERE pk.id_divisi = ?
+      `,
       [idDivisi]
     );
 
@@ -50,20 +65,34 @@ exports.getDashboardStats = async (req, res) => {
     let prokerSelesai = 0;
     let prokerBerjalan = 0;
 
-    rows.forEach(r => {
+    for (const r of rows) {
       totalProker++;
-      const status = calculateStatusWithLock(r.tanggal_mulai, r.tanggal_selesai, r.status_db);
+      const status = calculateStatusWithLock(r.Tanggal_mulai, r.Tanggal_selesai, r.status_db);
       if (status === "Selesai") prokerSelesai++;
       if (status === "Sedang Berjalan") prokerBerjalan++;
-    });
 
-    // 🔹 Hitung total laporan
+      // Update status otomatis jika belum final
+      if (status !== r.status_db && !["Selesai", "Gagal"].includes(r.status_db)) {
+        await db.query(`UPDATE Program_kerja SET Status=? WHERE id_ProgramKerja=?`, [
+          status,
+          r.id,
+        ]);
+      }
+    }
+
+    // =====================================================
+    // 🔹 Hitung laporan milik divisi
+    // =====================================================
     const [laporanRows] = await db.query(
       `SELECT COUNT(*) AS total FROM Laporan WHERE id_divisi = ?`,
       [idDivisi]
     );
+
     const totalLaporan = laporanRows[0]?.total || 0;
 
+    // =====================================================
+    // ✅ Render Dashboard
+    // =====================================================
     res.render("hmsi/hmsiDashboard", {
       title: "Dashboard HMSI",
       user,
@@ -72,10 +101,10 @@ exports.getDashboardStats = async (req, res) => {
       prokerSelesai,
       prokerBerjalan,
       totalLaporan,
+      unreadCount: res.locals.unreadCount || 0,
     });
-
-  } catch (error) {
-    console.error("❌ Error getDashboardStats:", error.message);
-    res.status(500).send("Terjadi kesalahan pada server. Cek log terminal.");
+  } catch (err) {
+    console.error("❌ Error getDashboardStats:", err.message);
+    res.status(500).send("Terjadi kesalahan server saat memuat dashboard HMSI.");
   }
 };

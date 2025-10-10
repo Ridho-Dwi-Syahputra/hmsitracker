@@ -11,6 +11,9 @@
     { name: 'Laporan', path: '/hmsi/laporan' },
     { name: 'Evaluasi DPA', path: '/hmsi/evaluasi' }
   ];
+
+  // ✅ Nama divisi fleksibel (join atau session)
+  var namaDivisi = user?.nama_divisi || user?.divisi?.nama_divisi || null;
 %>
 
 <div id="hmsi-sidebar-root">
@@ -34,6 +37,7 @@
       <div class="flex items-center gap-4">
         <img src="<%= fotoProfile %>?v=<%= Date.now() %>"
              alt="Foto Profil"
+             title="<%= namaDivisi || 'Divisi tidak diketahui' %>"
              class="w-12 h-12 rounded-full border object-cover shadow-md"
              onerror="this.onerror=null;this.src='/default-profile.png?v=<%= Date.now() %>'">
 
@@ -41,8 +45,10 @@
           <h3 class="text-sm font-semibold text-gray-800"><%= displayName %></h3>
           <p class="text-xs text-gray-500 mt-0.5">
             HMSI
-            <% if (user.nama_divisi) { %>
-              · <span class="text-orange-500 font-medium"><%= user.nama_divisi %></span>
+            <% if (namaDivisi) { %>
+              · <span class="text-orange-500 font-medium"><%= namaDivisi %></span>
+            <% } else { %>
+              · <span class="text-gray-400 italic">Divisi belum terdaftar</span>
             <% } %>
           </p>
         </div>
@@ -85,6 +91,16 @@
         </a>
       <% }) %>
     </nav>
+
+    <!-- Label Divisi -->
+    <div class="px-6 pb-4 text-center border-t border-gray-100">
+      <p class="text-xs text-gray-400">
+        Divisi:
+        <span class="text-orange-600 font-semibold">
+          <%= namaDivisi || 'Belum dikaitkan' %>
+        </span>
+      </p>
+    </div>
 
     <!-- Logout -->
     <div class="p-6 border-t border-gray-100">
@@ -159,24 +175,16 @@
   document.addEventListener("DOMContentLoaded", () => {
     const sidebar = document.getElementById("hmsi-sidebar");
     const overlay = document.getElementById("hmsi-sidebar-overlay");
-    const toggle = document.getElementById("hmsi-sidebar-toggle"); // tombol dari navbar
+    const toggle = document.getElementById("hmsi-sidebar-toggle");
 
-    if (window.innerWidth >= 1024) {
-      sidebar.classList.add("slide-in");
-    }
+    if (window.innerWidth >= 1024) sidebar.classList.add("slide-in");
 
     if (toggle) {
       toggle.addEventListener("click", () => {
         const isActive = toggle.classList.toggle("active");
-        if (isActive) {
-          sidebar.classList.add("slide-in");
-          sidebar.classList.remove("slide-out");
-          overlay.classList.remove("hidden");
-        } else {
-          sidebar.classList.remove("slide-in");
-          sidebar.classList.add("slide-out");
-          overlay.classList.add("hidden");
-        }
+        sidebar.classList.toggle("slide-in", isActive);
+        sidebar.classList.toggle("slide-out", !isActive);
+        overlay.classList.toggle("hidden", !isActive);
       });
     }
 

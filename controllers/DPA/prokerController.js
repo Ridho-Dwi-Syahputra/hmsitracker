@@ -1,5 +1,5 @@
 // =====================================================
-// controllers/DPA/prokerController.js
+// controllers/dpa/prokerController.js
 // Controller khusus DPA untuk Program Kerja
 // =====================================================
 
@@ -22,15 +22,17 @@ function formatTanggal(dateValue) {
 }
 
 // =====================================================
-// helper: hitung status otomatis (fallback untuk Belum Dimulai/Sedang Berjalan)
+// helper: hitung status otomatis (sinkron HMSI)
 // =====================================================
-function calculateStatus(start, end) {
+function calculateStatus(start, end, status_db = null) {
+  if (status_db === "Selesai" || status_db === "Gagal") return status_db;
   const today = new Date();
   const startDate = start ? new Date(start) : null;
   const endDate = end ? new Date(end) : null;
 
   if (startDate && today < startDate) return "Belum Dimulai";
-  if (startDate && endDate && today >= startDate && today <= endDate) return "Sedang Berjalan";
+  if (startDate && endDate && today >= startDate && today <= endDate)
+    return "Sedang Berjalan";
   if (endDate && today > endDate) return "Selesai";
   return "Belum Dimulai";
 }
@@ -45,8 +47,8 @@ exports.getAllProkerDPA = async (req, res) => {
         p.id_ProgramKerja AS id,
         p.Nama_ProgramKerja AS namaProker,
         u.id_divisi AS divisi,
-        d.nama_divisi AS nama_divisi,       -- 🧩 UPDATE: ambil nama divisi dari tabel divisi
-        d.id_divisi AS id_divisi,           -- 🧩 UPDATE: ambil id_divisi dari tabel divisi
+        d.nama_divisi AS nama_divisi,
+        d.id_divisi AS id_divisi,
         p.Deskripsi AS deskripsi,
         p.Tanggal_mulai AS tanggal_mulai,
         p.Tanggal_selesai AS tanggal_selesai,
@@ -55,22 +57,21 @@ exports.getAllProkerDPA = async (req, res) => {
         p.Status AS status_db
       FROM Program_kerja p
       LEFT JOIN User u ON p.id_anggota = u.id_anggota
-      LEFT JOIN divisi d ON u.id_divisi = d.id_divisi  -- 🧩 UPDATE: join tabel divisi
+      LEFT JOIN Divisi d ON u.id_divisi = d.id_divisi
       ORDER BY p.Tanggal_mulai DESC
     `);
- 
-    const programs = rows.map(r => {
-      // Gunakan status dari DB kalau sudah "Selesai"/"Gagal"
+
+    const programs = rows.map((r) => {
       let status = r.status_db;
       if (!status || ["Belum Dimulai", "Sedang Berjalan"].includes(status)) {
-        status = calculateStatus(r.tanggal_mulai, r.tanggal_selesai);
+        status = calculateStatus(r.tanggal_mulai, r.tanggal_selesai, r.status_db);
       }
 
       return {
         id: r.id,
         namaProker: r.namaProker,
-        divisi: r.nama_divisi || r.divisi,   // 🧩 UPDATE: fallback ke nama_divisi jika tersedia
-        id_divisi: r.id_divisi,              // 🧩 UPDATE: sertakan id_divisi untuk kebutuhan notifikasi
+        divisi: r.nama_divisi || r.divisi || "Tidak Diketahui",
+        id_divisi: r.id_divisi || null,
         deskripsi: r.deskripsi,
         tanggal_mulai: r.tanggal_mulai,
         tanggal_selesai: r.tanggal_selesai,
@@ -78,7 +79,7 @@ exports.getAllProkerDPA = async (req, res) => {
         dokumen_pendukung: r.dokumen_pendukung,
         tanggalMulaiFormatted: formatTanggal(r.tanggal_mulai),
         tanggalSelesaiFormatted: formatTanggal(r.tanggal_selesai),
-        status
+        status,
       };
     });
 
@@ -109,12 +110,13 @@ exports.getAllProkerDPA = async (req, res) => {
 exports.getDetailProkerDPA = async (req, res) => {
   try {
     const [rows] = await db.query(
-      `SELECT 
+      `
+      SELECT 
         p.id_ProgramKerja AS id,
         p.Nama_ProgramKerja AS namaProker,
         u.id_divisi AS divisi,
-        d.nama_divisi AS nama_divisi,     -- 🧩 UPDATE
-        d.id_divisi AS id_divisi,         -- 🧩 UPDATE
+        d.nama_divisi AS nama_divisi,
+        d.id_divisi AS id_divisi,
         p.Deskripsi AS deskripsi,
         p.Tanggal_mulai AS tanggal_mulai,
         p.Tanggal_selesai AS tanggal_selesai,
@@ -123,7 +125,7 @@ exports.getDetailProkerDPA = async (req, res) => {
         p.Status AS status_db
       FROM Program_kerja p
       LEFT JOIN User u ON p.id_anggota = u.id_anggota
-      LEFT JOIN divisi d ON u.id_divisi = d.id_divisi   -- 🧩 UPDATE
+      LEFT JOIN Divisi d ON u.id_divisi = d.id_divisi
       WHERE p.id_ProgramKerja = ?`,
       [req.params.id]
     );
@@ -133,21 +135,22 @@ exports.getDetailProkerDPA = async (req, res) => {
     }
 
     const r = rows[0];
-    
-    // ✅ PERBAIKAN: Gunakan status dari DB jika valid, atau hitung otomatis
     let status = r.status_db;
-    if (!status || !["Belum Dimulai", "Sedang Berjalan", "Selesai", "Gagal"].includes(status)) {
-      status = calculateStatus(r.tanggal_mulai, r.tanggal_selesai);
+    if (
+      !status ||
+      !["Belum Dimulai", "Sedang Berjalan", "Selesai", "Gagal"].includes(status)
+    ) {
+      status = calculateStatus(r.tanggal_mulai, r.tanggal_selesai, r.status_db);
     }
-    
-    console.log('📊 Status dari database:', r.status_db);
-    console.log('📊 Status yang digunakan:', status);
+
+    console.log("📊 Status dari database:", r.status_db);
+    console.log("📊 Status yang digunakan:", status);
 
     const proker = {
       id: r.id,
       namaProker: r.namaProker,
-      divisi: r.nama_divisi || r.divisi,   // 🧩 UPDATE
-      id_divisi: r.id_divisi,              // 🧩 UPDATE
+      divisi: r.nama_divisi || r.divisi || "Tidak Diketahui",
+      id_divisi: r.id_divisi || null,
       deskripsi: r.deskripsi,
       tanggal_mulai: r.tanggal_mulai,
       tanggal_selesai: r.tanggal_selesai,
@@ -155,7 +158,7 @@ exports.getDetailProkerDPA = async (req, res) => {
       dokumen_pendukung: r.dokumen_pendukung,
       tanggalMulaiFormatted: formatTanggal(r.tanggal_mulai),
       tanggalSelesaiFormatted: formatTanggal(r.tanggal_selesai),
-      status
+      status,
     };
 
     res.render("dpa/detailProker", {
@@ -180,34 +183,41 @@ exports.updateStatusProker = async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
-    console.log('📝 Request update status - ID:', id, 'Status:', status);
+    console.log("📝 Request update status - ID:", id, "Status:", status);
 
-    const validStatus = ["Belum Dimulai", "Sedang Berjalan", "Selesai", "Gagal"];
+    const validStatus = [
+      "Belum Dimulai",
+      "Sedang Berjalan",
+      "Selesai",
+      "Gagal",
+    ];
     if (!validStatus.includes(status)) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "Status tidak valid. Harus salah satu dari: Belum Dimulai, Sedang Berjalan, Selesai, Gagal" 
+      return res.status(400).json({
+        success: false,
+        message:
+          "Status tidak valid. Harus salah satu dari: Belum Dimulai, Sedang Berjalan, Selesai, Gagal",
       });
     }
 
-    // 🔹 Ambil info proker dulu untuk notifikasi
+    // 🔹 Ambil info proker untuk notifikasi
     const [rows] = await db.query(
-      `SELECT 
-         p.Nama_ProgramKerja AS namaProker, 
-         u._iddivisi AS divisi,
-         d.id_divisi AS id_divisi,          -- 🧩 UPDATE
-         d.nama_divisi AS nama_divisi       -- 🧩 UPDATE
-       FROM Program_kerja p
-       LEFT JOIN User u ON p.id_anggota = u.id_anggota
-       LEFT JOIN divisi d ON u.id_divisi = d.id_divisi   -- 🧩 UPDATE
-       WHERE p.id_ProgramKerja = ?`,
+      `
+      SELECT 
+        p.Nama_ProgramKerja AS namaProker,
+        u.id_divisi AS divisi,
+        d.id_divisi AS id_divisi,
+        d.nama_divisi AS nama_divisi
+      FROM Program_kerja p
+      LEFT JOIN User u ON p.id_anggota = u.id_anggota
+      LEFT JOIN Divisi d ON u.id_divisi = d.id_divisi
+      WHERE p.id_ProgramKerja = ?`,
       [id]
     );
 
     if (!rows.length) {
-      return res.status(404).json({ 
-        success: false, 
-        message: "Program kerja tidak ditemukan" 
+      return res.status(404).json({
+        success: false,
+        message: "Program kerja tidak ditemukan",
       });
     }
 
@@ -219,42 +229,44 @@ exports.updateStatusProker = async (req, res) => {
       [status, id]
     );
 
-    console.log('✅ Update result - Rows affected:', result.affectedRows);
-
     if (result.affectedRows === 0) {
-      return res.status(404).json({ 
-        success: false, 
-        message: "Program kerja tidak ditemukan atau tidak ada perubahan" 
+      return res.status(404).json({
+        success: false,
+        message: "Program kerja tidak ditemukan atau tidak ada perubahan",
       });
     }
 
     // 🔴 Hapus notifikasi lama sebelum menambah yang baru
     await deleteOldProkerNotif(id);
 
-    // 🟠 Tambahkan notifikasi ke HMSI divisi terkait
+    // 🟠 Tambahkan notifikasi ke HMSI
     const idNotifikasi = uuidv4();
-    const pesan = `DPA telah mengubah status Program Kerja "${proker.namaProker}" milik divisi ${proker.nama_divisi || proker.divisi} menjadi ${status}`;
-    
-    // 🧩 UPDATE: gunakan id_divisi, bukan string divisi
-    await db.query(
-      `INSERT INTO Notifikasi (id_notifikasi, pesan, role, id_divisi, status_baca, id_ProgramKerja, created_at)
-       VALUES (?, ?, 'HMSI', ?, 0, ?, NOW())`,
-      [idNotifikasi, pesan, proker.id_divisi, id]
-    );
+    const divisiNama = proker.nama_divisi || proker.divisi || "Tidak Diketahui";
+    const idDivisi = proker.id_divisi || null;
+    const pesan = `DPA telah mengubah status Program Kerja "${proker.namaProker}" milik divisi ${divisiNama} menjadi ${status}`;
 
-    console.log('✅ Status berhasil diubah dan notifikasi terkirim');
+    if (idDivisi) {
+      await db.query(
+        `INSERT INTO Notifikasi 
+         (id_notifikasi, pesan, target_role, id_divisi, status_baca, id_ProgramKerja, created_at)
+         VALUES (?, ?, 'HMSI', ?, 0, ?, NOW())`,
+        [idNotifikasi, pesan, idDivisi, id]
+      );
+      console.log("✅ Notifikasi dikirim ke divisi:", divisiNama);
+    } else {
+      console.warn("⚠️ Tidak dapat kirim notifikasi karena id_divisi NULL");
+    }
 
-    res.json({ 
-      success: true, 
-      message: `Status program kerja berhasil diubah menjadi ${status}` 
+    res.json({
+      success: true,
+      message: `Status program kerja berhasil diubah menjadi ${status}`,
     });
-
   } catch (err) {
     console.error("❌ Error updateStatusProker:", err.message);
     console.error("❌ Stack trace:", err.stack);
-    res.status(500).json({ 
-      success: false, 
-      message: "Gagal mengubah status program kerja: " + err.message 
+    res.status(500).json({
+      success: false,
+      message: "Gagal mengubah status program kerja: " + err.message,
     });
   }
 };

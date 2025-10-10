@@ -11,7 +11,6 @@ const bcrypt = require("bcryptjs");
 // GET: Form Login
 // =====================================================
 router.get("/login", (req, res) => {
-  // Jika sudah login, redirect sesuai role
   if (req.session.user) {
     const { role } = req.session.user;
     if (role === "Admin") return res.redirect("/admin/dashboard");
@@ -29,63 +28,97 @@ router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    // 🔹 Cari user + JOIN tabel divisi
+    // =====================================================
+    // 🔍 Ambil user berdasarkan email + data divisi
+    // =====================================================
     const [rows] = await db.query(
-      `SELECT 
-          u.id_anggota, u.nama, u.email, u.password, u.role, 
-          u.id_divisi, u.foto_profile, d.nama_divisi
-       FROM user u
-       LEFT JOIN divisi d ON u.id_divisi = d.id_divisi
-       WHERE u.email = ?
-       LIMIT 1`,
+      `
+      SELECT 
+        u.id_anggota,
+        u.nama,
+        u.email,
+        u.password,
+        u.role,
+        u.id_divisi,
+        u.foto_profile,
+        d.nama_divisi
+      FROM user u
+      LEFT JOIN divisi d ON u.id_divisi = d.id_divisi
+      WHERE u.email = ?
+      LIMIT 1
+      `,
       [email]
     );
 
     if (!rows.length) {
+      console.warn(`⚠️ Login gagal: email tidak ditemukan (${email})`);
       return res.render("auth/login", { errorMsg: "Email atau password salah!" });
     }
 
     const user = rows[0];
 
     // =====================================================
-    // 🔐 Cek password (bcrypt / fallback plain)
+    // 🔐 Verifikasi password (hash bcrypt / fallback plaintext)
     // =====================================================
     let isMatch = false;
-    if (user.password && user.password.startsWith("$2b$")) {
+    if (user.password?.startsWith("$2b$")) {
       isMatch = await bcrypt.compare(password, user.password);
     } else {
-      isMatch = password === user.password; // fallback (lama)
+      isMatch = password === user.password;
     }
 
     if (!isMatch) {
+      console.warn(`⚠️ Login gagal: password salah untuk ${email}`);
       return res.render("auth/login", { errorMsg: "Email atau password salah!" });
     }
 
     // =====================================================
-    // 🧠 Simpan user ke session
+    // 🧠 Simpan ke session (dengan fallback jika divisi null)
     // =====================================================
     req.session.user = {
-      id: user.id_anggota, // kompatibilitas lama
       id_anggota: user.id_anggota,
       nama: user.nama,
       email: user.email,
       role: user.role,
       id_divisi: user.id_divisi || null,
-      nama_divisi: user.nama_divisi || null,
+      nama_divisi: user.nama_divisi || (user.role === "HMSI" ? "Tidak Ada Divisi" : null),
       foto_profile: user.foto_profile || null,
     };
 
     // =====================================================
-    // 🚦 Redirect sesuai role
+    // ⚙️ Validasi HMSI tanpa divisi (untuk debugging)
     // =====================================================
-    if (user.role === "Admin") return res.redirect("/admin/dashboard");
-    if (user.role === "DPA") return res.redirect("/dpa/dashboard");
-    if (user.role === "HMSI") return res.redirect("/hmsi/dashboard");
+    if (user.role === "HMSI" && !user.id_divisi) {
+      console.warn(
+        `⚠️ HMSI "${user.nama}" login tanpa id_divisi! Beberapa fitur mungkin tidak berfungsi.`
+      );
+    }
 
-    return res.redirect("/");
+    console.log(
+      `✅ Login sukses: ${user.nama} (${user.role}${
+        user.nama_divisi ? " - " + user.nama_divisi : ""
+      })`
+    );
+
+    // =====================================================
+    // 🚦 Redirect berdasarkan role
+    // =====================================================
+    switch (user.role) {
+      case "Admin":
+        return res.redirect("/admin/dashboard");
+      case "DPA":
+        return res.redirect("/dpa/dashboard");
+      case "HMSI":
+        return res.redirect("/hmsi/dashboard");
+      default:
+        console.warn(`⚠️ Role tidak dikenali: ${user.role}`);
+        return res.redirect("/");
+    }
   } catch (err) {
     console.error("❌ [auth.js] Error saat login:", err.message);
-    res.render("auth/login", { errorMsg: "Terjadi kesalahan server. Coba lagi nanti." });
+    res.render("auth/login", {
+      errorMsg: "Terjadi kesalahan server. Silakan coba lagi nanti.",
+    });
   }
 });
 
@@ -93,7 +126,8 @@ router.post("/login", async (req, res) => {
 // GET: Logout
 // =====================================================
 router.get("/logout", (req, res) => {
-  req.session.destroy(() => {
+  req.session.destroy((err) => {
+    if (err) console.error("⚠️ Error saat destroy session:", err.message);
     res.redirect("/auth/login");
   });
 });

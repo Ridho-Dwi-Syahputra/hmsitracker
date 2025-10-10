@@ -1,10 +1,12 @@
 // =====================================================
-// controllers/HMSI/evaluasiController.js
+// controllers/hmsi/evaluasiController.js
 // Controller Evaluasi untuk HMSI
-// - HMSI dapat melihat evaluasi dari DPA
-// - HMSI dapat memberikan komentar tambahan
-// - Komentar HMSI selalu replace komentar lama (bukan append)
-// - Saat komentar diberikan, notifikasi muncul di DPA
+// =====================================================
+// 🔸 HMSI dapat melihat evaluasi dari DPA
+// 🔸 HMSI dapat memberikan komentar tambahan
+// 🔸 Komentar HMSI selalu replace komentar lama (bukan append)
+// 🔸 Saat komentar diberikan, notifikasi baru muncul di DPA
+// 🔸 Tidak menghapus notifikasi lama agar histori tetap ada
 // =====================================================
 
 const db = require("../../config/db");
@@ -29,10 +31,14 @@ function formatTanggal(dateValue) {
 async function getUnreadCount(id_divisi) {
   try {
     const [rows] = await db.query(
-      `SELECT COUNT(*) AS count
-       FROM Notifikasi n
-       JOIN Laporan l ON n.id_laporan = l.id_laporan
-       WHERE n.role = 'HMSI' AND n.status_baca = 0 AND l.id_divisi = ?`,
+      `
+      SELECT COUNT(*) AS count
+      FROM Notifikasi n
+      JOIN Laporan l ON n.id_laporan = l.id_laporan
+      WHERE n.target_role = 'HMSI' 
+        AND n.status_baca = 0 
+        AND l.id_divisi = ?
+      `,
       [id_divisi]
     );
     return rows[0]?.count || 0;
@@ -51,20 +57,29 @@ exports.getAllEvaluasi = async (req, res) => {
     const idDivisi = user?.id_divisi || null;
 
     const [rows] = await db.query(
-      `SELECT e.*, l.judul_laporan, p.Nama_ProgramKerja, u.nama AS evaluator, d.nama_divisi
-       FROM Evaluasi e
-       JOIN Laporan l ON e.id_laporan = l.id_laporan
-       JOIN Program_kerja p ON l.id_ProgramKerja = p.id_ProgramKerja
-       LEFT JOIN User u ON e.pemberi_evaluasi = u.id_anggota
-       LEFT JOIN divisi d ON l.id_divisi = d.id_divisi
-       WHERE l.id_divisi = ?
-       ORDER BY e.tanggal_evaluasi DESC`,
+      `
+      SELECT 
+        e.*, 
+        l.judul_laporan, 
+        p.Nama_ProgramKerja, 
+        u.nama AS evaluator, 
+        d.nama_divisi,
+        l.id_laporan
+      FROM Evaluasi e
+      JOIN Laporan l ON e.id_laporan = l.id_laporan
+      JOIN Program_kerja p ON l.id_ProgramKerja = p.id_ProgramKerja
+      LEFT JOIN User u ON e.pemberi_evaluasi = u.id_anggota
+      LEFT JOIN divisi d ON l.id_divisi = d.id_divisi
+      WHERE l.id_divisi = ?
+      ORDER BY e.tanggal_evaluasi DESC
+      `,
       [idDivisi]
     );
 
-    const evaluasi = rows.map(r => ({
+    const evaluasi = rows.map((r) => ({
       ...r,
       tanggalFormatted: formatTanggal(r.tanggal_evaluasi),
+      isRevisi: r.status_konfirmasi === "Revisi",
     }));
 
     const unreadCount = await getUnreadCount(idDivisi);
@@ -94,13 +109,21 @@ exports.getDetailEvaluasi = async (req, res) => {
     const { id } = req.params;
 
     const [rows] = await db.query(
-      `SELECT e.*, l.judul_laporan, l.id_divisi, p.Nama_ProgramKerja, u.nama AS evaluator, d.nama_divisi
-       FROM Evaluasi e
-       JOIN Laporan l ON e.id_laporan = l.id_laporan
-       JOIN Program_kerja p ON l.id_ProgramKerja = p.id_ProgramKerja
-       LEFT JOIN User u ON e.pemberi_evaluasi = u.id_anggota
-       LEFT JOIN divisi d ON l.id_divisi = d.id_divisi
-       WHERE e.id_evaluasi = ?`,
+      `
+      SELECT 
+        e.*, 
+        l.judul_laporan, 
+        l.id_divisi, 
+        p.Nama_ProgramKerja, 
+        u.nama AS evaluator, 
+        d.nama_divisi
+      FROM Evaluasi e
+      JOIN Laporan l ON e.id_laporan = l.id_laporan
+      JOIN Program_kerja p ON l.id_ProgramKerja = p.id_ProgramKerja
+      LEFT JOIN User u ON e.pemberi_evaluasi = u.id_anggota
+      LEFT JOIN divisi d ON l.id_divisi = d.id_divisi
+      WHERE e.id_evaluasi = ?
+      `,
       [id]
     );
 
@@ -114,7 +137,6 @@ exports.getDetailEvaluasi = async (req, res) => {
     }
 
     evaluasi.tanggalFormatted = formatTanggal(evaluasi.tanggal_evaluasi);
-
     const unreadCount = await getUnreadCount(idDivisi);
 
     res.render("hmsi/detailEvaluasi", {
@@ -144,30 +166,42 @@ exports.addKomentar = async (req, res) => {
       return res.redirect(`/hmsi/evaluasi?error=Komentar tidak boleh kosong`);
     }
 
-    // ✅ Update komentar_hmsi (selalu replace)
+    // ✅ Update komentar HMSI (replace komentar lama)
     await db.query(
-      "UPDATE Evaluasi SET komentar_hmsi = ? WHERE id_evaluasi = ?",
+      "UPDATE Evaluasi SET komentar_hmsi = ?, updated_at = NOW() WHERE id_evaluasi = ?",
       [komentar_hmsi, id]
     );
 
-    // 🔎 Ambil data evaluasi untuk bikin pesan notifikasi
+    // 🔎 Ambil data laporan terkait untuk pesan notifikasi
     const [info] = await db.query(
-      `SELECT e.id_laporan, l.judul_laporan, p.Nama_ProgramKerja
-       FROM Evaluasi e
-       JOIN Laporan l ON e.id_laporan = l.id_laporan
-       JOIN Program_kerja p ON l.id_ProgramKerja = p.id_ProgramKerja
-       WHERE e.id_evaluasi = ?`,
+      `
+      SELECT 
+        e.id_laporan, 
+        l.judul_laporan, 
+        p.Nama_ProgramKerja,
+        d.nama_divisi
+      FROM Evaluasi e
+      JOIN Laporan l ON e.id_laporan = l.id_laporan
+      JOIN Program_kerja p ON l.id_ProgramKerja = p.id_ProgramKerja
+      JOIN divisi d ON l.id_divisi = d.id_divisi
+      WHERE e.id_evaluasi = ?
+      `,
       [id]
     );
 
     if (info.length) {
       const data = info[0];
-      const pesanNotif = `HMSI (Divisi ${idDivisi}) memberikan komentar baru pada evaluasi program "${data.Nama_ProgramKerja}"`;
 
-      // 🟠 Simpan notifikasi untuk DPA
+      // 💬 Pesan notifikasi baru — tanpa hapus notifikasi lama
+      const pesanNotif = `Divisi ${data.nama_divisi} telah memberikan revisi atau komentar baru untuk laporan "${data.judul_laporan}".`;
+
+      // 🟠 Simpan notifikasi baru untuk DPA
       await db.query(
-        `INSERT INTO Notifikasi (id_notifikasi, pesan, role, id_divisi, status_baca, id_evaluasi, id_laporan, created_at)
-         VALUES (UUID(), ?, 'DPA', ?, 0, ?, ?, NOW())`,
+        `
+        INSERT INTO Notifikasi 
+        (id_notifikasi, pesan, target_role, id_divisi, status_baca, id_evaluasi, id_laporan, created_at)
+        VALUES (UUID(), ?, 'DPA', ?, 0, ?, ?, NOW())
+        `,
         [pesanNotif, idDivisi, id, data.id_laporan]
       );
     }

@@ -1,4 +1,4 @@
-// controllers/DPA/profileController.js
+// controllers/dpa/profileController.js
 // =====================================================
 // Controller untuk Profil DPA (lihat & edit profil)
 // =====================================================

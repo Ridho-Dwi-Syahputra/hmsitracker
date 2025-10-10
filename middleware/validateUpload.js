@@ -1,7 +1,6 @@
 // =====================================================
 // middleware/validateUpload.js
 // Middleware validasi upload file (Laporan & Program Kerja)
-// Dilengkapi logging & perbaikan bug double-next
 // =====================================================
 
 const multer = require("multer");
@@ -11,30 +10,32 @@ const db = require("../config/db");
 const { v4: uuidv4 } = require("uuid");
 
 // =====================================================
-// Buat folder upload jika belum ada
+// Helper: pastikan folder upload tipe tertentu ada
 // =====================================================
-const uploadDir = path.join(__dirname, "../public/uploads");
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-  console.info(`[INFO] validateUpload -> created upload dir: ${uploadDir}`);
+function ensureUploadFolder(type) {
+  const baseDir = path.join(__dirname, "../public/uploads");
+  const subDir = path.join(baseDir, type);
+  if (!fs.existsSync(subDir)) fs.mkdirSync(subDir, { recursive: true });
+  return subDir;
 }
 
 // =====================================================
-// KONFIGURASI MULTER
+// KONFIGURASI MULTER (dinamis berdasarkan type)
 // =====================================================
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    console.debug("[DEBUG] validateUpload -> saving to uploadDir:", uploadDir);
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase();
-    const baseName = path.basename(file.originalname, ext);
-    const uniqueName = `${baseName}-${uuidv4()}${ext}`;
-    console.debug("[DEBUG] validateUpload -> generated filename:", uniqueName);
-    cb(null, uniqueName);
-  },
-});
+function getMulterStorage(type) {
+  return multer.diskStorage({
+    destination: (req, file, cb) => {
+      const dest = ensureUploadFolder(type);
+      cb(null, dest);
+    },
+    filename: (req, file, cb) => {
+      const ext = path.extname(file.originalname).toLowerCase();
+      const base = path.basename(file.originalname, ext);
+      const uniqueName = `${base}-${uuidv4()}${ext}`;
+      cb(null, uniqueName);
+    },
+  });
+}
 
 // =====================================================
 // Filter file: hanya PDF, JPG, JPEG, PNG
@@ -42,32 +43,18 @@ const storage = multer.diskStorage({
 function fileFilter(req, file, cb) {
   const allowedTypes = ["application/pdf", "image/jpeg", "image/png"];
   if (!allowedTypes.includes(file.mimetype)) {
-    console.warn("[WARN] validateUpload -> unsupported file type:", file.mimetype);
     const err = new multer.MulterError("LIMIT_UNSUPPORTED_FILETYPE");
     return cb(err, false);
   }
-  console.debug("[DEBUG] validateUpload -> accepted file:", {
-    originalname: file.originalname,
-    mimetype: file.mimetype,
-  });
   cb(null, true);
 }
-
-// =====================================================
-// Inisialisasi upload
-// =====================================================
-const upload = multer({
-  storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB
-  fileFilter,
-});
 
 // =====================================================
 // Helper: Render ulang form dengan pesan error
 // =====================================================
 async function handleUploadError(res, req, mode, type, errorMsg) {
   const user = req.session.user || { name: "Unknown User" };
-  console.error("❌ Upload Error:", { mode, type, errorMsg, user: user.id || "?" });
+  console.error("❌ Upload Error:", { mode, type, errorMsg, user: user.id_anggota || "?" });
 
   try {
     if (type === "laporan") {
@@ -76,7 +63,6 @@ async function handleUploadError(res, req, mode, type, errorMsg) {
       );
 
       if (mode === "create") {
-        console.debug("[DEBUG] handleUploadError -> reload laporanForm (create)");
         return res.render("hmsi/laporanForm", {
           title: "Tambah Laporan",
           user,
@@ -87,7 +73,6 @@ async function handleUploadError(res, req, mode, type, errorMsg) {
           old: req.body,
         });
       } else {
-        console.debug("[DEBUG] handleUploadError -> reload editLaporan (edit)");
         const [rows] = await db.query("SELECT * FROM Laporan WHERE id_laporan = ?", [
           req.params.id,
         ]);
@@ -108,7 +93,6 @@ async function handleUploadError(res, req, mode, type, errorMsg) {
 
     if (type === "proker") {
       if (mode === "create") {
-        console.debug("[DEBUG] handleUploadError -> reload tambahProker (create)");
         return res.render("hmsi/tambahProker", {
           title: "Tambah Program Kerja",
           user,
@@ -118,7 +102,6 @@ async function handleUploadError(res, req, mode, type, errorMsg) {
           old: req.body,
         });
       } else {
-        console.debug("[DEBUG] handleUploadError -> reload editProker (edit)");
         const [rows] = await db.query(
           "SELECT * FROM Program_kerja WHERE id_ProgramKerja = ?",
           [req.params.id]
@@ -148,12 +131,17 @@ async function handleUploadError(res, req, mode, type, errorMsg) {
 // type: "laporan" | "proker"
 // =====================================================
 function validateUpload(mode = "create", type = "laporan") {
+  const storage = getMulterStorage(type);
+  const upload = multer({
+    storage,
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB
+    fileFilter,
+  });
+
   return (req, res, next) => {
     const fieldName = type === "laporan" ? "dokumentasi" : "dokumen_pendukung";
-    console.debug(`[DEBUG] validateUpload(${mode}, ${type}) -> fieldName: ${fieldName}`);
 
     upload.single(fieldName)(req, res, (err) => {
-      // Error dari multer (ukuran, tipe file, dll)
       if (err instanceof multer.MulterError) {
         let errorMsg = "Terjadi kesalahan upload file.";
         if (err.code === "LIMIT_FILE_SIZE") {
@@ -161,24 +149,16 @@ function validateUpload(mode = "create", type = "laporan") {
         } else if (err.code === "LIMIT_UNSUPPORTED_FILETYPE") {
           errorMsg = "Format file tidak didukung. Hanya PDF, JPG, JPEG, dan PNG.";
         }
-        console.warn("[WARN] validateUpload -> multer error:", err.code, errorMsg);
         return handleUploadError(res, req, mode, type, errorMsg);
       }
 
-      // Error lain (misalnya IO error)
       if (err) {
         console.error("❌ validateUpload -> unknown error:", err.message);
         return handleUploadError(res, req, mode, type, "Gagal mengunggah file.");
       }
 
       // ✅ Upload sukses
-      console.debug("[DEBUG] validateUpload -> success", {
-        mode,
-        type,
-        file: req.file ? req.file.filename : "no file uploaded",
-      });
-
-      return next(); // <-- ✅ penting: hanya satu kali next()
+      next();
     });
   };
 }

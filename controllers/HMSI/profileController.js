@@ -1,5 +1,5 @@
-// controllers/HMSI/profileController.js
 // =====================================================
+// controllers/HMSI/profileController.js
 // Controller untuk Profil HMSI (lihat & edit profil)
 // =====================================================
 
@@ -27,18 +27,22 @@ exports.getProfile = async (req, res) => {
     const userId = req.session.user?.id_anggota;
     if (!userId) return res.redirect("/auth/login");
 
-    const [rows] = await db.query(`
+    const [rows] = await db.query(
+      `
       SELECT 
         u.id_anggota,
         u.nama,
         u.email,
         u.role,
         u.foto_profile,
-        d.nama_divisi AS divisi
+        d.id_divisi,
+        d.nama_divisi
       FROM user u
       LEFT JOIN divisi d ON u.id_divisi = d.id_divisi
       WHERE u.id_anggota = ?
-    `, [userId]);
+      `,
+      [userId]
+    );
 
     if (!rows.length) return res.status(404).send("User tidak ditemukan");
 
@@ -63,18 +67,22 @@ exports.getEditProfile = async (req, res) => {
     const userId = req.session.user?.id_anggota;
     if (!userId) return res.redirect("/auth/login");
 
-    const [rows] = await db.query(`
+    const [rows] = await db.query(
+      `
       SELECT 
         u.id_anggota,
         u.nama,
         u.email,
         u.role,
         u.foto_profile,
-        d.nama_divisi AS divisi
+        d.id_divisi,
+        d.nama_divisi
       FROM user u
       LEFT JOIN divisi d ON u.id_divisi = d.id_divisi
       WHERE u.id_anggota = ?
-    `, [userId]);
+      `,
+      [userId]
+    );
 
     if (!rows.length) return res.status(404).send("User tidak ditemukan");
 
@@ -101,7 +109,6 @@ exports.postEditProfile = async (req, res) => {
 
     const { id_anggota, nama, password, confirm_password } = req.body || {};
 
-    // Validasi
     if (!nama || !id_anggota) {
       if (req.flash) req.flash("error", "NIM dan Nama wajib diisi");
       return res.redirect("/hmsi/profile/edit");
@@ -109,7 +116,7 @@ exports.postEditProfile = async (req, res) => {
 
     let foto_profile = req.session.user.foto_profile;
 
-    // Upload foto baru
+    // 🔸 Upload foto baru (hapus foto lama)
     if (req.file) {
       const fileName = req.file.filename;
       const newPath = "uploads/profile/" + fileName;
@@ -117,8 +124,11 @@ exports.postEditProfile = async (req, res) => {
       if (req.session.user.foto_profile) {
         const oldPath = path.join("public", req.session.user.foto_profile);
         if (fs.existsSync(oldPath)) {
-          try { fs.unlinkSync(oldPath); } 
-          catch (err) { console.warn("⚠️ Gagal hapus foto lama:", err.message); }
+          try {
+            fs.unlinkSync(oldPath);
+          } catch (err) {
+            console.warn("⚠️ Gagal hapus foto lama:", err.message);
+          }
         }
       }
 
@@ -130,7 +140,7 @@ exports.postEditProfile = async (req, res) => {
       return res.redirect("/hmsi/profile/edit");
     }
 
-    // Update data
+    // 🔹 Siapkan query update
     let query = "UPDATE user SET id_anggota = ?, nama = ?, foto_profile = ?";
     const values = [id_anggota, nama, foto_profile];
 
@@ -145,21 +155,30 @@ exports.postEditProfile = async (req, res) => {
 
     await db.query(query, values);
 
-    // Refresh session
-    const [rows] = await db.query(`
+    // 🔹 Refresh session user (ambil ulang dari DB)
+    const [rows] = await db.query(
+      `
       SELECT 
         u.id_anggota,
         u.nama,
         u.email,
         u.role,
+        u.id_divisi,
         u.foto_profile,
-        d.nama_divisi AS divisi
+        d.nama_divisi
       FROM user u
       LEFT JOIN divisi d ON u.id_divisi = d.id_divisi
       WHERE u.id_anggota = ?
-    `, [id_anggota]);
+      `,
+      [id_anggota]
+    );
 
-    if (rows.length) req.session.user = rows[0];
+    if (rows.length) {
+      req.session.user = {
+        ...rows[0],
+        nama_divisi: rows[0].nama_divisi || "Tanpa Divisi",
+      };
+    }
 
     if (req.flash) req.flash("success", "Profil berhasil diperbarui");
     res.redirect("/hmsi/profile");

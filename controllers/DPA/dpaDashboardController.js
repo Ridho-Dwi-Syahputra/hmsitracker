@@ -1,5 +1,5 @@
 // =====================================================
-// controllers/DPA/dpaDashboardController.js
+// controllers/dpa/dpaDashboardController.js
 // Controller khusus untuk Dashboard DPA
 // =====================================================
 

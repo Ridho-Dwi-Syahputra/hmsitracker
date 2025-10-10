@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Dashboard HMSI</title>
+  <title>Dashboard HMSI – <%= user.nama_divisi || 'Divisi HMSI' %></title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
@@ -10,17 +10,24 @@
 </head>
 <body class="bg-gray-50">
 
+  <!-- Navbar -->
   <%- include('../partials/navbarHMSI', { user: user, unreadCount: unreadCount }) %>
 
+  <!-- Sidebar -->
   <%- include('../partials/sidebarHMSI', { user: user, activeNav: 'Dashboard' }) %>
 
+  <!-- Main Content -->
   <main class="lg:ml-80 px-6 pt-20 pb-24">
 
+    <!-- Header Card -->
     <div class="max-w-6xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-orange-200 mb-8">
       <div class="bg-orange-500 text-white px-6 py-8 flex items-center justify-between">
         <div>
-          <h1 class="text-3xl font-bold mb-2">Selamat Datang, <%= user.name %> 👋</h1>
-          <p class="text-orange-100 text-lg">Dashboard HMSI - Kelola program kerja divisi Anda</p>
+          <h1 class="text-3xl font-bold mb-2">Selamat Datang, <%= user.nama || user.name %> 👋</h1>
+          <p class="text-orange-100 text-lg">Dashboard HMSI – Kelola program kerja dan laporan divisi Anda</p>
+          <p class="text-sm text-gray-200 mt-1">
+            Data untuk Divisi <span class="font-semibold text-white"><%= user.nama_divisi || 'Belum terdaftar' %></span>
+          </p>
         </div>
         <div class="hidden md:block">
           <i class="fa-solid fa-chart-line text-6xl text-orange-200"></i>
@@ -28,9 +35,11 @@
       </div>
     </div>
 
+    <!-- Statistik Cards -->
     <div class="max-w-6xl mx-auto mb-8">
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         
+        <!-- Total Proker -->
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-orange-200">
           <div class="flex items-center justify-between">
             <div>
@@ -45,6 +54,7 @@
           </div>
         </div>
 
+        <!-- Program Selesai -->
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-orange-200">
           <div class="flex items-center justify-between">
             <div>
@@ -59,6 +69,7 @@
           </div>
         </div>
 
+        <!-- Program Berjalan -->
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-orange-200">
           <div class="flex items-center justify-between">
             <div>
@@ -73,6 +84,7 @@
           </div>
         </div>
 
+        <!-- Total Laporan -->
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-orange-200">
           <div class="flex items-center justify-between">
             <div>
@@ -90,6 +102,7 @@
       </div>
     </div>
 
+    <!-- Aksi Cepat -->
     <div class="max-w-6xl mx-auto">
       <div class="bg-white rounded-2xl border border-orange-200 shadow-sm p-6">
         <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
@@ -104,7 +117,7 @@
           </a>
           <a href="/hmsi/laporan" 
              class="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition">
-             <i class="fa-solid fa-plus text-orange-500"></i>
+            <i class="fa-solid fa-upload text-blue-500"></i>
             <span class="text-sm font-medium text-gray-700">Upload Laporan</span>
           </a>
           <a href="/hmsi/notifikasi" 
@@ -115,7 +128,7 @@
           <a href="/hmsi/profile" 
              class="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition">
             <i class="fa-solid fa-user text-purple-500"></i>
-            <span class="text-sm font-medium text-gray-700">Edit Profile</span>
+            <span class="text-sm font-medium text-gray-700">Edit Profil</span>
           </a>
         </div>
       </div>
@@ -123,6 +136,7 @@
 
   </main>
 
+  <!-- Footer -->
   <%- include('../partials/footer') %>
 
 </body>

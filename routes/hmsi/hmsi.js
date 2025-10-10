@@ -1,5 +1,5 @@
-// routes/hmsi/hmsi.js
 // =====================================================
+// routes/hmsi/hmsi.js
 // Routing khusus untuk HMSI (Dashboard, Proker, Laporan, Evaluasi, Notifikasi, Profile)
 // =====================================================
 
@@ -16,7 +16,7 @@ const validateUpload = require("../../middleware/validateUpload");
 const rateLimiter = require("../../middleware/rateLimiter");
 
 // =====================================================
-// IMPORT CONTROLLERS (gunakan lowercase agar aman di semua OS)
+// IMPORT CONTROLLERS
 // =====================================================
 const prokerCtrl = require("../../controllers/hmsi/prokerController");
 const laporanCtrl = require("../../controllers/hmsi/laporanController");
@@ -38,8 +38,11 @@ router.get("/dashboard", dashboardCtrl.getDashboardStats);
 // =====================================================
 // PROGRAM KERJA (PROKER)
 // =====================================================
+
+// 📋 Daftar proker
 router.get("/kelola-proker", prokerCtrl.getAllProker);
 
+// 🆕 Form tambah proker
 router.get("/tambah-proker", (req, res) => {
   res.render("hmsi/tambahProker", {
     title: "Tambah Proker",
@@ -51,6 +54,7 @@ router.get("/tambah-proker", (req, res) => {
   });
 });
 
+// 💾 Tambah proker baru
 router.post(
   "/tambah-proker",
   rateLimiter,
@@ -58,9 +62,13 @@ router.post(
   prokerCtrl.createProker
 );
 
+// 📄 Detail satu proker
 router.get("/proker/:id", prokerCtrl.getDetailProker);
+
+// ✏️ Form edit proker
 router.get("/proker/:id/edit", prokerCtrl.getEditProker);
 
+// 💾 Update proker (termasuk kirim notifikasi ke DPA)
 router.post(
   "/proker/:id/edit",
   rateLimiter,
@@ -68,11 +76,14 @@ router.post(
   prokerCtrl.updateProker
 );
 
+// ❌ Hapus proker (hapus juga notifikasi lama, kirim notifikasi baru)
 router.post("/proker/:id/delete", rateLimiter, prokerCtrl.deleteProker);
+
+// ⬇️ Download dokumen pendukung proker
 router.get("/proker/download/:id", prokerCtrl.downloadDokumenPendukung);
 
 // =====================================================
-// LAPORAN
+// LAPORAN (CRUD + revisi setelah evaluasi)
 // =====================================================
 router.get("/laporan", laporanCtrl.getAllLaporan);
 router.get("/laporan/tambah", laporanCtrl.getFormLaporan);
@@ -96,15 +107,22 @@ router.post(
 router.post("/laporan/delete/:id", rateLimiter, laporanCtrl.deleteLaporan);
 router.get("/laporan/download/:id", laporanCtrl.downloadDokumentasi);
 
-// ⚠️ Letakkan paling bawah — karena ini wildcard
+// ⚠️ Harus paling bawah karena wildcard
 router.get("/laporan/:id", laporanCtrl.getDetailLaporan);
 
 // =====================================================
-// EVALUASI
+// EVALUASI LAPORAN (DPA → HMSI)
 // =====================================================
+// HMSI melihat hasil evaluasi & bisa kirim komentar balik (sinkron notifikasi)
 router.get("/evaluasi", evaluasiCtrl.getAllEvaluasi);
 router.get("/evaluasi/:id", evaluasiCtrl.getDetailEvaluasi);
-router.post("/evaluasi/:id/komentar", rateLimiter, evaluasiCtrl.addKomentar);
+
+// 💬 Komentar balik HMSI (replace, bukan append)
+router.post(
+  "/evaluasi/:id/komentar",
+  rateLimiter,
+  evaluasiCtrl.addKomentar
+);
 
 // =====================================================
 // NOTIFIKASI
@@ -113,16 +131,12 @@ router.get("/notifikasi", notifikasiCtrl.getAllNotifikasi);
 router.get("/notifikasi/read/:id", notifikasiCtrl.readAndRedirect);
 
 // =====================================================
-// PROFILE
+// PROFIL HMSI
 // =====================================================
-
-// 📄 Lihat profil HMSI
 router.get("/profile", profileCtrl.getProfile);
-
-// ✏️ Form edit profil HMSI
 router.get("/profile/edit", profileCtrl.getEditProfile);
 
-// ⚙️ Konfigurasi Multer untuk upload foto profil HMSI
+// ⚙️ Konfigurasi Upload foto profil
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, path.join("public/uploads/profile"));
@@ -135,7 +149,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// 💾 Update profil (nama wajib, password & foto opsional)
+// 💾 Update profil HMSI
 router.post(
   "/profile/update",
   rateLimiter,

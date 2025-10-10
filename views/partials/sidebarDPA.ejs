@@ -13,18 +13,6 @@
 %>
 
 <div id="dpa-sidebar-root">
-
-  <!-- 🔹 Mobile top bar -->
-  <div class="lg:hidden fixed top-0 left-0 w-full h-14 bg-gradient-to-r from-orange-500 to-orange-600 flex items-center justify-between px-4 z-40">
-    <!-- Hamburger -->
-    <button id="dpa-sidebar-toggle" class="hamburger p-2 rounded-lg bg-white shadow-md flex flex-col justify-between w-8 h-8">
-      <span class="bar"></span>
-      <span class="bar"></span>
-      <span class="bar"></span>
-    </button>
-    <h1 class="text-white font-semibold text-lg">HMSI Tracker</h1>
-  </div>
-
   <!-- 🔹 Overlay -->
   <div id="dpa-sidebar-overlay"
     class="hidden fixed inset-0 bg-black bg-opacity-40 z-40 lg:hidden transition-opacity duration-300"></div>
@@ -43,7 +31,6 @@
     <!-- Profile -->
     <div class="p-6 border-b border-gray-100 bg-white">
       <div class="flex items-center gap-4">
-        <!-- Foto Profil -->
         <img src="<%= fotoProfile %>?v=<%= Date.now() %>"
              alt="Foto Profil"
              class="w-12 h-12 rounded-full border object-cover shadow-md"
@@ -195,29 +182,31 @@
   document.addEventListener("DOMContentLoaded", () => {
     const sidebar = document.getElementById("dpa-sidebar");
     const overlay = document.getElementById("dpa-sidebar-overlay");
-    const toggle = document.getElementById("dpa-sidebar-toggle");
+    const toggle = document.getElementById("dpa-sidebar-toggle"); // toggle dari navbar
 
     if (window.innerWidth >= 1024) {
       sidebar.classList.add("slide-in");
     }
 
-    toggle.addEventListener("click", () => {
-      const isActive = toggle.classList.toggle("active");
-      if (isActive) {
-        sidebar.classList.add("slide-in");
-        sidebar.classList.remove("slide-out");
-        overlay.classList.remove("hidden");
-      } else {
-        sidebar.classList.remove("slide-in");
-        sidebar.classList.add("slide-out");
-        overlay.classList.add("hidden");
-      }
-    });
+    if (toggle) {
+      toggle.addEventListener("click", () => {
+        const isActive = toggle.classList.toggle("active");
+        if (isActive) {
+          sidebar.classList.add("slide-in");
+          sidebar.classList.remove("slide-out");
+          overlay.classList.remove("hidden");
+        } else {
+          sidebar.classList.remove("slide-in");
+          sidebar.classList.add("slide-out");
+          overlay.classList.add("hidden");
+        }
+      });
+    }
 
     overlay.addEventListener("click", () => {
       sidebar.classList.remove("slide-in");
       sidebar.classList.add("slide-out");
-      toggle.classList.remove("active");
+      toggle?.classList.remove("active");
       overlay.classList.add("hidden");
     });
 

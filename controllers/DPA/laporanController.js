@@ -1,5 +1,5 @@
 // =====================================================
-// controllers/DPA/laporanController.js
+// controllers/dpa/laporanController.js
 // Controller untuk DPA dalam mengelola laporan
 // DPA hanya bisa melihat laporan & memberi evaluasi
 // + menampilkan komentar HMSI bila ada
@@ -37,20 +37,20 @@ function getMimeFromFile(filename) {
 // =====================================================
 exports.getAllLaporanDPA = async (req, res) => {
   try {
-    const [rows] = await db.query(
-      `SELECT 
-          l.*, 
-          p.Nama_ProgramKerja AS namaProker,
-          d.nama_divisi AS namaDivisi,
-          e.status_konfirmasi
-       FROM Laporan l
-       LEFT JOIN Program_kerja p ON l.id_ProgramKerja = p.id_ProgramKerja
-       LEFT JOIN Evaluasi e ON e.id_laporan = l.id_laporan
-       LEFT JOIN divisi d ON l.id_divisi = d.id_divisi
-       ORDER BY l.tanggal DESC`
-    );
+    const [rows] = await db.query(`
+      SELECT 
+        l.*, 
+        p.Nama_ProgramKerja AS namaProker,
+        d.nama_divisi AS namaDivisi,
+        e.status_konfirmasi
+      FROM Laporan l
+      LEFT JOIN Program_kerja p ON l.id_ProgramKerja = p.id_ProgramKerja
+      LEFT JOIN Evaluasi e ON e.id_laporan = l.id_laporan
+      LEFT JOIN Divisi d ON l.id_divisi = d.id_divisi
+      ORDER BY l.tanggal DESC
+    `);
 
-    const laporan = rows.map(r => {
+    const laporan = rows.map((r) => {
       let tanggalFormatted = "-";
       if (r.tanggal && r.tanggal !== "0000-00-00") {
         const d = new Date(r.tanggal);
@@ -67,11 +67,7 @@ exports.getAllLaporanDPA = async (req, res) => {
       if (r.status_konfirmasi === "Revisi") status = "Revisi";
       else if (r.status_konfirmasi === "Selesai") status = "Disetujui";
 
-      return {
-        ...r,
-        tanggalFormatted,
-        status,
-      };
+      return { ...r, tanggalFormatted, status };
     });
 
     res.render("dpa/kelolaLaporan", {
@@ -93,23 +89,23 @@ exports.getAllLaporanDPA = async (req, res) => {
 // =====================================================
 exports.getDetailLaporanDPA = async (req, res) => {
   try {
-    const [rows] = await db.query(
-      `SELECT 
-          l.*, 
-          p.Nama_ProgramKerja AS namaProker,
-          d.nama_divisi AS namaDivisi,
-          l.deskripsi_target_kuantitatif,
-          l.deskripsi_target_kualitatif
-       FROM Laporan l
-       LEFT JOIN Program_kerja p ON l.id_ProgramKerja = p.id_ProgramKerja
-       LEFT JOIN divisi d ON l.id_divisi = d.id_divisi
-       WHERE l.id_laporan = ?`,
-      [req.params.id]
-    );
+    const [rows] = await db.query(`
+      SELECT 
+        l.*, 
+        p.Nama_ProgramKerja AS namaProker,
+        d.nama_divisi AS namaDivisi,
+        l.deskripsi_target_kuantitatif,
+        l.deskripsi_target_kualitatif
+      FROM Laporan l
+      LEFT JOIN Program_kerja p ON l.id_ProgramKerja = p.id_ProgramKerja
+      LEFT JOIN Divisi d ON l.id_divisi = d.id_divisi
+      WHERE l.id_laporan = ?
+    `, [req.params.id]);
 
     if (!rows.length) return res.status(404).send("Laporan tidak ditemukan");
     const laporan = rows[0];
 
+    // format tanggal
     let tanggalFormatted = "-";
     if (laporan.tanggal && laporan.tanggal !== "0000-00-00") {
       const d = new Date(laporan.tanggal);
@@ -125,15 +121,14 @@ exports.getDetailLaporanDPA = async (req, res) => {
     laporan.dokumentasi_mime = getMimeFromFile(laporan.dokumentasi);
 
     // ambil evaluasi terbaru (termasuk komentar HMSI)
-    const [evaluasiRows] = await db.query(
-      `SELECT e.*, u.nama AS namaEvaluator
-       FROM Evaluasi e
-       LEFT JOIN User u ON e.pemberi_evaluasi = u.id_anggota
-       WHERE e.id_laporan = ?
-       ORDER BY e.tanggal_evaluasi DESC
-       LIMIT 1`,
-      [req.params.id]
-    );
+    const [evaluasiRows] = await db.query(`
+      SELECT e.*, u.nama AS namaEvaluator
+      FROM Evaluasi e
+      LEFT JOIN User u ON e.pemberi_evaluasi = u.id_anggota
+      WHERE e.id_laporan = ?
+      ORDER BY e.tanggal_evaluasi DESC
+      LIMIT 1
+    `, [req.params.id]);
 
     const evaluasi = evaluasiRows.length ? evaluasiRows[0] : null;
 
@@ -157,23 +152,23 @@ exports.getDetailLaporanDPA = async (req, res) => {
 // =====================================================
 exports.getFormEvaluasi = async (req, res) => {
   try {
-    const [rows] = await db.query(
-      `SELECT 
-          l.*, 
-          p.Nama_ProgramKerja AS namaProker,
-          d.nama_divisi AS namaDivisi,
-          l.deskripsi_target_kuantitatif,
-          l.deskripsi_target_kualitatif
-       FROM Laporan l
-       LEFT JOIN Program_kerja p ON l.id_ProgramKerja = p.id_ProgramKerja
-       LEFT JOIN divisi d ON l.id_divisi = d.id_divisi
-       WHERE l.id_laporan = ?`,
-      [req.params.id]
-    );
+    const [rows] = await db.query(`
+      SELECT 
+        l.*, 
+        p.Nama_ProgramKerja AS namaProker,
+        d.nama_divisi AS namaDivisi,
+        l.deskripsi_target_kuantitatif,
+        l.deskripsi_target_kualitatif
+      FROM Laporan l
+      LEFT JOIN Program_kerja p ON l.id_ProgramKerja = p.id_ProgramKerja
+      LEFT JOIN Divisi d ON l.id_divisi = d.id_divisi
+      WHERE l.id_laporan = ?
+    `, [req.params.id]);
 
     if (!rows.length) return res.status(404).send("Laporan tidak ditemukan");
     const laporan = rows[0];
 
+    // format tanggal
     let tanggalFormatted = "-";
     if (laporan.tanggal && laporan.tanggal !== "0000-00-00") {
       const d = new Date(laporan.tanggal);
@@ -188,16 +183,15 @@ exports.getFormEvaluasi = async (req, res) => {
     laporan.tanggalFormatted = tanggalFormatted;
     laporan.dokumentasi_mime = getMimeFromFile(laporan.dokumentasi);
 
-    // ambil evaluasi (termasuk komentar HMSI jika ada)
-    const [evaluasiRows] = await db.query(
-      `SELECT e.*, u.nama AS namaEvaluator
-       FROM Evaluasi e
-       LEFT JOIN User u ON e.pemberi_evaluasi = u.id_anggota
-       WHERE e.id_laporan = ?
-       ORDER BY e.tanggal_evaluasi DESC
-       LIMIT 1`,
-      [req.params.id]
-    );
+    // ambil evaluasi terakhir
+    const [evaluasiRows] = await db.query(`
+      SELECT e.*, u.nama AS namaEvaluator
+      FROM Evaluasi e
+      LEFT JOIN User u ON e.pemberi_evaluasi = u.id_anggota
+      WHERE e.id_laporan = ?
+      ORDER BY e.tanggal_evaluasi DESC
+      LIMIT 1
+    `, [req.params.id]);
 
     const evaluasi = evaluasiRows.length ? evaluasiRows[0] : null;
 
@@ -218,7 +212,7 @@ exports.getFormEvaluasi = async (req, res) => {
 };
 
 // =====================================================
-// 💾 Simpan evaluasi + notifikasi ke HMSI (pakai id_divisi)
+// 💾 Simpan evaluasi + notifikasi ke HMSI (pakai target_role)
 // =====================================================
 exports.postEvaluasi = async (req, res) => {
   try {
@@ -235,12 +229,10 @@ exports.postEvaluasi = async (req, res) => {
       );
     }
 
-    const [cek] = await db.query(
-      `SELECT id_evaluasi FROM Evaluasi WHERE id_laporan = ?`,
-      [laporanId]
-    );
-
+    // cek evaluasi existing
+    const [cek] = await db.query(`SELECT id_evaluasi FROM Evaluasi WHERE id_laporan = ?`, [laporanId]);
     let idEvaluasi;
+
     if (cek.length) {
       idEvaluasi = cek[0].id_evaluasi;
       await db.query(
@@ -265,10 +257,10 @@ exports.postEvaluasi = async (req, res) => {
     );
     const laporan = laporanRows[0];
 
-    // kirim notifikasi ke HMSI (pakai id_divisi)
+    // kirim notifikasi ke HMSI (pakai target_role)
     const pesan = `DPA memberi evaluasi pada laporan "${laporan.judul_laporan}"`;
     await db.query(
-      `INSERT INTO Notifikasi (id_notifikasi, pesan, role, status_baca, id_divisi, id_laporan, id_evaluasi, created_at)
+      `INSERT INTO Notifikasi (id_notifikasi, pesan, target_role, status_baca, id_divisi, id_laporan, id_evaluasi, created_at)
        VALUES (?, ?, 'HMSI', 0, ?, ?, ?, NOW())`,
       [uuidv4(), pesan, laporan.id_divisi, laporanId, idEvaluasi]
     );
@@ -285,20 +277,20 @@ exports.postEvaluasi = async (req, res) => {
 // =====================================================
 exports.getAllEvaluasiDPA = async (req, res) => {
   try {
-    const [rows] = await db.query(
-      `SELECT 
-          e.*, 
-          l.judul_laporan, 
-          d.nama_divisi AS namaDivisi,
-          u.nama AS namaEvaluator
-       FROM Evaluasi e
-       LEFT JOIN Laporan l ON e.id_laporan = l.id_laporan
-       LEFT JOIN User u ON e.pemberi_evaluasi = u.id_anggota
-       LEFT JOIN divisi d ON l.id_divisi = d.id_divisi
-       ORDER BY e.tanggal_evaluasi DESC`
-    );
+    const [rows] = await db.query(`
+      SELECT 
+        e.*, 
+        l.judul_laporan, 
+        d.nama_divisi AS namaDivisi,
+        u.nama AS namaEvaluator
+      FROM Evaluasi e
+      LEFT JOIN Laporan l ON e.id_laporan = l.id_laporan
+      LEFT JOIN User u ON e.pemberi_evaluasi = u.id_anggota
+      LEFT JOIN Divisi d ON l.id_divisi = d.id_divisi
+      ORDER BY e.tanggal_evaluasi DESC
+    `);
 
-    const evaluasi = rows.map(r => {
+    const evaluasi = rows.map((r) => {
       let tanggalFormatted = "-";
       if (r.tanggal_evaluasi && r.tanggal_evaluasi !== "0000-00-00") {
         const d = new Date(r.tanggal_evaluasi);

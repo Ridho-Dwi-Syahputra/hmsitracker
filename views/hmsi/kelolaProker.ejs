@@ -174,10 +174,10 @@
               <thead class="bg-orange-100 text-gray-700">
                 <tr>
                   <th class="py-3 px-4 font-semibold border border-orange-200">No</th>
-                  <th class="py-3 px-4 font-semibold border border-orange-200 text-left">Nama Program</th>
-                  <th class="py-3 px-4 font-semibold border border-orange-200">Divisi</th>
+                  <th class="py-3 px-4 font-semibold border border-orange-200 text-left cursor-pointer" data-sort="namaProker">Nama Program <i class="fa-solid fa-sort text-gray-400 ml-1"></i></th>
+                  <th class="py-3 px-4 font-semibold border border-orange-200 cursor-pointer" data-sort="divisi">Divisi <i class="fa-solid fa-sort text-gray-400 ml-1"></i></th>
                   <th class="py-3 px-4 font-semibold border border-orange-200">Penanggung Jawab</th>
-                  <th class="py-3 px-4 font-semibold border border-orange-200">Status</th>
+                  <th class="py-3 px-4 font-semibold border border-orange-200 cursor-pointer" data-sort="status">Status <i class="fa-solid fa-sort text-gray-400 ml-1"></i></th>
                   <th class="py-3 px-4 font-semibold border border-orange-200">Aksi</th>
                 </tr>
               </thead>
@@ -367,13 +367,55 @@
         });
       });
 
+      // Sorting logic: clickable th[data-sort]
+      const sortHeaders = document.querySelectorAll('th[data-sort]');
+      let currentSort = { index: null, asc: true };
+
+      sortHeaders.forEach(header => {
+        header.addEventListener('click', () => {
+          const index = Array.from(header.parentNode.children).indexOf(header);
+          // toggle direction if same column
+          if (currentSort.index === index) {
+            currentSort.asc = !currentSort.asc;
+          } else {
+            currentSort.index = index;
+            currentSort.asc = true;
+          }
+
+          // reset icons
+          sortHeaders.forEach(h => {
+            const i = h.querySelector('i');
+            if (i) i.className = 'fa-solid fa-sort text-gray-400 ml-1';
+          });
+
+          const icon = header.querySelector('i');
+          if (icon) {
+            icon.className = currentSort.asc ? 'fa-solid fa-sort-up text-orange-500 ml-1' : 'fa-solid fa-sort-down text-orange-500 ml-1';
+          }
+
+          // sort rows array based on cell text at index
+          rows.sort((a, b) => {
+            const aText = (a.cells[currentSort.index]?.innerText || '').trim().toLowerCase();
+            const bText = (b.cells[currentSort.index]?.innerText || '').trim().toLowerCase();
+            if (aText < bText) return currentSort.asc ? -1 : 1;
+            if (aText > bText) return currentSort.asc ? 1 : -1;
+            return 0;
+          });
+
+          // re-append sorted rows to tbody
+          rows.forEach(r => tbody.appendChild(r));
+          // after sorting, re-run pagination (visibility preserved)
+          paginate();
+        });
+      });
+
       function filterRows() {
-        const searchValue = searchInput.value.toLowerCase();
+        const searchValue = (searchInput?.value || '').toLowerCase();
         rows.forEach(row => {
-          const namaProker = row.cells[1]?.innerText.toLowerCase() || "";
-          const divisi = row.cells[2]?.innerText.toLowerCase() || "";
-          const pj = row.cells[3]?.innerText.toLowerCase() || "";
-          const status = row.cells[4]?.innerText.trim() || "";
+          const namaProker = (row.cells[1]?.innerText || "").toLowerCase();
+          const divisi = (row.cells[2]?.innerText || "").toLowerCase();
+          const pj = (row.cells[3]?.innerText || "").toLowerCase();
+          const status = (row.cells[4]?.innerText || "").trim();
 
           let matchSearch = namaProker.includes(searchValue) || divisi.includes(searchValue) || pj.includes(searchValue);
           let matchStatus = (statusValue === "all" || status === statusValue);
@@ -402,7 +444,10 @@
 
       document.getElementById("prevPage")?.addEventListener("click", () => { currentPage--; paginate(); });
       document.getElementById("nextPage")?.addEventListener("click", () => { currentPage++; paginate(); });
-      searchInput?.addEventListener("input", filterRows);
+      searchInput?.addEventListener("input", () => {
+        currentPage = 1;
+        filterRows();
+      });
 
       if (rows.length > 0) filterRows();
     });

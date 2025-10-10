@@ -1,4 +1,4 @@
-// controllers/DPA/notifikasiController.js
+// controllers/dpa/notifikasiController.js
 // =====================================================
 // Controller untuk Notifikasi DPA
 // =====================================================
@@ -29,39 +29,44 @@ exports.getAllNotifikasi = async (req, res) => {
       return res.status(401).send("Unauthorized");
     }
 
+    // 🔹 Hanya notifikasi yang target_role = 'DPA'
     const [rows] = await db.query(`
       SELECT 
-        n.*, 
+        n.id_notifikasi,
+        n.pesan,
+        n.created_at,
+        n.status_baca,
+        l.id_laporan,
+        l.judul_laporan,
+        l.id_divisi AS laporan_divisi_id,
         d.nama_divisi,
-        l.judul_laporan, 
-        l.divisi AS laporan_divisi, 
         p.id_ProgramKerja AS proker_id,
         p.Nama_ProgramKerja
       FROM Notifikasi n
-      LEFT JOIN Divisi d ON n.id_divisi = d.id_divisi
       LEFT JOIN Laporan l ON n.id_laporan = l.id_laporan
       LEFT JOIN Program_kerja p ON n.id_ProgramKerja = p.id_ProgramKerja
-      WHERE (n.id_evaluasi IS NULL OR n.id_evaluasi = '')
-        AND (n.role IS NULL OR n.role = 'DPA')
+      LEFT JOIN Divisi d ON COALESCE(l.id_divisi, n.id_divisi) = d.id_divisi
+      WHERE n.target_role = 'DPA'
+        AND (n.id_evaluasi IS NULL OR n.id_evaluasi = '')
         AND LOWER(COALESCE(n.pesan, '')) NOT LIKE '%evaluasi%'
       ORDER BY n.created_at DESC
     `);
 
-    const notifikasi = rows.map(n => {
+    const notifikasi = rows.map((n) => {
       let tanggalFormatted = "-";
       if (n.created_at) {
         const d = new Date(n.created_at);
         if (!isNaN(d.getTime())) {
           tanggalFormatted = d.toLocaleDateString("id-ID", {
-            day: "2-digit", month: "short", year: "numeric"
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
           });
         }
       }
 
       const isLaporan = !!n.id_laporan;
-      const prokerId = !isLaporan ? (n.proker_id || n.id_ProgramKerja || null) : null;
-      const isProker = !!prokerId;
-
+      const isProker = !!n.proker_id;
       let linkUrl = "#";
       let linkLabel = "Lihat";
 
@@ -71,13 +76,11 @@ exports.getAllNotifikasi = async (req, res) => {
           ? "Lihat Laporan Baru"
           : "Lihat Laporan";
       } else if (isProker) {
-        linkUrl = `/dpa/lihatProker/${prokerId}/detail`;
+        linkUrl = `/dpa/lihatProker/${n.proker_id}/detail`;
         linkLabel = "Lihat Program Kerja";
       }
 
-      const divisiText =
-        n.nama_divisi || n.laporan_divisi || n.divisi || "Divisi Tidak Dikenal";
-
+      const divisiText = n.nama_divisi || "Divisi Tidak Dikenal";
       const shortMsg = isLaporan
         ? `${divisiText} telah menambahkan laporan baru`
         : `${divisiText} telah membuat program kerja baru`;
@@ -116,38 +119,43 @@ exports.getAllNotifikasiEvaluasi = async (req, res) => {
       return res.status(401).send("Unauthorized");
     }
 
+    // 🔹 Ambil hanya notifikasi evaluasi yang target_role = 'DPA'
     const [rows] = await db.query(`
       SELECT 
-        n.*,
-        d.nama_divisi,
+        n.id_notifikasi,
+        n.pesan,
+        n.created_at,
+        n.status_baca,
         e.id_evaluasi,
         e.komentar_hmsi,
         l.id_laporan,
         l.judul_laporan,
-        l.divisi AS laporan_divisi,
+        l.id_divisi AS laporan_divisi_id,
+        d.nama_divisi,
         p.Nama_ProgramKerja
       FROM Notifikasi n
-      LEFT JOIN Divisi d ON n.id_divisi = d.id_divisi
       JOIN Evaluasi e ON n.id_evaluasi = e.id_evaluasi
       JOIN Laporan l ON e.id_laporan = l.id_laporan
       JOIN Program_kerja p ON l.id_ProgramKerja = p.id_ProgramKerja
-      WHERE n.id_evaluasi IS NOT NULL
-        AND n.role = 'DPA'
+      LEFT JOIN Divisi d ON l.id_divisi = d.id_divisi
+      WHERE n.target_role = 'DPA'
       ORDER BY n.created_at DESC
     `);
 
-    const notifikasi = rows.map(n => {
+    const notifikasi = rows.map((n) => {
       let tanggalFormatted = "-";
       if (n.created_at) {
         const d = new Date(n.created_at);
         if (!isNaN(d.getTime())) {
           tanggalFormatted = d.toLocaleDateString("id-ID", {
-            day: "2-digit", month: "short", year: "numeric"
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
           });
         }
       }
 
-      const divisiText = n.nama_divisi || n.laporan_divisi || "Divisi Tidak Dikenal";
+      const divisiText = n.nama_divisi || "Divisi Tidak Dikenal";
 
       return {
         ...n,
