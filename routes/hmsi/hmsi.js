@@ -47,7 +47,7 @@ router.get("/tambah-proker", (req, res) => {
   res.render("hmsi/tambahProker", {
     title: "Tambah Proker",
     user: req.session.user,
-    activeNav: "Program Kerja",
+    activeNav: "proker",
     old: {},
     errorMsg: null,
     successMsg: null,
@@ -68,7 +68,7 @@ router.get("/proker/:id", prokerCtrl.getDetailProker);
 // ✏️ Form edit proker
 router.get("/proker/:id/edit", prokerCtrl.getEditProker);
 
-// 💾 Update proker (termasuk kirim notifikasi ke DPA)
+// 💾 Update proker
 router.post(
   "/proker/:id/edit",
   rateLimiter,
@@ -76,7 +76,7 @@ router.post(
   prokerCtrl.updateProker
 );
 
-// ❌ Hapus proker (hapus juga notifikasi lama, kirim notifikasi baru)
+// ❌ Hapus proker
 router.post("/proker/:id/delete", rateLimiter, prokerCtrl.deleteProker);
 
 // ⬇️ Download dokumen pendukung proker
@@ -113,13 +113,15 @@ router.get("/laporan/:id", laporanCtrl.getDetailLaporan);
 // =====================================================
 // EVALUASI LAPORAN (DPA → HMSI)
 // =====================================================
-// HMSI melihat hasil evaluasi & bisa kirim komentar balik (sinkron notifikasi)
-router.get("/evaluasi", evaluasiCtrl.getAllEvaluasi);
-router.get("/evaluasi/:id", evaluasiCtrl.getDetailEvaluasi);
+// 📄 HMSI melihat hasil evaluasi DPA
+router.get("/kelola-evaluasi", evaluasiCtrl.getKelolaEvaluasi);
+
+// 📄 Detail satu evaluasi
+router.get("/kelola-evaluasi/:id", evaluasiCtrl.getDetailEvaluasi);
 
 // 💬 Komentar balik HMSI (replace, bukan append)
 router.post(
-  "/evaluasi/:id/komentar",
+  "/kelola-evaluasi/:id/komentar",
   rateLimiter,
   evaluasiCtrl.addKomentar
 );

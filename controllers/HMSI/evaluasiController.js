@@ -1,5 +1,5 @@
 // =====================================================
-// controllers/hmsi/evaluasiController.js
+// controllers/HMSI/evaluasiController.js
 // Controller Evaluasi untuk HMSI
 // =====================================================
 // 🔸 HMSI dapat melihat evaluasi dari DPA
@@ -51,7 +51,7 @@ async function getUnreadCount(id_divisi) {
 // =====================================================
 // 📄 Ambil semua evaluasi (khusus laporan divisi HMSI)
 // =====================================================
-exports.getAllEvaluasi = async (req, res) => {
+exports.getKelolaEvaluasi = async (req, res) => {
   try {
     const user = req.session.user;
     const idDivisi = user?.id_divisi || null;
@@ -84,18 +84,18 @@ exports.getAllEvaluasi = async (req, res) => {
 
     const unreadCount = await getUnreadCount(idDivisi);
 
-    res.render("hmsi/kelolaEvaluasi", {
-      title: "Kelola Evaluasi",
+    res.render("HMSI/kelolaEvaluasi", {
+      title: "Telah Dievaluasi",
       user,
-      activeNav: "Evaluasi DPA",
+      activeNav: "kelolaEvaluasi",
       evaluasi,
       successMsg: req.query.success || null,
       errorMsg: req.query.error || null,
       unreadCount,
     });
   } catch (err) {
-    console.error("❌ Error getAllEvaluasi:", err.message);
-    res.status(500).send("Gagal mengambil evaluasi");
+    console.error("❌ Error getKelolaEvaluasi:", err.message);
+    res.status(500).send("Gagal mengambil data evaluasi");
   }
 };
 
@@ -139,10 +139,10 @@ exports.getDetailEvaluasi = async (req, res) => {
     evaluasi.tanggalFormatted = formatTanggal(evaluasi.tanggal_evaluasi);
     const unreadCount = await getUnreadCount(idDivisi);
 
-    res.render("hmsi/detailEvaluasi", {
+    res.render("HMSI/detailEvaluasi", {
       title: "Detail Evaluasi",
       user,
-      activeNav: "Evaluasi DPA",
+      activeNav: "kelolaEvaluasi",
       evaluasi,
       unreadCount,
     });
@@ -163,7 +163,7 @@ exports.addKomentar = async (req, res) => {
     const { komentar_hmsi } = req.body;
 
     if (!komentar_hmsi || komentar_hmsi.trim() === "") {
-      return res.redirect(`/hmsi/evaluasi?error=Komentar tidak boleh kosong`);
+      return res.redirect(`/hmsi/kelola-evaluasi?error=Komentar tidak boleh kosong`);
     }
 
     // ✅ Update komentar HMSI (replace komentar lama)
@@ -206,8 +206,8 @@ exports.addKomentar = async (req, res) => {
       );
     }
 
-    // 🔄 Redirect balik ke kelolaEvaluasi
-    res.redirect(`/hmsi/evaluasi?success=Komentar berhasil ditambahkan`);
+    // 🔄 Redirect balik ke halaman kelola evaluasi
+    res.redirect(`/hmsi/kelola-evaluasi?success=Komentar berhasil ditambahkan`);
   } catch (err) {
     console.error("❌ Error addKomentar:", err.message);
     res.status(500).send("Gagal menambahkan komentar");
