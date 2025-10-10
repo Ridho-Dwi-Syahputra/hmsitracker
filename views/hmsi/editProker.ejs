@@ -16,7 +16,7 @@
   <%- include('../partials/navbarHMSI', { user: user, unreadCount: unreadCount }) %>
 
   <!-- Sidebar -->
-  <%- include('../partials/sidebarHMSI', { activeNav: 'Program Kerja', user: user }) %>
+  <%- include('../partials/sidebarHMSI', { activeNav: 'proker', user: user }) %>
 
   <!-- Success Modal -->
   <div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
@@ -121,11 +121,7 @@
         <!-- Alert -->
         <%- include('../partials/alert', { errorMsg: errorMsg, successMsg: successMsg }) %>
 
-        <!-- Info Divisi Aktif -->
-        <div class="text-sm text-gray-500 mb-2">
-          Divisi: <span class="font-semibold text-orange-600"><%= user.nama_divisi %></span>
-        </div>
-
+        
         <!-- Form -->
         <form id="editProkerForm"
               action="/hmsi/proker/<%= proker.id_ProgramKerja %>/edit"
@@ -133,10 +129,7 @@
               enctype="multipart/form-data"
               class="space-y-10">
 
-          <!-- Hidden Divisi ID -->
-          <input type="hidden" name="id_divisi" value="<%= user.id_divisi %>">
-
-          <!-- Informasi Dasar -->
+            <!-- Informasi Dasar -->
           <div>
             <h4 class="text-lg font-semibold text-gray-700 mb-4">Informasi Dasar</h4>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">

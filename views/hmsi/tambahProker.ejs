@@ -15,7 +15,7 @@
   <%- include('../partials/navbarHMSI', { user: user, unreadCount: unreadCount }) %>
 
   <!-- Sidebar -->
-  <%- include('../partials/sidebarHMSI', { activeNav: 'Program Kerja', user: user }) %>
+  <%- include('../partials/sidebarHMSI', { activeNav: 'proker', user: user }) %>
 
   <!-- Success Modal -->
   <div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
@@ -118,21 +118,12 @@
         <%- include('../partials/alert', { errorMsg: errorMsg, successMsg: successMsg }) %>
 
         <!-- Form -->
-        <form id="prokerForm" action="/hmsi/tambah-proker" method="POST" enctype="multipart/form-data" class="space-y-10">
+        <form id="prokerForm" action="/hmsi/tambah-proker" method="POST" enctype="multipart/form-data" class="space-y-0">
 
           <!-- Hidden: id_divisi dari session -->
           <input type="hidden" name="id_divisi" value="<%= user?.id_divisi %>">
 
-          <!-- Informasi Divisi (tampilkan untuk konteks) -->
-          <div class="mb-4">
-            <p class="text-sm text-gray-600">
-              Membuat proker untuk divisi:
-              <span class="text-orange-600 font-semibold">
-                <%= user?.nama_divisi || user?.divisi?.nama_divisi || 'Belum dikaitkan' %>
-              </span>
-            </p>
-          </div>
-
+          
           <!-- Informasi Dasar -->
           <div>
             <h4 class="text-lg font-semibold text-gray-700 mb-4">Informasi Dasar</h4>

@@ -12,15 +12,15 @@
     { name: 'Kelola Divisi', path: '/admin/kelola-divisi', key: 'divisi' }
   ];
 
-  // ✅ Submenu keuangan
-  var keuanganSubmenu = [
-    { name: 'Pemasukan', path: '/admin/keuangan', key: 'keuangan' },
-    { name: 'Pengeluaran', path: '/admin/pengeluaran', key: 'pengeluaran' }
-  ];
+//   // ✅ Submenu keuangan
+//   var keuanganSubmenu = [
+//     { name: 'Pemasukan', path: '/admin/keuangan', key: 'keuangan' },
+//     { name: 'Pengeluaran', path: '/admin/pengeluaran', key: 'pengeluaran' }
+//   ];
 
-  // ✅ Cek submenu keuangan aktif
-  var isKeuanganActive = (activeNav === 'keuangan' || activeNav === 'pengeluaran');
-%>
+//   // ✅ Cek submenu keuangan aktif
+//   var isKeuanganActive = (activeNav === 'keuangan' || activeNav === 'pengeluaran');
+// %>
 
 <div id="admin-sidebar-root">
   <!-- Overlay -->
@@ -89,30 +89,7 @@
         </a>
       <% }) %>
 
-      <!-- Kelola Keuangan (dropdown) -->
-      <div class="space-y-1">
-        <button type="button"
-          class="nav-item block w-full p-3.5 my-1 rounded-xl text-sm font-medium flex items-center justify-between gap-3 <%= isKeuanganActive ? 'active' : '' %>"
-          onclick="toggleDropdown('keuanganDropdown')">
-          <div class="flex items-center gap-3">
-            <span class="w-1.5 h-1.5 rounded-full <%= isKeuanganActive ? 'bg-orange-500' : 'bg-gray-300' %>"></span>
-            <span>Kelola Keuangan</span>
-          </div>
-          <i class="fa-solid fa-chevron-down transition-transform duration-300 <%= isKeuanganActive ? 'rotate-180' : '' %>"></i>
-        </button>
-
-        <div id="keuanganDropdown" class="ml-6 space-y-1 <%= isKeuanganActive ? '' : 'hidden' %>">
-          <% keuanganSubmenu.forEach(sub => { 
-               var isSubActive = activeNav === sub.key;
-          %>
-            <a href="<%= sub.path %>"
-              class="sub-item block w-full p-3 my-1 rounded-lg text-sm font-medium <%= isSubActive ? 'active' : '' %>">
-              <%= sub.name %>
-            </a>
-          <% }) %>
-        </div>
-      </div>
-    </nav>
+        </nav>
 
     <!-- Logout -->
     <div class="p-6 border-t border-gray-100">

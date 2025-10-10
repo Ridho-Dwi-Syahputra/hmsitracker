@@ -472,10 +472,12 @@ exports.getEditLaporan = async (req, res) => {
     if (!rows.length) return res.status(404).send("Laporan tidak ditemukan");
 
     const laporan = rows[0];
+
+    // 🔒 Batasi akses HMSI hanya untuk divisi sendiri
     if (user.role === "HMSI" && laporan.id_divisi !== user.id_divisi)
       return res.status(403).send("Tidak boleh edit laporan divisi lain");
 
-    // 🔹 Dropdown: ambil program kerja dari divisi aktif (sinkron dengan getFormLaporan)
+    // 🔹 Ambil daftar program kerja milik divisi HMSI
     const [programs] = await db.query(
       `
       SELECT id_ProgramKerja AS id, Nama_ProgramKerja AS namaProker
@@ -486,23 +488,33 @@ exports.getEditLaporan = async (req, res) => {
       [user.id_divisi]
     );
 
-    // 🔹 Tambah properti untuk preview file lama (jika ada)
+    // 🔹 Siapkan data preview file dokumentasi
     laporan.dokumentasi_mime = getMimeFromFile(laporan.dokumentasi);
-    if (laporan.dokumentasi) {
-      laporan.filePreview = `/uploads/${laporan.dokumentasi}`; // untuk <img> / <a> preview di EJS
-    } else {
-      laporan.filePreview = null;
-    }
+    laporan.filePreview = laporan.dokumentasi
+      ? `/uploads/${laporan.dokumentasi}`
+      : null;
 
-    const redirectTarget = laporan.status_konfirmasi
-      ? "/hmsi/evaluasi"
-      : "/hmsi/laporan";
+    // ✅ Tentukan activeNav berdasarkan status evaluasi
+    // Jika status Revisi / Disetujui → sub menu “Telah Dievaluasi”
+    // Jika belum dievaluasi → sub menu “Belum Dievaluasi”
+    const activeNav =
+      laporan.status_konfirmasi === "Revisi" ||
+      laporan.status_konfirmasi === "Disetujui"
+        ? "kelolaEvaluasi"
+        : "laporan";
 
-    // 🔹 Render ke form edit
-    res.render("hmsi/editLaporan", {
+    // 🔹 Tentukan target redirect setelah edit selesai
+    const redirectTarget =
+      laporan.status_konfirmasi === "Revisi" ||
+      laporan.status_konfirmasi === "Disetujui"
+        ? "/hmsi/kelola-evaluasi"
+        : "/hmsi/laporan";
+
+    // 🔹 Render halaman edit laporan
+    res.render("HMSI/editLaporan", {
       title: "Edit Laporan",
       user,
-      activeNav: "Laporan",
+      activeNav,
       laporan,
       programs,
       redirectTarget,
@@ -514,6 +526,7 @@ exports.getEditLaporan = async (req, res) => {
     res.status(500).send("Gagal membuka form edit laporan");
   }
 };
+
 
 
 // =====================================================

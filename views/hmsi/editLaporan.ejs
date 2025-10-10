@@ -16,8 +16,13 @@
   <!-- Navbar -->
   <%- include('../partials/navbarHMSI', { user: user, unreadCount: unreadCount }) %>
 
-  <!-- Sidebar -->
-  <%- include('../partials/sidebarHMSI', { activeNav: 'Laporan', user: user }) %>
+  <%- include('../partials/sidebarHMSI', { 
+    activeNav: laporan.status_konfirmasi === 'Revisi' || laporan.status_konfirmasi === 'Disetujui' 
+      ? 'kelolaEvaluasi' 
+      : 'laporan',
+    user: user 
+  }) %>
+  
 
   <main class="lg:ml-80 px-6 pt-20 pb-8 flex-grow">
     <div class="max-w-5xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-200">
