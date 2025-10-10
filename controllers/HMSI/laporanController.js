@@ -441,8 +441,8 @@ exports.getDetailLaporan = async (req, res) => {
       user,
       activeNav: "Laporan",
       laporan,
-      errorMsg: null,
-      successMsg: null,
+      errorMsg: req.query.error || null,
+      successMsg: req.query.success || null,
     });
   } catch (err) {
     console.error("❌ getDetailLaporan error:", err.message);
@@ -517,7 +517,7 @@ exports.getEditLaporan = async (req, res) => {
 
 
 // =====================================================
-// 💾 Update laporan (revisi ringan + dukungan AJAX, logika lama dipertahankan)
+// 💾 Update laporan + keuangan
 // =====================================================
 exports.updateLaporan = async (req, res) => {
   let connection;
@@ -687,7 +687,7 @@ exports.updateLaporan = async (req, res) => {
 };
 
 // =====================================================
-// ❌ Hapus laporan
+// ❌ Hapus laporan (DENGAN VALIDASI APPROVAL)
 // =====================================================
 exports.deleteLaporan = async (req, res) => {
   let connection;

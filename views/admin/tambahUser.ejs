@@ -4,7 +4,9 @@
   <meta charset="UTF-8">
   <title><%= title %></title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://kit.fontawesome.com/your-fa-kit.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body class="bg-orange-50 min-h-screen flex flex-col">
 
@@ -13,6 +15,65 @@
 
   <!-- Sidebar -->
   <%- include('../partials/sidebarAdmin', { activeNav: 'users', user: user }) %>
+
+  <!-- Validation Modal -->
+  <div id="validationModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="validationModalContent">
+      <div class="text-center">
+        <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+          </svg>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 mb-2">Data Tidak Lengkap!</h3>
+        <p id="validationMessage" class="text-gray-600 mb-6">Mohon lengkapi semua field yang wajib diisi.</p>
+        <button id="closeValidationModal" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-3 px-6 rounded-xl transition-colors duration-200">
+          Mengerti
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirmation Modal -->
+  <div id="confirmationModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="confirmationModalContent">
+      <div class="text-center">
+        <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 mb-2">Konfirmasi</h3>
+        <p class="text-gray-600 mb-6">Apakah Anda yakin ingin menambahkan user ini?</p>
+        <div class="flex gap-3">
+          <button id="cancelConfirmation" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-3 px-6 rounded-xl transition-colors duration-200">
+            Batal
+          </button>
+          <button id="confirmSubmit" class="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-medium py-3 px-6 rounded-xl transition-colors duration-200">
+            Ya, Tambahkan
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Modal -->
+  <div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="successModalContent">
+      <div class="text-center">
+        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 mb-2">Berhasil!</h3>
+        <p class="text-gray-600 mb-6">User berhasil ditambahkan ke sistem.</p>
+        <button id="closeSuccessModal" class="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-3 px-6 rounded-xl transition-colors duration-200">
+          OK
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- Wrapper -->
   <main class="lg:ml-80 px-6 pt-20 pb-8 flex-grow">
@@ -30,7 +91,7 @@
         <%- include('../partials/alert', { errorMsg: errorMsg, successMsg: successMsg }) %>
 
         <!-- Form -->
-        <form action="/admin/user/tambah" method="POST" class="space-y-10">
+        <form id="tambahUserForm" action="/admin/user/tambah" method="POST" class="space-y-10">
 
           <!-- Informasi Dasar -->
           <div>
@@ -42,37 +103,41 @@
                 <label class="block text-sm font-medium text-orange-700 mb-2">
                   NIM <span class="text-red-500">*</span>
                 </label>
-                <input type="text" name="id_anggota" value="<%= old?.id_anggota || '' %>" required
+                <input type="text" name="id_anggota" id="id_anggota" value="<%= old?.id_anggota || '' %>" required
                   placeholder="Masukkan NIM"
                   class="w-full px-4 py-3 border border-orange-200 rounded-lg text-sm 
                          focus:border-orange-500 focus:ring-2 focus:ring-orange-200">
+                <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
               </div>
 
               <!-- Nama -->
               <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
                 <label class="block text-sm font-medium text-orange-700 mb-2">Nama Lengkap <span class="text-red-500">*</span></label>
-                <input type="text" name="nama" value="<%= old?.nama || '' %>" required
+                <input type="text" name="nama" id="nama" value="<%= old?.nama || '' %>" required
                   placeholder="Masukkan nama lengkap"
                   class="w-full px-4 py-3 border border-orange-200 rounded-lg text-sm 
                          focus:border-orange-500 focus:ring-2 focus:ring-orange-200">
+                <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
               </div>
 
               <!-- Email -->
               <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
                 <label class="block text-sm font-medium text-orange-700 mb-2">Email <span class="text-red-500">*</span></label>
-                <input type="email" name="email" value="<%= old?.email || '' %>" required
+                <input type="email" name="email" id="email" value="<%= old?.email || '' %>" required
                   placeholder="Masukkan email user"
                   class="w-full px-4 py-3 border border-orange-200 rounded-lg text-sm 
                          focus:border-orange-500 focus:ring-2 focus:ring-orange-200">
+                <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
               </div>
 
               <!-- Password -->
               <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
                 <label class="block text-sm font-medium text-orange-700 mb-2">Password <span class="text-red-500">*</span></label>
-                <input type="password" name="password" required
+                <input type="password" name="password" id="password" required
                   placeholder="Masukkan password"
                   class="w-full px-4 py-3 border border-orange-200 rounded-lg text-sm 
                          focus:border-orange-500 focus:ring-2 focus:ring-orange-200">
+                <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
               </div>
 
             </div>
@@ -101,6 +166,7 @@
                   </ul>
                 </div>
                 <input type="hidden" name="role" id="roleInput" value="<%= old?.role || '' %>">
+                <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
               </div>
 
               <!-- Divisi Dropdown (khusus HMSI) -->
@@ -162,6 +228,131 @@
 
   <!-- Script -->
   <script>
+    // ====== MODAL FUNCTIONS ======
+    function showModal(modalId) {
+      const modal = document.getElementById(modalId);
+      const content = document.getElementById(modalId + 'Content');
+      
+      if (!modal || !content) {
+        console.error('Modal elements not found:', modalId);
+        return;
+      }
+      
+      modal.classList.remove('hidden');
+      
+      setTimeout(() => {
+        content.classList.remove('scale-95', 'opacity-0');
+        content.classList.add('scale-100', 'opacity-100');
+      }, 10);
+    }
+
+    function hideModal(modalId) {
+      const modal = document.getElementById(modalId);
+      const content = document.getElementById(modalId + 'Content');
+      
+      if (!modal || !content) return;
+      
+      content.classList.remove('scale-100', 'opacity-100');
+      content.classList.add('scale-95', 'opacity-0');
+      
+      setTimeout(() => {
+        modal.classList.add('hidden');
+      }, 300);
+    }
+
+    // ====== VALIDATION FUNCTIONS ======
+    function validateField(field) {
+      const errorDiv = field.closest('.bg-orange-50')?.querySelector('.error-message');
+      
+      if (!errorDiv) return true;
+
+      let isValid = true;
+      let errorMessage = '';
+
+      if (field.hasAttribute('required') && field.value.trim() === '') {
+        isValid = false;
+        errorMessage = 'Field ini wajib diisi';
+      }
+
+      if (field.type === 'email' && field.value.trim() !== '') {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(field.value)) {
+          isValid = false;
+          errorMessage = 'Format email tidak valid';
+        }
+      }
+
+      if (field.name === 'password' && field.value.trim() !== '' && field.value.length < 6) {
+        isValid = false;
+        errorMessage = 'Password minimal 6 karakter';
+      }
+
+      if (!isValid) {
+        errorDiv.textContent = errorMessage;
+        errorDiv.classList.remove('hidden');
+        field.classList.add('border-red-500');
+        field.classList.remove('border-orange-200');
+      } else {
+        errorDiv.classList.add('hidden');
+        field.classList.remove('border-red-500');
+        field.classList.add('border-orange-200');
+      }
+
+      return isValid;
+    }
+
+    function validateAllFields() {
+      let allValid = true;
+      let emptyFields = [];
+      
+      const requiredFields = [
+        { id: 'id_anggota', name: 'NIM' },
+        { id: 'nama', name: 'Nama Lengkap' },
+        { id: 'email', name: 'Email' },
+        { id: 'password', name: 'Password' },
+        { id: 'roleInput', name: 'Role' }
+      ];
+
+      requiredFields.forEach(fieldInfo => {
+        const field = document.getElementById(fieldInfo.id);
+        if (field) {
+          if (field.value.trim() === '') {
+            allValid = false;
+            emptyFields.push(fieldInfo.name);
+            validateField(field);
+          } else {
+            if (!validateField(field)) {
+              allValid = false;
+            }
+          }
+        }
+      });
+
+      const role = document.getElementById('roleInput').value;
+      if (role === 'HMSI') {
+        const divisiField = document.getElementById('divisiInput');
+        if (divisiField.value.trim() === '') {
+          allValid = false;
+          emptyFields.push('Divisi');
+        }
+      }
+
+      if (emptyFields.length > 0) {
+        let message = '';
+        if (emptyFields.length === 1) {
+          message = `Field "${emptyFields[0]}" wajib diisi.`;
+        } else if (emptyFields.length === 2) {
+          message = `Field "${emptyFields[0]}" dan "${emptyFields[1]}" wajib diisi.`;
+        } else if (emptyFields.length > 2) {
+          const lastField = emptyFields.pop();
+          message = `Field ${emptyFields.join(', ')}, dan ${lastField} wajib diisi.`;
+        }
+        document.getElementById('validationMessage').textContent = message;
+      }
+
+      return allValid;
+    }
+
     // ====== ROLE DROPDOWN ======
     const roleBtn = document.getElementById("roleDropdownBtn");
     const roleMenu = document.getElementById("roleDropdownMenu");
@@ -175,6 +366,7 @@
         roleInput.value = btn.dataset.value;
         roleLabel.textContent = btn.textContent;
         roleMenu.classList.add("hidden");
+        validateField(roleInput);
 
         if (btn.dataset.value === "HMSI") {
           divisiWrapper.classList.remove("hidden");
@@ -185,8 +377,11 @@
         }
       });
     });
+    
     window.addEventListener("click", (e) => {
-      if (!roleBtn.contains(e.target) && !roleMenu.contains(e.target)) roleMenu.classList.add("hidden");
+      if (!roleBtn.contains(e.target) && !roleMenu.contains(e.target)) {
+        roleMenu.classList.add("hidden");
+      }
     });
 
     // ====== DIVISI DROPDOWN ======
@@ -195,16 +390,98 @@
     const divisiInput = document.getElementById("divisiInput");
     const divisiLabel = document.getElementById("divisiDropdownLabel");
 
-    divisiBtn?.addEventListener("click", () => divisiMenu.classList.toggle("hidden"));
-    divisiMenu?.querySelectorAll("button").forEach(btn => {
-      btn.addEventListener("click", () => {
-        divisiInput.value = btn.dataset.id;
-        divisiLabel.textContent = btn.textContent;
+    if (divisiBtn) {
+      divisiBtn.addEventListener("click", () => divisiMenu.classList.toggle("hidden"));
+    }
+    
+    if (divisiMenu) {
+      divisiMenu.querySelectorAll("button").forEach(btn => {
+        btn.addEventListener("click", () => {
+          divisiInput.value = btn.dataset.id;
+          divisiLabel.textContent = btn.textContent;
+          divisiMenu.classList.add("hidden");
+        });
+      });
+    }
+    
+    window.addEventListener("click", (e) => {
+      if (divisiBtn && divisiMenu && !divisiBtn.contains(e.target) && !divisiMenu.contains(e.target)) {
         divisiMenu.classList.add("hidden");
+      }
+    });
+
+    // ====== REAL-TIME VALIDATION ======
+    document.querySelectorAll('input[required]').forEach(field => {
+      field.addEventListener('blur', () => validateField(field));
+      field.addEventListener('input', () => {
+        if (field.classList.contains('border-red-500')) {
+          validateField(field);
+        }
       });
     });
-    window.addEventListener("click", (e) => {
-      if (!divisiBtn?.contains(e.target) && !divisiMenu?.contains(e.target)) divisiMenu?.classList.add("hidden");
+
+    // ====== FORM SUBMISSION ======
+    const form = document.getElementById('tambahUserForm');
+    let isSubmitting = false;
+
+    form.addEventListener('submit', (e) => {
+      // Prevent default submission ALWAYS
+      e.preventDefault();
+      e.stopPropagation();
+      
+      // Prevent double submission
+      if (isSubmitting) {
+        return false;
+      }
+      
+      // Validate all fields first
+      if (!validateAllFields()) {
+        showModal('validationModal');
+        return false;
+      }
+
+      // If validation passes, show confirmation modal
+      showModal('confirmationModal');
+    });
+
+    // ====== MODAL EVENT LISTENERS ======
+    document.getElementById('closeValidationModal').addEventListener('click', () => {
+      hideModal('validationModal');
+    });
+
+    document.getElementById('cancelConfirmation').addEventListener('click', () => {
+      hideModal('confirmationModal');
+    });
+
+    document.getElementById('confirmSubmit').addEventListener('click', () => {
+      hideModal('confirmationModal');
+      
+      // Set flag to prevent re-submission
+      isSubmitting = true;
+      
+      // Submit the form
+      setTimeout(() => {
+        form.submit();
+      }, 300);
+    });
+
+    document.getElementById('closeSuccessModal').addEventListener('click', () => {
+      window.location.href = '/admin/kelola-user';
+    });
+
+    // ====== CHECK SUCCESS PARAMETER ======
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const success = urlParams.get('success');
+      
+      console.log('Page loaded, checking success parameter:', success);
+      
+      if (success === 'true') {
+        console.log('Success parameter is true, showing modal...');
+        setTimeout(() => {
+          showModal('successModal');
+        }, 100);
+      }
     });
   </script>
 </body>

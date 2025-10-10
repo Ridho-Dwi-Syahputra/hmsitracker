@@ -1,46 +1,93 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <title>Dashboard Admin</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet"
+    <meta charset="UTF-8">
+    <title>Dashboard Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
         crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body class="bg-orange-50 min-h-screen flex flex-col">
 
-  <!-- ✅ Navbar Admin -->
-  <%- include('../partials/navbarAdmin', { user: user }) %>
+    <%- include('../partials/navbarAdmin', { user: user }) %>
 
-  <!-- ✅ Sidebar Admin -->
-  <%- include('../partials/sidebarAdmin', { user: user, activeNav: activeNav }) %>
+    <%- include('../partials/sidebarAdmin', { user: user, activeNav: activeNav }) %>
 
-  <!-- Wrapper -->
-  <main class="lg:ml-72 px-6 pt-20 pb-8 flex-grow">
-    <div class="max-w-4xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-orange-200">
+    <main class="lg:ml-72 px-6 pt-20 pb-8 flex-grow">
 
-      <!-- Header Card -->
-      <div class="bg-orange-500 text-white px-6 py-6">
-        <h1 class="text-2xl font-bold">Dashboard Admin</h1>
-        <p class="text-sm text-orange-100">Ringkasan informasi sistem HMSI</p>
-      </div>
+        <div class="max-w-4xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-orange-200 mb-8">
+            <div class="bg-orange-500 text-white px-6 py-8 flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold mb-2">Selamat Datang, <%= user.name || user.nama %> 👋</h1>
+                    <p class="text-orange-100 text-lg">Dashboard Admin - Ringkasan informasi sistem HMSI</p>
+                </div>
+                <div class="hidden md:block">
+                    <i class="fa-solid fa-chart-bar text-6xl text-orange-200"></i>
+                </div>
+            </div>
+        </div>
 
-      <!-- Body Card -->
-      <div class="p-6 sm:p-8 text-center">
-        <h2 class="text-3xl font-bold text-orange-600 mb-4">
-          Selamat Datang, <%= user.name || user.nama %> 👋
-        </h2>
-        <p class="text-gray-600">
-          Anda login sebagai <span class="font-semibold">Administrator</span>.
-        </p>
-      </div>
 
-    </div>
-  </main>
+        <div class="max-w-4xl mx-auto mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-  <!-- ✅ Footer -->
-  <%- include('../partials/footer') %>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-orange-200">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600 mb-1">Total User Terdaftar</p>
+                            <p class="text-3xl font-bold text-gray-800"><%= dashboardData.totalUsers %></p>
+                        </div>
+                        <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                            <i class="fa-solid fa-users text-blue-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-orange-200">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600 mb-1">Total Divisi Aktif</p>
+                            <p class="text-3xl font-bold text-green-600"><%= dashboardData.totalDivisi %></p>
+                        </div>
+                        <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                            <i class="fa-solid fa-sitemap text-green-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="max-w-4xl mx-auto">
+            <div class="bg-white rounded-2xl border border-orange-200 shadow-sm p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <i class="fa-solid fa-bolt text-orange-500 mr-2"></i>
+                    Aksi Cepat
+                </h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <a href="/admin/kelola-user" class="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition">
+                        <i class="fa-solid fa-user-gear text-blue-500"></i>
+                        <span class="text-sm font-medium text-gray-700">Kelola User</span>
+                    </a>
+                    <a href="/admin/keuangan" class="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:border-green-300 hover:bg-green-50 transition">
+                        <i class="fa-solid fa-wallet text-green-500"></i>
+                        <span class="text-sm font-medium text-gray-700">Kelola Kas</span>
+                    </a>
+                    <a href="/admin/user/tambah" class="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:border-orange-300 hover:bg-orange-50 transition">
+                        <i class="fa-solid fa-user-plus text-orange-500"></i>
+                        <span class="text-sm font-medium text-gray-700">Tambah User Baru</span>
+                    </a>
+                    <a href="/admin/profile/edit" class="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition">
+                        <i class="fa-solid fa-user-edit text-purple-500"></i>
+                        <span class="text-sm font-medium text-gray-700">Edit Profil Anda</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <%- include('../partials/footer') %>
 
 </body>
 </html>
