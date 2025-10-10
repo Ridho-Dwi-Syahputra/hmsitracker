@@ -16,6 +16,7 @@ const keuanganController = require("../../controllers/admin/keuanganController")
 const profileController = require("../../controllers/admin/profileController");
 const userController = require("../../controllers/admin/userController");
 const divisiController = require("../../controllers/admin/divisiController");
+const adminDashboardController = require("../../controllers/admin/adminDashboardController"); // 🆕 Ditambahkan kembali
 
 // =====================================================
 // 🏠 Dashboard Admin
