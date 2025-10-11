@@ -26,11 +26,7 @@
           <h1 class="text-2xl font-bold">Detail Laporan</h1>
           <p class="text-sm text-orange-100">Informasi lengkap laporan kegiatan HMSI</p>
         </div>
-        <a href="/dpa/kelolaLaporan"
-          class="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-all">
-          <i class="fa-solid fa-arrow-left text-sm"></i>
-          <span class="font-medium">Kembali</span>
-        </a>
+        
       </div>
 
       <!-- Body -->
@@ -118,15 +114,17 @@
           <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
             <% if (laporan.dokumentasi) { %>
               <div class="bg-white border border-gray-200 p-3 rounded-lg">
-                <% if (laporan.dokumentasi_mime === 'application/pdf') { %>
-                  <embed src="/uploads/<%= laporan.dokumentasi %>" type="application/pdf" width="100%" height="500px"/>
-                <% } else { %>
-                  <img src="/uploads/<%= laporan.dokumentasi %>" class="w-full max-h-96 object-contain rounded-lg" alt="Dokumentasi"/>
-                <% } %>
-                <a href="/uploads/<%= laporan.dokumentasi %>" target="_blank"
-                  class="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition">
-                  <i class="fa-solid fa-download"></i> Download Dokumentasi
-                </a>
+                <% const filePath = `/uploads/laporan/${laporan.dokumentasi}`; %>
+<% if (laporan.dokumentasi_mime === 'application/pdf') { %>
+  <embed src="<%= filePath %>" type="application/pdf" width="100%" height="500px"/>
+<% } else { %>
+  <img src="<%= filePath %>" class="w-full max-h-96 object-contain rounded-lg" alt="Dokumentasi"/>
+<% } %>
+<a href="<%= filePath %>" target="_blank"
+  class="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition">
+  <i class="fa-solid fa-download"></i> Download Dokumentasi
+</a>
+
               </div>
             <% } else { %>
               <div class="bg-white border border-gray-200 p-3 rounded-lg">
@@ -238,15 +236,22 @@
   <% } %>
 </section>
 
-        <!-- Tombol Evaluasi (Conditional) -->
-        <% if (!evaluasi || evaluasi.status_konfirmasi !== 'Selesai') { %>
-          <div class="flex justify-end">
-            <a href="/dpa/kelolaLaporan/<%= laporan.id_laporan %>/evaluasi"
-              class="inline-flex items-center gap-2 px-6 py-3 bg-orange-500 text-white rounded-xl text-sm font-semibold hover:bg-orange-600 transition transform hover:scale-105">
-              <i class="fa-solid fa-edit"></i> <%= evaluasi ? 'Edit Evaluasi' : 'Beri Evaluasi' %>
-            </a>
-          </div>
-        <% } %>
+<!-- ================= Tombol Aksi ================= -->
+<div class="pt-6 border-t flex gap-4 justify-end">
+  <a href="/dpa/kelolaLaporan"
+     class="px-8 py-3 border rounded-xl text-sm bg-white text-gray-700 hover:shadow-md transition">
+     Kembali
+  </a>
+
+  <% if (!evaluasi || evaluasi.status_konfirmasi !== 'Selesai') { %>
+    <a href="/dpa/kelolaLaporan/<%= laporan.id_laporan %>/evaluasi"
+       class="flex items-center gap-2 px-8 py-3 text-white bg-orange-500 rounded-xl text-sm font-semibold hover:bg-orange-600 transition transform hover:scale-105 active:scale-95">
+      <i class="fa-solid fa-edit"></i>
+      <span><%= evaluasi ? 'Edit Evaluasi' : 'Beri Evaluasi' %></span>
+    </a>
+  <% } %>
+</div>
+
 
       </div>
     </div>

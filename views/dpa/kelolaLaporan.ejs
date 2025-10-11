@@ -16,17 +16,14 @@
     .table-fixed th:nth-child(5) { width: 12%; }
     .table-fixed th:nth-child(6) { width: 13%; }
     .table-fixed th:nth-child(7) { width: 80px; }
-    .text-ellipsis {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
+    .text-ellipsis { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
+
   <!-- Navbar -->
   <%- include('../partials/navbarDPA', { user: user, unreadCount: unreadCount }) %>
-  
+
   <!-- Sidebar -->
   <%- include('../partials/sidebarDPA', { activeNav: 'Daftar Laporan', user: user }) %>
 
@@ -42,7 +39,8 @@
 
       <!-- Isi Konten -->
       <div class="p-6">
-        <!-- Search & Filter -->
+
+        <!-- ==================== Search & Filter ==================== -->
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6 flex-wrap">
 
           <!-- Search -->
@@ -75,7 +73,7 @@
             </div>
           </div>
 
-          <!-- Filter Divisi (Dynamic) -->
+          <!-- Filter Divisi -->
           <div class="relative">
             <button id="divisiDropdownBtn"
               class="flex items-center justify-between gap-2 px-4 py-3 border border-gray-300 rounded-xl text-sm bg-white
@@ -87,26 +85,18 @@
               class="hidden absolute right-0 mt-2 w-48 bg-white border border-orange-200 rounded-lg shadow-lg z-10">
               <ul class="text-sm text-gray-700">
                 <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="all">Semua Divisi</button></li>
-                <% 
-                  const uniqueDivisi = [...new Set(laporan.map(l => l.divisi).filter(Boolean))];
-                  if (uniqueDivisi.length > 0) {
-                    uniqueDivisi.forEach(div => { 
+                <%
+                  const uniqueDivisi = [...new Set(laporan.map(l => l.divisi).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+                  uniqueDivisi.forEach(div => {
                 %>
-                  <li>
-                    <button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="<%= div %>"><%= div %></button>
-                  </li>
-                <% 
-                    });
-                  } else { 
-                %>
-                  <li><span class="block px-4 py-2 text-gray-400 italic">Tidak ada data divisi</span></li>
-                <% } %>
+                  <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="<%= div %>"><%= div %></button></li>
+                <% }); %>
               </ul>
             </div>
           </div>
 
-          <!-- Filter Program Kerja (Dynamic) -->
-          <div class="relative">
+          <!-- Filter Program Kerja (dinamis, awalnya tersembunyi) -->
+          <div class="relative hidden" id="prokerFilterContainer">
             <button id="prokerDropdownBtn"
               class="flex items-center justify-between gap-2 px-4 py-3 border border-gray-300 rounded-xl text-sm bg-white
                      hover:border-orange-500 hover:shadow-md focus:ring-2 focus:ring-orange-500 transition-all duration-200">
@@ -115,29 +105,16 @@
             </button>
             <div id="prokerDropdownMenu"
               class="hidden absolute right-0 mt-2 w-60 bg-white border border-orange-200 rounded-lg shadow-lg z-10 max-h-60 overflow-y-auto">
-              <ul class="text-sm text-gray-700">
-                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="all">Semua Program Kerja</button></li>
-                <% 
-                  const uniqueProker = [...new Set(laporan.map(l => l.namaProker).filter(Boolean))];
-                  if (uniqueProker.length > 0) {
-                    uniqueProker.forEach(proker => { 
-                %>
-                  <li>
-                    <button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="<%= proker %>"><%= proker %></button>
-                  </li>
-                <% 
-                    });
-                  } else { 
-                %>
-                  <li><span class="block px-4 py-2 text-gray-400 italic">Tidak ada data program kerja</span></li>
-                <% } %>
+              <ul id="prokerList" class="text-sm text-gray-700">
+                <li><span class="block px-4 py-2 text-gray-400 italic">Pilih divisi terlebih dahulu</span></li>
               </ul>
             </div>
           </div>
+
         </div>
 
+        <!-- ==================== Tabel Data ==================== -->
         <% if (!laporan || laporan.length === 0) { %>
-          <!-- Empty State -->
           <div class="flex flex-col items-center space-y-4 py-20">
             <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
               <i class="fa-solid fa-folder-open text-2xl text-gray-400"></i>
@@ -148,7 +125,6 @@
             </div>
           </div>
         <% } else { %>
-          <!-- Tabel -->
           <div class="overflow-x-auto p-2 shadow-sm rounded-xl">
             <table class="min-w-full text-sm text-center border border-orange-200 rounded-xl overflow-hidden border-separate border-spacing-0 divide-x divide-gray-200 table-fixed">
               <thead class="bg-orange-100 text-gray-700">
@@ -164,17 +140,17 @@
               </thead>
               <tbody id="laporanTable">
                 <% laporan.forEach(function(l, i) { %>
-                  <tr class="hover:bg-orange-50 transition">
+                  <tr class="hover:bg-orange-50 transition"
+                      data-divisi="<%= l.divisi || '' %>"
+                      data-proker="<%= l.namaProker || '' %>">
                     <td class="py-3 px-4 border border-orange-100"><%= i + 1 %></td>
                     <td class="py-3 px-4 font-medium text-gray-800 border border-orange-100 text-left">
                       <div class="text-ellipsis" title="<%= l.judul_laporan %>"><%= l.judul_laporan %></div>
                     </td>
-                    <td class="py-3 px-4 text-gray-600 border border-orange-100" data-col="proker">
-                      <div class="text-ellipsis" title="<%= l.namaProker || '-' %>"><%= l.namaProker || '-' %></div>
-                    </td>
-                    <td class="py-3 px-4 text-gray-600 border border-orange-100" data-col="divisi"><%= l.divisi || '-' %></td>
+                    <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= l.namaProker || '-' %></td>
+                    <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= l.divisi || '-' %></td>
                     <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= l.tanggalFormatted %></td>
-                    <td class="py-3 px-4 border border-orange-100" data-col="status">
+                    <td class="py-3 px-4 border border-orange-100">
                       <% if (l.status === "Revisi") { %>
                         <span class="px-3 py-1 bg-red-100 text-red-700 rounded-lg text-xs font-semibold whitespace-nowrap">Revisi</span>
                       <% } else if (l.status === "Disetujui") { %>
@@ -208,6 +184,7 @@
     </div>
   </div>
 
+  <!-- ==================== SCRIPT ==================== -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const searchInput = document.getElementById("searchInput");
@@ -222,9 +199,13 @@
       const prokerBtn = document.getElementById("prokerDropdownBtn");
       const prokerMenu = document.getElementById("prokerDropdownMenu");
       const prokerLabel = document.getElementById("prokerDropdownLabel");
+      const prokerFilterContainer = document.getElementById("prokerFilterContainer");
+      const prokerList = document.getElementById("prokerList");
+
       const rowsPerPage = 10;
       let currentPage = 1;
 
+      // Tutup dropdown ketika klik di luar
       document.addEventListener("click", (e) => {
         if (!statusBtn.contains(e.target)) statusMenu.classList.add("hidden");
         if (!divisiBtn.contains(e.target)) divisiMenu.classList.add("hidden");
@@ -240,20 +221,58 @@
         });
       });
 
-      [statusMenu, divisiMenu, prokerMenu].forEach(menu => {
-        menu.querySelectorAll("button").forEach(btn => {
-          btn.addEventListener("click", () => {
-            const label = menu.previousElementSibling.querySelector("span");
-            label.textContent = btn.dataset.value === "all" ? 
-              (menu.id.includes("status") ? "Semua Status" : menu.id.includes("divisi") ? "Semua Divisi" : "Semua Program Kerja") 
-              : btn.dataset.value;
-            menu.classList.add("hidden");
-            currentPage = 1;
-            filterRows();
-          });
+      // ==================== MAP DIVISI -> PROKER ====================
+      const divisiToProker = {};
+      rows.forEach(row => {
+        const div = row.dataset.divisi;
+        const prok = row.dataset.proker;
+        if (!div || !prok) return;
+        if (!divisiToProker[div]) divisiToProker[div] = new Set();
+        divisiToProker[div].add(prok);
+      });
+
+      // ==================== Dropdown Status ====================
+      statusMenu.querySelectorAll("button").forEach(btn => {
+        btn.addEventListener("click", () => {
+          statusLabel.textContent = btn.dataset.value === "all" ? "Semua Status" : btn.dataset.value;
+          statusMenu.classList.add("hidden");
+          currentPage = 1;
+          filterRows();
         });
       });
 
+      // ==================== Dropdown Divisi + Proker Dinamis ====================
+      divisiMenu.querySelectorAll("button").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const selectedDiv = btn.dataset.value;
+          divisiLabel.textContent = selectedDiv === "all" ? "Semua Divisi" : selectedDiv;
+          divisiMenu.classList.add("hidden");
+          currentPage = 1;
+
+          // tampilkan / isi filter program kerja
+          if (selectedDiv !== "all" && divisiToProker[selectedDiv]) {
+            prokerFilterContainer.classList.remove("hidden");
+            const prokerArr = Array.from(divisiToProker[selectedDiv]).sort((a,b)=>a.localeCompare(b));
+            prokerList.innerHTML = `
+              <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="all">Semua Program Kerja</button></li>
+              ${prokerArr.map(p=>`<li><button class='w-full text-left px-4 py-2 hover:bg-orange-100' data-value='${p}'>${p}</button></li>`).join("")}
+            `;
+            prokerList.querySelectorAll("button").forEach(b=>{
+              b.addEventListener("click", ()=>{
+                prokerLabel.textContent = b.dataset.value === "all" ? "Semua Program Kerja" : b.dataset.value;
+                prokerMenu.classList.add("hidden");
+                filterRows();
+              });
+            });
+          } else {
+            prokerFilterContainer.classList.add("hidden");
+            prokerLabel.textContent = "Semua Program Kerja";
+          }
+          filterRows();
+        });
+      });
+
+      // ==================== FILTERING LOGIC ====================
       function filterRows() {
         const searchValue = searchInput.value.toLowerCase();
         const selectedStatus = statusLabel.textContent.trim();
@@ -263,29 +282,28 @@
         rows.forEach(row => {
           const judul = row.cells[1]?.innerText.toLowerCase() || "";
           const program = row.cells[2]?.innerText.trim() || "";
-          const status = row.querySelector("td[data-col='status']")?.innerText.trim() || "";
-          const divisi = row.querySelector("td[data-col='divisi']")?.innerText.trim() || "";
+          const status = row.cells[5]?.innerText.trim() || "";
+          const divisi = row.cells[3]?.innerText.trim() || "";
 
-          let matchSearch = judul.includes(searchValue) || program.toLowerCase().includes(searchValue);
-          let matchStatus = selectedStatus === "Semua Status" || status === selectedStatus;
-          let matchDivisi = selectedDivisi === "Semua Divisi" || divisi === selectedDivisi;
-          let matchProker = selectedProker === "Semua Program Kerja" || program === selectedProker;
+          const matchSearch = judul.includes(searchValue) || program.toLowerCase().includes(searchValue);
+          const matchStatus = selectedStatus === "Semua Status" || status === selectedStatus;
+          const matchDivisi = selectedDivisi === "Semua Divisi" || divisi === selectedDivisi;
+          const matchProker = selectedProker === "Semua Program Kerja" || program === selectedProker;
 
           row.dataset.visible = (matchSearch && matchStatus && matchDivisi && matchProker) ? "true" : "false";
         });
         paginate();
       }
 
+      // ==================== PAGINATION ====================
       function paginate() {
-        let visibleRows = rows.filter(row => row.dataset.visible !== "false");
-        let totalPages = Math.ceil(visibleRows.length / rowsPerPage);
+        const visibleRows = rows.filter(r => r.dataset.visible !== "false");
+        const totalPages = Math.ceil(visibleRows.length / rowsPerPage);
         if (currentPage > totalPages) currentPage = totalPages || 1;
 
-        rows.forEach(row => row.style.display = "none");
-        visibleRows.forEach((row, index) => {
-          if (index >= (currentPage-1)*rowsPerPage && index < currentPage*rowsPerPage) {
-            row.style.display = "";
-          }
+        rows.forEach(r => r.style.display = "none");
+        visibleRows.forEach((r, i) => {
+          if (i >= (currentPage-1)*rowsPerPage && i < currentPage*rowsPerPage) r.style.display = "";
         });
 
         document.getElementById("pageInfo").textContent = `Halaman ${currentPage} dari ${totalPages || 1}`;
@@ -296,12 +314,12 @@
       searchInput.addEventListener("input", () => { currentPage = 1; filterRows(); });
       document.getElementById("prevPage").addEventListener("click", () => { if (currentPage > 1) { currentPage--; paginate(); } });
       document.getElementById("nextPage").addEventListener("click", () => {
-        let visibleRows = rows.filter(row => row.dataset.visible !== "false");
-        let totalPages = Math.ceil(visibleRows.length / rowsPerPage);
+        const visibleRows = rows.filter(r => r.dataset.visible !== "false");
+        const totalPages = Math.ceil(visibleRows.length / rowsPerPage);
         if (currentPage < totalPages) { currentPage++; paginate(); }
       });
 
-      rows.forEach(row => row.dataset.visible = "true");
+      rows.forEach(r => r.dataset.visible = "true");
       paginate();
     });
   </script>

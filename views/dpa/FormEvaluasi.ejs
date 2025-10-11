@@ -202,26 +202,29 @@
         </div>
 
         <!-- Preview Dokumentasi -->
+<div>
+  <h4 class="text-lg font-semibold text-orange-600 mb-4">Preview Dokumentasi</h4>
+  <% if (laporan.dokumentasi) { 
+       const filePath = `/uploads/laporan/${laporan.dokumentasi}`;
+  %>
+    <% if (laporan.dokumentasi_mime === 'application/pdf') { %>
+      <embed src="<%= filePath %>" type="application/pdf" width="100%" height="420px" class="rounded-lg border"/>
+    <% } else if (laporan.dokumentasi_mime && laporan.dokumentasi_mime.startsWith('image/')) { %>
+      <img src="<%= filePath %>" alt="Dokumentasi" class="w-full max-h-96 object-contain rounded-lg border shadow"/>
+    <% } else { %>
+      <div class="p-4 bg-gray-50 border rounded-lg flex items-center justify-between">
         <div>
-          <h4 class="text-lg font-semibold text-orange-600 mb-4">Preview Dokumentasi</h4>
-          <% if (laporan.dokumentasi) { %>
-            <% if (laporan.dokumentasi_mime === 'application/pdf') { %>
-              <embed src="/uploads/<%= laporan.dokumentasi %>" type="application/pdf" width="100%" height="420px" class="rounded-lg border"/>
-            <% } else if (laporan.dokumentasi_mime.startsWith('image/')) { %>
-              <img src="/uploads/<%= laporan.dokumentasi %>" alt="Dokumentasi" class="w-full max-h-96 object-contain rounded-lg border shadow"/>
-            <% } else { %>
-              <div class="p-4 bg-gray-50 border rounded-lg flex items-center justify-between">
-                <div>
-                  <p class="font-medium"><%= laporan.dokumentasi %></p>
-                  <p class="text-xs text-gray-500">Tipe file tidak dapat dipreview, silakan unduh.</p>
-                </div>
-                <a href="/uploads/<%= laporan.dokumentasi %>" class="px-3 py-2 bg-orange-100 text-orange-700 rounded-lg text-sm font-medium">Download</a>
-              </div>
-            <% } %>
-          <% } else { %>
-            <p class="text-gray-500 text-sm">Tidak ada dokumentasi diunggah.</p>
-          <% } %>
+          <p class="font-medium"><%= laporan.dokumentasi %></p>
+          <p class="text-xs text-gray-500">Tipe file tidak dapat dipreview, silakan unduh.</p>
         </div>
+        <a href="<%= filePath %>" class="px-3 py-2 bg-orange-100 text-orange-700 rounded-lg text-sm font-medium">Download</a>
+      </div>
+    <% } %>
+  <% } else { %>
+    <p class="text-gray-500 text-sm">Tidak ada dokumentasi diunggah.</p>
+  <% } %>
+</div>
+
 
         <!-- Komentar HMSI -->
         <% if (laporan.komentar_hmsi) { %>

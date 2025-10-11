@@ -1,5 +1,5 @@
 // =====================================================
-// controllers/HMSI/profileController.js
+// controllers/hmsi/profileController.js
 // Controller untuk Profil HMSI (lihat & edit profil)
 // =====================================================
 

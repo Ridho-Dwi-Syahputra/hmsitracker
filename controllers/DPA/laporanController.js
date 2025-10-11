@@ -39,18 +39,23 @@ exports.getAllLaporanDPA = async (req, res) => {
   try {
     const [rows] = await db.query(`
       SELECT 
-        l.*, 
+        l.id_laporan,
+        l.judul_laporan,
+        l.tanggal,
+        l.id_ProgramKerja,
+        l.id_divisi,
         p.Nama_ProgramKerja AS namaProker,
-        d.nama_divisi AS namaDivisi,
+        d.nama_divisi AS nama_divisi,
         e.status_konfirmasi
       FROM Laporan l
       LEFT JOIN Program_kerja p ON l.id_ProgramKerja = p.id_ProgramKerja
-      LEFT JOIN Evaluasi e ON e.id_laporan = l.id_laporan
       LEFT JOIN Divisi d ON l.id_divisi = d.id_divisi
+      LEFT JOIN Evaluasi e ON e.id_laporan = l.id_laporan
       ORDER BY l.tanggal DESC
     `);
 
     const laporan = rows.map((r) => {
+      // Format tanggal
       let tanggalFormatted = "-";
       if (r.tanggal && r.tanggal !== "0000-00-00") {
         const d = new Date(r.tanggal);
@@ -63,11 +68,22 @@ exports.getAllLaporanDPA = async (req, res) => {
         }
       }
 
+      // Status
       let status = "Belum Dievaluasi";
       if (r.status_konfirmasi === "Revisi") status = "Revisi";
       else if (r.status_konfirmasi === "Selesai") status = "Disetujui";
 
-      return { ...r, tanggalFormatted, status };
+      // Divisi sinkron
+      const divisi = r.nama_divisi || "Tidak Diketahui";
+
+      return {
+        id_laporan: r.id_laporan,
+        judul_laporan: r.judul_laporan,
+        namaProker: r.namaProker || "-",
+        divisi,
+        tanggalFormatted,
+        status,
+      };
     });
 
     res.render("dpa/kelolaLaporan", {
@@ -89,49 +105,66 @@ exports.getAllLaporanDPA = async (req, res) => {
 // =====================================================
 exports.getDetailLaporanDPA = async (req, res) => {
   try {
+    const idLaporan = req.params.id;
+
+    // ====== Ambil detail laporan utama + nama divisi + nama program kerja ======
     const [rows] = await db.query(`
       SELECT 
         l.*, 
         p.Nama_ProgramKerja AS namaProker,
-        d.nama_divisi AS namaDivisi,
+        d.nama_divisi AS nama_divisi,
         l.deskripsi_target_kuantitatif,
         l.deskripsi_target_kualitatif
       FROM Laporan l
       LEFT JOIN Program_kerja p ON l.id_ProgramKerja = p.id_ProgramKerja
       LEFT JOIN Divisi d ON l.id_divisi = d.id_divisi
       WHERE l.id_laporan = ?
-    `, [req.params.id]);
+    `, [idLaporan]);
 
     if (!rows.length) return res.status(404).send("Laporan tidak ditemukan");
     const laporan = rows[0];
 
-    // format tanggal
-    let tanggalFormatted = "-";
+    // ====== Format tanggal aman ======
+    laporan.tanggalFormatted = "-";
     if (laporan.tanggal && laporan.tanggal !== "0000-00-00") {
-      const d = new Date(laporan.tanggal);
-      if (!isNaN(d.getTime())) {
-        tanggalFormatted = d.toLocaleDateString("id-ID", {
+      const parsed = new Date(laporan.tanggal);
+      if (!isNaN(parsed.getTime())) {
+        laporan.tanggalFormatted = parsed.toLocaleDateString("id-ID", {
           day: "2-digit",
           month: "short",
           year: "numeric",
         });
       }
     }
-    laporan.tanggalFormatted = tanggalFormatted;
-    laporan.dokumentasi_mime = getMimeFromFile(laporan.dokumentasi);
 
-    // ambil evaluasi terbaru (termasuk komentar HMSI)
+    // ====== Pastikan nama divisi tampil ======
+    laporan.divisi = laporan.nama_divisi || "Tidak Diketahui";
+
+    // ====== Ambil evaluasi terbaru (termasuk komentar HMSI) ======
     const [evaluasiRows] = await db.query(`
-      SELECT e.*, u.nama AS namaEvaluator
+      SELECT 
+        e.*, 
+        u.nama AS namaEvaluator
       FROM Evaluasi e
       LEFT JOIN User u ON e.pemberi_evaluasi = u.id_anggota
       WHERE e.id_laporan = ?
       ORDER BY e.tanggal_evaluasi DESC
       LIMIT 1
-    `, [req.params.id]);
+    `, [idLaporan]);
 
     const evaluasi = evaluasiRows.length ? evaluasiRows[0] : null;
 
+    // ====== Deteksi MIME dokumentasi ======
+    const getMimeFromFile = (filename) => {
+      if (!filename) return null;
+      const ext = filename.split(".").pop().toLowerCase();
+      if (["jpg", "jpeg", "png", "gif", "webp"].includes(ext)) return `image/${ext}`;
+      if (ext === "pdf") return "application/pdf";
+      return "application/octet-stream";
+    };
+    laporan.dokumentasi_mime = getMimeFromFile(laporan.dokumentasi);
+
+    // ====== Render halaman ======
     res.render("dpa/detailLaporan", {
       title: "Detail Laporan",
       user: req.session.user,
@@ -141,6 +174,7 @@ exports.getDetailLaporanDPA = async (req, res) => {
       errorMsg: null,
       successMsg: req.query.success || null,
     });
+
   } catch (err) {
     console.error("❌ Error getDetailLaporanDPA:", err.message);
     res.status(500).send("Gagal mengambil detail laporan");
