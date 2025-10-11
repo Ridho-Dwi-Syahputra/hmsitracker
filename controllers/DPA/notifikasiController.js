@@ -1,213 +1,258 @@
+// =====================================================
 // controllers/dpa/notifikasiController.js
-// =====================================================
-// Controller untuk Notifikasi DPA
-// =====================================================
-// - getAllNotifikasi: notifikasi laporan/proker dari HMSI
-// - getAllNotifikasiEvaluasi: notifikasi komentar HMSI pada evaluasi
-// - markAsRead: tandai notifikasi sudah dibaca
-// - readAndRedirect: tandai & redirect
+// Controller untuk Notifikasi DPA (Gabungan: Proker, Laporan, Evaluasi)
 // =====================================================
 
 const db = require("../../config/db");
 
-/**
- * Helper sederhana untuk mengecek apakah teks pesan
- * mengindikasikan "penambahan laporan baru".
- */
-function isNewLaporanText(pesan = "") {
-  const txt = String(pesan).toLowerCase();
-  return /menambah|menambahkan|ditambahkan|baru|tambah laporan|laporan baru/.test(txt);
+// =====================================================
+// Helper: format tanggal Indonesia
+// =====================================================
+function formatTanggal(dateValue) {
+  if (!dateValue) return "-";
+  const d = new Date(dateValue);
+  if (isNaN(d.getTime())) return "-";
+  return d.toLocaleDateString("id-ID", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 // =====================================================
-// 📄 Ambil semua notifikasi untuk DPA (laporan/proker HMSI)
+// 📄 Ambil SEMUA notifikasi (Proker, Laporan, Evaluasi)
 // =====================================================
 exports.getAllNotifikasi = async (req, res) => {
   try {
     const user = req.session.user;
-    if (!user || user.role !== "DPA") {
-      return res.status(401).send("Unauthorized");
-    }
 
-    // 🔹 Hanya notifikasi yang target_role = 'DPA'
-    const [rows] = await db.query(`
+    // 🔹 Query gabungan dengan deteksi tipe & status dihapus
+    const [rows] = await db.query(
+      `
       SELECT 
         n.id_notifikasi,
         n.pesan,
-        n.created_at,
         n.status_baca,
-        l.id_laporan,
-        l.judul_laporan,
-        l.id_divisi AS laporan_divisi_id,
+        n.created_at,
+        n.id_ProgramKerja,
+        n.id_laporan,
+        n.id_evaluasi,
         d.nama_divisi,
-        p.id_ProgramKerja AS proker_id,
-        p.Nama_ProgramKerja
+        
+        -- Data Program Kerja (jika ada)
+        p.Nama_ProgramKerja,
+        p.Status AS status_proker,
+        
+        -- Data Laporan (jika ada)
+        l.judul_laporan,
+        
+        -- Data Evaluasi (jika ada)
+        e.status_konfirmasi AS status_evaluasi,
+        
+        -- Deteksi tipe notifikasi
+        CASE 
+          WHEN n.id_evaluasi IS NOT NULL THEN 'evaluasi'
+          WHEN n.id_laporan IS NOT NULL AND n.id_ProgramKerja IS NULL THEN 'laporan'
+          WHEN n.id_ProgramKerja IS NOT NULL THEN 'proker'
+          ELSE 'unknown'
+        END AS tipe_notifikasi,
+        
+        -- Deteksi apakah data masih ada atau sudah dihapus
+        CASE 
+          WHEN n.id_evaluasi IS NOT NULL AND e.id_evaluasi IS NULL THEN 1
+          WHEN n.id_laporan IS NOT NULL AND l.id_laporan IS NULL THEN 1
+          WHEN n.id_ProgramKerja IS NOT NULL AND p.id_ProgramKerja IS NULL THEN 1
+          ELSE 0
+        END AS is_deleted
+      
       FROM Notifikasi n
-      LEFT JOIN Laporan l ON n.id_laporan = l.id_laporan
+      LEFT JOIN Divisi d ON n.id_divisi = d.id_divisi
       LEFT JOIN Program_kerja p ON n.id_ProgramKerja = p.id_ProgramKerja
-      LEFT JOIN Divisi d ON COALESCE(l.id_divisi, n.id_divisi) = d.id_divisi
+      LEFT JOIN Laporan l ON n.id_laporan = l.id_laporan
+      LEFT JOIN Evaluasi e ON n.id_evaluasi = e.id_evaluasi
+      
       WHERE n.target_role = 'DPA'
-        AND (n.id_evaluasi IS NULL OR n.id_evaluasi = '')
-        AND LOWER(COALESCE(n.pesan, '')) NOT LIKE '%evaluasi%'
       ORDER BY n.created_at DESC
-    `);
+      LIMIT 100
+      `
+    );
 
-    const notifikasi = rows.map((n) => {
-      let tanggalFormatted = "-";
-      if (n.created_at) {
-        const d = new Date(n.created_at);
-        if (!isNaN(d.getTime())) {
-          tanggalFormatted = d.toLocaleDateString("id-ID", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric",
-          });
-        }
-      }
-
-      const isLaporan = !!n.id_laporan;
-      const isProker = !!n.proker_id;
+    // 🔹 Mapping data notifikasi dengan link & label yang sesuai
+    const notifikasi = rows.map((r) => {
       let linkUrl = "#";
       let linkLabel = "Lihat";
+      let shortMsg = r.pesan; // ✅ Gunakan pesan asli dari database
 
-      if (isLaporan) {
-        linkUrl = `/dpa/kelolaLaporan/${n.id_laporan}`;
-        linkLabel = isNewLaporanText(n.pesan)
-          ? "Lihat Laporan Baru"
-          : "Lihat Laporan";
-      } else if (isProker) {
-        linkUrl = `/dpa/lihatProker/${n.proker_id}/detail`;
-        linkLabel = "Lihat Program Kerja";
+      // 🔸 Jika data sudah dihapus
+      if (r.is_deleted) {
+        linkUrl = `/dpa/readNotifikasi/${r.id_notifikasi}`;
+        linkLabel = "Data Dihapus";
+      } 
+      // 🔸 Jika data masih ada, tentukan link berdasarkan tipe
+      else {
+        linkUrl = `/dpa/readNotifikasi/${r.id_notifikasi}`;
+        linkLabel = "Lihat";
       }
 
-      const divisiText = n.nama_divisi || "Divisi Tidak Dikenal";
-      const shortMsg = isLaporan
-        ? `${divisiText} telah menambahkan laporan baru`
-        : `${divisiText} telah membuat program kerja baru`;
-
       return {
-        ...n,
-        tanggalFormatted,
-        _isProker: isProker,
-        _isLaporan: isLaporan,
+        id_notifikasi: r.id_notifikasi,
+        shortMsg, // ✅ Pesan lengkap dari database
+        tanggalFormatted: formatTanggal(r.created_at),
         linkUrl,
         linkLabel,
-        shortMsg,
-        divisi: divisiText,
+        status_baca: r.status_baca,
+        divisi: r.nama_divisi || "Unknown",
+        tipe: r.tipe_notifikasi,
+        is_deleted: r.is_deleted,
       };
     });
 
+    // 🔹 Hitung jumlah notifikasi belum dibaca
+    const unreadCount = notifikasi.filter((n) => n.status_baca === 0).length;
+
+    // 🔹 Render ke halaman dpaNotifikasi.ejs
     res.render("dpa/dpaNotifikasi", {
       title: "Notifikasi",
       user,
       activeNav: "Notifikasi",
       notifikasi,
+      unreadCount,
+      successMsg: req.query.success || null,
+      errorMsg: req.query.error || null,
     });
   } catch (err) {
-    console.error("❌ Error getAllNotifikasi DPA:", err.message);
+    console.error("❌ getAllNotifikasi error:", err.message);
     res.status(500).send("Gagal mengambil notifikasi");
   }
 };
 
 // =====================================================
-// 📄 Ambil notifikasi komentar evaluasi dari HMSI
-// =====================================================
-exports.getAllNotifikasiEvaluasi = async (req, res) => {
-  try {
-    const user = req.session.user;
-    if (!user || user.role !== "DPA") {
-      return res.status(401).send("Unauthorized");
-    }
-
-    // 🔹 Ambil hanya notifikasi evaluasi yang target_role = 'DPA'
-    const [rows] = await db.query(`
-      SELECT 
-        n.id_notifikasi,
-        n.pesan,
-        n.created_at,
-        n.status_baca,
-        e.id_evaluasi,
-        e.komentar_hmsi,
-        l.id_laporan,
-        l.judul_laporan,
-        l.id_divisi AS laporan_divisi_id,
-        d.nama_divisi,
-        p.Nama_ProgramKerja
-      FROM Notifikasi n
-      JOIN Evaluasi e ON n.id_evaluasi = e.id_evaluasi
-      JOIN Laporan l ON e.id_laporan = l.id_laporan
-      JOIN Program_kerja p ON l.id_ProgramKerja = p.id_ProgramKerja
-      LEFT JOIN Divisi d ON l.id_divisi = d.id_divisi
-      WHERE n.target_role = 'DPA'
-      ORDER BY n.created_at DESC
-    `);
-
-    const notifikasi = rows.map((n) => {
-      let tanggalFormatted = "-";
-      if (n.created_at) {
-        const d = new Date(n.created_at);
-        if (!isNaN(d.getTime())) {
-          tanggalFormatted = d.toLocaleDateString("id-ID", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric",
-          });
-        }
-      }
-
-      const divisiText = n.nama_divisi || "Divisi Tidak Dikenal";
-
-      return {
-        ...n,
-        tanggalFormatted,
-        linkUrl: `/dpa/detailLaporan/${n.id_laporan}`,
-        linkLabel: "Lihat Komentar HMSI",
-        shortMsg: `${divisiText} menambahkan komentar pada evaluasi proker "${n.Nama_ProgramKerja}"`,
-      };
-    });
-
-    res.render("dpa/dpaNotifikasiEvaluasi", {
-      title: "Notifikasi Evaluasi",
-      user,
-      activeNav: "Notifikasi Evaluasi",
-      notifikasi,
-    });
-  } catch (err) {
-    console.error("❌ Error getAllNotifikasiEvaluasi DPA:", err.message);
-    res.status(500).send("Gagal mengambil notifikasi evaluasi");
-  }
-};
-
-// =====================================================
-// ✅ Tandai notifikasi sebagai sudah dibaca
+// ✅ Tandai notifikasi sebagai sudah dibaca (AJAX)
 // =====================================================
 exports.markAsRead = async (req, res) => {
   try {
     const { id } = req.params;
-    await db.query("UPDATE Notifikasi SET status_baca = 1 WHERE id_notifikasi = ?", [id]);
-    return res.redirect("/dpa/dpaNotifikasi");
+
+    await db.query(
+      "UPDATE Notifikasi SET status_baca = 1 WHERE id_notifikasi = ?",
+      [id]
+    );
+
+    res.json({ success: true, message: "Notifikasi ditandai sudah dibaca" });
   } catch (err) {
-    console.error("❌ Error markAsRead DPA:", err.message);
-    res.status(500).send("Gagal update notifikasi");
+    console.error("❌ markAsRead error:", err.message);
+    res.status(500).json({ success: false, error: "Gagal menandai notifikasi" });
   }
 };
 
 // =====================================================
-// 🚀 Klik notifikasi = tandai sudah dibaca + redirect
+// 🔄 Baca notifikasi & redirect ke halaman terkait
+//    dengan VALIDASI data masih ada atau sudah dihapus
 // =====================================================
 exports.readAndRedirect = async (req, res) => {
   try {
     const { id } = req.params;
-    let redirectUrl = req.query.to ? decodeURIComponent(req.query.to) : "/dpa/dpaNotifikasi";
+    const user = req.session.user;
 
-    if (!(typeof redirectUrl === "string" && redirectUrl.startsWith("/dpa"))) {
-      redirectUrl = "/dpa/dpaNotifikasi";
+    // 🔹 STEP 1: Ambil data notifikasi
+    const [notifRows] = await db.query(
+      `SELECT * FROM Notifikasi WHERE id_notifikasi = ?`,
+      [id]
+    );
+
+    if (!notifRows.length) {
+      return res.render("partials/error", {
+        title: "Notifikasi Tidak Ditemukan",
+        message: "Notifikasi yang Anda cari tidak ditemukan di sistem.",
+        user,
+      });
     }
 
-    await db.query("UPDATE Notifikasi SET status_baca = 1 WHERE id_notifikasi = ?", [id]);
-    return res.redirect(redirectUrl);
+    const notif = notifRows[0];
+
+    // 🔹 STEP 2: Tandai notifikasi sebagai sudah dibaca
+    await db.query(
+      "UPDATE Notifikasi SET status_baca = 1 WHERE id_notifikasi = ?",
+      [id]
+    );
+
+    // 🔹 STEP 3: Deteksi tipe notifikasi dan validasi keberadaan data
+    let dataExists = false;
+    let redirectUrl = "/dpa/notifikasi";
+    let errorTitle = "Data Tidak Ditemukan";
+    let errorMessage = "Data yang Anda cari sudah tidak tersedia.";
+
+    // 🟢 CASE 1: Notifikasi terkait Program Kerja
+    if (notif.id_ProgramKerja) {
+      const [prokerRows] = await db.query(
+        `SELECT id_ProgramKerja FROM Program_kerja WHERE id_ProgramKerja = ?`,
+        [notif.id_ProgramKerja]
+      );
+
+      if (prokerRows.length > 0) {
+        // Data masih ada → redirect ke detail proker
+        dataExists = true;
+        redirectUrl = `/dpa/lihatProker/${notif.id_ProgramKerja}/detail`;
+      } else {
+        // Data sudah dihapus → tampilkan error
+        errorTitle = "Program Kerja Dihapus";
+        errorMessage = "Program kerja ini telah dihapus oleh HMSI.";
+      }
+    }
+    // 🟡 CASE 2: Notifikasi terkait Laporan (bukan evaluasi)
+    else if (notif.id_laporan && !notif.id_evaluasi) {
+      const [laporanRows] = await db.query(
+        `SELECT id_laporan FROM Laporan WHERE id_laporan = ?`,
+        [notif.id_laporan]
+      );
+
+      if (laporanRows.length > 0) {
+        // Data masih ada → redirect ke detail laporan
+        dataExists = true;
+        redirectUrl = `/dpa/kelolaLaporan/${notif.id_laporan}`;
+      } else {
+        // Data sudah dihapus → tampilkan error
+        errorTitle = "Laporan Dihapus";
+        errorMessage = "Laporan ini telah dihapus oleh HMSI.";
+      }
+    }
+    // 🔵 CASE 3: Notifikasi terkait Komentar/Evaluasi
+    else if (notif.id_evaluasi) {
+      const [evaluasiRows] = await db.query(
+        `SELECT id_evaluasi, id_laporan FROM Evaluasi WHERE id_evaluasi = ?`,
+        [notif.id_evaluasi]
+      );
+
+      if (evaluasiRows.length > 0) {
+        // Data masih ada → redirect ke detail laporan terkait
+        dataExists = true;
+        redirectUrl = `/dpa/kelolaLaporan/${evaluasiRows[0].id_laporan}`;
+      } else {
+        // Data sudah dihapus → tampilkan error
+        errorTitle = "Komentar Tidak Tersedia";
+        errorMessage = "Komentar pada laporan ini telah diperbarui atau dihapus oleh HMSI.";
+      }
+    }
+
+    // 🔹 STEP 4: Render halaman error atau redirect
+    if (!dataExists) {
+      return res.render("partials/error", {
+        title: errorTitle,
+        message: errorMessage,
+        user,
+      });
+    }
+
+    // ✅ Data masih ada, redirect ke halaman terkait
+    res.redirect(redirectUrl);
   } catch (err) {
-    console.error("❌ Error readAndRedirect DPA:", err.message);
-    res.status(500).send("Gagal membaca notifikasi");
+    console.error("❌ readAndRedirect error:", err.message);
+    return res.render("partials/error", {
+      title: "Terjadi Kesalahan",
+      message: "Gagal membuka notifikasi. Silakan coba lagi.",
+      user: req.session.user,
+    });
   }
 };

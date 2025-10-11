@@ -30,56 +30,28 @@
       <div class="p-6 sm:p-8 space-y-4">
         <% if (notifikasi && notifikasi.length > 0) { %>
           <% notifikasi.forEach(function(n) { 
-               const isProker = !!n.proker_id;
-               const isLaporan = !!n.id_laporan && !n.id_evaluasi;
-               const isEvaluasi = !!n.id_evaluasi;
-
-               const pesanLower = (n.pesan || '').toLowerCase();
-               const divisiText = (n.divisi && n.divisi !== '-') ? n.divisi : 'Divisi';
-
-               // short message
-               let shortMsg = '';
-               if (isProker) {
-                 shortMsg = `${divisiText} telah membuat Program Kerja baru`;
-               } else if (isLaporan) {
-                 shortMsg = `${divisiText} telah menambahkan Laporan baru`;
-               } else if (isEvaluasi) {
-                 shortMsg = `${divisiText} menambahkan komentar pada evaluasi laporan`;
-               }
-
-               // link label
-               let displayLinkLabel = 'Lihat';
-               if (isProker) {
-                 displayLinkLabel = 'Lihat Program Kerja';
-               } else if (isLaporan) {
-                 if (/menambah|menambahkan|ditambahkan|baru/.test(pesanLower)) {
-                   displayLinkLabel = 'Lihat Laporan Baru';
-                 } else {
-                   displayLinkLabel = 'Lihat Laporan';
-                 }
-               } else if (isEvaluasi) {
-                 displayLinkLabel = 'Lihat Komentar';
-               }
-
-               // target url
-               let targetUrl = '#';
-               if (isProker) {
-                 targetUrl = `/dpa/lihatProker/${n.proker_id || n.id_ProgramKerja}/detail`;
-               } else if (isLaporan) {
-                 targetUrl = `/dpa/kelolaLaporan/${n.id_laporan}`;
-               } else if (isEvaluasi) {
-                 targetUrl = `/dpa/detailLaporan/${n.id_laporan}`;
-               }
+               // ✅ Gunakan data dari controller, bukan buat ulang
+               const displayMessage = n.shortMsg || 'Notifikasi baru';
+               const displayLabel = n.linkLabel || 'Lihat';
+               const targetUrl = n.linkUrl || '#';
+               const divisiText = n.divisi || 'Unknown';
+               const isDeleted = n.is_deleted;
+               
+               // Deteksi tipe untuk icon
+               const isEvaluasi = n.tipe === 'evaluasi';
           %>
             <!-- Card Notifikasi -->
-            <a href="/dpa/notifikasi/read/<%= n.id_notifikasi %>?to=<%= encodeURIComponent(targetUrl) %>"
+            <a href="<%= targetUrl %>"
                class="block" aria-label="Buka notifikasi">
               <div class="flex items-start gap-4 p-4 bg-white border rounded-xl shadow-sm hover:shadow-md transition cursor-pointer
-                          <%= !n.status_baca ? 'border-2 border-orange-300' : 'border-orange-200' %>">
+                          <%= !n.status_baca ? 'border-2 border-orange-300' : 'border-orange-200' %>
+                          <%= isDeleted ? 'bg-gray-50 opacity-75' : '' %>">
 
                 <!-- Icon -->
                 <div class="flex-shrink-0 mt-1">
-                  <% if (isEvaluasi) { %>
+                  <% if (isDeleted) { %>
+                    <i class="fa-solid fa-triangle-exclamation text-red-500 text-lg"></i>
+                  <% } else if (isEvaluasi) { %>
                     <i class="fa-solid fa-comments text-orange-500 text-lg"></i>
                   <% } else { %>
                     <i class="fa-solid fa-bell text-orange-500 text-lg"></i>
@@ -88,30 +60,31 @@
 
                 <!-- Isi -->
                 <div class="flex-1">
-                  <p class="text-gray-800 text-sm font-medium"><%= shortMsg %></p>
+                  <!-- ✅ Tampilkan pesan lengkap dari controller -->
+                  <p class="text-gray-800 text-sm font-medium <%= isDeleted ? 'line-through text-gray-500' : '' %>">
+                    <%= displayMessage %>
+                  </p>
 
+                  <!-- Info Divisi & Tanggal -->
                   <p class="text-gray-600 text-xs mt-1">
-                    <% if (isLaporan) { %>
-                      <span class="font-semibold">Judul:</span> <%= n.judul_laporan || '-' %><br>
-                    <% } else if (isProker) { %>
-                      <span class="font-semibold">Program Kerja:</span> <%= n.Nama_ProgramKerja || '-' %><br>
-                    <% } else if (isEvaluasi) { %>
-                      <span class="font-semibold">Laporan:</span> <%= n.judul_laporan || '-' %><br>
-                      <span class="font-semibold">Program Kerja:</span> <%= n.Nama_ProgramKerja || '-' %><br>
-                    <% } %>
                     <span class="font-semibold">Divisi:</span> <%= divisiText %>
                   </p>
 
                   <div class="flex items-center justify-between mt-3">
                     <span class="text-xs text-gray-500"><%= n.tanggalFormatted %></span>
-                    <span class="text-orange-500 text-xs font-medium hover:underline"><%= displayLinkLabel %></span>
+                    <span class="<%= isDeleted ? 'text-red-500' : 'text-orange-500' %> text-xs font-medium hover:underline">
+                      <%= displayLabel %>
+                    </span>
                   </div>
                 </div>
 
-                <!-- Status -->
+                <!-- Status Badge -->
                 <div class="flex flex-col items-end gap-2">
                   <% if (!n.status_baca) { %>
                     <span class="text-[10px] px-2 py-1 bg-orange-100 text-orange-700 rounded-full">Baru</span>
+                  <% } %>
+                  <% if (isDeleted) { %>
+                    <span class="text-[10px] px-2 py-1 bg-red-100 text-red-700 rounded-full">Dihapus</span>
                   <% } %>
                 </div>
               </div>

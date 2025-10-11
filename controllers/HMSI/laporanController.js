@@ -713,21 +713,22 @@ exports.deleteLaporan = async (req, res) => {
       return res.status(403).send("Tidak boleh hapus laporan divisi lain");
     }
 
-    // hapus notifikasi lama
-    await connection.query("DELETE FROM Notifikasi WHERE id_laporan=?", [id]);
-    // hapus keuangan & laporan
+    // ❌ Jangan hapus notifikasi lama, biarkan histori tetap ada
+    // await connection.query("DELETE FROM Notifikasi WHERE id_laporan=?", [id]);
+
+    // 🧹 Hapus keuangan & laporan
     await connection.query("DELETE FROM keuangan WHERE id_laporan=?", [id]);
     await connection.query("DELETE FROM Laporan WHERE id_laporan=?", [id]);
     if (dokumentasi) safeRemoveFile(dokumentasi);
 
-    // notifikasi baru
+    // 🟢 Notifikasi baru ke DPA (sertakan id_laporan)
     const notifMsg = `Divisi ${user.nama_divisi || "HMSI"} menghapus laporan: "${judul_laporan}"`;
     await connection.query(
       `
-      INSERT INTO Notifikasi (id_notifikasi, pesan, target_role, id_divisi, created_at, status_baca)
-      VALUES (?, ?, 'DPA', ?, NOW(), 0)
+      INSERT INTO Notifikasi (id_notifikasi, pesan, target_role, id_divisi, id_laporan, created_at, status_baca)
+      VALUES (?, ?, 'DPA', ?, ?, NOW(), 0)
       `,
-      [uuidv4(), notifMsg, user.id_divisi]
+      [uuidv4(), notifMsg, user.id_divisi, id]
     );
 
     await connection.commit();

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title || "Kesalahan" %> | HMSI Tracker</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" 
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body class="bg-gradient-to-br from-orange-50 to-orange-100 min-h-screen flex items-center justify-center p-4">
+  
+  <!-- Error Card -->
+  <div class="bg-white rounded-3xl shadow-2xl p-8 sm:p-12 text-center max-w-md w-full border-t-8 border-orange-500">
+    
+    <!-- Icon -->
+    <div class="mb-6">
+      <div class="mx-auto w-24 h-24 bg-orange-100 rounded-full flex items-center justify-center">
+        <i class="fa-solid fa-triangle-exclamation text-5xl text-orange-500"></i>
+      </div>
+    </div>
+    
+    <!-- Title -->
+    <h1 class="text-2xl font-bold text-gray-800 mb-3">
+      <%= title || "Data Tidak Ditemukan" %> 
+      <span class="text-3xl">🤭</span>
+    </h1>
+    
+    <!-- Message -->
+    <p class="text-gray-600 text-base mb-3">
+      <%= message || "Data yang Anda cari sudah tidak tersedia." %>
+    </p>
+    
+    <!-- Status Label -->
+    <div class="inline-block bg-orange-100 text-orange-700 text-sm font-semibold px-4 py-2 rounded-full mb-8">
+      Not Found
+    </div>
+    
+    <!-- Divider -->
+    <div class="border-t border-gray-200 my-6"></div>
+    
+    <!-- Action Button -->
+    <div class="space-y-3">
+      <a href="/dpa/notifikasi" 
+         class="block w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+        <i class="fa-solid fa-arrow-left mr-2"></i>
+        Halaman Sebelumnya
+      </a>
+    </div>
+    
+  </div>
+  
+</body>
+</html>
