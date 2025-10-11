@@ -1,10 +1,9 @@
 <%
   // ✅ Ambil nama + foto profil
   var displayName = (user && (user.nama || user.name)) ? (user.nama || user.name) : 'Admin DPA';
-  var initial = displayName ? displayName.charAt(0).toUpperCase() : 'A';
   var fotoProfile = (user && user.foto_profile) ? ("/" + user.foto_profile.replace(/^\/+/, '')) : '/default-profile.png';
 
-  // Navigation untuk DPA
+  // ✅ Navigation untuk DPA
   var navItems = [
     { name: 'Dashboard', path: '/dpa/dashboard' },
     { name: 'Daftar Program Kerja', path: '/dpa/lihatProker' },
@@ -13,16 +12,16 @@
 %>
 
 <div id="dpa-sidebar-root">
-  <!-- 🔹 Overlay -->
+  <!-- Overlay -->
   <div id="dpa-sidebar-overlay"
-    class="hidden fixed inset-0 bg-black bg-opacity-40 z-40 lg:hidden transition-opacity duration-300"></div>
+       class="hidden fixed inset-0 bg-black bg-opacity-40 z-40 lg:hidden transition-opacity duration-300"></div>
 
-  <!-- 🔹 Sidebar -->
+  <!-- Sidebar -->
   <aside id="dpa-sidebar"
-    class="fixed inset-y-0 left-0 w-80 bg-white border-r border-gray-200 flex flex-col 
-           transform -translate-x-full lg:translate-x-0 z-50 transition-transform duration-300 ease-in-out">
+         class="fixed inset-y-0 left-0 w-80 bg-white border-r border-gray-200 flex flex-col 
+                transform -translate-x-full lg:translate-x-0 z-50 transition-transform duration-300 ease-in-out">
 
-    <!-- Header (desktop only) -->
+    <!-- Header -->
     <div class="hidden lg:block p-6 border-b border-gray-100 bg-gradient-to-br from-orange-500 to-orange-600">
       <h1 class="text-xl font-bold text-white tracking-wide">HMSI TRACKER</h1>
       <p class="text-sm text-orange-100 mt-1">Monitoring System</p>
@@ -46,7 +45,6 @@
           </p>
         </div>
 
-        <!-- Gear menuju profile -->
         <a href="/dpa/profile" title="Profile"
            class="gear-btn p-2 text-gray-400 hover:text-gray-600 rounded-lg transition-transform duration-300">
           <svg class="gear-icon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -79,8 +77,7 @@
            }
       %>
         <a href="<%= item.path %>"
-          class="nav-item block w-full p-3.5 my-1 rounded-xl text-sm font-medium flex items-center gap-3 <%= isActive ? 'active' : '' %>"
-          data-delay="<%= i * 100 %>">
+           class="nav-item block w-full p-3.5 my-1 rounded-xl text-sm font-medium flex items-center gap-3 <%= isActive ? 'active' : '' %>">
           <span class="w-1.5 h-1.5 rounded-full <%= isActive ? 'bg-orange-500' : 'bg-gray-300' %>"></span>
           <span><%= item.name %></span>
         </a>
@@ -91,13 +88,9 @@
     <div class="p-6 border-t border-gray-100">
       <form action="/auth/logout" method="GET">
         <button type="submit"
-          class="w-full flex items-center justify-center gap-3 px-4 py-3 text-gray-600 border border-gray-200 rounded-xl bg-white transition-all duration-300 hover:bg-red-50 hover:text-red-600 hover:scale-105 active:scale-95">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 
-              01-3 3H6a3 3 0 01-3-3V7a3 
-              3 0 013-3h4a3 3 0 013 3v1"/>
-          </svg>
+          class="w-full flex items-center justify-center gap-3 px-4 py-3 text-gray-600 border border-gray-200 rounded-xl bg-white 
+                 transition-all duration-300 hover:bg-red-50 hover:text-red-600 hover:scale-105 active:scale-95">
+          <i class="fa-solid fa-right-from-bracket"></i>
           Keluar
         </button>
       </form>
@@ -105,53 +98,32 @@
   </aside>
 </div>
 
-<!-- Styles -->
+<!-- ✅ Styles -->
 <style>
   #dpa-sidebar { will-change: transform; }
   .slide-in { transform: translateX(0) !important; }
   .slide-out { transform: translateX(-100%) !important; }
 
-  .hamburger .bar {
-    display: block;
-    width: 100%;
-    height: 3px;
-    background-color: #374151;
-    border-radius: 4px;
-    transition: all 0.3s ease;
-  }
-  .hamburger.active .bar:nth-child(1) {
-    transform: rotate(45deg) translate(5px, 5px);
-  }
-  .hamburger.active .bar:nth-child(2) {
-    opacity: 0;
-  }
-  .hamburger.active .bar:nth-child(3) {
-    transform: rotate(-45deg) translate(5px, -5px);
-  }
-
   .nav-item {
-    opacity: 0;
-    transform: translateX(-20px);
-    animation: fadeSlideIn 0.5s ease forwards;
     color: #374151;
     transition: all 0.3s ease, transform 0.2s ease;
   }
-  @keyframes fadeSlideIn {
-    from { opacity: 0; transform: translateX(-20px); }
-    to { opacity: 1; transform: translateX(0); }
-  }
+
   .nav-item:hover {
     transform: translateX(6px) scale(1.02);
     background: linear-gradient(to right, #fff7ed, #fff3e0);
     box-shadow: inset 4px 0 0 #f97316;
   }
+
+  /* ✅ Animasi aktif dipertahankan */
   .nav-item.active {
-    animation: fadeSlideIn 0.5s ease forwards, pulseOrange 1.5s ease-in-out infinite alternate;
+    animation: pulseOrange 1.5s ease-in-out infinite alternate;
     background: linear-gradient(to right, #fff7ed, #ffedd5);
     color: #ea580c !important;
     font-weight: 600;
     border-right: 3px solid #f97316;
   }
+
   @keyframes pulseOrange {
     from { box-shadow: inset 4px 0 0 #f97316, 0 0 0 rgba(249,115,22,0.15); }
     to   { box-shadow: inset 6px 0 0 #f97316, 0 0 10px rgba(249,115,22,0.28); }
@@ -165,9 +137,7 @@
     color: #ea580c;
     filter: drop-shadow(0 0 6px rgba(234,88,12,0.5));
   }
-  .gear-btn:active .gear-icon {
-    animation: gearShake 0.3s ease;
-  }
+  .gear-btn:active .gear-icon { animation: gearShake 0.3s ease; }
   @keyframes gearShake {
     0% { transform: rotate(0deg) scale(1); }
     25% { transform: rotate(12deg) scale(1.05); }
@@ -177,16 +147,14 @@
   }
 </style>
 
-<!-- Script -->
+<!-- ✅ Script -->
 <script>
   document.addEventListener("DOMContentLoaded", () => {
     const sidebar = document.getElementById("dpa-sidebar");
     const overlay = document.getElementById("dpa-sidebar-overlay");
-    const toggle = document.getElementById("dpa-sidebar-toggle"); // toggle dari navbar
+    const toggle = document.getElementById("dpa-sidebar-toggle");
 
-    if (window.innerWidth >= 1024) {
-      sidebar.classList.add("slide-in");
-    }
+    if (window.innerWidth >= 1024) sidebar.classList.add("slide-in");
 
     if (toggle) {
       toggle.addEventListener("click", () => {
@@ -208,10 +176,6 @@
       sidebar.classList.add("slide-out");
       toggle?.classList.remove("active");
       overlay.classList.add("hidden");
-    });
-
-    document.querySelectorAll(".nav-item").forEach((el, i) => {
-      el.style.animationDelay = (i * 100 + 300) + "ms";
     });
   });
 </script>

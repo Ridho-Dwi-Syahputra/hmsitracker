@@ -138,7 +138,6 @@ exports.getAllLaporan = async (req, res) => {
   }
 };
 
-
 // =====================================================
 // ➕ Form tambah laporan (perbaikan dropdown Program Kerja)
 // =====================================================
@@ -441,8 +440,8 @@ exports.getDetailLaporan = async (req, res) => {
       user,
       activeNav: "Laporan",
       laporan,
-      errorMsg: req.query.error || null,
-      successMsg: req.query.success || null,
+      errorMsg: null,
+      successMsg: null,
     });
   } catch (err) {
     console.error("❌ getDetailLaporan error:", err.message);
@@ -472,12 +471,10 @@ exports.getEditLaporan = async (req, res) => {
     if (!rows.length) return res.status(404).send("Laporan tidak ditemukan");
 
     const laporan = rows[0];
-
-    // 🔒 Batasi akses HMSI hanya untuk divisi sendiri
     if (user.role === "HMSI" && laporan.id_divisi !== user.id_divisi)
       return res.status(403).send("Tidak boleh edit laporan divisi lain");
 
-    // 🔹 Ambil daftar program kerja milik divisi HMSI
+    // 🔹 Dropdown: ambil program kerja dari divisi aktif (sinkron dengan getFormLaporan)
     const [programs] = await db.query(
       `
       SELECT id_ProgramKerja AS id, Nama_ProgramKerja AS namaProker
@@ -488,33 +485,23 @@ exports.getEditLaporan = async (req, res) => {
       [user.id_divisi]
     );
 
-    // 🔹 Siapkan data preview file dokumentasi
+    // 🔹 Tambah properti untuk preview file lama (jika ada)
     laporan.dokumentasi_mime = getMimeFromFile(laporan.dokumentasi);
-    laporan.filePreview = laporan.dokumentasi
-      ? `/uploads/${laporan.dokumentasi}`
-      : null;
+    if (laporan.dokumentasi) {
+      laporan.filePreview = `/uploads/${laporan.dokumentasi}`; // untuk <img> / <a> preview di EJS
+    } else {
+      laporan.filePreview = null;
+    }
 
-    // ✅ Tentukan activeNav berdasarkan status evaluasi
-    // Jika status Revisi / Disetujui → sub menu “Telah Dievaluasi”
-    // Jika belum dievaluasi → sub menu “Belum Dievaluasi”
-    const activeNav =
-      laporan.status_konfirmasi === "Revisi" ||
-      laporan.status_konfirmasi === "Disetujui"
-        ? "kelolaEvaluasi"
-        : "laporan";
+    const redirectTarget = laporan.status_konfirmasi
+      ? "/hmsi/evaluasi"
+      : "/hmsi/laporan";
 
-    // 🔹 Tentukan target redirect setelah edit selesai
-    const redirectTarget =
-      laporan.status_konfirmasi === "Revisi" ||
-      laporan.status_konfirmasi === "Disetujui"
-        ? "/hmsi/kelola-evaluasi"
-        : "/hmsi/laporan";
-
-    // 🔹 Render halaman edit laporan
-    res.render("HMSI/editLaporan", {
+    // 🔹 Render ke form edit
+    res.render("hmsi/editLaporan", {
       title: "Edit Laporan",
       user,
-      activeNav,
+      activeNav: "Laporan",
       laporan,
       programs,
       redirectTarget,
@@ -528,9 +515,8 @@ exports.getEditLaporan = async (req, res) => {
 };
 
 
-
 // =====================================================
-// 💾 Update laporan + keuangan
+// 💾 Update laporan (revisi ringan + dukungan AJAX, logika lama dipertahankan)
 // =====================================================
 exports.updateLaporan = async (req, res) => {
   let connection;
@@ -700,7 +686,7 @@ exports.updateLaporan = async (req, res) => {
 };
 
 // =====================================================
-// ❌ Hapus laporan (DENGAN VALIDASI APPROVAL)
+// ❌ Hapus laporan
 // =====================================================
 exports.deleteLaporan = async (req, res) => {
   let connection;
