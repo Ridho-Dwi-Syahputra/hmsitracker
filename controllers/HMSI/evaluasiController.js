@@ -153,7 +153,7 @@ exports.getDetailEvaluasi = async (req, res) => {
 };
 
 // =====================================================
-// 📝 Tambah / Update komentar HMSI
+// 📝 Tambah / Update komentar HMSI (versi AJAX friendly)
 // =====================================================
 exports.addKomentar = async (req, res) => {
   try {
@@ -162,17 +162,19 @@ exports.addKomentar = async (req, res) => {
     const { id } = req.params; // id_evaluasi
     const { komentar_hmsi } = req.body;
 
+    // 🧩 1️⃣ Validasi input: komentar tidak boleh kosong
     if (!komentar_hmsi || komentar_hmsi.trim() === "") {
-      return res.redirect(`/hmsi/kelola-evaluasi?error=Komentar tidak boleh kosong`);
+      // Jika kosong, kirim JSON error agar bisa ditangani di fetch()
+      return res.status(400).json({ success: false, message: "Komentar tidak boleh kosong" });
     }
 
-    // ✅ Update komentar HMSI (replace komentar lama)
+    // 🧠 2️⃣ Update komentar HMSI ke tabel Evaluasi (replace, bukan append)
     await db.query(
       "UPDATE Evaluasi SET komentar_hmsi = ?, updated_at = NOW() WHERE id_evaluasi = ?",
       [komentar_hmsi, id]
     );
 
-    // 🔎 Ambil data laporan terkait untuk pesan notifikasi
+    // 🔎 3️⃣ Ambil data laporan terkait — untuk isi pesan notifikasi ke DPA
     const [info] = await db.query(
       `
       SELECT 
@@ -189,13 +191,14 @@ exports.addKomentar = async (req, res) => {
       [id]
     );
 
+    // 🔔 4️⃣ Jika data laporan ditemukan, buat notifikasi baru untuk DPA
     if (info.length) {
       const data = info[0];
 
-      // 💬 Pesan notifikasi baru — tanpa hapus notifikasi lama
+      // 💬 Pesan notifikasi (tidak hapus notifikasi lama — biar histori tetap ada)
       const pesanNotif = `Divisi ${data.nama_divisi} telah memberikan revisi atau komentar baru untuk laporan "${data.judul_laporan}".`;
 
-      // 🟠 Simpan notifikasi baru untuk DPA
+      // 🟠 Simpan notifikasi baru ke tabel Notifikasi
       await db.query(
         `
         INSERT INTO Notifikasi 
@@ -206,10 +209,22 @@ exports.addKomentar = async (req, res) => {
       );
     }
 
-    // 🔄 Redirect balik ke halaman kelola evaluasi
-    res.redirect(`/hmsi/kelola-evaluasi?success=Komentar berhasil ditambahkan`);
+    // ✅ 5️⃣ Kirim respon JSON sukses (bukan redirect)
+    // Agar bisa ditangani oleh fetch() di front-end untuk menampilkan modal sukses
+    return res.status(200).json({
+      success: true,
+      message: "Komentar berhasil ditambahkan dan notifikasi terkirim",
+    });
+
   } catch (err) {
     console.error("❌ Error addKomentar:", err.message);
-    res.status(500).send("Gagal menambahkan komentar");
+
+    // 🚨 6️⃣ Jika error, kirim JSON error juga (bukan res.send)
+    return res.status(500).json({
+      success: false,
+      message: "Gagal menambahkan komentar",
+      error: err.message,
+    });
   }
 };
+

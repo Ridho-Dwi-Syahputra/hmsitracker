@@ -113,7 +113,8 @@ router.get("/laporan/:id", laporanCtrl.getDetailLaporan);
 // =====================================================
 // EVALUASI LAPORAN (DPA → HMSI)
 // =====================================================
-// 📄 HMSI melihat hasil evaluasi DPA
+
+// 📄 HMSI melihat hasil evaluasi DPA (tetap render kelolaEvaluasi.ejs)
 router.get("/kelola-evaluasi", evaluasiCtrl.getKelolaEvaluasi);
 
 // 📄 Detail satu evaluasi

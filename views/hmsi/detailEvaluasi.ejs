@@ -14,7 +14,7 @@
   <%- include('../partials/navbarHMSI', { user: user, unreadCount: unreadCount }) %>
 
   <!-- Sidebar -->
-  <%- include('../partials/sidebarHMSI', { activeNav: 'Evaluasi DPA', user: user }) %>
+  <%- include('../partials/sidebarHMSI', { activeNav: 'kelolaEvaluasi', user: user }) %>
 
   <!-- Success Modal -->
   <div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
@@ -219,14 +219,14 @@
             </div>
           <% } else { %>
             <!-- Form komentar (hanya tampil jika status bukan Selesai) -->
-            <form id="commentForm" action="/hmsi/evaluasi/<%= evaluasi.id_evaluasi %>/komentar" method="POST" class="mt-4 space-y-3">
+            <form id="commentForm" action="/hmsi/kelola-evaluasi/<%= evaluasi.id_evaluasi %>/komentar" method="POST">
               <textarea name="komentar_hmsi" id="komentarTextarea" rows="3" 
                 placeholder="Tulis komentar tambahan Anda di sini..."
                 class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400 hover:border-gray-400 transition-all"><%= evaluasi.komentar_hmsi || '' %></textarea>
               <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
               
               <div class="flex justify-between items-center gap-3 pt-4 border-t">
-                <a href="/hmsi/evaluasi" 
+                <a href="/hmsi/kelola-evaluasi" 
                   class="px-6 py-2 border border-gray-400 text-gray-600 rounded-xl hover:bg-gray-100 font-medium transition-colors duration-200">
                   Kembali
                 </a>
@@ -242,7 +242,7 @@
           <!-- Jika status Selesai, tampilkan hanya tombol Kembali -->
           <% if (isCompleted) { %>
             <div class="flex justify-center items-center gap-3 pt-4 border-t mt-4">
-              <a href="/hmsi/evaluasi" 
+              <a href="/hmsi/kelola-evaluasi" 
                 class="px-8 py-3 bg-orange-500 text-white rounded-xl hover:bg-orange-600 font-medium transition-colors duration-200 flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
@@ -394,11 +394,20 @@
 
     // Modal event listeners
     document.getElementById('closeSuccessModal').addEventListener('click', () => {
-      hideModal('successModal');
-      setTimeout(() => {
-        window.location.reload();
-      }, 300);
-    });
+  hideModal('successModal');
+
+  // Tunggu modal tertutup rapi
+  setTimeout(() => {
+    // 1️⃣ Reload dulu (efek refresh ringan)
+    window.location.reload();
+
+    // 2️⃣ Setelah reload selesai, otomatis redirect
+    setTimeout(() => {
+      window.location.href = '/hmsi/kelola-evaluasi';
+    }, 500); // jeda 0.5 detik biar reload sempat terjadi
+  }, 300);
+});
+
 
     document.getElementById('closeErrorModal').addEventListener('click', () => {
       hideModal('errorModal');
@@ -534,22 +543,21 @@
         .then(response => {
           // Hide loading modal first
           PopupMessage.hideLoading(() => {
-            if (response.ok || response.redirected) {
-              // Clear form before showing success modal
-              clearCommentForm();
-              PopupMessage.showSuccess(
-                'Komentar Berhasil Disimpan!', 
-                'Komentar tambahan Anda telah berhasil ditambahkan ke evaluasi ini.',
-                'OK',
-                () => {
-                  window.location.reload();
-                }
-              );
-            } else {
-              return response.text().then(text => {
-                throw new Error(text || 'Terjadi kesalahan saat menyimpan komentar');
-              });
-            }
+            if (response.ok) {
+  clearCommentForm();
+  PopupMessage.showSuccess(
+    'Komentar Berhasil Disimpan!', 
+    'Komentar tambahan Anda telah berhasil ditambahkan ke evaluasi ini.',
+    'OK',
+    () => {
+      // Setelah OK diklik → arahkan ke daftar evaluasi
+      setTimeout(() => {
+        window.location.href = '/hmsi/kelola-evaluasi';
+      }, 400);
+    }
+  );
+}
+
           });
         })
         .catch(error => {
