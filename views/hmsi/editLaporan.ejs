@@ -302,16 +302,16 @@
 
           <!-- ================= Tombol Aksi ================= -->
           <div class="pt-6 border-t border-gray-200 flex justify-end gap-4">
-            <a href="/hmsi/laporan"
-               class="px-8 py-3 border border-gray-300 rounded-xl text-sm font-medium bg-white text-gray-700 hover:shadow-md hover:border-gray-400">
-              Batal
-            </a>
-            <button type="submit" id="submitBtn"
-                    class="flex items-center justify-center gap-2 px-8 py-3 text-white bg-orange-500 rounded-xl text-sm font-semibold hover:bg-orange-600 hover:shadow-md">
-              <span id="btnText">Simpan</span>
-              <div id="btnSpinner" class="hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-            </button>
-          </div>
+  <a href="<%= redirectTarget %>"
+     class="px-8 py-3 border border-gray-300 rounded-xl text-sm font-medium bg-white text-gray-700 hover:shadow-md hover:border-gray-400">
+    Batal
+  </a>
+  <button type="submit" id="submitBtn"
+          class="flex items-center justify-center gap-2 px-8 py-3 text-white bg-orange-500 rounded-xl text-sm font-semibold hover:bg-orange-600 hover:shadow-md">
+    <span id="btnText">Simpan</span>
+    <div id="btnSpinner" class="hidden w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+  </button>
+</div>
         </form>
       </div>
     </div>
@@ -404,9 +404,10 @@
 
   <!-- ======================= SCRIPT SECTION ======================= -->
   <script>
-document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("DOMContentLoaded", () => {
+  // Ambil redirectTarget dari server
+  const redirectTarget = "<%= redirectTarget %>";
 
-  // ========================= MODAL HANDLERS =========================
   function showModal(modalId) {
     const modal = document.getElementById(modalId);
     const content = document.getElementById(modalId + "Content");
@@ -424,9 +425,10 @@ document.addEventListener("DOMContentLoaded", () => {
     content.classList.add("scale-95", "opacity-0");
     setTimeout(() => modal.classList.add("hidden"), 300);
 
+    // ✅ PERBAIKAN: Redirect dinamis berdasarkan status evaluasi
     if (modalId === "successModal") {
       setTimeout(() => {
-        window.location.href = "/hmsi/laporan?success=Laporan berhasil diperbarui";
+        window.location.href = redirectTarget + "?success=Laporan berhasil diperbarui";
       }, 350);
     }
   }

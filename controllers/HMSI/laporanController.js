@@ -474,7 +474,7 @@ exports.getEditLaporan = async (req, res) => {
     if (user.role === "HMSI" && laporan.id_divisi !== user.id_divisi)
       return res.status(403).send("Tidak boleh edit laporan divisi lain");
 
-    // 🔹 Dropdown: ambil program kerja dari divisi aktif (sinkron dengan getFormLaporan)
+    // 🔹 Dropdown: ambil program kerja dari divisi aktif
     const [programs] = await db.query(
       `
       SELECT id_ProgramKerja AS id, Nama_ProgramKerja AS namaProker
@@ -485,17 +485,19 @@ exports.getEditLaporan = async (req, res) => {
       [user.id_divisi]
     );
 
-    // 🔹 Tambah properti untuk preview file lama (jika ada)
+    // 🔹 Tambah properti untuk preview file lama
     laporan.dokumentasi_mime = getMimeFromFile(laporan.dokumentasi);
     if (laporan.dokumentasi) {
-      laporan.filePreview = `/uploads/${laporan.dokumentasi}`; // untuk <img> / <a> preview di EJS
+      laporan.filePreview = `/uploads/${laporan.dokumentasi}`;
     } else {
       laporan.filePreview = null;
     }
 
-    const redirectTarget = laporan.status_konfirmasi
-      ? "/hmsi/evaluasi"
-      : "/hmsi/laporan";
+    // ✅ PERBAIKAN: Tentukan redirect target berdasarkan status evaluasi
+    const redirectTarget = 
+      (laporan.status_konfirmasi === "Revisi" || laporan.status_konfirmasi === "Selesai" || laporan.status_konfirmasi === "Disetujui")
+        ? "/hmsi/kelola-evaluasi"
+        : "/hmsi/laporan";
 
     // 🔹 Render ke form edit
     res.render("hmsi/editLaporan", {
@@ -504,7 +506,7 @@ exports.getEditLaporan = async (req, res) => {
       activeNav: "Laporan",
       laporan,
       programs,
-      redirectTarget,
+      redirectTarget, // ✅ Kirim ke view
       errorMsg: null,
       successMsg: null,
     });
@@ -659,9 +661,13 @@ exports.updateLaporan = async (req, res) => {
 
     await connection.commit();
 
-    const redirectTarget = statusEvaluasi ? "/hmsi/evaluasi" : "/hmsi/laporan";
+    // ✅ PERBAIKAN: Redirect target yang benar
+    const redirectTarget = 
+      (statusEvaluasi === "Revisi" || statusEvaluasi === "Selesai" || statusEvaluasi === "Disetujui")
+        ? "/hmsi/kelola-evaluasi"
+        : "/hmsi/laporan";
 
-    // ==== NEW: Responsif terhadap jenis request ====
+    // Response
     if (req.xhr || req.headers.accept?.includes("application/json")) {
       return res.json({
         success: true,

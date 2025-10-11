@@ -32,18 +32,29 @@
       <!-- Body -->
       <div class="p-6 sm:p-8 space-y-4">
         <% if (notifikasi && notifikasi.length > 0) { %>
-          <% notifikasi.forEach(function(n) { %>
-            <% let targetUrl = n.linkUrl; %>
-
+          <% notifikasi.forEach(function(n) { 
+               // ✅ Gunakan data dari controller
+               const displayMessage = n.pesan || 'Notifikasi baru';
+               const displayLabel = n.linkLabel || 'Lihat';
+               const targetUrl = n.linkUrl || '#';
+               const divisiText = n.divisi || 'Unknown';
+               const isDeleted = n.is_deleted;
+               
+               // Deteksi tipe untuk icon
+               const isEvaluasi = n.tipe === 'evaluasi';
+          %>
             <!-- Kartu Notifikasi -->
-            <a href="/hmsi/notifikasi/read/<%= n.id_notifikasi %>"
+            <a href="<%= targetUrl %>"
                class="block" aria-label="Buka notifikasi">
               <div class="flex items-start gap-4 p-4 bg-white border rounded-xl shadow-sm hover:shadow-md transition cursor-pointer
-                          <%= !n.status_baca ? 'border-2 border-orange-300 bg-orange-50/50' : 'border-orange-100' %>">
+                          <%= !n.status_baca ? 'border-2 border-orange-300 bg-orange-50/50' : 'border-orange-100' %>
+                          <%= isDeleted ? 'bg-gray-50 opacity-75' : '' %>">
                 
                 <!-- Icon -->
                 <div class="flex-shrink-0 mt-1">
-                  <% if (n.id_evaluasi) { %>
+                  <% if (isDeleted) { %>
+                    <i class="fa-solid fa-triangle-exclamation text-red-500 text-lg"></i>
+                  <% } else if (isEvaluasi) { %>
                     <i class="fa-solid fa-clipboard-check text-orange-500 text-lg"></i>
                   <% } else { %>
                     <i class="fa-solid fa-bell text-orange-500 text-lg"></i>
@@ -52,33 +63,43 @@
 
                 <!-- Isi -->
                 <div class="flex-1">
-                  <p class="text-gray-800 text-sm font-medium">
-                    <%= n.pesan || (n.id_evaluasi ? 'Ada evaluasi dari DPA pada laporan Anda' : 'Status program kerja telah diperbarui oleh DPA') %>
+                  <!-- ✅ Tampilkan pesan lengkap dari controller -->
+                  <p class="text-gray-800 text-sm font-medium <%= isDeleted ? 'line-through text-gray-500' : '' %>">
+                    <%= displayMessage %>
                   </p>
 
                   <!-- Info tambahan -->
-                  <% if (n.id_evaluasi) { %>
+                  <% if (isEvaluasi && n.judul_laporan) { %>
                     <p class="text-gray-600 text-xs mt-1 leading-relaxed">
-                      <span class="font-semibold">Judul Laporan:</span> <%= n.judul_laporan || '-' %><br>
-                      <span class="font-semibold">Evaluator:</span> <%= n.evaluator || 'DPA' %>
+                      <span class="font-semibold">Judul Laporan:</span> <%= n.judul_laporan %><br>
+                      <% if (n.evaluator) { %>
+                        <span class="font-semibold">Evaluator:</span> <%= n.evaluator %>
+                      <% } %>
                     </p>
-                  <% } else if (n.id_ProgramKerja) { %>
+                  <% } else if (n.Nama_ProgramKerja) { %>
                     <p class="text-gray-600 text-xs mt-1 leading-relaxed">
-                      <span class="font-semibold">Program Kerja:</span> <%= n.Nama_ProgramKerja || '-' %>
+                      <span class="font-semibold">Program Kerja:</span> <%= n.Nama_ProgramKerja %>
                     </p>
                   <% } %>
 
                   <!-- Footer -->
                   <div class="flex items-center justify-between mt-3">
                     <span class="text-xs text-gray-500"><%= n.tanggalFormatted || '-' %></span>
-                    <span class="text-orange-600 text-xs font-semibold hover:underline"><%= n.linkLabel %></span>
+                    <span class="<%= isDeleted ? 'text-red-500' : 'text-orange-600' %> text-xs font-semibold hover:underline">
+                      <%= displayLabel %>
+                    </span>
                   </div>
                 </div>
 
-                <!-- Status -->
-                <% if (!n.status_baca) { %>
-                  <span class="text-[10px] px-2 py-1 bg-orange-100 text-orange-700 rounded-full self-start">Baru</span>
-                <% } %>
+                <!-- Status Badge -->
+                <div class="flex flex-col items-end gap-2">
+                  <% if (!n.status_baca) { %>
+                    <span class="text-[10px] px-2 py-1 bg-orange-100 text-orange-700 rounded-full">Baru</span>
+                  <% } %>
+                  <% if (isDeleted) { %>
+                    <span class="text-[10px] px-2 py-1 bg-red-100 text-red-700 rounded-full">Dihapus</span>
+                  <% } %>
+                </div>
               </div>
             </a>
           <% }) %>
