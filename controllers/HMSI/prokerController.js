@@ -204,9 +204,26 @@ exports.createProker = async (req, res) => {
       return res.status(400).send("Data pengguna tidak lengkap untuk membuat program kerja");
     }
 
-    const { namaProker, deskripsi, tanggal_mulai, tanggal_selesai, penanggungJawab } = req.body;
+    const { 
+      namaProker, 
+      deskripsi, 
+      tanggal_mulai, 
+      tanggal_selesai, 
+      penanggungJawab,
+      targetKuantitatif,
+      targetKualitatif 
+    } = req.body;
 
-    if (!namaProker || !deskripsi || !tanggal_mulai || !tanggal_selesai || !penanggungJawab) {
+    // 🔹 Validasi wajib isi
+    if (
+      !namaProker || 
+      !deskripsi || 
+      !tanggal_mulai || 
+      !tanggal_selesai || 
+      !penanggungJawab ||
+      !targetKuantitatif ||
+      !targetKualitatif
+    ) {
       return res.render("hmsi/tambahProker", {
         title: "Tambah Program Kerja",
         user,
@@ -217,6 +234,7 @@ exports.createProker = async (req, res) => {
       });
     }
 
+    // 🔹 Validasi tanggal
     if (new Date(tanggal_mulai) > new Date(tanggal_selesai)) {
       return res.render("hmsi/tambahProker", {
         title: "Tambah Program Kerja",
@@ -231,11 +249,12 @@ exports.createProker = async (req, res) => {
     const dokumen = req.file ? req.file.filename : null;
     const status = calculateStatusWithLock(tanggal_mulai, tanggal_selesai, null);
 
+    // 🟢 Simpan ke database
     await db.query(
       `
       INSERT INTO Program_kerja 
-      (id_ProgramKerja, Nama_ProgramKerja, Deskripsi, Tanggal_mulai, Tanggal_selesai, Penanggung_jawab, id_anggota, id_divisi, Dokumen_pendukung, Status)
-      VALUES (UUID(), ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      (id_ProgramKerja, Nama_ProgramKerja, Deskripsi, Tanggal_mulai, Tanggal_selesai, Penanggung_jawab, Target_Kuantitatif, Target_Kualitatif, id_anggota, id_divisi, Dokumen_pendukung, Status)
+      VALUES (UUID(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `,
       [
         namaProker,
@@ -243,6 +262,8 @@ exports.createProker = async (req, res) => {
         tanggal_mulai,
         tanggal_selesai,
         penanggungJawab,
+        targetKuantitatif,
+        targetKualitatif,
         user.id_anggota,
         user.id_divisi,
         dokumen,
@@ -250,6 +271,7 @@ exports.createProker = async (req, res) => {
       ]
     );
 
+    // 🟢 Tambahkan notifikasi ke DPA
     const idNotif = uuidv4();
     const pesan = `Divisi ${user.nama_divisi || "HMSI"} menambahkan Program Kerja baru: "${namaProker}"`;
     await db.query(
@@ -273,6 +295,7 @@ exports.createProker = async (req, res) => {
     });
   }
 };
+
 
 // =====================================================
 // ✏️ Ambil data untuk Edit Program
@@ -315,8 +338,17 @@ exports.updateProker = async (req, res) => {
     }
 
     const { id } = req.params;
-    const { namaProker, deskripsi, tanggal_mulai, tanggal_selesai, penanggungJawab } = req.body;
+    const { 
+      namaProker, 
+      deskripsi, 
+      tanggal_mulai, 
+      tanggal_selesai, 
+      penanggungJawab,
+      targetKuantitatif,
+      targetKualitatif
+    } = req.body;
 
+    // 🔹 Validasi tanggal
     if (new Date(tanggal_mulai) > new Date(tanggal_selesai)) {
       return res.render("hmsi/editProker", {
         title: "Edit Program Kerja",
@@ -328,6 +360,7 @@ exports.updateProker = async (req, res) => {
       });
     }
 
+    // 🔹 Ambil data lama
     const [existingRows] = await db.query(
       "SELECT Dokumen_pendukung, Status FROM Program_kerja WHERE id_ProgramKerja = ?",
       [id]
@@ -339,6 +372,7 @@ exports.updateProker = async (req, res) => {
     const newFile = req.file ? req.file.filename : null;
     const status = calculateStatusWithLock(tanggal_mulai, tanggal_selesai, status_db);
 
+    // 🟢 Query update dengan field baru
     let query = `
       UPDATE Program_kerja SET 
         Nama_ProgramKerja=?, 
@@ -346,6 +380,8 @@ exports.updateProker = async (req, res) => {
         Tanggal_mulai=?, 
         Tanggal_selesai=?, 
         Penanggung_jawab=?, 
+        Target_Kuantitatif=?, 
+        Target_Kualitatif=?, 
         id_anggota=?, 
         id_divisi=?, 
         Status=?`;
@@ -355,6 +391,8 @@ exports.updateProker = async (req, res) => {
       tanggal_mulai,
       tanggal_selesai,
       penanggungJawab,
+      targetKuantitatif,
+      targetKualitatif,
       user.id_anggota,
       user.id_divisi,
       status,
@@ -369,8 +407,11 @@ exports.updateProker = async (req, res) => {
     params.push(id);
 
     await db.query(query, params);
+
+    // 🧹 Hapus file lama jika diganti
     if (newFile && oldFile) safeRemoveFile(oldFile);
 
+    // 🟢 Tambahkan notifikasi ke DPA
     const idNotif = uuidv4();
     const pesan = `Divisi ${user.nama_divisi || "HMSI"} memperbarui Program Kerja: "${namaProker}"`;
     await db.query(
@@ -388,14 +429,16 @@ exports.updateProker = async (req, res) => {
   }
 };
 
+
 // =====================================================
-// ❌ Hapus Program Kerja
+// ❌ Hapus Program Kerja (hapus juga semua laporan terkait)
 // =====================================================
 exports.deleteProker = async (req, res) => {
   try {
     const user = req.session.user;
     const id = req.params.id;
 
+    // 🔹 Ambil nama proker & dokumen
     const [rows] = await db.query(
       "SELECT Nama_ProgramKerja, Dokumen_pendukung FROM Program_kerja WHERE id_ProgramKerja = ?",
       [id]
@@ -404,8 +447,26 @@ exports.deleteProker = async (req, res) => {
 
     const { Nama_ProgramKerja, Dokumen_pendukung } = rows[0];
 
+    // 🗑️ Ambil semua laporan terkait agar bisa hapus file dokumentasinya
+    const [laporanRows] = await db.query(
+      "SELECT dokumentasi FROM Laporan WHERE id_ProgramKerja = ?",
+      [id]
+    );
+
+    for (const lap of laporanRows) {
+      if (lap.dokumentasi) safeRemoveFile(lap.dokumentasi);
+    }
+
+    // 🧹 Hapus laporan terkait
+    await db.query("DELETE FROM Laporan WHERE id_ProgramKerja = ?", [id]);
+
+    // 🧹 Hapus notifikasi yang terhubung dengan proker ini
     await db.query("DELETE FROM Notifikasi WHERE id_ProgramKerja = ?", [id]);
 
+    // 🗑️ Hapus dokumen pendukung proker
+    if (Dokumen_pendukung) safeRemoveFile(Dokumen_pendukung);
+
+    // 🟢 Notifikasi ke DPA bahwa proker dihapus
     const idNotif = uuidv4();
     const pesan = `Divisi ${user.nama_divisi || "HMSI"} menghapus Program Kerja: "${Nama_ProgramKerja}"`;
     await db.query(
@@ -416,13 +477,13 @@ exports.deleteProker = async (req, res) => {
       [idNotif, pesan, user.id_divisi]
     );
 
+    // 🔚 Hapus proker terakhir
     await db.query("DELETE FROM Program_kerja WHERE id_ProgramKerja = ?", [id]);
-    if (Dokumen_pendukung) safeRemoveFile(Dokumen_pendukung);
 
-    res.redirect("/hmsi/kelola-proker?success=Program Kerja berhasil dihapus");
+    res.redirect("/hmsi/kelola-proker?success=Program Kerja beserta seluruh laporan terkait telah dihapus");
   } catch (err) {
     console.error("❌ Error deleteProker:", err.message);
-    res.status(500).send("Gagal menghapus program kerja");
+    res.status(500).send("Gagal menghapus program kerja beserta laporan terkait");
   }
 };
 

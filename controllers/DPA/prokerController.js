@@ -122,19 +122,25 @@ exports.getDetailProkerDPA = async (req, res) => {
         p.Tanggal_selesai AS tanggal_selesai,
         p.Penanggung_jawab AS penanggungJawab,
         p.Dokumen_pendukung AS dokumen_pendukung,
+        p.Target_Kuantitatif,
+        p.Target_Kualitatif,
         p.Status AS status_db
       FROM Program_kerja p
       LEFT JOIN User u ON p.id_anggota = u.id_anggota
       LEFT JOIN Divisi d ON u.id_divisi = d.id_divisi
-      WHERE p.id_ProgramKerja = ?`,
+      WHERE p.id_ProgramKerja = ?
+      `,
       [req.params.id]
     );
 
+    // 🔸 Jika tidak ditemukan
     if (!rows.length) {
       return res.status(404).send("Program Kerja tidak ditemukan");
     }
 
     const r = rows[0];
+
+    // 🔹 Hitung status otomatis bila belum final
     let status = r.status_db;
     if (
       !status ||
@@ -146,6 +152,7 @@ exports.getDetailProkerDPA = async (req, res) => {
     console.log("📊 Status dari database:", r.status_db);
     console.log("📊 Status yang digunakan:", status);
 
+    // 🔹 Susun objek proker lengkap
     const proker = {
       id: r.id,
       namaProker: r.namaProker,
@@ -156,11 +163,14 @@ exports.getDetailProkerDPA = async (req, res) => {
       tanggal_selesai: r.tanggal_selesai,
       penanggungJawab: r.penanggungJawab,
       dokumen_pendukung: r.dokumen_pendukung,
+      Target_Kuantitatif: r.Target_Kuantitatif || "-",
+      Target_Kualitatif: r.Target_Kualitatif || "-",
       tanggalMulaiFormatted: formatTanggal(r.tanggal_mulai),
       tanggalSelesaiFormatted: formatTanggal(r.tanggal_selesai),
       status,
     };
 
+    // 🔹 Render ke halaman detail DPA
     res.render("dpa/detailProker", {
       title: "Detail Program Kerja",
       user: req.session.user || { name: "Dummy User" },

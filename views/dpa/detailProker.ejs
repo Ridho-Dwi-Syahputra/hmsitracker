@@ -168,33 +168,56 @@
               </div>
             </div>
 
-            <!-- Dokumen Pendukung -->
-            <div class="md:col-span-2 bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-4">
-              <p class="font-medium text-gray-600 mb-2">Dokumen Pendukung</p>
-              <div class="bg-white border border-gray-200 p-4 rounded-lg space-y-6">
-                <% if (proker.dokumen_pendukung) { %>
-                  <% proker.dokumen_pendukung.split(',').forEach(file => {
-                       const f = file.trim();
-                       const ext = f.split('.').pop().toLowerCase();
-                  %>
-                    <div class="w-full bg-gray-50 rounded-lg border border-gray-300 shadow-sm p-2">
-                      <% if (['jpg','jpeg','png','gif'].includes(ext)) { %>
-                        <img src="/uploads/<%= f %>" alt="<%= f %>" class="w-full h-auto rounded-lg">
-                      <% } else if (ext === 'pdf') { %>
-                        <iframe src="/uploads/<%= f %>" class="w-full h-96 rounded-lg" frameborder="0"></iframe>
-                      <% } else if (['doc','docx','xls','xlsx','ppt','pptx'].includes(ext)) { %>
-                        <iframe src="https://view.officeapps.live.com/op/embed.aspx?src=<%= encodeURIComponent('http://'+req.headers.host+'/uploads/'+f) %>"
-                                class="w-full h-96 rounded-lg" frameborder="0"></iframe>
-                      <% } else { %>
-                        <p class="text-gray-500">File <%= f %> tidak dapat ditampilkan.</p>
-                      <% } %>
-                    </div>
-                  <% }) %>
-                <% } else { %>
-                  <p class="text-gray-500 italic">Tidak ada dokumen pendukung.</p>
-                <% } %>
-              </div>
-            </div>
+            <!-- Target Pencapaian -->
+<div class="md:col-span-2 bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-4">
+  <h4 class="text-lg font-semibold text-gray-700 mb-2">🎯 Target Pencapaian</h4>
+
+  <!-- Target Kuantitatif -->
+  <div class="bg-white border border-gray-200 p-4 rounded-lg">
+    <p class="font-medium text-gray-600 mb-2">Target Pencapaian Kuantitatif</p>
+    <p class="text-gray-800 whitespace-pre-line leading-relaxed">
+      <%= proker.Target_Kuantitatif || '-' %>
+    </p>
+  </div>
+
+  <!-- Target Kualitatif -->
+  <div class="bg-white border border-gray-200 p-4 rounded-lg">
+    <p class="font-medium text-gray-600 mb-2">Target Pencapaian Kualitatif</p>
+    <p class="text-gray-800 whitespace-pre-line leading-relaxed">
+      <%= proker.Target_Kualitatif || '-' %>
+    </p>
+  </div>
+</div>
+
+
+           <!-- Dokumen Pendukung -->
+<div class="md:col-span-2 bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-4">
+  <p class="font-medium text-gray-600 mb-2">Dokumen Pendukung</p>
+  <div class="bg-white border border-gray-200 p-4 rounded-lg space-y-6">
+    <% if (proker.dokumen_pendukung) { %>
+      <% proker.dokumen_pendukung.split(',').forEach(file => {
+           const f = file.trim();
+           const ext = f.split('.').pop().toLowerCase();
+      %>
+        <div class="w-full bg-gray-50 rounded-lg border border-gray-300 shadow-sm p-2">
+          <% if (['jpg','jpeg','png','gif'].includes(ext)) { %>
+            <img src="/uploads/proker/<%= f %>" alt="<%= f %>" class="w-full h-auto rounded-lg">
+          <% } else if (ext === 'pdf') { %>
+            <iframe src="/uploads/proker/<%= f %>" class="w-full h-96 rounded-lg" frameborder="0"></iframe>
+          <% } else if (['doc','docx','xls','xlsx','ppt','pptx'].includes(ext)) { %>
+            <iframe src="https://view.officeapps.live.com/op/embed.aspx?src=<%= encodeURIComponent('http://' + req.headers.host + '/uploads/proker/' + f) %>"
+                    class="w-full h-96 rounded-lg" frameborder="0"></iframe>
+          <% } else { %>
+            <p class="text-gray-500">File <%= f %> tidak dapat ditampilkan.</p>
+          <% } %>
+        </div>
+      <% }) %>
+    <% } else { %>
+      <p class="text-gray-500 italic">Tidak ada dokumen pendukung.</p>
+    <% } %>
+  </div>
+</div>
+
 
           </div>
         </section>
