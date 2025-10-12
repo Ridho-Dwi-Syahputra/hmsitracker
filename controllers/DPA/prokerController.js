@@ -4,7 +4,7 @@
 // =====================================================
 
 const db = require("../../config/db");
-const { v4: uuidv4 } = require("uuid"); // untuk id notifikasi
+const { v4: uuidv4 } = require("uuid");
 const { deleteOldProkerNotif } = require("../hmsi/notifikasiController");
 
 // =====================================================
@@ -25,7 +25,11 @@ function formatTanggal(dateValue) {
 // helper: hitung status otomatis (sinkron HMSI)
 // =====================================================
 function calculateStatus(start, end, status_db = null) {
-  if (status_db === "Selesai" || status_db === "Gagal") return status_db;
+  // 🔹 Jika status sudah final, gunakan status dari DB
+  if (status_db === "Selesai" || status_db === "Tidak Selesai") {
+    return status_db;
+  }
+  
   const today = new Date();
   const startDate = start ? new Date(start) : null;
   const endDate = end ? new Date(end) : null;
@@ -133,7 +137,6 @@ exports.getDetailProkerDPA = async (req, res) => {
       [req.params.id]
     );
 
-    // 🔸 Jika tidak ditemukan
     if (!rows.length) {
       return res.status(404).send("Program Kerja tidak ditemukan");
     }
@@ -142,17 +145,13 @@ exports.getDetailProkerDPA = async (req, res) => {
 
     // 🔹 Hitung status otomatis bila belum final
     let status = r.status_db;
-    if (
-      !status ||
-      !["Belum Dimulai", "Sedang Berjalan", "Selesai", "Gagal"].includes(status)
-    ) {
+    if (!status || !["Belum Dimulai", "Sedang Berjalan", "Selesai", "Tidak Selesai"].includes(status)) {
       status = calculateStatus(r.tanggal_mulai, r.tanggal_selesai, r.status_db);
     }
 
     console.log("📊 Status dari database:", r.status_db);
     console.log("📊 Status yang digunakan:", status);
 
-    // 🔹 Susun objek proker lengkap
     const proker = {
       id: r.id,
       namaProker: r.namaProker,
@@ -170,7 +169,6 @@ exports.getDetailProkerDPA = async (req, res) => {
       status,
     };
 
-    // 🔹 Render ke halaman detail DPA
     res.render("dpa/detailProker", {
       title: "Detail Program Kerja",
       user: req.session.user || { name: "Dummy User" },
@@ -195,25 +193,21 @@ exports.updateStatusProker = async (req, res) => {
 
     console.log("📝 Request update status - ID:", id, "Status:", status);
 
-    const validStatus = [
-      "Belum Dimulai",
-      "Sedang Berjalan",
-      "Selesai",
-      "Gagal",
-    ];
+    // ✅ Validasi status yang diperbolehkan (GANTI "Gagal" → "Tidak Selesai")
+    const validStatus = ["Belum Dimulai", "Sedang Berjalan", "Selesai", "Tidak Selesai"];
     if (!validStatus.includes(status)) {
       return res.status(400).json({
         success: false,
-        message:
-          "Status tidak valid. Harus salah satu dari: Belum Dimulai, Sedang Berjalan, Selesai, Gagal",
+        message: "Status tidak valid. Harus salah satu dari: " + validStatus.join(", "),
       });
     }
 
-    // 🔹 Ambil info proker untuk notifikasi
+    // 🔹 Ambil info proker untuk validasi dan notifikasi
     const [rows] = await db.query(
       `
       SELECT 
         p.Nama_ProgramKerja AS namaProker,
+        p.Status AS status_sekarang,
         u.id_divisi AS divisi,
         d.id_divisi AS id_divisi,
         d.nama_divisi AS nama_divisi
@@ -232,6 +226,14 @@ exports.updateStatusProker = async (req, res) => {
     }
 
     const proker = rows[0];
+
+    // 🔹 Validasi: Jika status sudah final (Selesai/Tidak Selesai), tidak boleh diubah
+    if (proker.status_sekarang === "Selesai" || proker.status_sekarang === "Tidak Selesai") {
+      return res.status(400).json({
+        success: false,
+        message: "Status program kerja sudah final dan tidak dapat diubah kembali.",
+      });
+    }
 
     // ✅ Update status di database
     const [result] = await db.query(
@@ -253,7 +255,7 @@ exports.updateStatusProker = async (req, res) => {
     const idNotifikasi = uuidv4();
     const divisiNama = proker.nama_divisi || proker.divisi || "Tidak Diketahui";
     const idDivisi = proker.id_divisi || null;
-    const pesan = `DPA telah mengubah status Program Kerja "${proker.namaProker}" milik divisi ${divisiNama} menjadi ${status}`;
+    const pesan = `DPA telah mengubah status Program Kerja "${proker.namaProker}" milik divisi ${divisiNama} menjadi "${status}"`;
 
     if (idDivisi) {
       await db.query(
@@ -269,7 +271,7 @@ exports.updateStatusProker = async (req, res) => {
 
     res.json({
       success: true,
-      message: `Status program kerja berhasil diubah menjadi ${status}`,
+      message: `Status program kerja berhasil diubah menjadi "${status}"`,
     });
   } catch (err) {
     console.error("❌ Error updateStatusProker:", err.message);
