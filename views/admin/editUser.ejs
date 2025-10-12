@@ -4,9 +4,47 @@
   <meta charset="UTF-8">
   <title><%= title %></title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://kit.fontawesome.com/your-fa-kit.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body class="bg-orange-50 min-h-screen flex flex-col">
+
+  <!-- Success Modal -->
+  <div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="successModalContent">
+      <div class="text-center">
+        <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 mb-2">Berhasil Disimpan!</h3>
+        <p class="text-gray-600 mb-6">Data user berhasil diperbarui.</p>
+        <button id="closeSuccessModal" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-3 px-6 rounded-xl transition-colors duration-200">
+          Kembali ke Kelola User
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error Modal -->
+  <div id="errorModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="errorModalContent">
+      <div class="text-center">
+        <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 mb-2">Terjadi Kesalahan!</h3>
+        <p id="errorMessage" class="text-gray-600 mb-6">Mohon periksa kembali data yang Anda masukkan.</p>
+        <button id="closeErrorModal" class="w-full bg-red-500 hover:bg-red-600 text-white font-medium py-3 px-6 rounded-xl transition-colors duration-200">
+          Tutup
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- Navbar -->
   <%- include('../partials/navbarAdmin', { user: user }) %>
@@ -30,7 +68,7 @@
         <%- include('../partials/alert', { errorMsg: errorMsg, successMsg: successMsg }) %>
 
         <!-- Form -->
-        <form action="/admin/user/edit/<%= userData.id_anggota %>" method="POST" class="space-y-10">
+        <form id="editUserForm" action="/admin/user/edit/<%= userData.id_anggota %>" method="POST" class="space-y-10">
 
           <!-- Informasi Dasar -->
           <div>
@@ -154,6 +192,76 @@
 
   <!-- Script -->
   <script>
+    // ===== MODAL HANDLERS =====
+    function showModal(modalId) {
+      const modal = document.getElementById(modalId);
+      const content = document.getElementById(modalId + 'Content');
+      if (!modal || !content) return;
+      modal.classList.remove('hidden');
+      setTimeout(() => {
+        content.classList.remove('scale-95', 'opacity-0');
+        content.classList.add('scale-100', 'opacity-100');
+      }, 10);
+    }
+
+    function hideModal(modalId) {
+      const modal = document.getElementById(modalId);
+      const content = document.getElementById(modalId + 'Content');
+      if (!modal || !content) return;
+      content.classList.remove('scale-100', 'opacity-100');
+      content.classList.add('scale-95', 'opacity-0');
+      setTimeout(() => {
+        modal.classList.add('hidden');
+      }, 300);
+    }
+
+    // ===== MODAL EVENT BINDING =====
+    document.getElementById('closeSuccessModal')?.addEventListener('click', () => {
+      hideModal('successModal');
+      setTimeout(() => {
+        window.location.href = '/admin/kelola-user';
+      }, 300);
+    });
+    
+    document.getElementById('closeErrorModal')?.addEventListener('click', () => hideModal('errorModal'));
+
+    ['successModal', 'errorModal'].forEach(id => {
+      const modal = document.getElementById(id);
+      if (!modal) return;
+      modal.addEventListener('click', e => {
+        if (e.target.id === id) hideModal(id);
+      });
+    });
+
+    // ===== FORM SUBMIT HANDLER =====
+    const userForm = document.getElementById('editUserForm');
+    
+    userForm?.addEventListener('submit', e => {
+      e.preventDefault();
+      
+      const formData = new FormData(userForm);
+      
+      fetch(userForm.action, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams(formData)
+      })
+      .then(async res => {
+        if (res.ok) {
+          showModal('successModal');
+        } else {
+          const msg = await res.text();
+          throw new Error(msg || 'Server error');
+        }
+      })
+      .catch(err => {
+        document.getElementById('errorMessage').textContent = 'Terjadi kesalahan: ' + (err.message || err);
+        showModal('errorModal');
+      });
+    });
+
     // ====== ROLE DROPDOWN ======
     const roleBtn = document.getElementById("roleDropdownBtn");
     const roleMenu = document.getElementById("roleDropdownMenu");
@@ -161,8 +269,8 @@
     const roleLabel = document.getElementById("roleDropdownLabel");
     const divisiWrapper = document.getElementById("divisiWrapper");
 
-    roleBtn.addEventListener("click", () => roleMenu.classList.toggle("hidden"));
-    roleMenu.querySelectorAll("button").forEach(btn => {
+    roleBtn?.addEventListener("click", () => roleMenu.classList.toggle("hidden"));
+    roleMenu?.querySelectorAll("button").forEach(btn => {
       btn.addEventListener("click", () => {
         roleInput.value = btn.dataset.value;
         roleLabel.textContent = btn.textContent;
@@ -177,8 +285,11 @@
         }
       });
     });
+    
     window.addEventListener("click", (e) => {
-      if (!roleBtn.contains(e.target) && !roleMenu.contains(e.target)) roleMenu.classList.add("hidden");
+      if (roleBtn && !roleBtn.contains(e.target) && !roleMenu.contains(e.target)) {
+        roleMenu.classList.add("hidden");
+      }
     });
 
     // ====== DIVISI DROPDOWN ======
@@ -195,8 +306,11 @@
         divisiMenu.classList.add("hidden");
       });
     });
+    
     window.addEventListener("click", (e) => {
-      if (!divisiBtn?.contains(e.target) && !divisiMenu?.contains(e.target)) divisiMenu?.classList.add("hidden");
+      if (divisiBtn && !divisiBtn?.contains(e.target) && !divisiMenu?.contains(e.target)) {
+        divisiMenu?.classList.add("hidden");
+      }
     });
   </script>
 </body>
