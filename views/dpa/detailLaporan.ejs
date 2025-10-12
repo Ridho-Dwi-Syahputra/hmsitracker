@@ -244,7 +244,7 @@
   </a>
 
   <% if (!evaluasi || evaluasi.status_konfirmasi !== 'Selesai') { %>
-    <a href="/dpa/kelolaLaporan/<%= laporan.id_laporan %>/evaluasi"
+    <a href="/dpa/laporan/<%= laporan.id_laporan %>/evaluasi"
        class="flex items-center gap-2 px-8 py-3 text-white bg-orange-500 rounded-xl text-sm font-semibold hover:bg-orange-600 transition transform hover:scale-105 active:scale-95">
       <i class="fa-solid fa-edit"></i>
       <span><%= evaluasi ? 'Edit Evaluasi' : 'Beri Evaluasi' %></span>

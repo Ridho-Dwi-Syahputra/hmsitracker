@@ -2,32 +2,33 @@
   // ✅ Ambil nama + foto profil
   var displayName = (user && (user.nama || user.name)) ? (user.nama || user.name) : 'Admin DPA';
   var fotoProfile = (user && user.foto_profile) ? ("/" + user.foto_profile.replace(/^\/+/, '')) : '/default-profile.png';
-
-  // ✅ Navigation untuk DPA
+  // ✅ Navigation untuk DPA dengan submenu
   var navItems = [
     { name: 'Dashboard', path: '/dpa/dashboard' },
     { name: 'Daftar Program Kerja', path: '/dpa/lihatProker' },
-    { name: 'Daftar Laporan', path: '/dpa/kelolaLaporan' }
+    {
+      name: 'Laporan',
+      submenu: [
+        { name: 'Belum Dievaluasi', path: '/dpa/kelolaLaporan' },
+        { name: 'Telah Dievaluasi', path: '/dpa/laporanDiterima' }
+      ]
+    }
   ];
 %>
 
 <div id="dpa-sidebar-root">
-  <!-- Overlay -->
   <div id="dpa-sidebar-overlay"
        class="hidden fixed inset-0 bg-black bg-opacity-40 z-40 lg:hidden transition-opacity duration-300"></div>
 
-  <!-- Sidebar -->
   <aside id="dpa-sidebar"
          class="fixed inset-y-0 left-0 w-80 bg-white border-r border-gray-200 flex flex-col 
                 transform -translate-x-full lg:translate-x-0 z-50 transition-transform duration-300 ease-in-out">
 
-    <!-- Header -->
     <div class="hidden lg:block p-6 border-b border-gray-100 bg-gradient-to-br from-orange-500 to-orange-600">
       <h1 class="text-xl font-bold text-white tracking-wide">HMSI TRACKER</h1>
       <p class="text-sm text-orange-100 mt-1">Monitoring System</p>
     </div>
 
-    <!-- Profile -->
     <div class="p-6 border-b border-gray-100 bg-white">
       <div class="flex items-center gap-4">
         <img src="<%= fotoProfile %>?v=<%= Date.now() %>"
@@ -47,44 +48,50 @@
 
         <a href="/dpa/profile" title="Profile"
            class="gear-btn p-2 text-gray-400 hover:text-gray-600 rounded-lg transition-transform duration-300">
-          <svg class="gear-icon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+           <svg class="gear-icon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 
-              0 002.573 1.066c1.543-.94 3.31.826 2.37 
-              2.37a1.724 1.724 0 001.065 2.572c1.756.426 
-              1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 
-              2.573c.94 1.543-.826 3.31-2.37 
-              2.37a1.724 1.724 0 00-2.572 
-              1.065c-.426 1.756-2.924 
-              1.756-3.35 0a1.724 1.724 
-              0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 
-              1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 
-              0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 
-              2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
           </svg>
         </a>
       </div>
     </div>
 
-    <!-- Navigation -->
     <nav id="dpa-nav" class="flex-1 p-6 overflow-y-auto space-y-1">
-      <% for (var i = 0; i < navItems.length; i++) { 
-           var item = navItems[i];
-           var isActive = false;
-           if (typeof activeNav !== 'undefined' && activeNav) {
-             var av = String(activeNav).toLowerCase();
-             isActive = (av === String(item.name).toLowerCase() || av === String(item.path).toLowerCase());
-           }
+      <% 
+        const activeNavLower = (typeof activeNav !== 'undefined' && activeNav) ? String(activeNav).toLowerCase() : '';
+        navItems.forEach(item => { 
+          if (item.submenu) {
+            const isParentActive = item.submenu.some(sub => activeNavLower === String(sub.name).toLowerCase());
+      %>
+        <div class="nav-dropdown" data-parent-active="<%= isParentActive %>">
+          <button class="nav-item dropdown-toggle block w-full p-3.5 my-1 rounded-xl text-sm font-medium flex items-center justify-between gap-3 <%= isParentActive ? 'active-parent' : '' %>">
+            <div class="flex items-center gap-3">
+              <span class="w-1.5 h-1.5 rounded-full <%= isParentActive ? 'bg-orange-500' : 'bg-gray-300' %>"></span>
+              <span><%= item.name %></span>
+            </div>
+            <i class="fa-solid fa-chevron-down transition-transform duration-300"></i>
+          </button>
+          <div class="submenu-container pl-6 overflow-hidden">
+            <% item.submenu.forEach(subItem => { 
+              const isSubActive = activeNavLower === String(subItem.name).toLowerCase();
+            %>
+              <a href="<%= subItem.path %>" class="submenu-item block w-full p-3 my-1 rounded-xl text-sm font-medium flex items-center gap-3 <%= isSubActive ? 'active' : '' %>">
+                <span><%= subItem.name %></span>
+              </a>
+            <% }); %>
+          </div>
+        </div>
+      <% } else { 
+          const isActive = activeNavLower === String(item.name).toLowerCase() || activeNavLower === String(item.path).toLowerCase();
       %>
         <a href="<%= item.path %>"
            class="nav-item block w-full p-3.5 my-1 rounded-xl text-sm font-medium flex items-center gap-3 <%= isActive ? 'active' : '' %>">
           <span class="w-1.5 h-1.5 rounded-full <%= isActive ? 'bg-orange-500' : 'bg-gray-300' %>"></span>
           <span><%= item.name %></span>
         </a>
-      <% } %>
+      <% } }); %>
     </nav>
 
-    <!-- Logout -->
     <div class="p-6 border-t border-gray-100">
       <form action="/auth/logout" method="GET">
         <button type="submit"
@@ -98,24 +105,17 @@
   </aside>
 </div>
 
-<!-- ✅ Styles -->
 <style>
   #dpa-sidebar { will-change: transform; }
   .slide-in { transform: translateX(0) !important; }
   .slide-out { transform: translateX(-100%) !important; }
 
-  .nav-item {
-    color: #374151;
-    transition: all 0.3s ease, transform 0.2s ease;
-  }
-
+  .nav-item { color: #374151; transition: all 0.3s ease, transform 0.2s ease; }
   .nav-item:hover {
     transform: translateX(6px) scale(1.02);
     background: linear-gradient(to right, #fff7ed, #fff3e0);
     box-shadow: inset 4px 0 0 #f97316;
   }
-
-  /* ✅ Animasi aktif dipertahankan */
   .nav-item.active {
     animation: pulseOrange 1.5s ease-in-out infinite alternate;
     background: linear-gradient(to right, #fff7ed, #ffedd5);
@@ -123,15 +123,22 @@
     font-weight: 600;
     border-right: 3px solid #f97316;
   }
+  .nav-item.active-parent { color: #ea580c !important; font-weight: 600; }
+  
+  .submenu-item { color: #4b5563; }
+  .submenu-item:hover { color: #ea580c; background-color: #fff7ed; }
+  .submenu-item.active { font-weight: 600; color: #f97316; background-color: #ffedd5; }
+  
+  .submenu-container { max-height: 0; transition: max-height 0.5s ease-in-out; }
+  .nav-dropdown.open .submenu-container { max-height: 200px; /* Adjust as needed */ }
+  .nav-dropdown.open .dropdown-toggle i { transform: rotate(180deg); }
 
   @keyframes pulseOrange {
     from { box-shadow: inset 4px 0 0 #f97316, 0 0 0 rgba(249,115,22,0.15); }
     to   { box-shadow: inset 6px 0 0 #f97316, 0 0 10px rgba(249,115,22,0.28); }
   }
 
-  .gear-icon {
-    transition: transform 0.4s ease, color 0.3s ease, filter 0.3s ease;
-  }
+  .gear-icon { transition: transform 0.4s ease, color 0.3s ease, filter 0.3s ease; }
   .gear-btn:hover .gear-icon {
     transform: rotate(90deg) scale(1.2);
     color: #ea580c;
@@ -147,35 +154,39 @@
   }
 </style>
 
-<!-- ✅ Script -->
 <script>
   document.addEventListener("DOMContentLoaded", () => {
     const sidebar = document.getElementById("dpa-sidebar");
     const overlay = document.getElementById("dpa-sidebar-overlay");
     const toggle = document.getElementById("dpa-sidebar-toggle");
 
+    // Sidebar toggle for mobile
     if (window.innerWidth >= 1024) sidebar.classList.add("slide-in");
-
     if (toggle) {
       toggle.addEventListener("click", () => {
         const isActive = toggle.classList.toggle("active");
-        if (isActive) {
-          sidebar.classList.add("slide-in");
-          sidebar.classList.remove("slide-out");
-          overlay.classList.remove("hidden");
-        } else {
-          sidebar.classList.remove("slide-in");
-          sidebar.classList.add("slide-out");
-          overlay.classList.add("hidden");
-        }
+        sidebar.classList.toggle("slide-in", isActive);
+        sidebar.classList.toggle("slide-out", !isActive);
+        overlay.classList.toggle("hidden", !isActive);
       });
     }
-
     overlay.addEventListener("click", () => {
       sidebar.classList.remove("slide-in");
       sidebar.classList.add("slide-out");
       toggle?.classList.remove("active");
       overlay.classList.add("hidden");
+    });
+
+    // Submenu toggle
+    const dropdowns = document.querySelectorAll(".nav-dropdown");
+    dropdowns.forEach(dropdown => {
+      const toggleBtn = dropdown.querySelector(".dropdown-toggle");
+      if (dropdown.dataset.parentActive === 'true') {
+          dropdown.classList.add('open');
+      }
+      toggleBtn.addEventListener("click", () => {
+        dropdown.classList.toggle("open");
+      });
     });
   });
 </script>

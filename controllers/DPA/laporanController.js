@@ -1,9 +1,6 @@
 // =====================================================
 // controllers/dpa/laporanController.js
 // Controller untuk DPA dalam mengelola laporan
-// DPA hanya bisa melihat laporan & memberi evaluasi
-// + menampilkan komentar HMSI bila ada
-// + sinkron dengan tabel divisi baru (pakai id_divisi)
 // =====================================================
 
 const db = require("../../config/db");
@@ -33,7 +30,7 @@ function getMimeFromFile(filename) {
 }
 
 // =====================================================
-// 📑 Daftar semua laporan (Read-only untuk DPA)
+// 📑 Daftar laporan BELUM DIEVALUASI (Hanya yang belum pernah dievaluasi)
 // =====================================================
 exports.getAllLaporanDPA = async (req, res) => {
   try {
@@ -51,45 +48,35 @@ exports.getAllLaporanDPA = async (req, res) => {
       LEFT JOIN Program_kerja p ON l.id_ProgramKerja = p.id_ProgramKerja
       LEFT JOIN Divisi d ON l.id_divisi = d.id_divisi
       LEFT JOIN Evaluasi e ON e.id_laporan = l.id_laporan
+      -- ✅ DIPERBAIKI: Hanya tampilkan yang benar-benar belum punya evaluasi
+      WHERE e.id_evaluasi IS NULL
       ORDER BY l.tanggal DESC
     `);
 
     const laporan = rows.map((r) => {
-      // Format tanggal
       let tanggalFormatted = "-";
       if (r.tanggal && r.tanggal !== "0000-00-00") {
         const d = new Date(r.tanggal);
         if (!isNaN(d.getTime())) {
           tanggalFormatted = d.toLocaleDateString("id-ID", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric",
+            day: "2-digit", month: "short", year: "numeric",
           });
         }
       }
-
-      // Status
-      let status = "Belum Dievaluasi";
-      if (r.status_konfirmasi === "Revisi") status = "Revisi";
-      else if (r.status_konfirmasi === "Selesai") status = "Disetujui";
-
-      // Divisi sinkron
-      const divisi = r.nama_divisi || "Tidak Diketahui";
-
       return {
         id_laporan: r.id_laporan,
         judul_laporan: r.judul_laporan,
         namaProker: r.namaProker || "-",
-        divisi,
+        divisi: r.nama_divisi || "Tidak Diketahui",
         tanggalFormatted,
-        status,
+        status: "Belum Dievaluasi",
       };
     });
 
     res.render("dpa/kelolaLaporan", {
-      title: "Daftar Laporan",
+      title: "Laporan Belum Dievaluasi",
       user: req.session.user,
-      activeNav: "Laporan",
+      activeNav: "Belum dievaluasi",
       laporan,
       successMsg: req.query.success || null,
       errorMsg: null,
@@ -101,20 +88,79 @@ exports.getAllLaporanDPA = async (req, res) => {
 };
 
 // =====================================================
+// 🗂️ Daftar laporan TELAH DIEVALUASI (Diterima & Revisi)
+// =====================================================
+exports.getLaporanDiterima = async (req, res) => {
+  try {
+    const [rows] = await db.query(`
+      SELECT 
+        l.id_laporan,
+        l.judul_laporan,
+        l.tanggal,
+        l.id_ProgramKerja,
+        l.id_divisi,
+        p.Nama_ProgramKerja AS namaProker,
+        d.nama_divisi AS nama_divisi,
+        e.status_konfirmasi
+      FROM Laporan l
+      LEFT JOIN Program_kerja p ON l.id_ProgramKerja = p.id_ProgramKerja
+      LEFT JOIN Divisi d ON l.id_divisi = d.id_divisi
+      JOIN Evaluasi e ON e.id_laporan = l.id_laporan
+      -- ✅ DIPERBAIKI: Tampilkan yang statusnya 'Selesai' ATAU 'Revisi'
+      WHERE e.status_konfirmasi IN ('Selesai', 'Revisi')
+      ORDER BY e.updated_at DESC
+    `);
+
+    const laporan = rows.map((r) => {
+      let tanggalFormatted = "-";
+      if (r.tanggal && r.tanggal !== "0000-00-00") {
+        const d = new Date(r.tanggal);
+        if (!isNaN(d.getTime())) {
+          tanggalFormatted = d.toLocaleDateString("id-ID", {
+            day: "2-digit", month: "short", year: "numeric",
+          });
+        }
+      }
+      
+      // ✅ DIPERBAIKI: Status dinamis sesuai data dari database
+      const status = r.status_konfirmasi === 'Selesai' ? 'Diterima' : 'Revisi';
+
+      return {
+        id_laporan: r.id_laporan,
+        judul_laporan: r.judul_laporan,
+        namaProker: r.namaProker || "-",
+        divisi: r.nama_divisi || "Tidak Diketahui",
+        tanggalFormatted,
+        status, // Kirim status yang benar ke view
+      };
+    });
+
+    res.render("dpa/laporanDiterima", {
+      title: "Laporan Telah Dievaluasi",
+      user: req.session.user,
+      activeNav: "Telah Dievaluasi",
+      laporan,
+      successMsg: req.query.success || null,
+      errorMsg: null,
+    });
+  } catch (err) {
+    console.error("❌ Error getLaporanDiterima:", err.message);
+    res.status(500).send("Gagal mengambil laporan yang telah dievaluasi");
+  }
+};
+
+// =====================================================
 // 📄 Detail laporan (Read-only untuk DPA)
 // =====================================================
 exports.getDetailLaporanDPA = async (req, res) => {
   try {
     const idLaporan = req.params.id;
 
-    // ====== Ambil detail laporan utama + nama divisi + nama program kerja ======
     const [rows] = await db.query(`
       SELECT 
         l.*, 
         p.Nama_ProgramKerja AS namaProker,
-        d.nama_divisi AS nama_divisi,
-        l.deskripsi_target_kuantitatif,
-        l.deskripsi_target_kualitatif
+        d.nama_divisi AS nama_divisi
       FROM Laporan l
       LEFT JOIN Program_kerja p ON l.id_ProgramKerja = p.id_ProgramKerja
       LEFT JOIN Divisi d ON l.id_divisi = d.id_divisi
@@ -124,51 +170,39 @@ exports.getDetailLaporanDPA = async (req, res) => {
     if (!rows.length) return res.status(404).send("Laporan tidak ditemukan");
     const laporan = rows[0];
 
-    // ====== Format tanggal aman ======
     laporan.tanggalFormatted = "-";
-    if (laporan.tanggal && laporan.tanggal !== "0000-00-00") {
+    if (laporan.tanggal) {
       const parsed = new Date(laporan.tanggal);
       if (!isNaN(parsed.getTime())) {
         laporan.tanggalFormatted = parsed.toLocaleDateString("id-ID", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
+          day: "2-digit", month: "short", year: "numeric",
         });
       }
     }
-
-    // ====== Pastikan nama divisi tampil ======
     laporan.divisi = laporan.nama_divisi || "Tidak Diketahui";
 
-    // ====== Ambil evaluasi terbaru (termasuk komentar HMSI) ======
     const [evaluasiRows] = await db.query(`
-      SELECT 
-        e.*, 
-        u.nama AS namaEvaluator
+      SELECT e.*, u.nama AS namaEvaluator
       FROM Evaluasi e
       LEFT JOIN User u ON e.pemberi_evaluasi = u.id_anggota
       WHERE e.id_laporan = ?
-      ORDER BY e.tanggal_evaluasi DESC
-      LIMIT 1
+      ORDER BY e.updated_at DESC LIMIT 1
     `, [idLaporan]);
 
     const evaluasi = evaluasiRows.length ? evaluasiRows[0] : null;
 
-    // ====== Deteksi MIME dokumentasi ======
-    const getMimeFromFile = (filename) => {
-      if (!filename) return null;
-      const ext = filename.split(".").pop().toLowerCase();
-      if (["jpg", "jpeg", "png", "gif", "webp"].includes(ext)) return `image/${ext}`;
-      if (ext === "pdf") return "application/pdf";
-      return "application/octet-stream";
-    };
     laporan.dokumentasi_mime = getMimeFromFile(laporan.dokumentasi);
+    
+    // ✅ DIPERBAIKI: Menentukan sidebar aktif berdasarkan status evaluasi
+    let activeNav = "Belum dievaluasi";
+    if (evaluasi) {
+      activeNav = "Telah Dievaluasi";
+    }
 
-    // ====== Render halaman ======
     res.render("dpa/detailLaporan", {
       title: "Detail Laporan",
       user: req.session.user,
-      activeNav: "Laporan",
+      activeNav: activeNav,
       laporan,
       evaluasi,
       errorMsg: null,
@@ -190,9 +224,7 @@ exports.getFormEvaluasi = async (req, res) => {
       SELECT 
         l.*, 
         p.Nama_ProgramKerja AS namaProker,
-        d.nama_divisi AS namaDivisi,
-        l.deskripsi_target_kuantitatif,
-        l.deskripsi_target_kualitatif
+        d.nama_divisi AS namaDivisi
       FROM Laporan l
       LEFT JOIN Program_kerja p ON l.id_ProgramKerja = p.id_ProgramKerja
       LEFT JOIN Divisi d ON l.id_divisi = d.id_divisi
@@ -202,29 +234,20 @@ exports.getFormEvaluasi = async (req, res) => {
     if (!rows.length) return res.status(404).send("Laporan tidak ditemukan");
     const laporan = rows[0];
 
-    // format tanggal
     let tanggalFormatted = "-";
-    if (laporan.tanggal && laporan.tanggal !== "0000-00-00") {
+    if (laporan.tanggal) {
       const d = new Date(laporan.tanggal);
       if (!isNaN(d.getTime())) {
         tanggalFormatted = d.toLocaleDateString("id-ID", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
+          day: "2-digit", month: "short", year: "numeric",
         });
       }
     }
     laporan.tanggalFormatted = tanggalFormatted;
     laporan.dokumentasi_mime = getMimeFromFile(laporan.dokumentasi);
 
-    // ambil evaluasi terakhir
     const [evaluasiRows] = await db.query(`
-      SELECT e.*, u.nama AS namaEvaluator
-      FROM Evaluasi e
-      LEFT JOIN User u ON e.pemberi_evaluasi = u.id_anggota
-      WHERE e.id_laporan = ?
-      ORDER BY e.tanggal_evaluasi DESC
-      LIMIT 1
+      SELECT e.* FROM Evaluasi e WHERE e.id_laporan = ? ORDER BY e.updated_at DESC LIMIT 1
     `, [req.params.id]);
 
     const evaluasi = evaluasiRows.length ? evaluasiRows[0] : null;
@@ -232,12 +255,11 @@ exports.getFormEvaluasi = async (req, res) => {
     res.render("dpa/formEvaluasi", {
       title: "Evaluasi Laporan",
       user: req.session.user,
-      activeNav: "Laporan",
+      activeNav: "Belum dievaluasi", // Tetap, karena ini bagian dari alur evaluasi
       laporan,
       evaluasi,
       errorMsg: req.query.error || null,
       successMsg: null,
-      oldData: req.query.oldData ? JSON.parse(req.query.oldData) : null,
     });
   } catch (err) {
     console.error("❌ Error getFormEvaluasi:", err.message);
@@ -246,60 +268,49 @@ exports.getFormEvaluasi = async (req, res) => {
 };
 
 // =====================================================
-// 💾 Simpan evaluasi + notifikasi ke HMSI (pakai target_role)
+// 💾 Simpan evaluasi + notifikasi ke HMSI
 // =====================================================
 exports.postEvaluasi = async (req, res) => {
   try {
     const { komentar, status_konfirmasi } = req.body;
     const laporanId = req.params.id;
-    const evaluatorId = req.session.user?.id;
+    const evaluatorId = req.session.user?.id_anggota;
 
     if (!komentar || !status_konfirmasi) {
-      const oldData = { komentar, status_konfirmasi };
-      return res.redirect(
-        `/dpa/laporan/${laporanId}/evaluasi?error=${encodeURIComponent(
-          !komentar ? "Komentar wajib diisi" : "Status wajib dipilih"
-        )}&oldData=${encodeURIComponent(JSON.stringify(oldData))}`
-      );
+      return res.redirect(`/dpa/laporan/${laporanId}/evaluasi?error=Komentar dan status wajib diisi`);
     }
 
-    // cek evaluasi existing
     const [cek] = await db.query(`SELECT id_evaluasi FROM Evaluasi WHERE id_laporan = ?`, [laporanId]);
     let idEvaluasi;
 
     if (cek.length) {
       idEvaluasi = cek[0].id_evaluasi;
       await db.query(
-        `UPDATE Evaluasi
-         SET komentar = ?, status_konfirmasi = ?, tanggal_evaluasi = NOW(), pemberi_evaluasi = ?
-         WHERE id_evaluasi = ?`,
+        `UPDATE Evaluasi SET komentar = ?, status_konfirmasi = ?, pemberi_evaluasi = ? WHERE id_evaluasi = ?`,
         [komentar, status_konfirmasi, evaluatorId, idEvaluasi]
       );
     } else {
       idEvaluasi = uuidv4();
       await db.query(
         `INSERT INTO Evaluasi (id_evaluasi, komentar, status_konfirmasi, tanggal_evaluasi, id_laporan, pemberi_evaluasi)
-         VALUES (?, ?, ?, NOW(), ?, ?)`,
+         VALUES (?, ?, ?, CURDATE(), ?, ?)`,
         [idEvaluasi, komentar, status_konfirmasi, laporanId, evaluatorId]
       );
     }
 
-    // ambil detail laporan termasuk id_divisi
     const [laporanRows] = await db.query(
-      `SELECT judul_laporan, id_divisi FROM Laporan WHERE id_laporan = ?`,
-      [laporanId]
+      `SELECT judul_laporan, id_divisi FROM Laporan WHERE id_laporan = ?`, [laporanId]
     );
     const laporan = laporanRows[0];
 
-    // kirim notifikasi ke HMSI (pakai target_role)
     const pesan = `DPA memberi evaluasi pada laporan "${laporan.judul_laporan}"`;
     await db.query(
-      `INSERT INTO Notifikasi (id_notifikasi, pesan, target_role, status_baca, id_divisi, id_laporan, id_evaluasi, created_at)
-       VALUES (?, ?, 'HMSI', 0, ?, ?, ?, NOW())`,
+      `INSERT INTO Notifikasi (id_notifikasi, pesan, target_role, status_baca, id_divisi, id_laporan, id_evaluasi)
+       VALUES (?, ?, 'HMSI', 0, ?, ?, ?)`,
       [uuidv4(), pesan, laporan.id_divisi, laporanId, idEvaluasi]
     );
 
-    res.redirect(`/dpa/kelolaLaporan?success=Evaluasi berhasil disimpan`);
+    res.redirect(`/dpa/laporanDiterima?success=Evaluasi berhasil disimpan`);
   } catch (err) {
     console.error("❌ Error postEvaluasi:", err.message);
     res.status(500).send("Gagal menyimpan evaluasi");
@@ -307,7 +318,7 @@ exports.postEvaluasi = async (req, res) => {
 };
 
 // =====================================================
-// 📋 Daftar semua evaluasi
+// Daftar semua evaluasi
 // =====================================================
 exports.getAllEvaluasiDPA = async (req, res) => {
   try {

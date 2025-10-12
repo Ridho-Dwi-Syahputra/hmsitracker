@@ -57,7 +57,7 @@
               <ul class="text-sm text-gray-700">
                 <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="all">Semua Status</button></li>
                 <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="Revisi">Revisi</button></li>
-                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="Selesai">Disetujui</button></li>
+                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="Selesai">Diterima</button></li>
               </ul>
             </div>
           </div>
@@ -100,7 +100,7 @@
                       <% if (e.status_konfirmasi === "Revisi") { %>
                         <span class="px-3 py-1 text-xs rounded-full bg-red-100 text-red-700 font-medium">Revisi</span>
                       <% } else if (e.status_konfirmasi === "Selesai") { %>
-                        <span class="px-3 py-1 text-xs rounded-full bg-green-100 text-green-700 font-medium">Disetujui</span>
+                        <span class="px-3 py-1 text-xs rounded-full bg-green-100 text-green-700 font-medium">Diterima</span>
                       <% } else { %>
                         <span class="px-3 py-1 text-xs rounded-full bg-gray-100 text-gray-600 font-medium"><%= e.status_konfirmasi %></span>
                       <% } %>
@@ -119,7 +119,7 @@
                           <i class="fa-solid fa-pen-to-square text-lg"></i>
                         </a>
                       <% } else { %>
-                        <button disabled class="text-gray-400 cursor-not-allowed" title="Laporan sudah disetujui">
+                        <button disabled class="text-gray-400 cursor-not-allowed" title="Laporan sudah diterima">
                           <i class="fa-solid fa-pen-to-square text-lg"></i>
                         </button>
                       <% } %>

@@ -16,7 +16,7 @@ const { requireLogin, requireRole } = require("../../middleware/auth");
 // =====================================================
 // IMPORT CONTROLLERS
 // =====================================================
-const dpaDashboardController = require("../../controllers/DPA/dpaDashboardController"); 
+const dpaDashboardController = require("../../controllers/DPA/dpaDashboardController");
 const dpaProkerController = require("../../controllers/DPA/prokerController");
 const dpaLaporanController = require("../../controllers/DPA/laporanController");
 const dpaNotifikasiController = require("../../controllers/DPA/notifikasiController");
@@ -68,6 +68,7 @@ router.post(
 // =====================================================
 // LAPORAN
 // =====================================================
+// Halaman untuk laporan yang BELUM dievaluasi
 router.get(
   "/kelolaLaporan",
   requireLogin,
@@ -75,14 +76,15 @@ router.get(
   dpaLaporanController.getAllLaporanDPA
 );
 
+// ✅ BARU: Halaman untuk laporan yang SUDAH dievaluasi (Diterima)
 router.get(
-  "/kelolaLaporan/:id",
+  "/laporanDiterima",
   requireLogin,
   requireRole(["DPA"]),
-  dpaLaporanController.getDetailLaporanDPA
+  dpaLaporanController.getLaporanDiterima
 );
 
-// 📌 Alias route: /dpa/laporan/:id
+// Rute ini sekarang menjadi DETAIL untuk laporan apa pun, terlepas dari statusnya
 router.get(
   "/laporan/:id",
   requireLogin,
@@ -90,25 +92,11 @@ router.get(
   dpaLaporanController.getDetailLaporanDPA
 );
 
+
 // =====================================================
 // EVALUASI LAPORAN
 // =====================================================
 router.get(
-  "/kelolaLaporan/:id/evaluasi",
-  requireLogin,
-  requireRole(["DPA"]),
-  dpaLaporanController.getFormEvaluasi
-);
-
-router.post(
-  "/kelolaLaporan/:id/evaluasi",
-  requireLogin,
-  requireRole(["DPA"]),
-  dpaLaporanController.postEvaluasi
-);
-
-// 📌 Alias route: /dpa/laporan/:id/evaluasi
-router.get(
   "/laporan/:id/evaluasi",
   requireLogin,
   requireRole(["DPA"]),
@@ -121,6 +109,7 @@ router.post(
   requireRole(["DPA"]),
   dpaLaporanController.postEvaluasi
 );
+
 
 // =====================================================
 // KELOLA EVALUASI (list semua evaluasi oleh DPA)
@@ -159,15 +148,6 @@ router.get(
   requireRole(["DPA"]),
   dpaNotifikasiController.markAsRead
 );
-
-
-// // 🚨 Halaman error untuk notifikasi data dihapus
-// router.get(
-//     "/error",
-//     requireLogin,
-//     requireRole(["DPA"]),
-//     dpaNotifikasiController.getErrorPage
-//   );
 
 // =====================================================
 // PROFILE DPA

@@ -23,14 +23,14 @@
 
   <%- include('../partials/navbarDPA', { user: user, unreadCount: typeof unreadCount !== 'undefined' ? unreadCount : 0 }) %>
 
-  <%- include('../partials/sidebarDPA', { activeNav: 'Belum dievaluasi', user: user }) %>
+  <%- include('../partials/sidebarDPA', { activeNav: 'Telah Dievaluasi', user: user }) %>
 
   <main class="lg:ml-80 px-6 pt-20 pb-8 flex-grow">
     <div class="max-w-7xl mx-auto bg-white rounded-2xl border border-orange-200 shadow-xl overflow-hidden">
 
       <div class="bg-orange-500 px-6 py-6 text-white">
         <h1 class="text-2xl font-bold"><%= title %></h1>
-        <p class="text-sm text-orange-100">Daftar laporan kegiatan dari semua divisi HMSI yang memerlukan evaluasi.</p>
+        <p class="text-sm text-orange-100">Arsip laporan kegiatan dari semua divisi HMSI yang telah selesai dievaluasi.</p>
       </div>
 
       <div class="p-6 sm:p-8">
@@ -44,23 +44,6 @@
                        border-gray-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-500
                        placeholder-gray-400 transition-all duration-300">
               <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-            </div>
-          </div>
-
-          <div class="relative">
-            <button id="statusDropdownBtn"
-              class="flex items-center justify-between gap-2 px-4 py-3 border border-gray-300 rounded-xl text-sm bg-white
-                      hover:border-orange-500 hover:shadow-md focus:ring-2 focus:ring-orange-500 transition-all duration-200">
-              <span id="statusDropdownLabel">Semua Status</span>
-              <i class="fa-solid fa-chevron-down text-orange-500"></i>
-            </button>
-            <div id="statusDropdownMenu"
-              class="hidden absolute right-0 mt-2 w-48 bg-white border border-orange-200 rounded-lg shadow-lg z-10">
-              <ul class="text-sm text-gray-700">
-                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="all">Semua Status</button></li>
-                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="Belum Dievaluasi">Belum Dievaluasi</button></li>
-                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="Revisi">Revisi</button></li>
-              </ul>
             </div>
           </div>
 
@@ -105,7 +88,7 @@
           <div class="flex flex-col items-center space-y-4 py-20 text-center">
             <i class="fa-solid fa-folder-open text-4xl text-gray-300 mb-3"></i>
             <p class="text-lg font-semibold text-gray-700">Belum Ada Laporan</p>
-            <p class="text-gray-500">Tidak ada laporan yang memerlukan evaluasi saat ini.</p>
+            <p class="text-gray-500">Tidak ada laporan yang diterima atau direvisi yang dapat ditampilkan.</p>
           </div>
         <% } else { %>
           <div class="overflow-x-auto p-2 shadow-sm rounded-xl">
@@ -134,10 +117,11 @@
                     <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= l.divisi || '-' %></td>
                     <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= l.tanggalFormatted %></td>
                     <td class="py-3 px-4 border border-orange-100">
-                      <% if (l.status === "Revisi") { %>
+                      <%# ✅ DIPERBAIKI: Logika untuk menampilkan status Diterima atau Revisi %>
+                      <% if (l.status === 'Revisi') { %>
                         <span class="px-3 py-1 bg-red-100 text-red-700 rounded-lg text-xs font-semibold whitespace-nowrap">Revisi</span>
                       <% } else { %>
-                        <span class="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg text-xs font-semibold whitespace-nowrap">Belum Dievaluasi</span>
+                        <span class="px-3 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-semibold whitespace-nowrap">Diterima</span>
                       <% } %>
                     </td>
                     <td class="py-3 px-4 border border-orange-100">
@@ -165,13 +149,11 @@
   </main>
 
   <script>
+    // Script pagination dan filter tidak perlu diubah, biarkan seperti semula
     document.addEventListener("DOMContentLoaded", () => {
       const searchInput = document.getElementById("searchInput");
       const tbody = document.getElementById("laporanTable");
       let rows = Array.from(tbody?.querySelectorAll("tr") || []);
-      const statusBtn = document.getElementById("statusDropdownBtn");
-      const statusMenu = document.getElementById("statusDropdownMenu");
-      const statusLabel = document.getElementById("statusDropdownLabel");
       const divisiBtn = document.getElementById("divisiDropdownBtn");
       const divisiMenu = document.getElementById("divisiDropdownMenu");
       const divisiLabel = document.getElementById("divisiDropdownLabel");
@@ -180,16 +162,13 @@
       const prokerLabel = document.getElementById("prokerDropdownLabel");
       const prokerFilterContainer = document.getElementById("prokerFilterContainer");
       const prokerList = document.getElementById("prokerList");
-
       const rowsPerPage = 10;
       let currentPage = 1;
-      
       document.addEventListener("click", (e) => {
-        if (!statusBtn.contains(e.target)) statusMenu.classList.add("hidden");
         if (!divisiBtn.contains(e.target)) divisiMenu.classList.add("hidden");
         if (!prokerBtn.contains(e.target)) prokerMenu.classList.add("hidden");
       });
-      [statusBtn, divisiBtn, prokerBtn].forEach(btn => {
+      [divisiBtn, prokerBtn].forEach(btn => {
         btn.addEventListener("click", e => {
           e.stopPropagation();
           const menu = btn.nextElementSibling;
@@ -197,7 +176,6 @@
           menu.classList.toggle("hidden");
         });
       });
-      
       const divisiToProker = {};
       rows.forEach(row => {
         const div = row.dataset.divisi;
@@ -206,23 +184,12 @@
         if (!divisiToProker[div]) divisiToProker[div] = new Set();
         divisiToProker[div].add(prok);
       });
-      
-      statusMenu.querySelectorAll("button").forEach(btn => {
-        btn.addEventListener("click", () => {
-          statusLabel.textContent = btn.dataset.value === "all" ? "Semua Status" : btn.dataset.value;
-          statusMenu.classList.add("hidden");
-          currentPage = 1;
-          filterRows();
-        });
-      });
-      
       divisiMenu.querySelectorAll("button").forEach(btn => {
         btn.addEventListener("click", () => {
           const selectedDiv = btn.dataset.value;
           divisiLabel.textContent = selectedDiv === "all" ? "Semua Divisi" : selectedDiv;
           divisiMenu.classList.add("hidden");
           currentPage = 1;
-
           if (selectedDiv !== "all" && divisiToProker[selectedDiv]) {
             prokerFilterContainer.classList.remove("hidden");
             const prokerArr = Array.from(divisiToProker[selectedDiv]).sort((a,b)=>a.localeCompare(b));
@@ -244,33 +211,25 @@
           filterRows();
         });
       });
-      
       function filterRows() {
         const searchValue = searchInput.value.toLowerCase();
-        const selectedStatus = statusLabel.textContent.trim();
         const selectedDivisi = divisiLabel.textContent.trim();
         const selectedProker = prokerLabel.textContent.trim();
         rows.forEach(row => {
           const judul = row.cells[1]?.innerText.toLowerCase() || "";
           const program = row.cells[2]?.innerText.trim() || "";
-          const status = row.cells[5]?.innerText.trim() || "";
           const divisi = row.cells[3]?.innerText.trim() || "";
-
           const matchSearch = judul.includes(searchValue) || program.toLowerCase().includes(searchValue);
-          const matchStatus = selectedStatus === "Semua Status" || status === selectedStatus;
           const matchDivisi = selectedDivisi === "Semua Divisi" || divisi === selectedDivisi;
           const matchProker = selectedProker === "Semua Program Kerja" || program === selectedProker;
-
-          row.dataset.visible = (matchSearch && matchStatus && matchDivisi && matchProker) ? "true" : "false";
+          row.dataset.visible = (matchSearch && matchDivisi && matchProker) ? "true" : "false";
         });
         paginate();
       }
-
       function paginate() {
         const visibleRows = rows.filter(r => r.dataset.visible !== "false");
         const totalPages = Math.ceil(visibleRows.length / rowsPerPage);
         if (currentPage > totalPages) currentPage = totalPages || 1;
-
         rows.forEach(r => r.style.display = "none");
         visibleRows.forEach((r, i) => {
           if (i >= (currentPage-1)*rowsPerPage && i < currentPage*rowsPerPage) r.style.display = "";
@@ -279,7 +238,6 @@
         document.getElementById("prevPage").disabled = currentPage === 1;
         document.getElementById("nextPage").disabled = currentPage === totalPages || totalPages === 0;
       }
-
       searchInput.addEventListener("input", () => { currentPage = 1; filterRows(); });
       document.getElementById("prevPage").addEventListener("click", () => { if (currentPage > 1) { currentPage--; paginate(); } });
       document.getElementById("nextPage").addEventListener("click", () => {

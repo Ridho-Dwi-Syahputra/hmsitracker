@@ -1,13 +1,10 @@
 // =====================================================
 // controllers/HMSI/dashboardController.js
-// Dashboard HMSI berdasarkan divisi login
 // =====================================================
 
 const db = require("../../config/db");
 
-// =====================================================
-// Helper: Hitung status otomatis dengan respect ke keputusan DPA
-// =====================================================
+
 function calculateStatusWithLock(start, end, status_db) {
   if (status_db === "Selesai" || status_db === "Gagal") return status_db;
 
@@ -21,9 +18,6 @@ function calculateStatusWithLock(start, end, status_db) {
   return "Belum Dimulai";
 }
 
-// =====================================================
-// 📊 Dashboard HMSI
-// =====================================================
 exports.getDashboardStats = async (req, res) => {
   try {
     const user = req.session.user;
@@ -44,9 +38,6 @@ exports.getDashboardStats = async (req, res) => {
       });
     }
 
-    // =====================================================
-    // 🔹 Ambil semua proker milik divisi user (tanpa JOIN user)
-    // =====================================================
     const [rows] = await db.query(
       `
       SELECT 
@@ -81,7 +72,7 @@ exports.getDashboardStats = async (req, res) => {
     }
 
     // =====================================================
-    // 🔹 Hitung laporan milik divisi
+    // 🔹Hitung laporan milik divisi
     // =====================================================
     const [laporanRows] = await db.query(
       `SELECT COUNT(*) AS total FROM Laporan WHERE id_divisi = ?`,
@@ -91,7 +82,7 @@ exports.getDashboardStats = async (req, res) => {
     const totalLaporan = laporanRows[0]?.total || 0;
 
     // =====================================================
-    // ✅ Render Dashboard
+    // Render Dashboard
     // =====================================================
     res.render("hmsi/hmsiDashboard", {
       title: "Dashboard HMSI",
