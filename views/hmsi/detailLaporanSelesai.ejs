@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title><%= title %></title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+
+  <%- include('../partials/navbarHMSI', { user: user, unreadCount: unreadCount }) %>
+  <%- include('../partials/sidebarHMSI', { activeNav: 'laporanSelesai', user: user }) %>
+
+  <main class="lg:ml-80 px-6 pt-20 pb-8 flex-grow">
+    <div class="max-w-5xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-200">
+      <div class="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-6">
+        <h1 class="text-2xl font-bold">Detail Laporan Diterima</h1>
+        <p class="text-sm text-orange-100">Informasi lengkap laporan beserta hasil evaluasi akhir dari DPA</p>
+      </div>
+
+      <div class="p-6 sm:p-8 space-y-10">
+        <% function boxField(label, value) { %>
+          <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
+            <p class="font-medium text-gray-600 mb-2"><%= label %></p>
+            <div class="bg-white border border-gray-200 p-3 rounded-lg">
+              <p class="text-gray-800 whitespace-pre-line"><%= value || '-' %></p>
+            </div>
+          </div>
+        <% } %>
+
+        <section>
+          <h4 class="text-lg font-semibold text-gray-700 mb-4">Informasi Dasar</h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="md:col-span-2"><%= boxField("Judul Laporan", laporan.judul_laporan) %></div>
+            <%= boxField("Program Kerja", laporan.namaProker) %>
+            <%= boxField("Divisi", laporan.divisi) %>
+            <div class="md:col-span-2"><%= boxField("Deskripsi Kegiatan", laporan.deskripsi_kegiatan) %></div>
+          </div>
+        </section>
+
+        <section>
+          <h4 class="text-lg font-semibold text-gray-700 mb-4">Evaluasi Akhir DPA</h4>
+          <% if (evaluasi) { %>
+            <div class="space-y-6">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <%= boxField("Status Konfirmasi", "Diterima") %>
+                <%= boxField("Tanggal Evaluasi", evaluasi.tanggal_evaluasi) %>
+              </div>
+              <%= boxField("Komentar Evaluasi", evaluasi.komentar) %>
+            </div>
+          <% } else { %>
+            <p>Data evaluasi tidak ditemukan.</p>
+          <% } %>
+        </section>
+
+        <div class="pt-6 border-t flex justify-end">
+          <a href="/hmsi/laporan-selesai" class="px-8 py-3 border rounded-xl bg-gray-100 hover:bg-gray-200 transition">
+            Kembali ke Daftar
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

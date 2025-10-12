@@ -16,11 +16,11 @@ const { requireLogin, requireRole } = require("../../middleware/auth");
 // =====================================================
 // IMPORT CONTROLLERS
 // =====================================================
-const dpaDashboardController = require("../../controllers/DPA/dpaDashboardController");
-const dpaProkerController = require("../../controllers/DPA/prokerController");
-const dpaLaporanController = require("../../controllers/DPA/laporanController");
-const dpaNotifikasiController = require("../../controllers/DPA/notifikasiController");
-const dpaProfileController = require("../../controllers/DPA/profileController");
+const dpaDashboardController = require("../../controllers/dpa/dpaDashboardController");
+const dpaProkerController = require("../../controllers/dpa/prokerController");
+const dpaLaporanController = require("../../controllers/dpa/laporanController");
+const dpaNotifikasiController = require("../../controllers/dpa/notifikasiController");
+const dpaProfileController = require("../../controllers/dpa/profileController");
 
 // =====================================================
 // DASHBOARD DPA
