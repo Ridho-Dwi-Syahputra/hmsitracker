@@ -83,7 +83,7 @@ router.post("/proker/:id/delete", rateLimiter, prokerCtrl.deleteProker);
 router.get("/proker/download/:id", prokerCtrl.downloadDokumenPendukung);
 
 // =====================================================
-// LAPORAN (CRUD + revisi setelah evaluasi)
+// LAPORAN (PENGAJUAN)
 // =====================================================
 router.get("/laporan", laporanCtrl.getAllLaporan);
 router.get("/laporan/tambah", laporanCtrl.getFormLaporan);
@@ -111,21 +111,22 @@ router.get("/laporan/download/:id", laporanCtrl.downloadDokumentasi);
 router.get("/laporan/:id", laporanCtrl.getDetailLaporan);
 
 // =====================================================
-// EVALUASI LAPORAN (DPA → HMSI)
+// EVALUASI LAPORAN (PERLU REVISI)
 // =====================================================
-
-// 📄 HMSI melihat hasil evaluasi DPA (tetap render kelolaEvaluasi.ejs)
 router.get("/kelola-evaluasi", evaluasiCtrl.getKelolaEvaluasi);
-
-// 📄 Detail satu evaluasi
 router.get("/kelola-evaluasi/:id", evaluasiCtrl.getDetailEvaluasi);
-
-// 💬 Komentar balik HMSI (replace, bukan append)
 router.post(
   "/kelola-evaluasi/:id/komentar",
   rateLimiter,
   evaluasiCtrl.addKomentar
 );
+
+// =====================================================
+// ✅ BLOK ROUTE BARU YANG DITAMBAHKAN
+// LAPORAN DITERIMA (SELESAI)
+// =====================================================
+router.get("/laporan-selesai", laporanCtrl.getLaporanSelesai);
+router.get("/laporan-selesai/:idLaporan/detail", laporanCtrl.getDetailLaporanSelesai);
 
 // =====================================================
 // NOTIFIKASI

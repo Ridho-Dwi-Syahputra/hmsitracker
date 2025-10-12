@@ -11,7 +11,6 @@
 <body class="bg-gray-50 min-h-screen flex flex-col">
 
   <%- include('../partials/navbarHMSI', { user: user, unreadCount: unreadCount }) %>
-
   <%- include('../partials/sidebarHMSI', { user: user, activeNav: 'kelolaEvaluasi' }) %>
 
   <main class="lg:ml-80 px-6 pt-20 pb-8 flex-grow">
@@ -19,53 +18,35 @@
 
       <div class="bg-orange-500 text-white px-6 py-6 flex items-center justify-between">
         <div>
-          <h1 class="text-2xl font-bold">Kelola Evaluasi Laporan Program Kerja</h1>
-          <p class="text-sm text-orange-100">Daftar evaluasi laporan oleh DPA</p>
+          <h1 class="text-2xl font-bold">Laporan Perlu Revisi</h1>
+          <p class="text-sm text-orange-100">Daftar laporan yang membutuhkan revisi berdasarkan evaluasi DPA.</p>
         </div>
       </div>
 
       <div class="p-6 sm:p-8">
-
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-          <div class="relative w-full md:w-1/2">
-            <input id="searchInput" type="text" placeholder="Cari evaluasi..."
-              class="w-full pl-10 pr-4 py-3 border rounded-xl text-sm
-                     border-gray-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-500
-                     focus:bg-orange-50 focus:text-orange-700 
-                     placeholder-gray-400 focus:placeholder-orange-400
-                     transition-all duration-300">
-            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-          </div>
-
-          <div class="relative">
-            <button id="statusDropdownBtn"
-              class="flex items-center justify-between gap-2 px-4 py-3 border border-gray-300 rounded-xl text-sm bg-white
-                     hover:border-orange-500 hover:shadow-md focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200">
-              <span id="statusDropdownLabel">Semua Status</span>
-              <i class="fa-solid fa-chevron-down text-orange-500"></i>
-            </button>
-            <div id="statusDropdownMenu"
-              class="hidden absolute right-0 mt-2 w-48 bg-white border border-orange-200 rounded-lg shadow-lg z-10">
-              <ul class="text-sm text-gray-700">
-                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="all">Semua Status</button></li>
-                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="Revisi">Revisi</button></li>
-                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="Selesai">Diterima</button></li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
         <% if (!evaluasi || evaluasi.length === 0) { %>
           <div class="flex flex-col items-center space-y-4 py-20">
             <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
               <i class="fa-solid fa-clipboard-check text-2xl text-gray-400"></i>
             </div>
             <div class="text-center">
-              <div class="text-xl font-semibold text-gray-800 mb-2">Belum ada evaluasi</div>
-              <div class="text-gray-500">Evaluasi laporan oleh DPA akan muncul di sini</div>
+              <div class="text-xl font-semibold text-gray-800 mb-2">Tidak Ada Laporan Perlu Revisi</div>
+              <div class="text-gray-500">Saat ini, semua laporan Anda sudah disetujui.</div>
             </div>
           </div>
         <% } else { %>
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+            <div class="relative w-full md:w-2/3">
+              <input id="searchInput" type="text" placeholder="Cari berdasarkan judul atau program kerja..."
+                     class="w-full pl-10 pr-4 py-3 border rounded-xl text-sm
+                            border-gray-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-500
+                            focus:bg-orange-50 focus:text-orange-700
+                            placeholder-gray-400 focus:placeholder-orange-400
+                            transition-all duration-300">
+              <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            </div>
+          </div>
+
           <div class="overflow-x-auto bg-white-50 p-2 shadow-sm rounded-xl">
             <table class="min-w-full text-sm text-center border border-orange-200 rounded-xl overflow-hidden border-separate border-spacing-0">
               <thead class="bg-orange-100 text-gray-700">
@@ -80,37 +61,25 @@
               </thead>
               <tbody id="evaluasiTable">
                 <% evaluasi.forEach((e, index) => { %>
-                  <tr class="hover:bg-orange-50 transition" data-status="<%= e.status_konfirmasi %>">
+                  <tr class="hover:bg-orange-50 transition">
                     <td class="py-3 px-4 border border-orange-100"><%= index + 1 %></td>
                     <td class="py-3 px-4 text-gray-800 font-medium border border-orange-100 text-left"><%= e.judul_laporan %></td>
                     <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= e.Nama_ProgramKerja %></td>
                     <td class="py-3 px-4 border border-orange-100">
-                      <% if (e.status_konfirmasi === "Revisi") { %>
-                        <span class="px-3 py-1 text-xs rounded-full bg-red-100 text-red-700 font-medium">Revisi</span>
-                      <% } else if (e.status_konfirmasi === "Selesai") { %>
-                        <span class="px-3 py-1 text-xs rounded-full bg-green-100 text-green-700 font-medium">Diterima</span>
-                      <% } else { %>
-                        <span class="px-3 py-1 text-xs rounded-full bg-gray-100 text-gray-600 font-medium"><%= e.status_konfirmasi %></span>
-                      <% } %>
+                      <span class="px-3 py-1 text-xs rounded-full bg-red-100 text-red-700 font-medium">Revisi</span>
                     </td>
                     <td class="py-3 px-4 text-gray-500 border border-orange-100"><%= e.tanggalFormatted %></td>
                     <td class="py-3 px-4 border border-orange-100 flex items-center justify-center gap-3">
                       <a href="/hmsi/kelola-evaluasi/<%= e.id_evaluasi %>"
-                         class="text-orange-500 hover:text-orange-700 transition transform hover:scale-110" 
+                         class="text-orange-500 hover:text-orange-700 transition transform hover:scale-110"
                          title="Lihat Detail Evaluasi">
                         <i class="fa-solid fa-eye text-lg"></i>
                       </a>
-                      <% if (e.status_konfirmasi === "Revisi") { %>
-                        <a href="/hmsi/laporan/edit/<%= e.id_laporan %>"
-                           class="text-orange-500 hover:text-orange-700 transition transform hover:scale-110"
-                           title="Edit Laporan">
-                          <i class="fa-solid fa-pen-to-square text-lg"></i>
-                        </a>
-                      <% } else { %>
-                        <button disabled class="text-gray-400 cursor-not-allowed" title="Laporan sudah diterima">
-                          <i class="fa-solid fa-pen-to-square text-lg"></i>
-                        </button>
-                      <% } %>
+                      <a href="/hmsi/laporan/edit/<%= e.id_laporan %>"
+                         class="text-orange-500 hover:text-orange-700 transition transform hover:scale-110"
+                         title="Edit Laporan">
+                        <i class="fa-solid fa-pen-to-square text-lg"></i>
+                      </a>
                     </td>
                   </tr>
                 <% }) %>
@@ -124,7 +93,6 @@
             <button id="nextPage" class="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 disabled:opacity-50">Next</button>
           </div>
         <% } %>
-
       </div>
     </div>
   </main>
@@ -135,67 +103,58 @@
     document.addEventListener("DOMContentLoaded", () => {
       const searchInput = document.getElementById("searchInput");
       const tbody = document.getElementById("evaluasiTable");
-      const rows = tbody ? Array.from(tbody.querySelectorAll("tr[data-status]")) : [];
+      const rows = tbody ? Array.from(tbody.querySelectorAll("tr")) : [];
       const rowsPerPage = 10;
       let currentPage = 1;
-      let currentFilter = "all";
 
-      const statusBtn = document.getElementById("statusDropdownBtn");
-      const statusMenu = document.getElementById("statusDropdownMenu");
-      const statusLabel = document.getElementById("statusDropdownLabel");
-
-      statusBtn?.addEventListener("click", () => {
-        statusMenu.classList.toggle("hidden");
-      });
-
-      statusMenu?.querySelectorAll("button").forEach(btn => {
-        btn.addEventListener("click", () => {
-          currentFilter = btn.dataset.value;
-          statusLabel.textContent = btn.textContent;
-          statusMenu.classList.add("hidden");
-          filterRows();
-        });
-      });
-
-      function filterRows() {
+      function filterAndPaginate() {
         const searchValue = searchInput.value.toLowerCase();
-        rows.forEach(row => {
+        
+        const visibleRows = rows.filter(row => {
           const judul = row.cells[1]?.innerText.toLowerCase() || "";
           const program = row.cells[2]?.innerText.toLowerCase() || "";
-          // LOGIKA PENCARIAN EVALUATOR DIHAPUS
-          const status = row.dataset.status;
-
-          // PENCARIAN DIUPDATE, VARIABEL 'evaluator' DIHILANGKAN
-          let matchSearch = judul.includes(searchValue) || program.includes(searchValue) || status.toLowerCase().includes(searchValue);
-          let matchFilter = currentFilter === "all" || status === currentFilter;
-
-          row.dataset.visible = (matchSearch && matchFilter) ? "true" : "false";
+          return judul.includes(searchValue) || program.includes(searchValue);
         });
-        paginate();
-      }
 
-      function paginate() {
-        const visibleRows = rows.filter(row => row.dataset.visible === "true");
         const totalPages = Math.ceil(visibleRows.length / rowsPerPage);
         if (currentPage > totalPages) currentPage = totalPages || 1;
 
         rows.forEach(row => row.style.display = "none");
-        visibleRows.forEach((row, index) => {
-          if (index >= (currentPage-1)*rowsPerPage && index < currentPage*rowsPerPage) {
-            row.style.display = "";
-          }
-        });
 
+        const start = (currentPage - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+        visibleRows.slice(start, end).forEach(row => row.style.display = "");
+        
         document.getElementById("pageInfo").textContent = `Halaman ${currentPage} dari ${totalPages || 1}`;
         document.getElementById("prevPage").disabled = currentPage === 1;
         document.getElementById("nextPage").disabled = currentPage === totalPages || totalPages === 0;
       }
 
-      document.getElementById("prevPage")?.addEventListener("click", () => { currentPage--; paginate(); });
-      document.getElementById("nextPage")?.addEventListener("click", () => { currentPage++; paginate(); });
-      searchInput?.addEventListener("input", filterRows);
+      document.getElementById("prevPage")?.addEventListener("click", () => {
+        if (currentPage > 1) {
+          currentPage--;
+          filterAndPaginate();
+        }
+      });
+      
+      document.getElementById("nextPage")?.addEventListener("click", () => {
+        // We need to recalculate total pages in case of an active filter
+        const visibleRows = rows.filter(row => (row.cells[1]?.innerText.toLowerCase() || "").includes(searchInput.value.toLowerCase()));
+        const totalPages = Math.ceil(visibleRows.length / rowsPerPage);
+        if (currentPage < totalPages) {
+          currentPage++;
+          filterAndPaginate();
+        }
+      });
+      
+      searchInput?.addEventListener("input", () => {
+        currentPage = 1;
+        filterAndPaginate();
+      });
 
-      if (rows.length > 0) filterRows();
+      if (rows.length > 0) {
+        filterAndPaginate();
+      }
     });
   </script>
 </body>

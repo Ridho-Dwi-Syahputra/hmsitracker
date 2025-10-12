@@ -107,7 +107,6 @@
       <div class="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-6">
         <h1 class="text-2xl font-bold"><%= title || "Tambah Laporan" %></h1>
         <p class="text-sm text-orange-100">Lengkapi detail laporan kegiatan di bawah</p>
-        <p class="text-sm text-white mt-1">Divisi: <%= user.nama_divisi %></p>
       </div>
 
       <!-- Body -->
@@ -354,7 +353,7 @@
 document.addEventListener("DOMContentLoaded", () => {
 
   // ==============================
-  // 🔸 Modal Functions
+  // Modal Functions
   // ==============================
   function showModal(modalId) {
     const modal = document.getElementById(modalId);
@@ -410,7 +409,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // ==============================
-  // 🔸 Dropdown Program Kerja
+  // Dropdown Program Kerja
   // ==============================
   const btn = document.getElementById("prokerDropdownBtn");
   const menu = document.getElementById("prokerDropdownMenu");

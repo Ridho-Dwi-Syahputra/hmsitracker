@@ -15,11 +15,12 @@
     <div class="max-w-6xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-orange-200">
 
       <div class="bg-orange-500 text-white px-6 py-6">
-        <h1 class="text-2xl font-bold">Laporan Diterima</h1>
-        <p class="text-sm text-orange-100">Arsip laporan program kerja yang telah disetujui oleh DPA</p>
+        <h1 class="text-2xl font-bold">Arsip Laporan Diterima</h1>
+        <p class="text-sm text-orange-100">Daftar laporan program kerja yang telah dievaluasi dan disetujui oleh DPA.</p>
       </div>
 
       <div class="p-6 sm:p-8">
+
         <% if (!laporanSelesai || laporanSelesai.length === 0) { %>
           <div class="text-center py-20">
             <i class="fa-solid fa-check-double text-4xl text-gray-300 mb-4"></i>
@@ -27,26 +28,42 @@
             <p class="text-gray-500">Laporan yang sudah disetujui DPA akan muncul di sini.</p>
           </div>
         <% } else { %>
-          <div class="overflow-x-auto">
-            <table class="min-w-full text-sm text-center">
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+            <div class="relative w-full md:w-1/2">
+              <input id="searchInput" type="text" placeholder="Cari berdasarkan judul atau program kerja..."
+                class="w-full pl-10 pr-4 py-3 border rounded-xl text-sm
+                       border-gray-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-500
+                       focus:bg-orange-50 focus:text-orange-700
+                       placeholder-gray-400 focus:placeholder-orange-400
+                       transition-all duration-300">
+              <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto bg-white-50 p-2 shadow-sm rounded-xl">
+            <table class="min-w-full text-sm text-center border border-orange-200 rounded-xl overflow-hidden border-separate border-spacing-0">
               <thead class="bg-orange-100 text-gray-700">
                 <tr>
-                  <th class="py-3 px-4 font-semibold">No</th>
-                  <th class="py-3 px-4 font-semibold text-left">Judul Laporan</th>
-                  <th class="py-3 px-4 font-semibold">Program Kerja</th>
-                  <th class="py-3 px-4 font-semibold">Tanggal Disetujui</th>
-                  <th class="py-3 px-4 font-semibold">Aksi</th>
+                  <th class="py-3 px-4 font-semibold border border-orange-200">No</th>
+                  <th class="py-3 px-4 font-semibold border border-orange-200 text-left">Judul Laporan</th>
+                  <th class="py-3 px-4 font-semibold border border-orange-200">Program Kerja</th>
+                  <th class="py-3 px-4 font-semibold border border-orange-200">Status</th>
+                  <th class="py-3 px-4 font-semibold border border-orange-200">Tanggal Disetujui</th>
+                  <th class="py-3 px-4 font-semibold border border-orange-200">Aksi</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody id="laporanTable">
                 <% laporanSelesai.forEach((l, index) => { %>
                   <tr class="hover:bg-orange-50 transition">
-                    <td class="py-3 px-4 border-b"><%= index + 1 %></td>
-                    <td class="py-3 px-4 border-b text-left font-medium"><%= l.judul_laporan %></td>
-                    <td class="py-3 px-4 border-b"><%= l.Nama_ProgramKerja %></td>
-                    <td class="py-3 px-4 border-b text-gray-500"><%= l.tanggalFormatted %></td>
-                    <td class="py-3 px-4 border-b">
-                      <a href="/hmsi/laporan-selesai/<%= l.id_laporan %>/detail" class="text-orange-500 hover:text-orange-700" title="Lihat Detail">
+                    <td class="py-3 px-4 border border-orange-100"><%= index + 1 %></td>
+                    <td class="py-3 px-4 text-gray-800 font-medium border border-orange-100 text-left"><%= l.judul_laporan %></td>
+                    <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= l.Nama_ProgramKerja %></td>
+                    <td class="py-3 px-4 border border-orange-100">
+                      <span class="px-3 py-1 text-xs rounded-full bg-green-100 text-green-700 font-medium">Diterima</span>
+                    </td>
+                    <td class="py-3 px-4 text-gray-500 border border-orange-100"><%= l.tanggalFormatted %></td>
+                    <td class="py-3 px-4 border border-orange-100">
+                      <a href="/hmsi/laporan-selesai/<%= l.id_laporan %>/detail" class="text-orange-500 hover:text-orange-700 transition transform hover:scale-110" title="Lihat Detail Laporan">
                         <i class="fa-solid fa-eye text-lg"></i>
                       </a>
                     </td>
@@ -55,9 +72,66 @@
               </tbody>
             </table>
           </div>
+
+          <div class="flex justify-center items-center gap-2 mt-6" id="pagination">
+            <button id="prevPage" class="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 disabled:opacity-50">Prev</button>
+            <span id="pageInfo" class="text-gray-700"></span>
+            <button id="nextPage" class="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 disabled:opacity-50">Next</button>
+          </div>
         <% } %>
       </div>
     </div>
   </main>
+
+  <%- include('../partials/footer') %>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const searchInput = document.getElementById("searchInput");
+      const tbody = document.getElementById("laporanTable");
+      const rows = tbody ? Array.from(tbody.querySelectorAll("tr")) : [];
+      const rowsPerPage = 10;
+      let currentPage = 1;
+
+      // Fungsi untuk melakukan filter berdasarkan pencarian
+      function filterRows() {
+        const searchValue = searchInput.value.toLowerCase();
+        rows.forEach(row => {
+          const judul = row.cells[1]?.innerText.toLowerCase() || "";
+          const program = row.cells[2]?.innerText.toLowerCase() || "";
+          const matchSearch = judul.includes(searchValue) || program.includes(searchValue);
+          row.dataset.visible = matchSearch ? "true" : "false";
+        });
+        paginate();
+      }
+
+      // Fungsi untuk paginasi (perpindahan halaman)
+      function paginate() {
+        const visibleRows = rows.filter(row => row.dataset.visible === "true");
+        const totalPages = Math.ceil(visibleRows.length / rowsPerPage);
+        if (currentPage > totalPages) currentPage = totalPages || 1;
+
+        rows.forEach(row => row.style.display = "none");
+        visibleRows.forEach((row, index) => {
+          if (index >= (currentPage - 1) * rowsPerPage && index < currentPage * rowsPerPage) {
+            row.style.display = "";
+          }
+        });
+
+        document.getElementById("pageInfo").textContent = `Halaman ${currentPage} dari ${totalPages || 1}`;
+        document.getElementById("prevPage").disabled = currentPage === 1;
+        document.getElementById("nextPage").disabled = currentPage === totalPages || totalPages === 0;
+      }
+
+      // Event listener untuk input pencarian dan tombol paginasi
+      document.getElementById("prevPage")?.addEventListener("click", () => { currentPage--; paginate(); });
+      document.getElementById("nextPage")?.addEventListener("click", () => { currentPage++; paginate(); });
+      searchInput?.addEventListener("input", filterRows);
+
+      // Inisialisasi tampilan tabel saat halaman dimuat
+      if (rows.length > 0) filterRows();
+    });
+  </script>
+
 </body>
 </html>

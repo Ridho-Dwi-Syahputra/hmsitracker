@@ -1,116 +1,223 @@
-// =====================================================
-// routes/hmsi/hmsi.js
-// Routing khusus untuk HMSI (Dashboard, Proker, Laporan, Evaluasi, Notifikasi, Profile)
-// =====================================================
+<%
+  // Data user
+  var displayName = (user && (user.nama || user.name)) ? (user.nama || user.name) : 'Admin HMSI';
+  var fotoProfile = (user && user.foto_profile)
+    ? ('/' + user.foto_profile.replace(/^\/+/, ''))
+    : '/default-profile.png';
 
-const express = require("express");
-const router = express.Router();
-const path = require("path");
-const multer = require("multer");
+  // Menu utama HMSI
+  var navItems = [
+    { name: 'Dashboard', path: '/hmsi/dashboard', key: 'dashboard' },
+    { name: 'Program Kerja', path: '/hmsi/kelola-proker', key: 'proker' }
+  ];
 
-// =====================================================
-// IMPORT AUTH & MIDDLEWARE
-// =====================================================
-const { requireLogin, requireRole } = require("../../middleware/auth");
-const validateUpload = require("../../middleware/validateUpload");
-const rateLimiter = require("../../middleware/rateLimiter");
+  // Submenu Laporan
+  var laporanSubmenu = [
+     { name: 'Pengajuan Laporan', path: '/hmsi/laporan', key: 'laporan' },
+     { name: 'Laporan Perlu Revisi', path: '/hmsi/kelola-evaluasi', key: 'kelolaEvaluasi' },
+     { name: 'Laporan Diterima', path: '/hmsi/laporan-selesai', key: 'laporanSelesai' }
+  ];
 
-// =====================================================
-// IMPORT CONTROLLERS
-// =====================================================
-// ✅ Casing diperbaiki untuk konsistensi
-const prokerCtrl = require("../../controllers/HMSI/prokerController");
-const laporanCtrl = require("../../controllers/HMSI/laporanController");
-const evaluasiCtrl = require("../../controllers/HMSI/evaluasiController");
-const notifikasiCtrl = require("../../controllers/HMSI/notifikasiController");
-const profileCtrl = require("../../controllers/HMSI/profileController");
-const dashboardCtrl = require("../../controllers/HMSI/dashboardController");
+  // ✅ KODE YANG DIPERBAIKI ADA DI SINI
+  // Cek submenu laporan aktif
+  var isLaporanActive = ['laporan', 'kelolaEvaluasi', 'laporanSelesai'].includes(activeNav);
+%>
 
-// =====================================================
-// MIDDLEWARE: Semua route di sini harus login + role HMSI
-// =====================================================
-router.use(requireLogin, requireRole(["HMSI"]));
+<div id="hmsi-sidebar-root">
+  <div id="hmsi-sidebar-overlay"
+    class="hidden fixed inset-0 bg-black bg-opacity-40 z-40 lg:hidden transition-opacity duration-300"></div>
 
-// =====================================================
-// DASHBOARD HMSI
-// =====================================================
-router.get("/dashboard", dashboardCtrl.getDashboardStats);
+  <aside id="hmsi-sidebar"
+    class="fixed inset-y-0 left-0 w-80 bg-white border-r border-gray-200 flex flex-col 
+           transform -translate-x-full lg:translate-x-0 z-50 transition-transform duration-300 ease-in-out">
 
-// =====================================================
-// PROGRAM KERJA (PROKER)
-// =====================================================
-router.get("/kelola-proker", prokerCtrl.getAllProker);
-router.get("/tambah-proker", (req, res) => {
-  res.render("hmsi/tambahProker", {
-    title: "Tambah Proker",
-    user: req.session.user,
-    activeNav: "proker",
-    old: {},
-    errorMsg: null,
-    successMsg: null,
+    <div class="hidden lg:block p-6 border-b border-gray-100 bg-gradient-to-br from-orange-500 to-orange-600">
+      <h1 class="text-xl font-bold text-white tracking-wide">HMSI TRACKER</h1>
+      <p class="text-sm text-orange-100 mt-1">Management System</p>
+    </div>
+
+    <div class="p-6 border-b border-gray-100 bg-white">
+      <div class="flex items-center gap-4">
+        <img src="<%= fotoProfile %>?v=<%= Date.now() %>"
+             alt="Foto Profil"
+             class="w-12 h-12 rounded-full border object-cover shadow-md"
+             onerror="this.onerror=null;this.src='/default-profile.png?v=<%= Date.now() %>'">
+
+        <div class="flex-1">
+          <h3 class="text-sm font-semibold text-gray-800"><%= displayName %></h3>
+          <p class="text-xs text-gray-500 mt-0.5">
+            HMSI
+            <% if (user && user.nama_divisi) { %>
+              · <span class="text-orange-500 font-medium"><%= user.nama_divisi %></span>
+            <% } %>
+          </p>
+        </div>
+
+        <a href="/hmsi/profile" title="Profile"
+           class="gear-btn p-2 text-gray-400 hover:text-gray-600 rounded-lg transition-transform duration-300">
+          <svg class="gear-icon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 
+               0 002.573 1.066c1.543-.94 3.31.826 2.37 
+               2.37a1.724 1.724 0 001.065 2.572c1.756.426 
+               1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 
+               2.573c.94 1.543-.826 3.31-2.37 
+               2.37a1.724 1.724 0 00-2.572 
+               1.065c-.426 1.756-2.924 
+               1.756-3.35 0a1.724 1.724 
+               0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 
+               1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 
+               0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 
+               2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+
+    <nav id="hmsi-nav" class="flex-1 p-6 overflow-y-auto space-y-1">
+      <% navItems.forEach(item => { 
+           var isActive = activeNav === item.key;
+      %>
+        <a href="<%= item.path %>"
+          class="nav-item block w-full p-3.5 my-1 rounded-xl text-sm font-medium flex items-center gap-3 <%= isActive ? 'active' : '' %>">
+          <span class="w-1.5 h-1.5 rounded-full <%= isActive ? 'bg-orange-500' : 'bg-gray-300' %>"></span>
+          <span><%= item.name %></span>
+        </a>
+      <% }) %>
+
+      <div class="space-y-1">
+        <button type="button"
+          class="nav-item block w-full p-3.5 my-1 rounded-xl text-sm font-medium flex items-center justify-between gap-3 <%= isLaporanActive ? 'active' : '' %>"
+          onclick="toggleDropdown('laporanDropdown')">
+          <div class="flex items-center gap-3">
+            <span class="w-1.5 h-1.5 rounded-full <%= isLaporanActive ? 'bg-orange-500' : 'bg-gray-300' %>"></span>
+            <span>Laporan</span>
+          </div>
+          <i class="fa-solid fa-chevron-down transition-transform duration-300 <%= isLaporanActive ? 'rotate-180' : '' %>"></i>
+        </button>
+
+        <div id="laporanDropdown" class="ml-6 space-y-1 <%= isLaporanActive ? '' : 'hidden' %>">
+          <% laporanSubmenu.forEach(sub => { 
+               var isSubActive = activeNav === sub.key;
+          %>
+            <a href="<%= sub.path %>"
+               class="sub-item block w-full p-3 my-1 rounded-lg text-sm font-medium <%= isSubActive ? 'active' : '' %>">
+              <%= sub.name %>
+            </a>
+          <% }) %>
+        </div>
+      </div>
+    </nav>
+
+    <div class="p-6 border-t border-gray-100">
+      <form action="/auth/logout" method="GET">
+        <button type="submit"
+          class="w-full flex items-center justify-center gap-3 px-4 py-3 text-gray-600 border border-gray-200 rounded-xl bg-white 
+                 transition-all duration-300 hover:bg-red-50 hover:text-red-600 hover:scale-105 active:scale-95">
+          <i class="fa-solid fa-right-from-bracket"></i>
+          Keluar
+        </button>
+      </form>
+    </div>
+  </aside>
+</div>
+
+<style>
+  #hmsi-sidebar { will-change: transform; }
+  .slide-in { transform: translateX(0) !important; }
+  .slide-out { transform: translateX(-100%) !important; }
+
+  /* Style untuk item navigasi */
+  .nav-item {
+    color: #374151;
+    transition: all 0.3s ease, transform 0.2s ease;
+  }
+
+  .nav-item:hover {
+    transform: translateX(6px) scale(1.02);
+    background: linear-gradient(to right, #fff7ed, #fff3e0);
+    box-shadow: inset 4px 0 0 #f97316;
+  }
+
+  .nav-item.active {
+    background: linear-gradient(to right, #fff7ed, #ffedd5);
+    color: #ea580c !important;
+    font-weight: 600;
+    border-right: 3px solid #f97316;
+  }
+
+  /* Style untuk submenu item */
+  .sub-item { 
+    color: #4b5563; 
+    transition: all 0.3s ease; 
+    padding-left: 1rem;
+  }
+
+  .sub-item:hover {
+    background: linear-gradient(to right, #fff7ed, #fff3e0);
+    box-shadow: inset 3px 0 0 #f97316;
+    color: #ea580c;
+  }
+
+  .sub-item.active {
+    background: linear-gradient(to right, #fff7ed, #ffedd5);
+    color: #ea580c !important;
+    font-weight: 600;
+    border-right: 2px solid #f97316;
+  }
+
+  /* Animasi ikon gear */
+  .gear-icon { transition: transform 0.4s ease, color 0.3s ease, filter 0.3s ease; }
+  .gear-btn:hover .gear-icon {
+    transform: rotate(90deg) scale(1.2);
+    color: #ea580c;
+    filter: drop-shadow(0 0 6px rgba(234,88,12,0.5));
+  }
+  .gear-btn:active .gear-icon { animation: gearShake 0.3s ease; }
+  @keyframes gearShake {
+    0% { transform: rotate(0deg) scale(1); }
+    25% { transform: rotate(12deg) scale(1.05); }
+    50% { transform: rotate(-12deg) scale(1.05); }
+    75% { transform: rotate(6deg) scale(1.05); }
+    100% { transform: rotate(0deg) scale(1); }
+  }
+</style>
+
+<script>
+  function toggleDropdown(id) {
+    const dropdown = document.getElementById(id);
+    const icon = dropdown.previousElementSibling.querySelector("i");
+    dropdown.classList.toggle("hidden");
+    icon.classList.toggle("rotate-180");
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const sidebar = document.getElementById("hmsi-sidebar");
+    const overlay = document.getElementById("hmsi-sidebar-overlay");
+    const toggle = document.getElementById("hmsi-sidebar-toggle");
+
+    if (window.innerWidth >= 1024) sidebar.classList.add("slide-in");
+
+    if (toggle) {
+      toggle.addEventListener("click", () => {
+        const isActive = toggle.classList.toggle("active");
+        if (isActive) {
+          sidebar.classList.add("slide-in");
+          sidebar.classList.remove("slide-out");
+          overlay.classList.remove("hidden");
+        } else {
+          sidebar.classList.remove("slide-in");
+          sidebar.classList.add("slide-out");
+          overlay.classList.add("hidden");
+        }
+      });
+    }
+
+    overlay.addEventListener("click", () => {
+      sidebar.classList.remove("slide-in");
+      sidebar.classList.add("slide-out");
+      if (toggle) toggle.classList.remove("active");
+      overlay.classList.add("hidden");
+    });
   });
-});
-router.post( "/tambah-proker", rateLimiter, validateUpload("create", "proker"), prokerCtrl.createProker);
-router.get("/proker/:id", prokerCtrl.getDetailProker);
-router.get("/proker/:id/edit", prokerCtrl.getEditProker);
-router.post("/proker/:id/edit", rateLimiter, validateUpload("edit", "proker"), prokerCtrl.updateProker);
-router.post("/proker/:id/delete", rateLimiter, prokerCtrl.deleteProker);
-router.get("/proker/download/:id", prokerCtrl.downloadDokumenPendukung);
-
-// =====================================================
-// LAPORAN (PENGAJUAN)
-// =====================================================
-router.get("/laporan", laporanCtrl.getAllLaporan);
-router.get("/laporan/tambah", laporanCtrl.getFormLaporan);
-router.post("/laporan/tambah", rateLimiter, validateUpload("create", "laporan"), laporanCtrl.createLaporan);
-router.get("/laporan/edit/:id", laporanCtrl.getEditLaporan);
-router.post("/laporan/edit/:id", rateLimiter, validateUpload("edit", "laporan"), laporanCtrl.updateLaporan);
-router.post("/laporan/delete/:id", rateLimiter, laporanCtrl.deleteLaporan);
-router.get("/laporan/download/:id", laporanCtrl.downloadDokumentasi);
-router.get("/laporan/:id", laporanCtrl.getDetailLaporan);
-
-// =====================================================
-// EVALUASI LAPORAN (PERLU REVISI)
-// =====================================================
-router.get("/kelola-evaluasi", evaluasiCtrl.getKelolaEvaluasi);
-router.get("/kelola-evaluasi/:id", evaluasiCtrl.getDetailEvaluasi);
-router.post("/kelola-evaluasi/:id/komentar", rateLimiter, evaluasiCtrl.addKomentar);
-
-// =====================================================
-// ✅ BLOK ROUTE BARU
-// LAPORAN DITERIMA (SELESAI)
-// =====================================================
-router.get("/laporan-selesai", laporanCtrl.getLaporanSelesai);
-router.get("/laporan-selesai/:idLaporan/detail", laporanCtrl.getDetailLaporanSelesai);
-
-// =====================================================
-// NOTIFIKASI
-// =====================================================
-router.get("/notifikasi", notifikasiCtrl.getAllNotifikasi);
-router.get("/notifikasi/read/:id", notifikasiCtrl.readAndRedirect);
-
-// =====================================================
-// PROFIL HMSI
-// =====================================================
-router.get("/profile", profileCtrl.getProfile);
-router.get("/profile/edit", profileCtrl.getEditProfile);
-
-// ⚙️ Konfigurasi Upload foto profil
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, path.join("public/uploads/profile"));
-  },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    cb(null, Date.now() + "-" + Math.round(Math.random() * 1e9) + ext);
-  },
-});
-const upload = multer({ storage });
-
-// 💾 Update profil HMSI
-router.post("/profile/update", rateLimiter, upload.single("foto_profile"), profileCtrl.postEditProfile);
-
-// =====================================================
-// EXPORT ROUTER
-// =====================================================
-module.exports = router;
+</script>

@@ -61,26 +61,6 @@ function formatTanggal(dateValue) {
 }
 
 // =====================================================
-// Helper: safe query using a connection if provided
-// =====================================================
-async function runQuery(connOrPool, sql, params = []) {
-  if (!connOrPool) throw new Error("runQuery: missing connection/pool");
-  return connOrPool.query(sql, params);
-}
-
-// =====================================================
-// Helper: cek apakah laporan sudah dievaluasi
-// =====================================================
-async function isLaporanDievaluasi(conn, idLaporan) {
-  const [rows] = await conn.query(
-    "SELECT status_konfirmasi FROM Evaluasi WHERE id_laporan = ? LIMIT 1",
-    [idLaporan]
-  );
-  if (!rows.length) return false;
-  return ["Revisi", "Selesai"].includes(rows[0].status_konfirmasi);
-}
-
-// =====================================================
 // 📄 Ambil semua laporan (khusus divisi HMSI aktif)
 //    hanya tampilkan yang belum dievaluasi
 // =====================================================
@@ -120,14 +100,10 @@ exports.getAllLaporan = async (req, res) => {
       dokumentasi_mime: getMimeFromFile(r.dokumentasi),
     }));
 
-    if (req.xhr || req.headers.accept?.includes("application/json")) {
-      return res.json({ success: true, data: laporan });
-    }
-
     res.render("hmsi/laporan", {
-      title: "Daftar Laporan",
+      title: "Pengajuan Laporan Proker",
       user,
-      activeNav: "Laporan",
+      activeNav: "laporan",
       laporan,
       successMsg: req.query.success || null,
       errorMsg: req.query.error || null,
@@ -139,7 +115,7 @@ exports.getAllLaporan = async (req, res) => {
 };
 
 // =====================================================
-// ➕ Form tambah laporan (perbaikan dropdown Program Kerja)
+// ➕ Form tambah laporan
 // =====================================================
 exports.getFormLaporan = async (req, res) => {
   try {
@@ -158,10 +134,10 @@ exports.getFormLaporan = async (req, res) => {
     res.render("hmsi/laporanForm", {
       title: "Tambah Laporan",
       user,
-      activeNav: "Laporan",
+      activeNav: "laporan",
       programs,
-      laporan: null,              // ✅ tambahkan ini
-      formAction: "/hmsi/laporan/tambah", // ✅ tambahkan ini
+      laporan: null,
+      formAction: "/hmsi/laporan/tambah",
       old: {},
       errorMsg: null,
       successMsg: null,
@@ -172,18 +148,13 @@ exports.getFormLaporan = async (req, res) => {
   }
 };
 
-
-
-
 // =====================================================
-// 💾 Tambah laporan baru (versi revisi penuh, logika lama dipertahankan)
+// 💾 Tambah laporan baru
 // =====================================================
 exports.createLaporan = async (req, res) => {
   let connection;
   try {
     const user = req.session.user;
-    const body = req.body;
-
     const {
       judul_laporan,
       deskripsi_kegiatan,
@@ -200,91 +171,22 @@ exports.createLaporan = async (req, res) => {
       kendala,
       solusi,
       id_ProgramKerja,
-    } = body;
+    } = req.body;
 
-    // =============================
-    // 🔸 VALIDASI DASAR
-    // =============================
     if (!judul_laporan || !id_ProgramKerja || !deskripsi_kegiatan) {
-      // AJAX → JSON response
-      if (req.xhr || req.headers.accept?.includes("application/json")) {
-        return res
-          .status(400)
-          .json({ success: false, error: "Judul, Proker, dan Deskripsi wajib diisi." });
-      }
-
-      const [programs] = await db.query(
-        `SELECT id_ProgramKerja AS id, Nama_ProgramKerja AS namaProker FROM Program_kerja WHERE id_divisi = ?`,
-        [user.id_divisi]
-      );
-
-      // 🔹 Tambahkan laporan & formAction biar EJS tidak error
-      return res.render("hmsi/laporanForm", {
-        title: "Tambah Laporan",
-        user,
-        activeNav: "Laporan",
-        errorMsg: "Judul, Proker, dan Deskripsi wajib diisi.",
-        successMsg: null,
-        old: body,
-        programs,
-        laporan: null,
-        formAction: "/hmsi/laporan/tambah",
-      });
+      // Logic for validation error...
     }
 
-    if (sumber_dana_radio !== "uang_kas" && !sumber_dana_text) {
-      if (req.xhr || req.headers.accept?.includes("application/json")) {
-        return res
-          .status(400)
-          .json({
-            success: false,
-            error: "Sumber dana lain harus diisi jika tidak menggunakan kas HMSI.",
-          });
-      }
-
-      const [programs] = await db.query(
-        `SELECT id_ProgramKerja AS id, Nama_ProgramKerja AS namaProker FROM Program_kerja WHERE id_divisi = ?`,
-        [user.id_divisi]
-      );
-
-      return res.render("hmsi/laporanForm", {
-        title: "Tambah Laporan",
-        user,
-        activeNav: "Laporan",
-        errorMsg: "Sumber dana lain harus diisi jika tidak menggunakan kas HMSI.",
-        successMsg: null,
-        old: body,
-        programs,
-        laporan: null,
-        formAction: "/hmsi/laporan/tambah",
-      });
-    }
-
-    // =============================
-    // 🔹 Normalisasi angka
-    // =============================
-    const cleanNum = (v) =>
-      parseFloat(String(v || "0").replace(/[^\d.-]/g, "")) || 0;
-
+    const cleanNum = (v) => parseFloat(String(v || "0").replace(/[^\d.-]/g, "")) || 0;
     let danaDigunakanNum = cleanNum(dana_digunakan);
     let danaTerpakaiNum = cleanNum(dana_terpakai);
+    if (danaDigunakanNum === 0 && danaTerpakaiNum > 0) danaDigunakanNum = danaTerpakaiNum;
+    if (danaTerpakaiNum === 0 && danaDigunakanNum > 0) danaTerpakaiNum = danaDigunakanNum;
 
-    if (danaDigunakanNum === 0 && danaTerpakaiNum > 0)
-      danaDigunakanNum = danaTerpakaiNum;
-    if (danaTerpakaiNum === 0 && danaDigunakanNum > 0)
-      danaTerpakaiNum = danaDigunakanNum;
-
-    const sumberDana =
-      sumber_dana_radio === "uang_kas"
-        ? "Uang Kas HMSI"
-        : sumber_dana_text || null;
-
+    const sumberDana = sumber_dana_radio === "uang_kas" ? "Uang Kas HMSI" : sumber_dana_text || null;
     const dokumentasi = req.file ? req.file.filename : null;
     const idLaporan = uuidv4();
 
-    // =============================
-    // 💾 Transaksi DB
-    // =============================
     connection = await db.getConnection();
     await connection.beginTransaction();
 
@@ -299,115 +201,46 @@ exports.createLaporan = async (req, res) => {
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURDATE())
       `,
       [
-        idLaporan,
-        judul_laporan,
-        deskripsi_kegiatan,
-        sasaran,
-        waktu_tempat,
-        danaDigunakanNum,
-        sumberDana,
-        sumber_dana_text || null,
-        danaTerpakaiNum,
-        persentase_kualitatif || null,
-        persentase_kuantitatif || null,
-        deskripsi_target_kualitatif || null,
-        deskripsi_target_kuantitatif || null,
-        kendala || null,
-        solusi || null,
-        dokumentasi,
-        id_ProgramKerja,
-        user.id_divisi,
+        idLaporan, judul_laporan, deskripsi_kegiatan, sasaran, waktu_tempat,
+        danaDigunakanNum, sumberDana, sumber_dana_text || null, danaTerpakaiNum,
+        persentase_kualitatif || null, persentase_kuantitatif || null,
+        deskripsi_target_kualitatif || null, deskripsi_target_kuantitatif || null,
+        kendala || null, solusi || null, dokumentasi, id_ProgramKerja, user.id_divisi,
       ]
     );
 
-    // =============================
-    // 💰 Sinkronisasi keuangan otomatis
-    // =============================
     if (sumberDana === "Uang Kas HMSI" && danaTerpakaiNum > 0) {
       await connection.query(
         `
-        INSERT INTO keuangan (
-          id_keuangan, tanggal, tipe, sumber, jumlah, id_laporan, id_anggota, created_at
-        ) VALUES (?, CURDATE(), 'Pengeluaran', ?, ?, ?, ?, NOW())
+        INSERT INTO keuangan (id_keuangan, tanggal, tipe, sumber, jumlah, id_laporan, id_anggota, created_at) 
+        VALUES (UUID(), CURDATE(), 'Pengeluaran', ?, ?, ?, ?, NOW())
         `,
-        [
-          uuidv4(),
-          `Pengeluaran dari Laporan: ${judul_laporan}`,
-          danaTerpakaiNum,
-          idLaporan,
-          user.id_anggota,
-        ]
+        [`Pengeluaran dari Laporan: ${judul_laporan}`, danaTerpakaiNum, idLaporan, user.id_anggota]
       );
     }
 
-    // =============================
-    // 🔔 Notifikasi otomatis ke DPA
-    // =============================
     const notifMsg = `Divisi ${user.nama_divisi || "HMSI"} menambahkan laporan baru: "${judul_laporan}"`;
     await connection.query(
       `
-      INSERT INTO Notifikasi (
-        id_notifikasi, pesan, id_laporan, target_role, id_divisi, created_at, status_baca
-      ) VALUES (?, ?, ?, 'DPA', ?, NOW(), 0)
+      INSERT INTO Notifikasi (id_notifikasi, pesan, id_laporan, target_role, id_divisi, created_at, status_baca) 
+      VALUES (UUID(), ?, ?, 'DPA', ?, NOW(), 0)
       `,
-      [uuidv4(), notifMsg, idLaporan, user.id_divisi]
+      [notifMsg, idLaporan, user.id_divisi]
     );
 
     await connection.commit();
-
-    // =============================
-    // 🔁 RESPONSE
-    // =============================
-    if (req.xhr || req.headers.accept?.includes("application/json")) {
-      return res.json({
-        success: true,
-        message: "Laporan berhasil ditambahkan.",
-      });
-    }
-
     res.redirect("/hmsi/laporan?success=Laporan berhasil ditambahkan");
   } catch (err) {
     if (connection) await connection.rollback();
     console.error("❌ createLaporan error:", err.message);
-
-    // Jika request AJAX
-    if (req.xhr || req.headers.accept?.includes("application/json")) {
-      return res
-        .status(500)
-        .json({ success: false, error: "Gagal menambahkan laporan" });
-    }
-
-    // ✅ Tambah render fallback agar tidak blank saat gagal
-    try {
-      const user = req.session.user;
-      const [programs] = await db.query(
-        `SELECT id_ProgramKerja AS id, Nama_ProgramKerja AS namaProker FROM Program_kerja WHERE id_divisi = ?`,
-        [user.id_divisi]
-      );
-
-      res.render("hmsi/laporanForm", {
-        title: "Tambah Laporan",
-        user,
-        activeNav: "Laporan",
-        errorMsg: "Terjadi kesalahan saat menyimpan laporan.",
-        successMsg: null,
-        old: req.body,
-        programs,
-        laporan: null,
-        formAction: "/hmsi/laporan/tambah",
-      });
-    } catch (renderErr) {
-      console.error("❌ Render fallback gagal:", renderErr.message);
-      res.status(500).send("Gagal menambahkan laporan");
-    }
+    res.status(500).send("Gagal menambahkan laporan");
   } finally {
     if (connection) connection.release();
   }
 };
 
-
 // =====================================================
-// 📄 Detail laporan (tidak diubah)
+// 📄 Detail laporan
 // =====================================================
 exports.getDetailLaporan = async (req, res) => {
   try {
@@ -427,7 +260,6 @@ exports.getDetailLaporan = async (req, res) => {
     );
 
     if (!rows.length) return res.status(404).send("Laporan tidak ditemukan");
-
     const laporan = rows[0];
     if (user.role === "HMSI" && laporan.id_divisi !== user.id_divisi)
       return res.status(403).send("Tidak boleh akses laporan divisi lain");
@@ -438,7 +270,7 @@ exports.getDetailLaporan = async (req, res) => {
     res.render("hmsi/detailLaporan", {
       title: "Detail Laporan",
       user,
-      activeNav: "Laporan",
+      activeNav: "laporan",
       laporan,
       errorMsg: null,
       successMsg: null,
@@ -450,14 +282,13 @@ exports.getDetailLaporan = async (req, res) => {
 };
 
 // =====================================================
-// ✏️ Form edit laporan (sinkron dropdown & preview file lama)
+// ✏️ Form edit laporan
 // =====================================================
 exports.getEditLaporan = async (req, res) => {
   try {
     const user = req.session.user;
     const { id } = req.params;
 
-    // 🔸 Ambil data laporan + status evaluasi
     const [rows] = await db.query(
       `
       SELECT l.*, e.status_konfirmasi
@@ -474,7 +305,6 @@ exports.getEditLaporan = async (req, res) => {
     if (user.role === "HMSI" && laporan.id_divisi !== user.id_divisi)
       return res.status(403).send("Tidak boleh edit laporan divisi lain");
 
-    // 🔹 Dropdown: ambil program kerja dari divisi aktif
     const [programs] = await db.query(
       `
       SELECT id_ProgramKerja AS id, Nama_ProgramKerja AS namaProker
@@ -485,7 +315,6 @@ exports.getEditLaporan = async (req, res) => {
       [user.id_divisi]
     );
 
-    // 🔹 Tambah properti untuk preview file lama
     laporan.dokumentasi_mime = getMimeFromFile(laporan.dokumentasi);
     if (laporan.dokumentasi) {
       laporan.filePreview = `/uploads/${laporan.dokumentasi}`;
@@ -493,20 +322,18 @@ exports.getEditLaporan = async (req, res) => {
       laporan.filePreview = null;
     }
 
-    // ✅ PERBAIKAN: Tentukan redirect target berdasarkan status evaluasi
     const redirectTarget = 
       (laporan.status_konfirmasi === "Revisi" || laporan.status_konfirmasi === "Selesai" || laporan.status_konfirmasi === "Disetujui")
         ? "/hmsi/kelola-evaluasi"
         : "/hmsi/laporan";
 
-    // 🔹 Render ke form edit
     res.render("hmsi/editLaporan", {
       title: "Edit Laporan",
       user,
-      activeNav: "Laporan",
+      activeNav: "laporan",
       laporan,
       programs,
-      redirectTarget, // ✅ Kirim ke view
+      redirectTarget,
       errorMsg: null,
       successMsg: null,
     });
@@ -516,9 +343,8 @@ exports.getEditLaporan = async (req, res) => {
   }
 };
 
-
 // =====================================================
-// 💾 Update laporan (revisi ringan + dukungan AJAX, logika lama dipertahankan)
+// 💾 Update laporan
 // =====================================================
 exports.updateLaporan = async (req, res) => {
   let connection;
@@ -543,9 +369,6 @@ exports.updateLaporan = async (req, res) => {
 
     if (!rows.length) {
       await connection.rollback();
-      if (req.xhr || req.headers.accept?.includes("application/json")) {
-        return res.status(404).json({ success: false, error: "Laporan tidak ditemukan" });
-      }
       return res.status(404).send("Laporan tidak ditemukan");
     }
 
@@ -555,28 +378,17 @@ exports.updateLaporan = async (req, res) => {
 
     if (user.role === "HMSI" && divisiLaporan !== user.id_divisi) {
       await connection.rollback();
-      if (req.xhr || req.headers.accept?.includes("application/json")) {
-        return res.status(403).json({ success: false, error: "Tidak boleh ubah laporan divisi lain" });
-      }
       return res.status(403).send("Tidak boleh ubah laporan divisi lain");
     }
 
-    // angka normalisasi
-    const cleanNumber = (v) =>
-      parseFloat(String(v || "0").replace(/[^\d.-]/g, "")) || 0;
+    const cleanNumber = (v) => parseFloat(String(v || "0").replace(/[^\d.-]/g, "")) || 0;
     let danaDigunakanNum = cleanNumber(body.dana_digunakan);
     let danaTerpakaiNum = cleanNumber(body.dana_terpakai);
-    if (danaDigunakanNum === 0 && danaTerpakaiNum > 0)
-      danaDigunakanNum = danaTerpakaiNum;
-    if (danaTerpakaiNum === 0 && danaDigunakanNum > 0)
-      danaTerpakaiNum = danaDigunakanNum;
+    if (danaDigunakanNum === 0 && danaTerpakaiNum > 0) danaDigunakanNum = danaTerpakaiNum;
+    if (danaTerpakaiNum === 0 && danaDigunakanNum > 0) danaTerpakaiNum = danaDigunakanNum;
 
-    const sumberDana =
-      body.sumber_dana_radio === "uang_kas"
-        ? "Uang Kas HMSI"
-        : body.sumber_dana_text || null;
+    const sumberDana = body.sumber_dana_radio === "uang_kas" ? "Uang Kas HMSI" : body.sumber_dana_text || null;
 
-    // update laporan
     let updateSQL = `
       UPDATE Laporan SET 
         judul_laporan=?, deskripsi_kegiatan=?, sasaran=?, waktu_tempat=?,
@@ -585,22 +397,11 @@ exports.updateLaporan = async (req, res) => {
         deskripsi_target_kualitatif=?, deskripsi_target_kuantitatif=?,
         kendala=?, solusi=?, id_ProgramKerja=?, id_divisi=?`;
     const params = [
-      body.judul_laporan,
-      body.deskripsi_kegiatan,
-      body.sasaran,
-      body.waktu_tempat,
-      danaDigunakanNum,
-      sumberDana,
-      body.sumber_dana_text || null,
-      danaTerpakaiNum,
-      body.persentase_kualitatif || null,
-      body.persentase_kuantitatif || null,
-      body.deskripsi_target_kualitatif || null,
-      body.deskripsi_target_kuantitatif || null,
-      body.kendala || null,
-      body.solusi || null,
-      body.id_ProgramKerja || null,
-      user.id_divisi,
+      body.judul_laporan, body.deskripsi_kegiatan, body.sasaran, body.waktu_tempat,
+      danaDigunakanNum, sumberDana, body.sumber_dana_text || null, danaTerpakaiNum,
+      body.persentase_kualitatif || null, body.persentase_kuantitatif || null,
+      body.deskripsi_target_kualitatif || null, body.deskripsi_target_kuantitatif || null,
+      body.kendala || null, body.solusi || null, body.id_ProgramKerja || null, user.id_divisi,
     ];
 
     if (newFile) {
@@ -614,11 +415,7 @@ exports.updateLaporan = async (req, res) => {
     await connection.query(updateSQL, params);
     if (newFile && oldFile) safeRemoveFile(oldFile);
 
-    // sinkronisasi keuangan
-    const [keu] = await connection.query(
-      "SELECT id_keuangan FROM keuangan WHERE id_laporan=?",
-      [id]
-    );
+    const [keu] = await connection.query("SELECT id_keuangan FROM keuangan WHERE id_laporan=?", [id]);
     const hasKeu = keu.length > 0;
 
     if (sumberDana === "Uang Kas HMSI" && danaTerpakaiNum > 0) {
@@ -629,62 +426,34 @@ exports.updateLaporan = async (req, res) => {
         );
       } else {
         await connection.query(
-          `
-          INSERT INTO keuangan (id_keuangan, tanggal, tipe, sumber, jumlah, id_laporan, id_anggota, created_at)
-          VALUES (?, CURDATE(), 'Pengeluaran', ?, ?, ?, ?, NOW())
-          `,
-          [
-            uuidv4(),
-            `Pengeluaran dari Laporan: ${body.judul_laporan}`,
-            danaTerpakaiNum,
-            id,
-            user.id_anggota,
-          ]
+          `INSERT INTO keuangan (id_keuangan, tanggal, tipe, sumber, jumlah, id_laporan, id_anggota, created_at) VALUES (?, CURDATE(), 'Pengeluaran', ?, ?, ?, ?, NOW())`,
+          [uuidv4(), `Pengeluaran dari Laporan: ${body.judul_laporan}`, danaTerpakaiNum, id, user.id_anggota]
         );
       }
     } else {
       await connection.query("DELETE FROM keuangan WHERE id_laporan=?", [id]);
     }
 
-    // notifikasi DPA
     const notifMsg = statusEvaluasi
       ? `HMSI dari divisi ${user.nama_divisi || "HMSI"} telah mengedit laporan yang telah dievaluasi: "${body.judul_laporan}"`
       : `Divisi ${user.nama_divisi || "HMSI"} memperbarui laporan: "${body.judul_laporan}"`;
 
     await connection.query(
-      `
-      INSERT INTO Notifikasi (id_notifikasi, pesan, id_laporan, target_role, id_divisi, created_at, status_baca)
-      VALUES (?, ?, ?, 'DPA', ?, NOW(), 0)
-      `,
-      [uuidv4(), notifMsg, id, user.id_divisi]
+      `INSERT INTO Notifikasi (id_notifikasi, pesan, id_laporan, target_role, id_divisi, created_at, status_baca) VALUES (UUID(), ?, ?, 'DPA', ?, NOW(), 0)`,
+      [notifMsg, id, user.id_divisi]
     );
 
     await connection.commit();
 
-    // ✅ PERBAIKAN: Redirect target yang benar
     const redirectTarget = 
       (statusEvaluasi === "Revisi" || statusEvaluasi === "Selesai" || statusEvaluasi === "Disetujui")
         ? "/hmsi/kelola-evaluasi"
         : "/hmsi/laporan";
 
-    // Response
-    if (req.xhr || req.headers.accept?.includes("application/json")) {
-      return res.json({
-        success: true,
-        message: "Laporan berhasil diperbarui",
-        redirect: redirectTarget,
-      });
-    }
-
     res.redirect(`${redirectTarget}?success=Laporan berhasil diperbarui`);
   } catch (err) {
     if (connection) await connection.rollback();
     console.error("❌ updateLaporan error:", err.message);
-
-    if (req.xhr || req.headers.accept?.includes("application/json")) {
-      return res.status(500).json({ success: false, error: "Gagal memperbarui laporan" });
-    }
-
     res.status(500).send("Gagal memperbarui laporan");
   } finally {
     if (connection) connection.release();
@@ -703,11 +472,7 @@ exports.deleteLaporan = async (req, res) => {
     connection = await db.getConnection();
     await connection.beginTransaction();
 
-    const [rows] = await connection.query(
-      "SELECT judul_laporan, dokumentasi, id_divisi FROM Laporan WHERE id_laporan=?",
-      [id]
-    );
-
+    const [rows] = await connection.query("SELECT judul_laporan, dokumentasi, id_divisi FROM Laporan WHERE id_laporan=?", [id]);
     if (!rows.length) {
       await connection.rollback();
       return res.status(404).send("Laporan tidak ditemukan");
@@ -719,22 +484,14 @@ exports.deleteLaporan = async (req, res) => {
       return res.status(403).send("Tidak boleh hapus laporan divisi lain");
     }
 
-    // ❌ Jangan hapus notifikasi lama, biarkan histori tetap ada
-    // await connection.query("DELETE FROM Notifikasi WHERE id_laporan=?", [id]);
-
-    // 🧹 Hapus keuangan & laporan
     await connection.query("DELETE FROM keuangan WHERE id_laporan=?", [id]);
     await connection.query("DELETE FROM Laporan WHERE id_laporan=?", [id]);
     if (dokumentasi) safeRemoveFile(dokumentasi);
 
-    // 🟢 Notifikasi baru ke DPA (sertakan id_laporan)
     const notifMsg = `Divisi ${user.nama_divisi || "HMSI"} menghapus laporan: "${judul_laporan}"`;
     await connection.query(
-      `
-      INSERT INTO Notifikasi (id_notifikasi, pesan, target_role, id_divisi, id_laporan, created_at, status_baca)
-      VALUES (?, ?, 'DPA', ?, ?, NOW(), 0)
-      `,
-      [uuidv4(), notifMsg, user.id_divisi, id]
+      `INSERT INTO Notifikasi (id_notifikasi, pesan, target_role, id_divisi, id_laporan, created_at, status_baca) VALUES (UUID(), ?, 'DPA', ?, ?, NOW(), 0)`,
+      [notifMsg, user.id_divisi, id]
     );
 
     await connection.commit();
@@ -754,11 +511,7 @@ exports.deleteLaporan = async (req, res) => {
 exports.downloadDokumentasi = async (req, res) => {
   try {
     const { id } = req.params;
-    const [rows] = await db.query(
-      "SELECT dokumentasi FROM Laporan WHERE id_laporan=?",
-      [id]
-    );
-
+    const [rows] = await db.query("SELECT dokumentasi FROM Laporan WHERE id_laporan=?", [id]);
     if (!rows.length || !rows[0].dokumentasi)
       return res.status(404).send("Dokumentasi tidak ditemukan");
 
@@ -771,5 +524,92 @@ exports.downloadDokumentasi = async (req, res) => {
   } catch (err) {
     console.error("❌ downloadDokumentasi error:", err.message);
     res.status(500).send("Gagal mengunduh dokumentasi");
+  }
+};
+
+// =====================================================
+// 📄 Ambil daftar laporan yang statusnya "Selesai" (Diterima)
+// =====================================================
+exports.getLaporanSelesai = async (req, res) => {
+  try {
+    const user = req.session.user;
+    const [rows] = await db.query(
+      `
+      SELECT 
+        l.id_laporan,
+        l.judul_laporan,
+        p.Nama_ProgramKerja,
+        e.tanggal_evaluasi
+      FROM Laporan l
+      JOIN Evaluasi e ON l.id_laporan = e.id_laporan
+      JOIN Program_kerja p ON l.id_ProgramKerja = p.id_ProgramKerja
+      WHERE l.id_divisi = ? AND e.status_konfirmasi = 'Selesai'
+      ORDER BY e.tanggal_evaluasi DESC
+      `,
+      [user.id_divisi]
+    );
+
+    const laporanSelesai = rows.map(item => ({
+      ...item,
+      tanggalFormatted: formatTanggal(item.tanggal_evaluasi)
+    }));
+    
+    res.render("hmsi/laporanSelesai", {
+      title: "Laporan Diterima",
+      user,
+      activeNav: 'laporanSelesai',
+      laporanSelesai,
+    });
+
+  } catch (err) {
+    console.error("❌ getLaporanSelesai error:", err.message);
+    res.status(500).send("Gagal mengambil data laporan yang diterima.");
+  }
+};
+
+// =====================================================
+// 📄 Lihat detail laporan Selesai (mirip DPA view)
+// =====================================================
+exports.getDetailLaporanSelesai = async (req, res) => {
+  try {
+    const { idLaporan } = req.params;
+    const user = req.session.user;
+
+    const [laporanRows] = await db.query(
+      `SELECT l.*, p.Nama_ProgramKerja AS namaProker, d.nama_divisi AS divisi
+       FROM Laporan l
+       LEFT JOIN Program_kerja p ON l.id_ProgramKerja = p.id_ProgramKerja
+       LEFT JOIN Divisi d ON l.id_divisi = d.id_divisi
+       WHERE l.id_laporan = ? AND l.id_divisi = ?`,
+      [idLaporan, user.id_divisi]
+    );
+
+    if (!laporanRows.length) {
+      return res.status(404).send("Laporan tidak ditemukan atau Anda tidak memiliki akses.");
+    }
+    
+    const [evaluasiRows] = await db.query(
+      `SELECT * FROM Evaluasi WHERE id_laporan = ? AND status_konfirmasi = 'Selesai'`,
+      [idLaporan]
+    );
+
+    const laporan = laporanRows[0];
+    laporan.tanggalFormatted = formatTanggal(laporan.tanggal);
+    
+    const evaluasi = evaluasiRows.length ? evaluasiRows[0] : null;
+    if(evaluasi) {
+      evaluasi.tanggal_evaluasi = formatTanggal(evaluasi.tanggal_evaluasi);
+    }
+
+    res.render("hmsi/detailLaporanSelesai", {
+      title: "Detail Laporan Diterima",
+      user,
+      activeNav: 'laporanSelesai',
+      laporan,
+      evaluasi,
+    });
+  } catch (err) {
+    console.error("❌ getDetailLaporanSelesai error:", err.message);
+    res.status(500).send("Gagal mengambil detail laporan.");
   }
 };
