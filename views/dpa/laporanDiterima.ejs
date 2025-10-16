@@ -37,6 +37,7 @@
 
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6 flex-wrap">
 
+          <!-- Search Input -->
           <div class="flex-1">
             <div class="relative">
               <input id="searchInput" type="text" placeholder="Cari laporan..."
@@ -47,6 +48,25 @@
             </div>
           </div>
 
+          <!-- Filter Status -->
+          <div class="relative">
+            <button id="statusDropdownBtn"
+              class="flex items-center justify-between gap-2 px-4 py-3 border border-gray-300 rounded-xl text-sm bg-white
+                      hover:border-orange-500 hover:shadow-md focus:ring-2 focus:ring-orange-500 transition-all duration-200">
+              <span id="statusDropdownLabel">Semua Status</span>
+              <i class="fa-solid fa-chevron-down text-orange-500"></i>
+            </button>
+            <div id="statusDropdownMenu"
+              class="hidden absolute right-0 mt-2 w-48 bg-white border border-orange-200 rounded-lg shadow-lg z-10">
+              <ul class="text-sm text-gray-700">
+                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="all">Semua Status</button></li>
+                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="Diterima">Diterima</button></li>
+                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="Revisi">Revisi</button></li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Filter Divisi -->
           <div class="relative">
             <button id="divisiDropdownBtn"
               class="flex items-center justify-between gap-2 px-4 py-3 border border-gray-300 rounded-xl text-sm bg-white
@@ -68,6 +88,7 @@
             </div>
           </div>
 
+          <!-- Filter Program Kerja -->
           <div class="relative hidden" id="prokerFilterContainer">
             <button id="prokerDropdownBtn"
               class="flex items-center justify-between gap-2 px-4 py-3 border border-gray-300 rounded-xl text-sm bg-white
@@ -117,7 +138,6 @@
                     <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= l.divisi || '-' %></td>
                     <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= l.tanggalFormatted %></td>
                     <td class="py-3 px-4 border border-orange-100">
-                      <%# ✅ DIPERBAIKI: Logika untuk menampilkan status Diterima atau Revisi %>
                       <% if (l.status === 'Revisi') { %>
                         <span class="px-3 py-1 bg-red-100 text-red-700 rounded-lg text-xs font-semibold whitespace-nowrap">Revisi</span>
                       <% } else { %>
@@ -149,26 +169,37 @@
   </main>
 
   <script>
-    // Script pagination dan filter tidak perlu diubah, biarkan seperti semula
     document.addEventListener("DOMContentLoaded", () => {
       const searchInput = document.getElementById("searchInput");
       const tbody = document.getElementById("laporanTable");
       let rows = Array.from(tbody?.querySelectorAll("tr") || []);
+      
+      const statusBtn = document.getElementById("statusDropdownBtn");
+      const statusMenu = document.getElementById("statusDropdownMenu");
+      const statusLabel = document.getElementById("statusDropdownLabel");
+      
       const divisiBtn = document.getElementById("divisiDropdownBtn");
       const divisiMenu = document.getElementById("divisiDropdownMenu");
       const divisiLabel = document.getElementById("divisiDropdownLabel");
+      
       const prokerBtn = document.getElementById("prokerDropdownBtn");
       const prokerMenu = document.getElementById("prokerDropdownMenu");
       const prokerLabel = document.getElementById("prokerDropdownLabel");
       const prokerFilterContainer = document.getElementById("prokerFilterContainer");
       const prokerList = document.getElementById("prokerList");
+      
       const rowsPerPage = 10;
       let currentPage = 1;
+      
+      // Close dropdowns when clicking outside
       document.addEventListener("click", (e) => {
+        if (!statusBtn.contains(e.target)) statusMenu.classList.add("hidden");
         if (!divisiBtn.contains(e.target)) divisiMenu.classList.add("hidden");
         if (!prokerBtn.contains(e.target)) prokerMenu.classList.add("hidden");
       });
-      [divisiBtn, prokerBtn].forEach(btn => {
+      
+      // Toggle dropdown menus
+      [statusBtn, divisiBtn, prokerBtn].forEach(btn => {
         btn.addEventListener("click", e => {
           e.stopPropagation();
           const menu = btn.nextElementSibling;
@@ -176,6 +207,8 @@
           menu.classList.toggle("hidden");
         });
       });
+      
+      // Build divisi-to-proker mapping
       const divisiToProker = {};
       rows.forEach(row => {
         const div = row.dataset.divisi;
@@ -184,12 +217,25 @@
         if (!divisiToProker[div]) divisiToProker[div] = new Set();
         divisiToProker[div].add(prok);
       });
+      
+      // Status filter
+      statusMenu.querySelectorAll("button").forEach(btn => {
+        btn.addEventListener("click", () => {
+          statusLabel.textContent = btn.dataset.value === "all" ? "Semua Status" : btn.dataset.value;
+          statusMenu.classList.add("hidden");
+          currentPage = 1;
+          filterRows();
+        });
+      });
+      
+      // Divisi filter
       divisiMenu.querySelectorAll("button").forEach(btn => {
         btn.addEventListener("click", () => {
           const selectedDiv = btn.dataset.value;
           divisiLabel.textContent = selectedDiv === "all" ? "Semua Divisi" : selectedDiv;
           divisiMenu.classList.add("hidden");
           currentPage = 1;
+          
           if (selectedDiv !== "all" && divisiToProker[selectedDiv]) {
             prokerFilterContainer.classList.remove("hidden");
             const prokerArr = Array.from(divisiToProker[selectedDiv]).sort((a,b)=>a.localeCompare(b));
@@ -211,40 +257,58 @@
           filterRows();
         });
       });
+      
+      // Filter rows function
       function filterRows() {
         const searchValue = searchInput.value.toLowerCase();
+        const selectedStatus = statusLabel.textContent.trim();
         const selectedDivisi = divisiLabel.textContent.trim();
         const selectedProker = prokerLabel.textContent.trim();
+        
         rows.forEach(row => {
           const judul = row.cells[1]?.innerText.toLowerCase() || "";
           const program = row.cells[2]?.innerText.trim() || "";
           const divisi = row.cells[3]?.innerText.trim() || "";
+          const status = row.cells[5]?.innerText.trim() || "";
+          
           const matchSearch = judul.includes(searchValue) || program.toLowerCase().includes(searchValue);
+          const matchStatus = selectedStatus === "Semua Status" || status === selectedStatus;
           const matchDivisi = selectedDivisi === "Semua Divisi" || divisi === selectedDivisi;
           const matchProker = selectedProker === "Semua Program Kerja" || program === selectedProker;
-          row.dataset.visible = (matchSearch && matchDivisi && matchProker) ? "true" : "false";
+          
+          row.dataset.visible = (matchSearch && matchStatus && matchDivisi && matchProker) ? "true" : "false";
         });
         paginate();
       }
+      
+      // Pagination function
       function paginate() {
         const visibleRows = rows.filter(r => r.dataset.visible !== "false");
         const totalPages = Math.ceil(visibleRows.length / rowsPerPage);
         if (currentPage > totalPages) currentPage = totalPages || 1;
+        
         rows.forEach(r => r.style.display = "none");
         visibleRows.forEach((r, i) => {
           if (i >= (currentPage-1)*rowsPerPage && i < currentPage*rowsPerPage) r.style.display = "";
         });
+        
         document.getElementById("pageInfo").textContent = `Halaman ${currentPage} dari ${totalPages || 1}`;
         document.getElementById("prevPage").disabled = currentPage === 1;
         document.getElementById("nextPage").disabled = currentPage === totalPages || totalPages === 0;
       }
+      
+      // Event listeners
       searchInput.addEventListener("input", () => { currentPage = 1; filterRows(); });
-      document.getElementById("prevPage").addEventListener("click", () => { if (currentPage > 1) { currentPage--; paginate(); } });
+      document.getElementById("prevPage").addEventListener("click", () => { 
+        if (currentPage > 1) { currentPage--; paginate(); } 
+      });
       document.getElementById("nextPage").addEventListener("click", () => {
         const visibleRows = rows.filter(r => r.dataset.visible !== "false");
         const totalPages = Math.ceil(visibleRows.length / rowsPerPage);
         if (currentPage < totalPages) { currentPage++; paginate(); }
       });
+      
+      // Initialize
       rows.forEach(r => r.dataset.visible = "true");
       paginate();
     });
