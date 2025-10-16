@@ -8,7 +8,6 @@
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col font-sans">
 
-  <!-- ✅ MODAL 1: Konfirmasi Awal -->
   <div id="confirmModal1" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
     <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="confirmModal1Content">
       <div class="text-center">
@@ -33,7 +32,6 @@
     </div>
   </div>
 
-  <!-- ✅ MODAL 2: Validasi Akhir dengan Input Teks -->
   <div id="confirmModal2" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
     <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="confirmModal2Content">
       <div class="text-center">
@@ -79,7 +77,6 @@
     </div>
   </div>
 
-  <!-- Success Modal -->
   <div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
     <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="successModalContent">
       <div class="text-center">
@@ -97,7 +94,6 @@
     </div>
   </div>
 
-  <!-- Error Modal -->
   <div id="errorModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
     <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="errorModalContent">
       <div class="text-center">
@@ -115,7 +111,6 @@
     </div>
   </div>
 
-  <!-- Loading Modal -->
   <div id="loadingModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
     <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="loadingModalContent">
       <div class="text-center">
@@ -128,171 +123,176 @@
     </div>
   </div>
 
-  <!-- Navbar -->
   <%- include('../partials/navbarDPA', { user: user, unreadCount: unreadCount }) %>
 
-  <!-- Sidebar -->
   <%- include('../partials/sidebarDPA', { activeNav: 'Daftar Program Kerja', user: user }) %>
 
-  <!-- Main Content -->
   <main class="lg:ml-80 px-6 pt-20 pb-10 flex-grow">
     <div class="max-w-4xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-200">
 
-      <!-- Header -->
-      <div class="bg-gradient-to-r from-orange-500 to-orange-600 px-6 py-6 flex items-center justify-between">
+      <div class="bg-gradient-to-r from-orange-500 to-orange-600 px-6 py-6">
         <div>
           <h1 class="text-2xl font-bold text-white">Detail Program Kerja</h1>
           <p class="text-sm text-orange-100">Informasi lengkap program kerja HMSI</p>
         </div>
-        <a href="/dpa/lihatProker" class="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-all duration-200">
-          <i class="fa-solid fa-arrow-left text-sm"></i>
-          <span class="font-medium">Kembali</span>
-        </a>
       </div>
 
-      <!-- Main Content -->
-      <div class="p-6 sm:p-8 space-y-8">
+      <div class="p-6 sm:p-8">
+        <div class="space-y-10">
 
-        <!-- Informasi Program Kerja -->
-        <section class="space-y-6">
-          <h4 class="text-lg font-semibold text-gray-700 mb-2">Informasi Program Kerja</h4>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-            <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
-              <p class="font-medium text-gray-600 mb-1">Nama Program Kerja</p>
-              <div class="bg-white border border-gray-200 p-3 rounded-lg">
-                <p class="text-gray-800 font-semibold"><%= proker.namaProker || '-' %></p>
+          <div>
+            <h4 class="text-lg font-semibold text-gray-700 mb-4">Informasi Dasar</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="md:col-span-2 bg-gray-50 border border-gray-200 rounded-xl p-4">
+                <p class="block text-sm font-medium text-gray-700 mb-2">Nama Program Kerja</p>
+                <div class="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-sm text-gray-800 font-medium">
+                  <%= proker.namaProker || '-' %>
+                </div>
+              </div>
+              <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                <p class="block text-sm font-medium text-gray-700 mb-2">Tanggal Mulai</p>
+                <div class="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-sm text-gray-800 font-medium">
+                  <%= proker.tanggalMulaiFormatted || '-' %>
+                </div>
+              </div>
+              <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                <p class="block text-sm font-medium text-gray-700 mb-2">Tanggal Selesai</p>
+                <div class="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-sm text-gray-800 font-medium">
+                  <%= proker.tanggalSelesaiFormatted || '-' %>
+                </div>
+              </div>
+              <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                <p class="block text-sm font-medium text-gray-700 mb-2">Divisi</p>
+                <div class="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-sm text-gray-800 font-medium">
+                  <%= proker.divisi || '-' %>
+                </div>
+              </div>
+              <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                <p class="block text-sm font-medium text-gray-700 mb-2">Penanggung Jawab</p>
+                <div class="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-sm text-gray-800 font-medium">
+                  <%= proker.penanggungJawab || '-' %>
+                </div>
+              </div>
+              <div class="md:col-span-2 bg-gray-50 border border-gray-200 rounded-xl p-4">
+                <p class="block text-sm font-medium text-gray-700 mb-2">Status</p>
+                <div class="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-sm">
+                  <span id="status-label" class="px-3 py-1 text-sm rounded-full font-medium
+                    <% if (proker.status === 'Selesai') { %> bg-green-100 text-green-700
+                    <% } else if (proker.status === 'Tidak Selesai') { %> bg-red-100 text-red-700
+                    <% } else if (proker.status === 'Sedang Berjalan') { %> bg-blue-100 text-blue-700
+                    <% } else { %> bg-gray-100 text-gray-600 <% } %>">
+                    <%= proker.status %>
+                  </span>
+                </div>
+              </div>
+              <div class="md:col-span-2 bg-gray-50 border border-gray-200 rounded-xl p-4">
+                <p class="block text-sm font-medium text-gray-700 mb-2">Deskripsi Program</p>
+                <div class="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-sm text-gray-800 whitespace-pre-line leading-relaxed min-h-[100px]">
+                  <%= proker.deskripsi || '-' %>
+                </div>
               </div>
             </div>
+          </div>
 
-            <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
-              <p class="font-medium text-gray-600 mb-1">Divisi</p>
-              <div class="bg-white border border-gray-200 p-3 rounded-lg">
-                <p class="text-gray-800 font-semibold"><%= proker.divisi || '-' %></p>
+          <div>
+            <h4 class="text-lg font-semibold text-gray-700 mb-4">🎯 Target Pencapaian</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                <p class="block text-sm font-medium text-gray-700 mb-2">Target Pencapaian Kuantitatif</p>
+                <div class="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-sm text-gray-800 whitespace-pre-line leading-relaxed min-h-[80px]">
+                  <%= proker.Target_Kuantitatif || '-' %>
+                </div>
+              </div>
+              <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                <p class="block text-sm font-medium text-gray-700 mb-2">Target Pencapaian Kualitatif</p>
+                <div class="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-sm text-gray-800 whitespace-pre-line leading-relaxed min-h-[80px]">
+                  <%= proker.Target_Kualitatif || '-' %>
+                </div>
               </div>
             </div>
-
-            <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
-              <p class="font-medium text-gray-600 mb-1">Penanggung Jawab</p>
-              <div class="bg-white border border-gray-200 p-3 rounded-lg">
-                <p class="text-gray-800 font-semibold"><%= proker.penanggungJawab || '-' %></p>
+          </div>
+          
+          <div>
+              <h4 class="text-lg font-semibold text-gray-700 mb-4">📄 Dokumen Pendukung</h4>
+              <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                  <% if (proker.dokumen_pendukung) { %>
+                      <% proker.dokumen_pendukung.split(',').forEach(file => {
+                          const f = file.trim();
+                          const ext = f.split('.').pop().toLowerCase();
+                      %>
+                          <div class="w-full bg-white rounded-lg border border-gray-300 shadow-sm p-2 mb-4">
+                              <% if (['jpg','jpeg','png','gif'].includes(ext)) { %>
+                                  <img src="/uploads/proker/<%= f %>" alt="<%= f %>" class="w-full h-auto rounded-lg">
+                              <% } else if (ext === 'pdf') { %>
+                                  <iframe src="/uploads/proker/<%= f %>" class="w-full h-96 rounded-lg" frameborder="0"></iframe>
+                              <% } else if (['doc','docx','xls','xlsx','ppt','pptx'].includes(ext)) { %>
+                                  <iframe src="https://view.officeapps.live.com/op/embed.aspx?src=<%= encodeURIComponent('http://' + req.headers.host + '/uploads/proker/' + f) %>" class="w-full h-96 rounded-lg" frameborder="0"></iframe>
+                              <% } else { %>
+                                  <div class="p-4 text-center">
+                                      <p class="text-gray-500">File <%= f %> tidak dapat ditampilkan.</p>
+                                      <a href="/uploads/proker/<%= f %>" target="_blank" class="text-orange-600 hover:underline mt-2 inline-block">Unduh File</a>
+                                  </div>
+                              <% } %>
+                          </div>
+                      <% }) %>
+                  <% } else { %>
+                      <div class="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg text-sm text-gray-500 italic">
+                          Tidak ada dokumen pendukung yang diunggah.
+                      </div>
+                  <% } %>
               </div>
+          </div>
+
+        </div>
+        
+        <div class="pt-10 mt-10 border-t border-gray-200">
+          <div class="flex flex-col-reverse sm:flex-row items-center justify-between gap-4">
+            
+            <div>
+              <% if (proker.status === "Selesai" || proker.status === "Tidak Selesai") { %>
+                <div class="text-center md:text-left py-2 px-4 bg-gray-100 border border-gray-200 rounded-xl">
+                  <p class="text-gray-600 text-sm">
+                    <i class="fa-solid fa-info-circle mr-2"></i>
+                    Status program kerja sudah final.
+                  </p>
+                </div>
+              <% } else if (proker.status !== "Sedang Berjalan") { %>
+                <div class="text-center md:text-left py-2 px-4 bg-yellow-50 border border-yellow-200 rounded-xl">
+                  <p class="text-yellow-700 text-sm">
+                    <i class="fa-solid fa-clock mr-2"></i>
+                    Aksi hanya tersedia saat proker berjalan.
+                  </p>
+                </div>
+              <% } %>
             </div>
 
-            <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
-              <p class="font-medium text-gray-600 mb-1">Tanggal Mulai</p>
-              <div class="bg-white border border-gray-200 p-3 rounded-lg">
-                <p class="text-gray-800 font-semibold"><%= proker.tanggalMulaiFormatted || '-' %></p>
-              </div>
-            </div>
-
-            <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
-              <p class="font-medium text-gray-600 mb-1">Tanggal Selesai</p>
-              <div class="bg-white border border-gray-200 p-3 rounded-lg">
-                <p class="text-gray-800 font-semibold"><%= proker.tanggalSelesaiFormatted || '-' %></p>
-              </div>
-            </div>
-
-            <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
-              <p class="font-medium text-gray-600 mb-1">Status</p>
-              <div class="bg-white border border-gray-200 p-3 rounded-lg">
-                <span id="status-label" class="px-3 py-1 text-sm rounded-full font-medium
-                  <% if (proker.status === 'Selesai') { %> bg-green-100 text-green-700
-                  <% } else if (proker.status === 'Tidak Selesai') { %> bg-red-100 text-red-700
-                  <% } else if (proker.status === 'Sedang Berjalan') { %> bg-blue-100 text-blue-700
-                  <% } else { %> bg-gray-100 text-gray-600 <% } %>">
-                  <%= proker.status %>
-                </span>
-              </div>
-            </div>
-
-            <div class="md:col-span-2 bg-gray-50 border border-gray-200 rounded-xl p-4">
-              <p class="font-medium text-gray-600 mb-2">Deskripsi</p>
-              <div class="bg-white border border-gray-200 p-4 rounded-lg">
-                <p class="text-gray-800 whitespace-pre-line leading-relaxed"><%= proker.deskripsi || '-' %></p>
-              </div>
-            </div>
-
-            <div class="md:col-span-2 bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-4">
-              <h4 class="text-lg font-semibold text-gray-700 mb-2">🎯 Target Pencapaian</h4>
-              <div class="bg-white border border-gray-200 p-4 rounded-lg">
-                <p class="font-medium text-gray-600 mb-2">Target Pencapaian Kuantitatif</p>
-                <p class="text-gray-800 whitespace-pre-line leading-relaxed"><%= proker.Target_Kuantitatif || '-' %></p>
-              </div>
-              <div class="bg-white border border-gray-200 p-4 rounded-lg">
-                <p class="font-medium text-gray-600 mb-2">Target Pencapaian Kualitatif</p>
-                <p class="text-gray-800 whitespace-pre-line leading-relaxed"><%= proker.Target_Kualitatif || '-' %></p>
-              </div>
-            </div>
-
-            <div class="md:col-span-2 bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-4">
-              <p class="font-medium text-gray-600 mb-2">Dokumen Pendukung</p>
-              <div class="bg-white border border-gray-200 p-4 rounded-lg space-y-6">
-                <% if (proker.dokumen_pendukung) { %>
-                  <% proker.dokumen_pendukung.split(',').forEach(file => {
-                       const f = file.trim();
-                       const ext = f.split('.').pop().toLowerCase();
-                  %>
-                    <div class="w-full bg-gray-50 rounded-lg border border-gray-300 shadow-sm p-2">
-                      <% if (['jpg','jpeg','png','gif'].includes(ext)) { %>
-                        <img src="/uploads/proker/<%= f %>" alt="<%= f %>" class="w-full h-auto rounded-lg">
-                      <% } else if (ext === 'pdf') { %>
-                        <iframe src="/uploads/proker/<%= f %>" class="w-full h-96 rounded-lg" frameborder="0"></iframe>
-                      <% } else if (['doc','docx','xls','xlsx','ppt','pptx'].includes(ext)) { %>
-                        <iframe src="https://view.officeapps.live.com/op/embed.aspx?src=<%= encodeURIComponent('http://' + req.headers.host + '/uploads/proker/' + f) %>" class="w-full h-96 rounded-lg" frameborder="0"></iframe>
-                      <% } else { %>
-                        <p class="text-gray-500">File <%= f %> tidak dapat ditampilkan.</p>
-                      <% } %>
-                    </div>
-                  <% }) %>
-                <% } else { %>
-                  <p class="text-gray-500 italic">Tidak ada dokumen pendukung.</p>
+            <div class="flex w-full sm:w-auto justify-end gap-3">
+              <a href="/dpa/lihatProker" 
+                 class="w-full sm:w-auto text-center px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold rounded-xl transition-all duration-300">
+                Kembali
+              </a>
+              
+              <div id="statusButtons" class="flex w-full sm:w-auto gap-3">
+                <% if (proker.status === "Sedang Berjalan") { %>
+                  <button onclick="ubahStatus('<%= proker.id %>', 'Selesai')" id="btnSelesai"
+                          class="flex-1 sm:flex-initial group relative overflow-hidden px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 active:scale-95">
+                    <span class="relative z-10 flex items-center justify-center gap-2">
+                      <i class="fa-solid fa-check-circle"></i>
+                      <span>Selesai</span>
+                    </span>
+                  </button>
+                  
+                  <button onclick="ubahStatus('<%= proker.id %>', 'Tidak Selesai')" id="btnTidakSelesai"
+                          class="flex-1 sm:flex-initial group relative overflow-hidden px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 active:scale-95">
+                    <span class="relative z-10 flex items-center justify-center gap-2">
+                      <i class="fa-solid fa-times-circle"></i>
+                      <span>Tidak Selesai</span>
+                    </span>
+                  </button>
                 <% } %>
               </div>
             </div>
-
           </div>
-        </section>
-
-        <!-- ✅ Tombol Ubah Status - HANYA MUNCUL JIKA STATUS = SEDANG BERJALAN -->
-        <div id="statusButtons" class="flex gap-3 justify-end mt-6">
-          <% if (proker.status === "Sedang Berjalan") { %>
-            <button onclick="ubahStatus('<%= proker.id %>', 'Selesai')" id="btnSelesai"
-                    class="group relative overflow-hidden px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 active:scale-95">
-              <span class="relative z-10 flex items-center gap-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                <span>Selesai</span>
-              </span>
-              <div class="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
-            </button>
-            
-            <button onclick="ubahStatus('<%= proker.id %>', 'Tidak Selesai')" id="btnTidakSelesai"
-                    class="group relative overflow-hidden px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 active:scale-95">
-              <span class="relative z-10 flex items-center gap-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                <span>Tidak Selesai</span>
-              </span>
-              <div class="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
-            </button>
-          <% } else if (proker.status === "Selesai" || proker.status === "Tidak Selesai") { %>
-            <div class="w-full text-center py-3 px-6 bg-gray-100 rounded-xl">
-              <p class="text-gray-600 text-sm">
-                <i class="fa-solid fa-info-circle mr-2"></i>
-                Status program kerja sudah final dan tidak dapat diubah.
-              </p>
-            </div>
-          <% } else { %>
-            <div class="w-full text-center py-3 px-6 bg-yellow-50 border border-yellow-200 rounded-xl">
-              <p class="text-yellow-700 text-sm">
-                <i class="fa-solid fa-clock mr-2"></i>
-                Button ubah status hanya tersedia saat program kerja sedang berjalan.
-              </p>
-            </div>
-          <% } %>
         </div>
 
       </div>
@@ -300,233 +300,191 @@
   </main>
 
   <script>
-  // =====================================================
-  // Pop-up Message Utility Class
-  // =====================================================
-  class PopupMessage {
-    static showModal(modalId) {
-      const modal = document.getElementById(modalId);
-      const content = document.getElementById(modalId + 'Content');
-      if (!modal || !content) return;
-      modal.classList.remove('hidden');
-      setTimeout(() => {
-        content.classList.remove('scale-95', 'opacity-0');
-        content.classList.add('scale-100', 'opacity-100');
-      }, 10);
+    // =====================================================
+    // Pop-up Message Utility Class
+    // =====================================================
+    class PopupMessage {
+      static showModal(modalId) {
+        const modal = document.getElementById(modalId);
+        const content = document.getElementById(modalId + 'Content');
+        if (!modal || !content) return;
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+          content.classList.remove('scale-95', 'opacity-0');
+          content.classList.add('scale-100', 'opacity-100');
+        }, 10);
+      }
+
+      static hideModal(modalId, callback = null) {
+        const modal = document.getElementById(modalId);
+        const content = document.getElementById(modalId + 'Content');
+        if (!modal || !content) return;
+        content.classList.remove('scale-100', 'opacity-100');
+        content.classList.add('scale-95', 'opacity-0');
+        setTimeout(() => {
+          modal.classList.add('hidden');
+          if (callback) callback();
+        }, 300);
+      }
+
+      static showSuccess(title, message, buttonText = 'OK', callback = null) {
+        document.getElementById('successModalTitle').textContent = title;
+        document.getElementById('successModalMessage').textContent = message;
+        const button = document.getElementById('closeSuccessModal');
+        button.textContent = buttonText;
+        button.replaceWith(button.cloneNode(true));
+        const newButton = document.getElementById('closeSuccessModal');
+        newButton.addEventListener('click', () => this.hideModal('successModal', callback));
+        this.showModal('successModal');
+      }
+
+      static showError(title, message, buttonText = 'Tutup', callback = null) {
+        document.getElementById('errorModalTitle').textContent = title;
+        document.getElementById('errorMessage').textContent = message;
+        const button = document.getElementById('closeErrorModal');
+        button.textContent = buttonText;
+        button.replaceWith(button.cloneNode(true));
+        const newButton = document.getElementById('closeErrorModal');
+        newButton.addEventListener('click', () => this.hideModal('errorModal', callback));
+        this.showModal('errorModal');
+      }
+
+      static showLoading(title = 'Memproses...', message = 'Mohon tunggu sebentar.') {
+        document.getElementById('loadingModalTitle').textContent = title;
+        document.getElementById('loadingModalMessage').textContent = message;
+        this.showModal('loadingModal');
+      }
+
+      static hideLoading(callback = null) {
+        this.hideModal('loadingModal', callback);
+      }
     }
 
-    static hideModal(modalId, callback = null) {
-      const modal = document.getElementById(modalId);
-      const content = document.getElementById(modalId + 'Content');
-      if (!modal || !content) return;
-      content.classList.remove('scale-100', 'opacity-100');
-      content.classList.add('scale-95', 'opacity-0');
-      setTimeout(() => {
-        modal.classList.add('hidden');
-        if (callback) callback();
-      }, 300);
-    }
+    // =====================================================
+    // SISTEM VALIDASI DUA TAHAP
+    // =====================================================
+    let pendingAction = null;
 
-    static showSuccess(title, message, buttonText = 'OK', callback = null) {
-      document.getElementById('successModalTitle').textContent = title;
-      document.getElementById('successModalMessage').textContent = message;
-      const button = document.getElementById('closeSuccessModal');
-      button.textContent = buttonText;
-      button.replaceWith(button.cloneNode(true));
-      const newButton = document.getElementById('closeSuccessModal');
-      newButton.addEventListener('click', () => this.hideModal('successModal', callback));
-      this.showModal('successModal');
-    }
-
-    static showError(title, message, buttonText = 'Tutup', callback = null) {
-      document.getElementById('errorModalTitle').textContent = title;
-      document.getElementById('errorMessage').textContent = message;
-      const button = document.getElementById('closeErrorModal');
-      button.textContent = buttonText;
-      button.replaceWith(button.cloneNode(true));
-      const newButton = document.getElementById('closeErrorModal');
-      newButton.addEventListener('click', () => this.hideModal('errorModal', callback));
-      this.showModal('errorModal');
-    }
-
-    static showLoading(title = 'Memproses...', message = 'Mohon tunggu sebentar.') {
-      document.getElementById('loadingModalTitle').textContent = title;
-      document.getElementById('loadingModalMessage').textContent = message;
-      this.showModal('loadingModal');
-    }
-
-    static hideLoading(callback = null) {
-      this.hideModal('loadingModal', callback);
-    }
-  }
-
-  // =====================================================
-  // ✅ SISTEM VALIDASI DUA TAHAP
-  // =====================================================
-  let pendingAction = null;
-
-  // 🔹 Fungsi utama: User klik button "Selesai" atau "Tidak Selesai"
-  function ubahStatus(id, status) {
-    pendingAction = { id, status };
-    
-    // Tampilkan status di Modal 1
-    document.getElementById('statusTarget1').textContent = status;
-    
-    PopupMessage.showModal('confirmModal1');
-  }
-
-  // =====================================================
-  // EVENT LISTENERS
-  // =====================================================
-  document.addEventListener('DOMContentLoaded', () => {
-    
-    // ✅ MODAL 1: Konfirmasi Awal
-    document.getElementById('cancelConfirm1').addEventListener('click', () => {
-      PopupMessage.hideModal('confirmModal1');
-      pendingAction = null;
-    });
-
-    document.getElementById('proceedConfirm1').addEventListener('click', () => {
-      // Tutup Modal 1, lanjut ke Modal 2
-      PopupMessage.hideModal('confirmModal1', () => {
-        if (pendingAction) {
-          // Tampilkan status di Modal 2
-          document.getElementById('statusTarget2').textContent = pendingAction.status.toLowerCase();
-          document.getElementById('validationInput').value = '';
-          document.getElementById('validationError').classList.add('hidden');
-          
-          PopupMessage.showModal('confirmModal2');
-          
-          // Auto-focus ke input
-          setTimeout(() => {
-            document.getElementById('validationInput').focus();
-          }, 100);
-        }
-      });
-    });
-
-    // ✅ MODAL 2: Validasi Akhir dengan Input Teks
-    document.getElementById('cancelConfirm2').addEventListener('click', () => {
-      PopupMessage.hideModal('confirmModal2');
-      pendingAction = null;
-    });
-
-    document.getElementById('proceedConfirm2').addEventListener('click', () => {
-      const input = document.getElementById('validationInput').value;
-      const errorDiv = document.getElementById('validationError');
+    function ubahStatus(id, status) {
+      pendingAction = { id, status };
       
-      // ✅ Validasi teks (case-sensitive)
-      if (input !== 'YA, SAYA YAKIN') {
-        errorDiv.classList.remove('hidden');
-        document.getElementById('validationInput').classList.add('border-red-500');
-        return;
-      }
+      document.getElementById('statusTarget1').textContent = status;
       
-      // ✅ Validasi berhasil, lanjutkan proses
-      PopupMessage.hideModal('confirmModal2', () => {
-        if (pendingAction) {
-          executeStatusChange(pendingAction.id, pendingAction.status);
-        }
-      });
-    });
+      PopupMessage.showModal('confirmModal1');
+    }
 
-    // Enter key submit di Modal 2
-    document.getElementById('validationInput').addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        document.getElementById('proceedConfirm2').click();
-      }
-    });
-
-    // Reset error saat user ketik
-    document.getElementById('validationInput').addEventListener('input', () => {
-      document.getElementById('validationError').classList.add('hidden');
-      document.getElementById('validationInput').classList.remove('border-red-500');
-    });
-
-    // ESC untuk tutup modal
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        ['successModal', 'errorModal', 'confirmModal1', 'confirmModal2', 'loadingModal'].forEach(id => {
-          const modal = document.getElementById(id);
-          if (modal && !modal.classList.contains('hidden')) {
-            PopupMessage.hideModal(id);
-          }
-        });
-      }
-    });
-  });
-
-  // =====================================================
-  // ✅ Eksekusi perubahan status setelah validasi berhasil
-  // =====================================================
-  async function executeStatusChange(id, status) {
-    PopupMessage.showLoading('Mengubah Status...', 'Mohon tunggu sebentar.');
-
-    try {
-      const res = await fetch(`/dpa/proker/${id}/status`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status })
+    // =====================================================
+    // EVENT LISTENERS
+    // =====================================================
+    document.addEventListener('DOMContentLoaded', () => {
+      
+      document.getElementById('cancelConfirm1').addEventListener('click', () => {
+        PopupMessage.hideModal('confirmModal1');
+        pendingAction = null;
       });
 
-      const data = await res.json();
-
-      PopupMessage.hideLoading(() => {
-        if (data.success) {
-          PopupMessage.showSuccess(
-            'Status Berhasil Diubah!',
-            data.message || `Status program kerja telah berhasil diubah menjadi "${status}".`,
-            'Mengerti'
-          );
-
-          // Update label status
-          const label = document.getElementById('status-label');
-          label.textContent = status;
-          label.className = "px-3 py-1 text-sm rounded-full font-medium";
-          if (status === "Selesai") {
-            label.classList.add("bg-green-100","text-green-700");
-          } else if (status === "Tidak Selesai") {
-            label.classList.add("bg-red-100","text-red-700");
-          }
-
-          // Hilangkan kedua button
-          const statusButtons = document.getElementById('statusButtons');
-          if (statusButtons) {
-            const buttons = statusButtons.querySelectorAll('button');
-            buttons.forEach(btn => {
-              btn.style.opacity = '0';
-              btn.style.transform = 'scale(0.9)';
-            });
+      document.getElementById('proceedConfirm1').addEventListener('click', () => {
+        PopupMessage.hideModal('confirmModal1', () => {
+          if (pendingAction) {
+            document.getElementById('statusTarget2').textContent = pendingAction.status.toLowerCase();
+            document.getElementById('validationInput').value = '';
+            document.getElementById('validationError').classList.add('hidden');
+            
+            PopupMessage.showModal('confirmModal2');
             
             setTimeout(() => {
-              statusButtons.innerHTML = `
-                <div class="w-full text-center py-3 px-6 bg-gray-100 rounded-xl animate-fade-in">
-                  <p class="text-gray-600 text-sm">
-                    <i class="fa-solid fa-info-circle mr-2"></i>
-                    Status program kerja sudah final dan tidak dapat diubah.
-                  </p>
-                </div>
-              `;
-            }, 300);
+              document.getElementById('validationInput').focus();
+            }, 100);
           }
+        });
+      });
 
-        } else {
-          PopupMessage.showError(
-            'Gagal Mengubah Status!',
-            data.message || 'Terjadi kesalahan saat mengubah status.'
-          );
+      document.getElementById('cancelConfirm2').addEventListener('click', () => {
+        PopupMessage.hideModal('confirmModal2');
+        pendingAction = null;
+      });
+
+      document.getElementById('proceedConfirm2').addEventListener('click', () => {
+        const input = document.getElementById('validationInput').value;
+        const errorDiv = document.getElementById('validationError');
+        
+        if (input !== 'YA, SAYA YAKIN') {
+          errorDiv.classList.remove('hidden');
+          document.getElementById('validationInput').classList.add('border-red-500');
+          return;
+        }
+        
+        PopupMessage.hideModal('confirmModal2', () => {
+          if (pendingAction) {
+            executeStatusChange(pendingAction.id, pendingAction.status);
+          }
+        });
+      });
+
+      document.getElementById('validationInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          document.getElementById('proceedConfirm2').click();
         }
       });
-    } catch(err) {
-      console.error('Error detail:', err);
-      PopupMessage.hideLoading(() => {
-        PopupMessage.showError(
-          'Terjadi Kesalahan!',
-          err.message || 'Terjadi kesalahan koneksi atau server. Mohon coba lagi.'
-        );
+
+      document.getElementById('validationInput').addEventListener('input', () => {
+        document.getElementById('validationError').classList.add('hidden');
+        document.getElementById('validationInput').classList.remove('border-red-500');
       });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          ['successModal', 'errorModal', 'confirmModal1', 'confirmModal2', 'loadingModal'].forEach(id => {
+            const modal = document.getElementById(id);
+            if (modal && !modal.classList.contains('hidden')) {
+              PopupMessage.hideModal(id);
+            }
+          });
+        }
+      });
+    });
+
+    // =====================================================
+    // Eksekusi perubahan status setelah validasi berhasil
+    // =====================================================
+    async function executeStatusChange(id, status) {
+      PopupMessage.showLoading('Mengubah Status...', 'Mohon tunggu sebentar.');
+
+      try {
+        const res = await fetch(`/dpa/proker/${id}/status`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status })
+        });
+
+        const data = await res.json();
+
+        PopupMessage.hideLoading(() => {
+          if (data.success) {
+            PopupMessage.showSuccess(
+              'Status Berhasil Diubah!',
+              data.message || `Status program kerja telah berhasil diubah menjadi "${status}".`,
+              'Mengerti',
+              () => window.location.reload() // Reload the page on success
+            );
+
+          } else {
+            PopupMessage.showError(
+              'Gagal Mengubah Status!',
+              data.message || 'Terjadi kesalahan saat mengubah status.'
+            );
+          }
+        });
+      } catch(err) {
+        console.error('Error detail:', err);
+        PopupMessage.hideLoading(() => {
+          PopupMessage.showError(
+            'Terjadi Kesalahan!',
+            err.message || 'Terjadi kesalahan koneksi atau server. Mohon coba lagi.'
+          );
+        });
+      }
     }
-  }
   </script>
 
   <style>
