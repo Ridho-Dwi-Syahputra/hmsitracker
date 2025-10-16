@@ -9,14 +9,14 @@
         crossorigin="anonymous" referrerpolicy="no-referrer" />
   <style>
     .table-fixed { table-layout: fixed; }
-    .table-fixed th:nth-child(1) { width: 50px; }   /* No */
-    .table-fixed th:nth-child(2) { width: 25%; }    /* Nama Program */
-    .table-fixed th:nth-child(3) { width: 13%; }    /* Divisi */
-    .table-fixed th:nth-child(4) { width: 12%; }    /* Penanggung Jawab */
-    .table-fixed th:nth-child(5) { width: 10%; }    /* Tanggal Mulai */
-    .table-fixed th:nth-child(6) { width: 10%; }    /* Tanggal Selesai */
-    .table-fixed th:nth-child(7) { width: 10%; }    /* Status */
-    .table-fixed th:nth-child(8) { width: 100px; }  /* Aksi */
+    .table-fixed th:nth-child(1) { width: 50px; }      /* No */
+    .table-fixed th:nth-child(2) { width: 25%; }       /* Nama Program */
+    .table-fixed th:nth-child(3) { width: 13%; }       /* Divisi */
+    .table-fixed th:nth-child(4) { width: 12%; }       /* Penanggung Jawab */
+    .table-fixed th:nth-child(5) { width: 10%; }       /* Tanggal Mulai */
+    .table-fixed th:nth-child(6) { width: 10%; }       /* Tanggal Selesai */
+    .table-fixed th:nth-child(7) { width: 10%; }       /* Status */
+    .table-fixed th:nth-child(8) { width: 100px; }      /* Aksi */
 
     .text-ellipsis {
       overflow: hidden;
@@ -28,9 +28,7 @@
 
 <body class="bg-orange-50 min-h-screen flex flex-col">
 
-  <!-- Navbar -->
   <%- include('../partials/navbarDPA', { user: user, unreadCount: unreadCount }) %>
-  <!-- Sidebar -->
   <%- include('../partials/sidebarDPA', { user: user, activeNav: 'Daftar Program Kerja' }) %>
 
   <main class="lg:ml-80 px-6 pt-20 pb-8 flex-grow">
@@ -45,10 +43,8 @@
 
       <div class="p-6 sm:p-8">
 
-        <!-- Search & Filter -->
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6 flex-wrap">
 
-          <!-- Search -->
           <div class="flex-1">
             <div class="relative">
               <input id="searchInput" type="text" placeholder="Cari program kerja..."
@@ -61,7 +57,6 @@
             </div>
           </div>
 
-          <!-- Filter Status -->
           <div class="relative">
             <button id="statusBtn"
               class="flex items-center justify-between gap-2 px-4 py-3 border border-gray-300 rounded-xl text-sm bg-white
@@ -81,7 +76,6 @@
             </div>
           </div>
 
-          <!-- Filter Divisi -->
           <div class="relative">
             <button id="divisiBtn"
               class="flex items-center justify-between gap-2 px-4 py-3 border border-gray-300 rounded-xl text-sm bg-white
@@ -104,7 +98,6 @@
 
         </div>
 
-        <!-- Table -->
         <div class="overflow-x-auto bg-white-50 p-2 shadow-sm rounded-xl">
           <table class="min-w-full text-sm text-center border border-orange-200 rounded-xl overflow-hidden border-separate border-spacing-0 table-fixed">
             <thead class="bg-orange-100 text-gray-700">
@@ -144,12 +137,13 @@
                     </td>
                     <td class="py-3 px-4 border border-orange-100">
                       <div class="flex justify-center items-center gap-2">
+
                         <a href="/dpa/proker/<%= p.id %>/detail" 
-                           class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-orange-100 text-orange-600 hover:bg-orange-200 hover:text-orange-700 transition-all duration-200" 
+                           class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-orange-600 hover:bg-orange-100 hover:text-orange-700 transition-all duration-200" 
                            title="Lihat Detail">
                           <i class="fa-solid fa-eye text-sm"></i>
                         </a>
-                      </div>
+                        </div>
                     </td>
                   </tr>
                 <% }); %>
@@ -167,7 +161,6 @@
           </table>
         </div>
 
-        <!-- Pagination -->
         <div class="flex justify-center items-center gap-2 mt-6" id="pagination">
           <button id="prevPage" class="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 disabled:opacity-50 disabled:cursor-not-allowed">Prev</button>
           <span id="pageInfo" class="text-gray-700 mx-4"></span>
