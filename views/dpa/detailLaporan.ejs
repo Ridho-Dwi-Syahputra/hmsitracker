@@ -14,7 +14,7 @@
   <%- include('../partials/navbarDPA', { user: user, unreadCount: typeof unreadCount !== 'undefined' ? unreadCount : 0 }) %>
 
   <!-- Sidebar -->
-  <%- include('../partials/sidebarDPA', { activeNav: 'Belum dievaluasi', user: user }) %>
+  <%- include('../partials/sidebarDPA', { activeNav: activeNav, user: user }) %>
 
   <!-- Wrapper -->
   <main class="lg:ml-80 px-6 pt-20 pb-8 flex-grow">
@@ -26,7 +26,6 @@
           <h1 class="text-2xl font-bold">Detail Laporan</h1>
           <p class="text-sm text-orange-100">Informasi lengkap laporan kegiatan HMSI</p>
         </div>
-        
       </div>
 
       <!-- Body -->
@@ -90,6 +89,16 @@
             %>
             <%= boxField("Target Kuantitatif", kuantitatifDisplay) %>
             <%= boxField("Target Kualitatif", kualitatifDisplay) %>
+            
+            <!-- Deskripsi Target Kuantitatif -->
+            <div class="md:col-span-2">
+              <%= boxField("Deskripsi Target Kuantitatif", laporan.deskripsi_target_kuantitatif || 'Tidak ada deskripsi') %>
+            </div>
+            
+            <!-- Deskripsi Target Kualitatif -->
+            <div class="md:col-span-2">
+              <%= boxField("Deskripsi Target Kualitatif", laporan.deskripsi_target_kualitatif || 'Tidak ada deskripsi') %>
+            </div>
           </div>
         </section>
 
@@ -115,16 +124,15 @@
             <% if (laporan.dokumentasi) { %>
               <div class="bg-white border border-gray-200 p-3 rounded-lg">
                 <% const filePath = `/uploads/laporan/${laporan.dokumentasi}`; %>
-<% if (laporan.dokumentasi_mime === 'application/pdf') { %>
-  <embed src="<%= filePath %>" type="application/pdf" width="100%" height="500px"/>
-<% } else { %>
-  <img src="<%= filePath %>" class="w-full max-h-96 object-contain rounded-lg" alt="Dokumentasi"/>
-<% } %>
-<a href="<%= filePath %>" target="_blank"
-  class="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition">
-  <i class="fa-solid fa-download"></i> Download Dokumentasi
-</a>
-
+                <% if (laporan.dokumentasi_mime === 'application/pdf') { %>
+                  <embed src="<%= filePath %>" type="application/pdf" width="100%" height="500px"/>
+                <% } else { %>
+                  <img src="<%= filePath %>" class="w-full max-h-96 object-contain rounded-lg" alt="Dokumentasi"/>
+                <% } %>
+                <a href="<%= filePath %>" target="_blank"
+                  class="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition">
+                  <i class="fa-solid fa-download"></i> Download Dokumentasi
+                </a>
               </div>
             <% } else { %>
               <div class="bg-white border border-gray-200 p-3 rounded-lg">
@@ -163,17 +171,17 @@
                     <p class="text-xs text-green-600">Evaluasi ini telah selesai diproses.</p>
                   </div>
                 </div>
-              <% } else if (evaluasi.status_konfirmasi === 'Pending') { %>
-                <!-- Status Pending -->
-                <div class="p-4 bg-blue-50 border border-blue-200 rounded-xl flex items-center gap-3">
-                  <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              <% } else if (evaluasi.status_konfirmasi === 'Revisi') { %>
+                <!-- Status Revisi -->
+                <div class="p-4 bg-orange-50 border border-orange-200 rounded-xl flex items-center gap-3">
+                  <div class="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
                     </svg>
                   </div>
                   <div>
-                    <p class="text-sm font-medium text-blue-800">Evaluasi Sedang Diproses</p>
-                    <p class="text-xs text-blue-600">Status evaluasi masih dalam tahap pending. Anda dapat mengubah evaluasi ini.</p>
+                    <p class="text-sm font-medium text-orange-800">Laporan Perlu Revisi</p>
+                    <p class="text-xs text-orange-600">Laporan ini memerlukan revisi dari HMSI. Anda masih dapat mengubah evaluasi ini.</p>
                   </div>
                 </div>
               <% } %>
@@ -194,64 +202,70 @@
           <% } %>
         </section>
 
-        <!-- Tambahkan section ini setelah section "Evaluasi DPA" dan sebelum tombol evaluasi -->
+        <!-- Komentar Balasan HMSI -->
+        <section>
+          <h4 class="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
+            <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 14h.01M16 10h.01M21 16a2 2 0 0 1-2 2H7l-4 4V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+            Komentar Balasan dari HMSI
+          </h4>
+          
+          <% if (evaluasi && evaluasi.komentar_hmsi) { %>
+            <!-- Ada Komentar dari HMSI -->
+            <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
+              <div class="bg-orange-50 border border-orange-200 p-4 rounded-lg">
+                <div class="flex items-start gap-3">
+                  <div class="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <i class="fa-solid fa-comment-dots text-orange-600"></i>
+                  </div>
+                  <div class="flex-1">
+                    <p class="text-sm font-semibold text-gray-700 mb-1">Komentar Tambahan HMSI</p>
+                    <p class="text-gray-800 whitespace-pre-line"><%= evaluasi.komentar_hmsi %></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% } else { %>
+            <!-- Belum Ada Komentar dari HMSI -->
+            <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
+              <div class="bg-white border border-gray-200 p-4 rounded-lg flex items-center gap-3">
+                <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <i class="fa-solid fa-comment-slash text-gray-400"></i>
+                </div>
+                <div>
+                  <p class="text-sm font-medium text-gray-500">Belum ada komentar balasan dari HMSI</p>
+                  <p class="text-xs text-gray-400 mt-1">HMSI belum memberikan komentar tambahan untuk evaluasi ini.</p>
+                </div>
+              </div>
+            </div>
+          <% } %>
+        </section>
 
-<!-- Komentar Balasan HMSI -->
-<section>
-  <h4 class="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
-    <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 14h.01M16 10h.01M21 16a2 2 0 0 1-2 2H7l-4 4V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-    </svg>
-    Komentar Balasan dari HMSI
-  </h4>
-  
-  <% if (evaluasi && evaluasi.komentar_hmsi) { %>
-    <!-- Ada Komentar dari HMSI -->
-    <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
-      <div class="bg-orange-50 border border-orange-200 p-4 rounded-lg">
-        <div class="flex items-start gap-3">
-          <div class="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
-            <i class="fa-solid fa-comment-dots text-orange-600"></i>
-          </div>
-          <div class="flex-1">
-            <p class="text-sm font-semibold text-gray-700 mb-1">Komentar Tambahan HMSI</p>
-            <p class="text-gray-800 whitespace-pre-line"><%= evaluasi.komentar_hmsi %></p>
-          </div>
+        <!-- ================= Tombol Aksi ================= -->
+        <div class="pt-6 border-t flex gap-4 justify-end">
+          <% if (evaluasi && (evaluasi.status_konfirmasi === 'Selesai' || evaluasi.status_konfirmasi === 'Revisi')) { %>
+            <!-- Jika sudah ada evaluasi dengan status Selesai/Revisi, tombol kembali ke Telah Dievaluasi -->
+            <a href="/dpa/laporanDiterima"
+               class="px-8 py-3 border rounded-xl text-sm bg-white text-gray-700 hover:shadow-md transition">
+               Kembali
+            </a>
+          <% } else { %>
+            <!-- Jika belum ada evaluasi, tombol kembali ke Belum Dievaluasi -->
+            <a href="/dpa/kelolaLaporan"
+               class="px-8 py-3 border rounded-xl text-sm bg-white text-gray-700 hover:shadow-md transition">
+               Kembali
+            </a>
+          <% } %>
+
+          <% if (!evaluasi || evaluasi.status_konfirmasi !== 'Selesai') { %>
+            <a href="/dpa/laporan/<%= laporan.id_laporan %>/evaluasi"
+               class="flex items-center gap-2 px-8 py-3 text-white bg-orange-500 rounded-xl text-sm font-semibold hover:bg-orange-600 transition transform hover:scale-105 active:scale-95">
+              <i class="fa-solid fa-edit"></i>
+              <span><%= evaluasi ? 'Edit Evaluasi' : 'Beri Evaluasi' %></span>
+            </a>
+          <% } %>
         </div>
-      </div>
-    </div>
-  <% } else { %>
-    <!-- Belum Ada Komentar dari HMSI -->
-    <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
-      <div class="bg-white border border-gray-200 p-4 rounded-lg flex items-center gap-3">
-        <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
-          <i class="fa-solid fa-comment-slash text-gray-400"></i>
-        </div>
-        <div>
-          <p class="text-sm font-medium text-gray-500">Belum ada komentar balasan dari HMSI</p>
-          <p class="text-xs text-gray-400 mt-1">HMSI belum memberikan komentar tambahan untuk evaluasi ini.</p>
-        </div>
-      </div>
-    </div>
-  <% } %>
-</section>
-
-<!-- ================= Tombol Aksi ================= -->
-<div class="pt-6 border-t flex gap-4 justify-end">
-  <a href="/dpa/kelolaLaporan"
-     class="px-8 py-3 border rounded-xl text-sm bg-white text-gray-700 hover:shadow-md transition">
-     Kembali
-  </a>
-
-  <% if (!evaluasi || evaluasi.status_konfirmasi !== 'Selesai') { %>
-    <a href="/dpa/laporan/<%= laporan.id_laporan %>/evaluasi"
-       class="flex items-center gap-2 px-8 py-3 text-white bg-orange-500 rounded-xl text-sm font-semibold hover:bg-orange-600 transition transform hover:scale-105 active:scale-95">
-      <i class="fa-solid fa-edit"></i>
-      <span><%= evaluasi ? 'Edit Evaluasi' : 'Beri Evaluasi' %></span>
-    </a>
-  <% } %>
-</div>
-
 
       </div>
     </div>

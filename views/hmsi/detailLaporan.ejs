@@ -1,204 +1,316 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title><%= title %></title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://kit.fontawesome.com/your-fa-kit.js" crossorigin="anonymous"></script>
   <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
         crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col">
 
-  <!-- Navbar -->
-  <%- include('../partials/navbarHMSI', { user: user, unreadCount: typeof unreadCount !== 'undefined' ? unreadCount : 0 }) %>
+  <%- include('../partials/navbarHMSI', { user: user, unreadCount: unreadCount }) %>
+  <%- include('../partials/sidebarHMSI', { activeNav: 'laporan', user: user }) %>
 
-  <!-- Sidebar -->
-  <%- include('../partials/sidebarHMSI', { activeNav: 'Laporan', user: user }) %>
+  <div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="deleteModalContent">
+      <div class="text-center">
+        <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+          </svg>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 mb-2">Hapus Laporan?</h3>
+        <p class="text-gray-600 mb-6">Tindakan ini tidak dapat dibatalkan. Semua data laporan akan dihapus secara permanen.</p>
+        <div class="flex gap-3">
+          <button onclick="closeDeleteModal()" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-3 px-6 rounded-xl transition-colors duration-200">
+            Batal
+          </button>
+          <form action="/hmsi/laporan/delete/<%= laporan.id_laporan %>" method="POST" class="flex-1">
+            <button type="submit" class="w-full bg-red-500 hover:bg-red-600 text-white font-medium py-3 px-6 rounded-xl transition-colors duration-200">
+              Hapus
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
 
-  <!-- Wrapper -->
   <main class="lg:ml-80 px-6 pt-20 pb-8 flex-grow">
     <div class="max-w-5xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-200">
 
-      <!-- Header -->
-      <div class="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-6 flex items-center justify-between">
-        <div>
-          <h1 class="text-2xl font-bold">Detail Laporan</h1>
-          <p class="text-sm text-orange-100">Informasi lengkap laporan kegiatan HMSI</p>
-        </div>
-        <a href="/hmsi/laporan"
-          class="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-all">
-          <i class="fa-solid fa-arrow-left text-sm"></i>
-          <span class="font-medium">Kembali</span>
-        </a>
+      <div class="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-6">
+        <h1 class="text-2xl font-bold">Detail Laporan Kegiatan</h1>
+        <p class="text-sm text-orange-100">Informasi lengkap laporan program kerja</p>
       </div>
 
-      <!-- Body -->
-      <div class="p-6 sm:p-8 space-y-10">
+      <div class="p-6 sm:p-8">
 
-        <!-- Alert Messages -->
-        <% if (successMsg) { %>
-          <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg flex items-center gap-2">
-            <i class="fa-solid fa-check-circle"></i>
-            <span><%= successMsg %></span>
-          </div>
-        <% } %>
-        <% if (errorMsg) { %>
-          <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg flex items-center gap-2">
-            <i class="fa-solid fa-exclamation-circle"></i>
-            <span><%= errorMsg %></span>
-          </div>
-        <% } %>
+        <%- include('../partials/alert', { errorMsg: errorMsg, successMsg: successMsg }) %>
 
-        <!-- Reusable Component -->
-        <%
-        function boxField(label, value) {
-          const displayValue = value || '-';
-        %>
-          <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
-            <p class="font-medium text-gray-600 mb-2"><%= label %></p>
-            <div class="bg-white border border-gray-200 p-3 rounded-lg">
-              <p class="text-gray-800 whitespace-pre-line"><%= displayValue %></p>
-            </div>
-          </div>
-        <% } %>
+        <div class="space-y-10">
 
-        <!-- Informasi Dasar -->
-        <section>
-          <h4 class="text-lg font-semibold text-gray-700 mb-4">Informasi Dasar</h4>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="md:col-span-2">
-              <%= boxField("Judul Laporan", laporan.judul_laporan) %>
-            </div>
-            <%= boxField("Program Kerja", laporan.namaProker) %>
-            <%= boxField("Divisi", laporan.divisi) %>
-            <%= boxField("Tanggal Pelaksanaan", laporan.tanggalFormatted) %>
-            <%= boxField("Waktu & Tempat", laporan.waktu_tempat) %>
-            <div class="md:col-span-2">
-              <%= boxField("Deskripsi Kegiatan", laporan.deskripsi_kegiatan) %>
-            </div>
-          </div>
-        </section>
+          <div>
+            <h4 class="text-lg font-semibold text-gray-700 mb-4">Informasi Dasar</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-        <!-- Informasi Keuangan -->
-        <section>
-          <h4 class="text-lg font-semibold text-gray-700 mb-4">Informasi Keuangan</h4>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <%= boxField("Sumber Dana", laporan.sumber_dana) %>
-            <%
-              let danaDisplay = '-';
-              if (laporan.dana_digunakan) {
-                const dana = parseInt(laporan.dana_digunakan);
-                if (!isNaN(dana)) {
-                  danaDisplay = `Rp ${dana.toLocaleString('id-ID')}`;
-                }
-              }
-            %>
-            <%= boxField("Dana Terpakai", danaDisplay) %>
-          </div>
-        </section>
-
-        <!-- Target Pencapaian -->
-        <section>
-          <h4 class="text-lg font-semibold text-gray-700 mb-4">Target Pencapaian</h4>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <%
-              const kuantitatifDisplay = laporan.persentase_kuantitatif ? `${laporan.persentase_kuantitatif}%` : '-';
-              const kualitatifDisplay = laporan.persentase_kualitatif ? `${laporan.persentase_kualitatif}%` : '-';
-            %>
-            <%= boxField("Target Kuantitatif", kuantitatifDisplay) %>
-            <%= boxField("Target Kualitatif", kualitatifDisplay) %>
-          </div>
-        </section>
-
-        <!-- Kendala & Solusi -->
-        <section>
-          <h4 class="text-lg font-semibold text-gray-700 mb-4">Kendala dan Solusi</h4>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <%= boxField("Kendala", laporan.kendala || "Tidak ada kendala yang dilaporkan") %>
-            <%= boxField("Solusi", laporan.solusi || "Tidak ada solusi yang dilaporkan") %>
-          </div>
-        </section>
-
-        <!-- Sasaran -->
-        <section>
-          <h4 class="text-lg font-semibold text-gray-700 mb-4">Sasaran Kegiatan</h4>
-          <%= boxField("Sasaran", laporan.sasaran) %>
-        </section>
-
-        <!-- Dokumentasi -->
-        <section>
-          <h4 class="text-lg font-semibold text-gray-700 mb-4">Dokumentasi</h4>
-          <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
-            <% if (laporan.dokumentasi) { %>
-              <div class="bg-white border border-gray-200 p-3 rounded-lg">
-                <% if (laporan.dokumentasi_mime === 'application/pdf') { %>
-                  <embed src="/uploads/<%= laporan.dokumentasi %>" type="application/pdf" width="100%" height="500px"/>
-                <% } else { %>
-                  <img src="/uploads/<%= laporan.dokumentasi %>" class="w-full max-h-96 object-contain rounded-lg" alt="Dokumentasi"/>
-                <% } %>
+              <div class="md:col-span-2 bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Judul Laporan
+                </label>
+                <div class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm bg-white">
+                  <%= laporan.judul_laporan %>
+                </div>
               </div>
-            <% } else { %>
-              <div class="bg-white border border-gray-200 p-3 rounded-lg">
-                <p class="text-gray-500 italic">Belum ada dokumentasi</p>
-              </div>
-            <% } %>
-          </div>
-        </section>
 
-        <!-- Status Evaluasi DPA -->
-        <section>
-          <h4 class="text-lg font-semibold text-gray-700 mb-4">Status Evaluasi DPA</h4>
-          
-          <% if (laporan.status_konfirmasi === 'Selesai') { %>
-            <!-- Info Message untuk Status Selesai -->
-            <div class="p-4 bg-green-50 border border-green-200 rounded-xl flex items-center gap-3">
-              <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                </svg>
+              <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Program Kerja
+                </label>
+                <div class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm bg-white">
+                  <%= laporan.namaProker || '-' %>
+                </div>
               </div>
-              <div>
-                <p class="text-sm font-medium text-green-800">Evaluasi Telah Selesai</p>
-                <p class="text-xs text-green-600">Laporan ini telah dievaluasi dan disetujui oleh DPA. Laporan tidak dapat diubah lagi.</p>
+
+              <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Tanggal Laporan
+                </label>
+                <div class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm bg-white">
+                  <%= laporan.tanggalFormatted %>
+                </div>
+              </div>
+
+              <div class="md:col-span-2 bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Waktu & Tempat
+                </label>
+                <div class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm bg-white">
+                  <%= laporan.waktu_tempat || '-' %>
+                </div>
+              </div>
+
+              <div class="md:col-span-2 bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Deskripsi Kegiatan
+                </label>
+                <div class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm resize-none bg-white ">
+                  <%= laporan.deskripsi_kegiatan || '-' %>
+                </div>
+              </div>
+
+              <div class="md:col-span-2 bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Sasaran Kegiatan
+                </label>
+                <div class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm bg-white">
+                  <%= laporan.sasaran || '-' %>
+                </div>
               </div>
             </div>
-          <% } else if (laporan.status_konfirmasi === 'Pending') { %>
-            <!-- Info Message untuk Status Pending -->
-            <div class="p-4 bg-blue-50 border border-blue-200 rounded-xl flex items-center gap-3">
-              <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
+          </div>
+
+          <div>
+            <h4 class="text-lg font-semibold text-gray-700 mb-4">Informasi Keuangan</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              
+              <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Sumber Dana
+                </label>
+                <div class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm bg-white">
+                  <%= laporan.sumber_dana === 'Uang Kas HMSI' ? 'Uang Kas HMSI' : (laporan.sumber_dana_lainnya || laporan.sumber_dana || '-') %>
+                </div>
               </div>
-              <div>
-                <p class="text-sm font-medium text-blue-800">Sedang Dalam Proses</p>
-                <p class="text-xs text-blue-600">Laporan sedang dalam proses evaluasi oleh DPA. Mohon tunggu hingga selesai.</p>
+
+              <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Total Dana Kegiatan (Rp)
+                </label>
+                <div class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm bg-white font-semibold">
+                  <%= (laporan.dana_digunakan || 0).toLocaleString('id-ID') %>
+                </div>
+              </div>
+
+              <% if (laporan.dana_terpakai) { %>
+              <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Dana Terpakai (Rp)
+                </label>
+                <div class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm bg-white font-semibold">
+                  <%= (laporan.dana_terpakai || 0).toLocaleString('id-ID') %>
+                </div>
+              </div>
+              <% } %>
+            </div>
+          </div>
+
+          <div class="mt-8">
+            <h4 class="text-lg font-semibold text-gray-700 mb-4">🎯 Target Pencapaian</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              
+              <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition-colors">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Target Pencapaian Kuantitatif
+                </label>
+                <div class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm bg-white">
+                  <div class="font-semibold mb-2"><%= laporan.persentase_kuantitatif || 0 %>%</div>
+                  <% if (laporan.deskripsi_target_kuantitatif) { %>
+                    <p class="text-gray-600"><%= laporan.deskripsi_target_kuantitatif %></p>
+                  <% } %>
+                </div>
+              </div>
+
+              <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition-colors">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Target Pencapaian Kualitatif
+                </label>
+                <div class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm bg-white">
+                  <div class="font-semibold mb-2"><%= laporan.persentase_kualitatif || 0 %>%</div>
+                  <% if (laporan.deskripsi_target_kualitatif) { %>
+                    <p class="text-gray-600"><%= laporan.deskripsi_target_kualitatif %></p>
+                  <% } %>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <div>
+            <h4 class="text-lg font-semibold text-gray-700 mb-4">Kendala dan Solusi</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              
+              <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Kendala yang Dihadapi
+                </label>
+                <div class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm resize-none bg-white">
+                  <%= laporan.kendala || '-' %>
+                </div>
+              </div>
+
+              <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 hover:bg-gray-100/50 transition">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Solusi yang Diterapkan
+                </label>
+                <div class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm resize-none bg-white">
+                  <%= laporan.solusi || '-' %>
+                </div>
               </div>
             </div>
+          </div>
+
+<% if (laporan.dokumentasi) { %>
+          <div class="mt-3">
+            <h4 class="text-lg font-semibold text-gray-700 mb-1">File Dokumen Pendukung</h4>
+            <p class="text-sm text-gray-500 mb-4">Dokumen pendukung laporan kegiatan</p>
+
+            <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <h5 class="text-sm font-semibold mb-2 text-blue-800">File Saat Ini:</h5>
+              <div class="flex justify-between items-center flex-wrap gap-2">
+                <span class="text-sm text-blue-700 truncate max-w-xs"><%= laporan.dokumentasi.split('-').slice(1).join('-') %></span>
+                <div class="flex gap-2">
+                  <% if (/\.(jpg|jpeg|png)$/i.test(laporan.dokumentasi)) { %>
+                    <button type="button" onclick="togglePreview()"
+                            class="text-xs bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition">
+                      <i class="fa-solid fa-eye mr-1"></i>Lihat Preview
+                    </button>
+                  <% } %>
+                  <% if (/\.pdf$/i.test(laporan.dokumentasi)) { %>
+                    <a href="/uploads/laporan/<%= laporan.dokumentasi %>" target="_blank"
+                       class="text-xs bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition">
+                      <i class="fa-solid fa-file-pdf mr-1"></i>Buka PDF
+                    </a>
+                  <% } %>
+                  <a href="/uploads/laporan/<%= laporan.dokumentasi %>" download
+                     class="text-xs bg-orange-500 text-white px-3 py-1 rounded hover:bg-orange-600 transition">
+                    <i class="fa-solid fa-download mr-1"></i>Download
+                  </a>
+                </div>
+              </div>
+              <% if (/\.(jpg|jpeg|png)$/i.test(laporan.dokumentasi)) { %>
+                <div id="imagePreview" class="mt-3 hidden">
+                  <img src="/uploads/laporan/<%= laporan.dokumentasi %>" alt="Preview dokumentasi" class="max-h-64 rounded-lg border shadow-md mx-auto" onerror="this.parentElement.innerHTML='<p class=\'text-red-500 text-sm\'>Gagal memuat gambar</p>'">
+                </div>
+              <% } %>
+            </div>
+          </div>
           <% } else { %>
-            <!-- Info Message untuk Belum Ada Evaluasi -->
-            <div class="p-4 bg-yellow-50 border border-yellow-200 rounded-xl flex items-center gap-3">
-              <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center flex-shrink-0">
-                <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-              </div>
-              <div>
-                <p class="text-sm font-medium text-yellow-800">Menunggu Evaluasi</p>
-                <p class="text-xs text-yellow-600">Laporan belum dievaluasi. Silakan tunggu DPA untuk mengevaluasi laporan ini.</p>
-              </div>
+          <div class="mt-3">
+            <h4 class="text-lg font-semibold text-gray-700 mb-1">File Dokumen Pendukung</h4>
+            <p class="text-sm text-gray-500 mb-4">Dokumen pendukung laporan kegiatan</p>
+            
+            <div class="p-6 bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg text-center">
+              <div class="text-4xl text-gray-400 mb-2">📄</div>
+              <p class="text-sm text-gray-600">Tidak ada dokumen pendukung</p>
             </div>
+          </div>
           <% } %>
-        </section>
+
+          <% if (evaluasi) { %>
+          <div class="mt-3">
+            <h4 class="text-lg font-semibold text-gray-700 mb-4">Hasil Evaluasi DPA</h4>
+            <div class="bg-blue-50 border border-blue-200 rounded-xl p-6 space-y-4">
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-white border border-blue-200 rounded-lg p-4">
+                  <label class="block text-sm font-medium text-blue-700 mb-2">Status Konfirmasi</label>
+                  <p class="text-gray-900 font-semibold"><%= evaluasi.status_konfirmasi || 'Belum Dievaluasi' %></p>
+                </div>
+                <div class="bg-white border border-blue-200 rounded-lg p-4">
+                  <label class="block text-sm font-medium text-blue-700 mb-2">Tanggal Evaluasi</label>
+                  <p class="text-gray-900"><%= evaluasi.tanggal_evaluasi || '-' %></p>
+                </div>
+              </div>
+
+              <% if (evaluasi.catatan || evaluasi.komentar) { %>
+              <div class="bg-white border border-blue-200 rounded-lg p-4">
+                <label class="block text-sm font-medium text-blue-700 mb-2">Catatan Evaluasi</label>
+                <p class="text-gray-900 whitespace-pre-wrap"><%= evaluasi.catatan || evaluasi.komentar %></p>
+              </div>
+              <% } %>
+            </div>
+          </div>
+          <% } %>
+
+          <div class="pt-6 border-t flex justify-end">
+          <a href="/hmsi/laporan" class="flex items-center justify-center gap-2 px-8 py-3 text-white bg-orange-500 rounded-xl text-sm font-semibold hover:bg-orange-600 hover:shadow-md">
+            Kembali
+          </a>
+        </div>
       </div>
     </div>
   </main>
 
-  <!-- Script -->
+  <%- include('../partials/footer') %>
+
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      console.log('Detail laporan HMSI loaded');
+    function confirmDelete() {
+      const modal = document.getElementById('deleteModal');
+      const content = document.getElementById('deleteModalContent');
+      if (!modal || !content) return;
+      modal.classList.remove('hidden');
+      setTimeout(() => {
+        content.classList.remove('scale-95', 'opacity-0');
+        content.classList.add('scale-100', 'opacity-100');
+      }, 10);
+    }
+
+    function closeDeleteModal() {
+      const modal = document.getElementById('deleteModal');
+      const content = document.getElementById('deleteModalContent');
+      if (!modal || !content) return;
+      content.classList.remove('scale-100', 'opacity-100');
+      content.classList.add('scale-95', 'opacity-0');
+      setTimeout(() => {
+        modal.classList.add('hidden');
+      }, 300);
+    }
+
+    document.getElementById('deleteModal')?.addEventListener('click', e => {
+      if (e.target.id === 'deleteModal') closeDeleteModal();
     });
   </script>
 

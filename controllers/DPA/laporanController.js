@@ -189,7 +189,7 @@ exports.getDetailLaporanDPA = async (req, res) => {
     
     // ✅ DIPERBAIKI: Menentukan sidebar aktif berdasarkan status evaluasi
     let activeNav = "Belum dievaluasi";
-    if (evaluasi) {
+    if (evaluasi && (evaluasi.status_konfirmasi === 'Selesai' || evaluasi.status_konfirmasi === 'Revisi')) {
       activeNav = "Telah Dievaluasi";
     }
 
