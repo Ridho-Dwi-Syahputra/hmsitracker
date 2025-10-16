@@ -43,13 +43,14 @@ exports.getAllNotifikasi = async (req, res) => {
       });
     }
 
+    // --- KODE BARU DIMULAI DI SINI (QUERY TELAH DIUBAH) ---
     const [rows] = await db.query(
       `
       SELECT 
         n.id_notifikasi, n.pesan, n.status_baca, n.created_at,
         n.id_ProgramKerja, n.id_laporan, n.id_evaluasi,
         d.nama_divisi, p.Nama_ProgramKerja, l.judul_laporan,
-        e.status_konfirmasi AS status_evaluasi, u.nama AS evaluator,
+        e.status_konfirmasi AS status_evaluasi,
         CASE 
           WHEN n.id_evaluasi IS NOT NULL THEN 'evaluasi'
           WHEN n.id_laporan IS NOT NULL THEN 'laporan'
@@ -67,7 +68,6 @@ exports.getAllNotifikasi = async (req, res) => {
       LEFT JOIN Program_kerja p ON n.id_ProgramKerja = p.id_ProgramKerja
       LEFT JOIN Laporan l ON n.id_laporan = l.id_laporan
       LEFT JOIN Evaluasi e ON n.id_evaluasi = e.id_evaluasi
-      LEFT JOIN User u ON e.pemberi_evaluasi = u.id_anggota
       WHERE n.target_role = 'HMSI' AND (n.id_divisi = ? OR l.id_divisi = ?)
       ORDER BY n.created_at DESC
       LIMIT 100
@@ -91,9 +91,10 @@ exports.getAllNotifikasi = async (req, res) => {
         is_deleted: r.is_deleted,
         judul_laporan: r.judul_laporan,
         Nama_ProgramKerja: r.Nama_ProgramKerja,
-        evaluator: r.evaluator,
+        // Properti 'evaluator' telah dihapus
       };
     });
+    // --- KODE BARU SELESAI ---
 
     const unreadCount = notifikasi.filter((n) => n.status_baca === 0).length;
 
@@ -193,8 +194,6 @@ exports.readAndRedirect = async (req, res) => {
     });
   }
 };
-
-// ... (sisa file tidak perlu diubah) ...
 
 // =====================================================
 // 🧹 Hapus semua notifikasi terkait laporan/proker tertentu

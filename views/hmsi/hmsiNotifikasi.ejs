@@ -10,17 +10,13 @@
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col">
 
-  <!-- Navbar -->
   <%- include('../partials/navbarHMSI', { user: user, unreadCount: unreadCount }) %>
 
-  <!-- Sidebar -->
   <%- include('../partials/sidebarHMSI', { user: user, activeNav: 'notifikasi' }) %>
 
-  <!-- Wrapper -->
   <main class="lg:ml-80 px-6 pt-20 pb-8 flex-grow">
     <div class="max-w-4xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-orange-200">
 
-      <!-- Header -->
       <div class="bg-orange-500 text-white px-6 py-6">
         <h1 class="text-2xl font-bold">Notifikasi</h1>
         <p class="text-sm text-orange-100">
@@ -29,7 +25,6 @@
         </p>
       </div>
 
-      <!-- Body -->
       <div class="p-6 sm:p-8 space-y-4">
         <% if (notifikasi && notifikasi.length > 0) { %>
           <% notifikasi.forEach(function(n) { 
@@ -43,14 +38,13 @@
                // Deteksi tipe untuk icon
                const isEvaluasi = n.tipe === 'evaluasi';
           %>
-            <!-- Kartu Notifikasi -->
             <a href="<%= targetUrl %>"
                class="block" aria-label="Buka notifikasi">
+      
               <div class="flex items-start gap-4 p-4 bg-white border rounded-xl shadow-sm hover:shadow-md transition cursor-pointer
                           <%= !n.status_baca ? 'border-2 border-orange-300 bg-orange-50/50' : 'border-orange-100' %>
                           <%= isDeleted ? 'bg-gray-50 opacity-75' : '' %>">
                 
-                <!-- Icon -->
                 <div class="flex-shrink-0 mt-1">
                   <% if (isDeleted) { %>
                     <i class="fa-solid fa-triangle-exclamation text-red-500 text-lg"></i>
@@ -61,28 +55,20 @@
                   <% } %>
                 </div>
 
-                <!-- Isi -->
                 <div class="flex-1">
-                  <!-- ✅ Tampilkan pesan lengkap dari controller -->
                   <p class="text-gray-800 text-sm font-medium <%= isDeleted ? 'line-through text-gray-500' : '' %>">
                     <%= displayMessage %>
                   </p>
 
-                  <!-- Info tambahan -->
                   <% if (isEvaluasi && n.judul_laporan) { %>
                     <p class="text-gray-600 text-xs mt-1 leading-relaxed">
-                      <span class="font-semibold">Judul Laporan:</span> <%= n.judul_laporan %><br>
-                      <% if (n.evaluator) { %>
-                        <span class="font-semibold">Evaluator:</span> <%= n.evaluator %>
-                      <% } %>
+                      <span class="font-semibold">Terkait Laporan:</span> <%= n.judul_laporan %>
                     </p>
                   <% } else if (n.Nama_ProgramKerja) { %>
                     <p class="text-gray-600 text-xs mt-1 leading-relaxed">
                       <span class="font-semibold">Program Kerja:</span> <%= n.Nama_ProgramKerja %>
                     </p>
                   <% } %>
-
-                  <!-- Footer -->
                   <div class="flex items-center justify-between mt-3">
                     <span class="text-xs text-gray-500"><%= n.tanggalFormatted || '-' %></span>
                     <span class="<%= isDeleted ? 'text-red-500' : 'text-orange-600' %> text-xs font-semibold hover:underline">
@@ -91,7 +77,6 @@
                   </div>
                 </div>
 
-                <!-- Status Badge -->
                 <div class="flex flex-col items-end gap-2">
                   <% if (!n.status_baca) { %>
                     <span class="text-[10px] px-2 py-1 bg-orange-100 text-orange-700 rounded-full">Baru</span>
@@ -104,7 +89,6 @@
             </a>
           <% }) %>
         <% } else { %>
-          <!-- Empty State -->
           <div class="flex flex-col items-center space-y-4 py-20">
             <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
               <i class="fa-solid fa-bell-slash text-2xl text-gray-400"></i>
@@ -119,10 +103,8 @@
     </div>
   </main>
 
-  <!-- Footer -->
   <%- include('../partials/footer') %>
 
-  <!-- Script -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('a.block').forEach(a => {

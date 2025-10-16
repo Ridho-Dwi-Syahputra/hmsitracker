@@ -288,7 +288,17 @@ exports.postEvaluasi = async (req, res) => {
     );
     const laporan = laporanRows[0];
 
-    const pesan = `DPA memberi evaluasi pada laporan "${laporan.judul_laporan}"`;
+    // --- KODE BARU DIMULAI DI SINI ---
+    let pesan;
+    if (status_konfirmasi === 'Selesai') {
+      pesan = `"${laporan.judul_laporan}" telah diterima oleh DPA.`;
+    } else if (status_konfirmasi === 'Revisi') {
+      pesan = `DPA meminta revisi untuk laporan "${laporan.judul_laporan}".`;
+    } else {
+      pesan = `DPA telah memberi evaluasi pada laporan "${laporan.judul_laporan}".`;
+    }
+
+
     await db.query(
       `INSERT INTO Notifikasi (id_notifikasi, pesan, target_role, status_baca, id_divisi, id_laporan, id_evaluasi)
        VALUES (?, ?, 'HMSI', 0, ?, ?, ?)`,

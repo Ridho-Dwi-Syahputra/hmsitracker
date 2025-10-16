@@ -6,17 +6,14 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
 </head>
-  <!-- Navbar -->
-  <%- include('../partials/navbarDPA', { user: user, unreadCount: unreadCount }) %>
 <body class="bg-gray-100">
 
   <%- include('../partials/navbarDPA', { user: user, unreadCount: unreadCount }) %>
-
   <%- include('../partials/sidebarDPA', { user: user, activeNav: 'Dashboard' }) %>
 
   <main class="lg:ml-80 px-6 pt-20 pb-24">
 
-    <div class="max-w-6xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-200 mb-8">
+    <div class="max-w-7xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-200 mb-8">
       <div class="bg-orange-500 text-white px-6 py-8 flex items-center justify-between">
         <div>
           <h1 class="text-3xl font-bold mb-2">Selamat Datang, DPA 👋</h1>
@@ -28,21 +25,33 @@
       </div>
     </div>
 
-    <div class="max-w-6xl mx-auto mb-8">
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        
+    <div class="max-w-7xl mx-auto mb-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-gray-600 mb-1">Total Proker</p>
-              <p class="text-2xl font-bold text-gray-800"><%= totalProker %></p>
+              <p class="text-sm text-gray-600 mb-1">Belum Dievaluasi</p>
+              <p class="text-2xl font-bold text-amber-600"><%= laporanBelumEvaluasi %></p>
             </div>
-            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-              <i class="fa-solid fa-tasks text-blue-600 text-xl"></i>
+            <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
+              <i class="fa-solid fa-file-circle-question text-amber-600 text-xl"></i>
             </div>
           </div>
         </div>
 
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-600 mb-1">Laporan Perlu Revisi</p>
+              <p class="text-2xl font-bold text-red-600"><%= laporanRevisi %></p>
+            </div>
+            <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
+              <i class="fa-solid fa-file-pen text-red-600 text-xl"></i>
+            </div>
+          </div>
+        </div>
+        
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
           <div class="flex items-center justify-between">
             <div>
@@ -58,6 +67,18 @@
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
           <div class="flex items-center justify-between">
             <div>
+              <p class="text-sm text-gray-600 mb-1">Total Proker</p>
+              <p class="text-2xl font-bold text-gray-800"><%= totalProker %></p>
+            </div>
+            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+              <i class="fa-solid fa-tasks text-blue-600 text-xl"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+          <div class="flex items-center justify-between">
+            <div>
               <p class="text-sm text-gray-600 mb-1">Program Berjalan</p>
               <p class="text-2xl font-bold text-orange-600"><%= prokerBerjalan %></p>
             </div>
@@ -66,7 +87,7 @@
             </div>
           </div>
         </div>
-
+        
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
           <div class="flex items-center justify-between">
             <div>
@@ -82,33 +103,43 @@
       </div>
     </div>
 
-    <div class="max-w-6xl mx-auto">
-      <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+    <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+      
+      <div class="lg:col-span-2 bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
         <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-          <i class="fa-solid fa-bolt text-orange-500 mr-2"></i>
-          Aksi Cepat
+          <i class="fa-solid fa-history text-gray-500 mr-3"></i>
+          Aktivitas Terbaru dari HMSI
         </h3>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <a href="/dpa/lihatProker" class="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:border-orange-300 hover:bg-orange-50 transition">
-            <i class="fa-solid fa-tasks text-orange-500"></i>
-            <span class="text-sm font-medium text-gray-700">Lihat Semua Proker</span>
-          </a>
-          <a href="/dpa/kelolaLaporan" class="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition">
-            <i class="fa-solid fa-file-signature text-blue-500"></i>
-            <span class="text-sm font-medium text-gray-700">Kelola Laporan</span>
-          </a>
-          <a href="/dpa/notifikasi" class="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:border-green-300 hover:bg-green-50 transition">
-            <i class="fa-solid fa-bell text-green-500"></i>
-            <span class="text-sm font-medium text-gray-700">Lihat Notifikasi</span>
-          </a>
-          <a href="/dpa/profile" class="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition">
-            <i class="fa-solid fa-user text-purple-500"></i>
-            <span class="text-sm font-medium text-gray-700">Edit Profile</span>
-          </a>
+        <div class="overflow-x-auto">
+          <% if (recentHmsiActivities && recentHmsiActivities.length > 0) { %>
+            <table class="min-w-full text-sm">
+              <thead class="text-left text-gray-500">
+                <tr>
+                  <th class="p-2 font-medium">Aktivitas</th>
+                  <th class="p-2 font-medium">Divisi</th>
+                  <th class="p-2 font-medium">Waktu</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% recentHmsiActivities.forEach(item => { %>
+                  <tr class="border-t border-gray-200">
+                    <td class="p-3 font-medium text-gray-800"><%= item.description %></td>
+                    <td class="p-3 text-gray-600"><%= item.nama_divisi %></td>
+                    <td class="p-3 text-gray-500 whitespace-nowrap"><%= item.tanggalFormatted %></td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          <% } else { %>
+            <div class="text-center py-10 text-gray-500">
+              <i class="fa-solid fa-check-double text-3xl mb-2"></i>
+              <p>Belum ada aktivitas terbaru dari HMSI.</p>
+            </div>
+          <% } %>
         </div>
       </div>
-    </div>
 
+      </div>
   </main>
 
   <%- include('../partials/footer') %>

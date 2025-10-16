@@ -1,9 +1,19 @@
 // =====================================================
 // controllers/dpa/dpaDashboardController.js
-// Controller khusus untuk Dashboard DPA
+// Controller khusus untuk Dashboard DPA (VERSI FINAL DIPERBAIKI)
 // =====================================================
 
 const db = require("../../config/db");
+
+// Helper untuk format tanggal
+function formatTanggal(dateValue) {
+  if (!dateValue) return "-";
+  const d = new Date(dateValue);
+  if (isNaN(d.getTime())) return "-";
+  return d.toLocaleDateString("id-ID", {
+    day: "2-digit", month: "long", year: "numeric",
+  });
+}
 
 // =====================================================
 // 📊 GET: Statistik Dashboard DPA
@@ -16,66 +26,66 @@ exports.getDpaDashboardStats = async (req, res) => {
       return res.redirect("/auth/login?error=Akses ditolak.");
     }
 
-    // =====================================================
-    // 📦 Ambil semua statistik secara paralel
-    // =====================================================
     const [
       totalProkerResult,
       prokerSelesaiResult,
       prokerBerjalanResult,
+      laporanBelumEvaluasiResult,
+      laporanRevisiResult,
+      recentHmsiActivitiesResult,
       totalLaporanResult,
-      perDivisiResult
     ] = await Promise.all([
-      // 1️⃣ Total program kerja
       db.query(`SELECT COUNT(*) AS total FROM Program_kerja`),
-
-      // ✅ KUNCI PERBAIKAN DI SINI
-      // 2️⃣ Program kerja yang statusnya sudah dikonfirmasi 'Selesai'
+      db.query(`SELECT COUNT(*) AS total FROM Program_kerja WHERE Status = 'Selesai'`),
+      db.query(`SELECT COUNT(*) AS total FROM Program_kerja WHERE CURDATE() BETWEEN Tanggal_mulai AND Tanggal_selesai AND (Status IS NULL OR Status = 'Sedang Berjalan')`),
+      db.query(`SELECT COUNT(*) AS total FROM Laporan l LEFT JOIN Evaluasi e ON l.id_laporan = e.id_laporan WHERE e.id_evaluasi IS NULL`),
       db.query(`
-        SELECT COUNT(*) AS total 
-        FROM Program_kerja 
-        WHERE Status = 'Selesai'
+        SELECT COUNT(*) AS total FROM Evaluasi e
+        WHERE e.status_konfirmasi = 'Revisi' AND e.tanggal_evaluasi = (
+          SELECT MAX(sub_e.tanggal_evaluasi) FROM Evaluasi sub_e WHERE sub_e.id_laporan = e.id_laporan
+        )
       `),
-
-      // 3️⃣ Program kerja yang sedang berjalan
       db.query(`
-        SELECT COUNT(*) AS total 
-        FROM Program_kerja 
-        WHERE CURDATE() BETWEEN Tanggal_mulai AND Tanggal_selesai AND (Status IS NULL OR Status = 'Sedang Berjalan')
+        (
+            -- Aktivitas 1: Laporan baru diajukan
+            SELECT
+                CONCAT('Mengajukan laporan: "', l.judul_laporan, '"') as description,
+                d.nama_divisi,
+                l.tanggal as activity_timestamp
+            FROM Laporan l
+            JOIN Divisi d ON l.id_divisi = d.id_divisi
+        )
+        UNION ALL
+        (
+            -- Aktivitas 2: HMSI membalas/mengomentari evaluasi
+            SELECT
+                CONCAT('Membalas evaluasi pada: "', l.judul_laporan, '"') as description,
+                d.nama_divisi,
+                e.updated_at as activity_timestamp
+            FROM Evaluasi e
+            JOIN Laporan l ON e.id_laporan = l.id_laporan
+            JOIN Divisi d ON l.id_divisi = d.id_divisi
+            /* ✅ KUNCI PERBAIKAN: Mengganti e.created_at menjadi e.tanggal_evaluasi */
+            WHERE e.komentar_hmsi IS NOT NULL AND e.updated_at > e.tanggal_evaluasi
+        )
+        ORDER BY activity_timestamp DESC
+        LIMIT 5
       `),
-
-      // 4️⃣ Total laporan dari semua divisi
       db.query(`SELECT COUNT(*) AS total FROM Laporan`),
-
-      // 5️⃣ Statistik per divisi (optional, untuk grafik)
-      db.query(`
-        SELECT 
-          COALESCE(d.nama_divisi, u.id_divisi) AS divisi,
-          COUNT(p.id_ProgramKerja) AS totalProker
-        FROM Program_kerja p
-        LEFT JOIN User u ON p.id_anggota = u.id_anggota
-        LEFT JOIN Divisi d ON u.id_divisi = d.id_divisi
-        GROUP BY divisi
-        ORDER BY divisi ASC
-      `)
     ]);
 
-    // =====================================================
-    // 📈 Ekstraksi hasil query
-    // =====================================================
     const totalProker = totalProkerResult[0][0].total || 0;
     const prokerSelesai = prokerSelesaiResult[0][0].total || 0;
     const prokerBerjalan = prokerBerjalanResult[0][0].total || 0;
     const totalLaporan = totalLaporanResult[0][0].total || 0;
+    const laporanBelumEvaluasi = laporanBelumEvaluasiResult[0][0].total || 0;
+    const laporanRevisi = laporanRevisiResult[0][0].total || 0;
 
-    const perDivisiData = perDivisiResult[0].map(row => ({
-      divisi: row.divisi || "Tidak diketahui",
-      totalProker: row.totalProker
+    const recentHmsiActivities = recentHmsiActivitiesResult[0].map(item => ({
+      ...item,
+      tanggalFormatted: formatTanggal(item.activity_timestamp)
     }));
-
-    // =====================================================
-    // 🎨 Render ke EJS
-    // =====================================================
+    
     res.render("dpa/dpaDashboard", {
       title: "Dashboard DPA",
       user,
@@ -84,7 +94,9 @@ exports.getDpaDashboardStats = async (req, res) => {
       prokerSelesai,
       prokerBerjalan,
       totalLaporan,
-      perDivisiData
+      laporanBelumEvaluasi,
+      laporanRevisi,
+      recentHmsiActivities,
     });
   } catch (error) {
     console.error("❌ Error saat mengambil statistik DPA:", error.message);
