@@ -12,7 +12,7 @@ exports.getDpaDashboardStats = async (req, res) => {
   try {
     const user = req.session.user;
     if (!user || user.role !== "DPA") {
-      console.error("⚠️ Akses ditolak: bukan DPA atau sesi tidak valid.");
+      console.error("Akses ditolak: bukan DPA atau sesi tidak valid.");
       return res.redirect("/auth/login?error=Akses ditolak.");
     }
 
@@ -29,18 +29,19 @@ exports.getDpaDashboardStats = async (req, res) => {
       // 1️⃣ Total program kerja
       db.query(`SELECT COUNT(*) AS total FROM Program_kerja`),
 
-      // 2️⃣ Program kerja yang sudah selesai (Tanggal_selesai < hari ini)
+      // ✅ KUNCI PERBAIKAN DI SINI
+      // 2️⃣ Program kerja yang statusnya sudah dikonfirmasi 'Selesai'
       db.query(`
         SELECT COUNT(*) AS total 
         FROM Program_kerja 
-        WHERE Tanggal_selesai < CURDATE()
+        WHERE Status = 'Selesai'
       `),
 
       // 3️⃣ Program kerja yang sedang berjalan
       db.query(`
         SELECT COUNT(*) AS total 
         FROM Program_kerja 
-        WHERE CURDATE() BETWEEN Tanggal_mulai AND Tanggal_selesai
+        WHERE CURDATE() BETWEEN Tanggal_mulai AND Tanggal_selesai AND (Status IS NULL OR Status = 'Sedang Berjalan')
       `),
 
       // 4️⃣ Total laporan dari semua divisi
@@ -83,7 +84,7 @@ exports.getDpaDashboardStats = async (req, res) => {
       prokerSelesai,
       prokerBerjalan,
       totalLaporan,
-      perDivisiData // bisa dipakai di chart front-end
+      perDivisiData
     });
   } catch (error) {
     console.error("❌ Error saat mengambil statistik DPA:", error.message);

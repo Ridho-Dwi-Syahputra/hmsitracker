@@ -192,11 +192,9 @@ exports.readAndRedirect = async (req, res) => {
       );
 
       if (prokerRows.length > 0) {
-        // Data masih ada → redirect ke detail proker
         dataExists = true;
         redirectUrl = `/dpa/lihatProker/${notif.id_ProgramKerja}/detail`;
       } else {
-        // Data sudah dihapus → tampilkan error
         errorTitle = "Program Kerja Dihapus";
         errorMessage = "Program kerja ini telah dihapus oleh HMSI.";
       }
@@ -209,11 +207,10 @@ exports.readAndRedirect = async (req, res) => {
       );
 
       if (laporanRows.length > 0) {
-        // Data masih ada → redirect ke detail laporan
         dataExists = true;
-        redirectUrl = `/dpa/kelolaLaporan/${notif.id_laporan}`;
+        // KUNCI PERBAIKAN: Ubah 'kelolaLaporan' menjadi 'laporan' agar cocok dengan router
+        redirectUrl = `/dpa/laporan/${notif.id_laporan}`;
       } else {
-        // Data sudah dihapus → tampilkan error
         errorTitle = "Laporan Dihapus";
         errorMessage = "Laporan ini telah dihapus oleh HMSI.";
       }
@@ -226,11 +223,10 @@ exports.readAndRedirect = async (req, res) => {
       );
 
       if (evaluasiRows.length > 0) {
-        // Data masih ada → redirect ke detail laporan terkait
         dataExists = true;
-        redirectUrl = `/dpa/kelolaLaporan/${evaluasiRows[0].id_laporan}`;
+        // KUNCI PERBAIKAN: Ubah 'kelolaLaporan' menjadi 'laporan' agar cocok dengan router
+        redirectUrl = `/dpa/laporan/${evaluasiRows[0].id_laporan}`;
       } else {
-        // Data sudah dihapus → tampilkan error
         errorTitle = "Komentar Tidak Tersedia";
         errorMessage = "Komentar pada laporan ini telah diperbarui atau dihapus oleh HMSI.";
       }
