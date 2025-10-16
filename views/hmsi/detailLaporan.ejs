@@ -59,7 +59,7 @@
         </section>
 
         <section>
-          <h4 class="text-lg font-semibold text-gray-800 border-b pb-2 mb-4">🎯 Target Pencapaian</h4>
+          <h4 class="text-lg font-semibold text-gray-800 border-b pb-2 mb-4">Target Pencapaian</h4>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <%- boxField('Target Kuantitatif', `${laporan.persentase_kuantitatif || 0}%`) %>
             <%- boxField('Target Kualitatif', `${laporan.persentase_kualitatif || 0}%`) %>
@@ -77,7 +77,7 @@
         </section>
 
         <section>
-          <h4 class="text-lg font-semibold text-gray-800 border-b pb-2 mb-4">📄 Dokumen Pendukung</h4>
+          <h4 class="text-lg font-semibold text-gray-800 border-b pb-2 mb-4">Dokumen Pendukung</h4>
           <div class="bg-gray-50/70 border border-gray-200 rounded-xl p-4">
             <% if (laporan.dokumentasi) { %>
               <% const filePath = `/uploads/laporan/${laporan.dokumentasi}`; %>

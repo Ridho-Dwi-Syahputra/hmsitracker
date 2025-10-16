@@ -253,33 +253,28 @@ exports.getFormEvaluasi = async (req, res) => {
 };
 
 // =====================================================
-// 💾 Simpan evaluasi + notifikasi ke HMSI (VERSI FINAL)
+// 💾 Simpan evaluasi + notifikasi ke HMSI
 // =====================================================
 exports.postEvaluasi = async (req, res) => {
   try {
-    // 1. Ambil data dari form yang dikirim DPA
     const { komentar, status_konfirmasi } = req.body;
     const laporanId = req.params.id;
     const evaluatorId = req.session.user?.id_anggota;
 
-    // Validasi input
     if (!komentar || !status_konfirmasi) {
       return res.redirect(`/dpa/laporan/${laporanId}/evaluasi?error=Komentar dan status wajib diisi`);
     }
 
-    // 2. Simpan atau Update data di tabel `Evaluasi`
     const [cek] = await db.query(`SELECT id_evaluasi FROM Evaluasi WHERE id_laporan = ?`, [laporanId]);
     let idEvaluasi;
 
     if (cek.length) {
-      // Jika evaluasi sudah ada, UPDATE
       idEvaluasi = cek[0].id_evaluasi;
       await db.query(
         `UPDATE Evaluasi SET komentar = ?, status_konfirmasi = ?, pemberi_evaluasi = ? WHERE id_evaluasi = ?`,
         [komentar, status_konfirmasi, evaluatorId, idEvaluasi]
       );
     } else {
-      // Jika evaluasi baru, INSERT
       idEvaluasi = uuidv4();
       await db.query(
         `INSERT INTO Evaluasi (id_evaluasi, komentar, status_konfirmasi, tanggal_evaluasi, id_laporan, pemberi_evaluasi)
@@ -288,18 +283,11 @@ exports.postEvaluasi = async (req, res) => {
       );
     }
 
-    // --- INI BAGIAN PALING PENTING ---
-
-    // 3. Ambil detail laporan untuk membuat pesan
     const [laporanRows] = await db.query(
       `SELECT judul_laporan, id_divisi FROM Laporan WHERE id_laporan = ?`, [laporanId]
     );
-    if (!laporanRows.length) {
-      throw new Error("Laporan tidak ditemukan saat hendak membuat notifikasi.");
-    }
     const laporan = laporanRows[0];
 
-    // --- KODE BARU DIMULAI DI SINI ---
     let pesan;
     if (status_konfirmasi === 'Selesai') {
       pesan = `"${laporan.judul_laporan}" telah diterima oleh DPA.`;
@@ -309,19 +297,14 @@ exports.postEvaluasi = async (req, res) => {
       pesan = `DPA telah memberi evaluasi pada laporan "${laporan.judul_laporan}".`;
     }
 
-
+  
     await db.query(
       `INSERT INTO Notifikasi (id_notifikasi, pesan, target_role, status_baca, id_divisi, id_laporan, id_evaluasi)
        VALUES (?, ?, 'HMSI', 0, ?, ?, ?)`,
-      [uuidv4(), pesanNotifikasi, laporan.id_divisi, laporanId, idEvaluasi]
+      [uuidv4(), pesan, laporan.id_divisi, laporanId, idEvaluasi]
     );
 
-    // 7. Update kolom status_laporan di tabel Laporan agar data sinkron
-    await db.query(`UPDATE Laporan SET status_laporan = ? WHERE id_laporan = ?`, [status_konfirmasi, laporanId]);
-
-    // 8. Redirect DPA ke halaman yang sesuai
-    res.redirect(`/dpa/laporanDiterima?success=Evaluasi untuk laporan "${laporan.judul_laporan}" berhasil disimpan`);
-
+    res.redirect(`/dpa/laporanDiterima?success=Evaluasi berhasil disimpan`);
   } catch (err) {
     console.error("❌ Error postEvaluasi:", err.message);
     res.status(500).send("Gagal menyimpan evaluasi");
