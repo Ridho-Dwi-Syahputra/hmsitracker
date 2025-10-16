@@ -131,6 +131,7 @@
                 <label class="block text-sm font-medium mb-2">Judul Laporan <span class="text-red-500">*</span></label>
                 <input type="text" name="judul_laporan" id="judul_laporan" required
                   value="<%= (typeof old !== 'undefined' && old?.judul_laporan) ? old.judul_laporan : (typeof laporan !== 'undefined' && laporan?.judul_laporan) ? laporan.judul_laporan : '' %>"
+                  placeholder="Tuliskan judul laporan kegiatan..."
                   class="w-full px-4 py-3 border rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100">
                 <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
               </div>
@@ -183,6 +184,7 @@
               <div class="md:col-span-2 bg-gray-50 border p-4 rounded-xl">
                 <label class="block text-sm font-medium mb-2">Deskripsi Kegiatan <span class="text-red-500">*</span></label>
                 <textarea id="deskripsi_kegiatan" name="deskripsi_kegiatan" rows="4" required
+                  placeholder="Tuliskan deskripsi kegiatan secara lengkap..."
                   class="w-full px-4 py-3 border rounded-lg text-sm resize-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100"><%= (typeof old !== 'undefined' && old?.deskripsi_kegiatan) ? old.deskripsi_kegiatan : (typeof laporan !== 'undefined' && laporan?.deskripsi_kegiatan) ? laporan.deskripsi_kegiatan : '' %></textarea>
                 <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
               </div>
@@ -194,25 +196,10 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div class="bg-gray-50 border p-4 rounded-xl">
                 <label class="block text-sm font-medium mb-2">Sumber Dana <span class="text-red-500">*</span></label>
-                <div class="flex flex-col gap-3">
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="radio" name="sumber_dana_radio" value="uang_kas" class="text-orange-500 focus:ring-orange-500"
-                      <%= ((typeof old !== 'undefined' && old?.sumber_dana === 'Uang Kas HMSI') || (typeof laporan !== 'undefined' && laporan?.sumber_dana === 'Uang Kas HMSI')) ? 'checked' : '' %> >
-                    <span class="text-sm">Uang Kas HMSI</span>
-                  </label>
-                  <div>
-                    <label class="flex items-center gap-2 cursor-pointer">
-                      <input type="radio" name="sumber_dana_radio" value="lainnya" class="text-orange-500 focus:ring-orange-500"
-                        <%= ((typeof old !== 'undefined' && old?.sumber_dana && old?.sumber_dana !== 'Uang Kas HMSI') || (typeof laporan !== 'undefined' && laporan?.sumber_dana && laporan?.sumber_dana !== 'Uang Kas HMSI')) ? 'checked' : '' %>>
-                      <span class="text-sm">Lainnya:</span>
-                    </label>
-                    <input type="text" name="sumber_dana_text" id="sumber_dana_text"
-                      value="<%= (typeof old !== 'undefined' && old?.sumber_dana && old?.sumber_dana !== 'Uang Kas HMSI') ? old.sumber_dana : (typeof laporan !== 'undefined' && laporan?.sumber_dana && laporan?.sumber_dana !== 'Uang Kas HMSI') ? laporan.sumber_dana : '' %>"
-                      placeholder="Contoh: Departemen SI"
-                      class="mt-2 w-full px-3 py-2 border rounded-lg text-sm disabled:bg-gray-100 focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
-                      <%= ((!old || !old?.sumber_dana) && (!laporan || !laporan?.sumber_dana || laporan?.sumber_dana === 'Uang Kas HMSI')) ? 'disabled' : '' %>>
-                  </div>
-                </div>
+                <input type="text" name="sumber_dana" id="sumber_dana" required
+                  value="<%= (typeof old !== 'undefined' && old?.sumber_dana) ? old.sumber_dana : (typeof laporan !== 'undefined' && laporan?.sumber_dana) ? laporan.sumber_dana : '' %>"
+                  placeholder="Tuliskan sumber dananya seperti Departemen SI"
+                  class="w-full px-4 py-3 border rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100">
                 <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
               </div>
 
@@ -234,6 +221,7 @@
                 <label class="block text-sm font-medium mb-2">Target Kuantitatif (%) <span class="text-red-500">*</span></label>
                 <input type="number" id="persentase_kuantitatif" name="persentase_kuantitatif"
                   value="<%= (typeof old !== 'undefined' && old?.persentase_kuantitatif) ? old.persentase_kuantitatif : (typeof laporan !== 'undefined' && laporan?.persentase_kuantitatif) ? laporan.persentase_kuantitatif : '' %>" required min="0" max="100"
+                  placeholder="Contoh: 85"
                   class="w-full px-4 py-3 border rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100">
                 <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
               </div>
@@ -242,20 +230,25 @@
                 <label class="block text-sm font-medium mb-2">Target Kualitatif (%) <span class="text-red-500">*</span></label>
                 <input type="number" id="persentase_kualitatif" name="persentase_kualitatif"
                   value="<%= (typeof old !== 'undefined' && old?.persentase_kualitatif) ? old.persentase_kualitatif : (typeof laporan !== 'undefined' && laporan?.persentase_kualitatif) ? laporan.persentase_kualitatif : '' %>" required min="0" max="100"
+                  placeholder="Contoh: 90"
                   class="w-full px-4 py-3 border rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100">
                 <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
               </div>
 
               <div class="md:col-span-2 bg-gray-50 border p-4 rounded-xl">
-                <label class="block text-sm font-medium mb-2">Deskripsi Target Kuantitatif</label>
-                <textarea name="deskripsi_target_kuantitatif" rows="3"
+                <label class="block text-sm font-medium mb-2">Deskripsi Target Kuantitatif <span class="text-red-500">*</span></label>
+                <textarea name="deskripsi_target_kuantitatif" id="deskripsi_target_kuantitatif" rows="3" required
+                  placeholder="Tuliskan deskripsi pencapaian target kuantitatif..."
                   class="w-full px-4 py-3 border rounded-lg text-sm resize-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100"><%= (typeof old !== 'undefined' && old?.deskripsi_target_kuantitatif) ? old.deskripsi_target_kuantitatif : (typeof laporan !== 'undefined' && laporan?.deskripsi_target_kuantitatif) ? laporan.deskripsi_target_kuantitatif : '' %></textarea>
+                <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
               </div>
 
               <div class="md:col-span-2 bg-gray-50 border p-4 rounded-xl">
-                <label class="block text-sm font-medium mb-2">Deskripsi Target Kualitatif</label>
-                <textarea name="deskripsi_target_kualitatif" rows="3"
+                <label class="block text-sm font-medium mb-2">Deskripsi Target Kualitatif <span class="text-red-500">*</span></label>
+                <textarea name="deskripsi_target_kualitatif" id="deskripsi_target_kualitatif" rows="3" required
+                  placeholder="Tuliskan deskripsi pencapaian target kualitatif..."
                   class="w-full px-4 py-3 border rounded-lg text-sm resize-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100"><%= (typeof old !== 'undefined' && old?.deskripsi_target_kualitatif) ? old.deskripsi_target_kualitatif : (typeof laporan !== 'undefined' && laporan?.deskripsi_target_kualitatif) ? laporan.deskripsi_target_kualitatif : '' %></textarea>
+                <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
               </div>
             </div>
           </div>
@@ -266,6 +259,7 @@
               <div class="bg-gray-50 border p-4 rounded-xl">
                 <label class="block text-sm font-medium mb-2">Kendala yang Dihadapi <span class="text-red-500">*</span></label>
                 <textarea id="kendala" name="kendala" rows="3" required
+                  placeholder="Tuliskan kendala yang dihadapi selama kegiatan..."
                   class="w-full px-4 py-3 border rounded-lg text-sm resize-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100"><%= (typeof old !== 'undefined' && old?.kendala) ? old.kendala : (typeof laporan !== 'undefined' && laporan?.kendala) ? laporan.kendala : '' %></textarea>
                 <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
               </div>
@@ -273,6 +267,7 @@
               <div class="bg-gray-50 border p-4 rounded-xl">
                 <label class="block text-sm font-medium mb-2">Solusi yang Diterapkan <span class="text-red-500">*</span></label>
                 <textarea id="solusi" name="solusi" rows="3" required
+                  placeholder="Tuliskan solusi yang diterapkan untuk mengatasi kendala..."
                   class="w-full px-4 py-3 border rounded-lg text-sm resize-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100"><%= (typeof old !== 'undefined' && old?.solusi) ? old.solusi : (typeof laporan !== 'undefined' && laporan?.solusi) ? laporan.solusi : '' %></textarea>
                 <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
               </div>
@@ -283,7 +278,7 @@
             <label class="block text-sm font-medium mb-2">Sasaran Kegiatan <span class="text-red-500">*</span></label>
             <input type="text" id="sasaran" name="sasaran"
               value="<%= (typeof old !== 'undefined' && old?.sasaran) ? old.sasaran : (typeof laporan !== 'undefined' && laporan?.sasaran) ? laporan.sasaran : '' %>" required
-              placeholder="Contoh: Panti Asuhan"
+              placeholder="Contoh: Panti Asuhan, Mahasiswa Angkatan 2024"
               class="w-full px-4 py-3 border rounded-lg text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-100">
             <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
           </div>
@@ -376,7 +371,7 @@
         closeErrorModal: "errorModal",
         closeValidationModal: "validationModal",
         closeFileSizeModal: "fileSizeModal",
-        cancelSubmitBtn: "confirmSubmitModal", // <-- TOMBOL BATAL DARI MODAL BARU
+        cancelSubmitBtn: "confirmSubmitModal",
       };
       Object.entries(modalMappings).forEach(([btnId, modalId]) => {
         const btn = document.getElementById(btnId);
@@ -384,7 +379,7 @@
       });
     
       // Klik di luar modal untuk tutup
-      ["successModal", "errorModal", "validationModal", "fileSizeModal", "confirmSubmitModal"].forEach((id) => { // <-- TAMBAHKAN ID MODAL BARU
+      ["successModal", "errorModal", "validationModal", "fileSizeModal", "confirmSubmitModal"].forEach((id) => {
         const modal = document.getElementById(id);
         if (modal) modal.addEventListener("click", (e) => {
           if (e.target.id === id) hideModal(id);
@@ -392,7 +387,7 @@
       });
     
       // ==============================
-      // Dropdown Program Kerja (Tidak Berubah)
+      // Dropdown Program Kerja
       // ==============================
       const btn = document.getElementById("prokerDropdownBtn");
       const menu = document.getElementById("prokerDropdownMenu");
@@ -423,27 +418,7 @@
       }
     
       // ==============================
-      // Radio Sumber Dana (Tidak Berubah)
-      // ==============================
-      const radios = document.querySelectorAll('input[name="sumber_dana_radio"]');
-      const textInput = document.querySelector('input[name="sumber_dana_text"]');
-      radios.forEach((r) => {
-        r.addEventListener("change", () => {
-          if (r.value === "lainnya" && r.checked) {
-            textInput.disabled = false;
-            textInput.focus();
-            textInput.required = true;
-          } else if (r.value === "uang_kas" && r.checked) {
-            textInput.disabled = true;
-            textInput.value = "";
-            textInput.required = false;
-          }
-          validateSumberDana();
-        });
-      });
-      
-      // ==============================
-      // File Upload Drag & Drop (Tidak Berubah)
+      // File Upload Drag & Drop
       // ==============================
       const dropzone = document.getElementById("dropzone");
       const fileInput = document.getElementById("fileUpload");
@@ -484,7 +459,7 @@
       });
     
       // ==============================
-      // Validation Helpers (Tidak Berubah)
+      // Validation Helpers
       // ==============================
       function validateField(field) {
         const errorDiv = field.closest(".bg-gray-50")?.querySelector(".error-message") || field.closest("div")?.querySelector(".error-message");
@@ -492,7 +467,7 @@
         let isValid = true;
         let message = "";
         if (field.hasAttribute("required")) {
-          if (field.type === "file" && !document.querySelector('a[href^="/uploads/"]')) { // Only require file if no old file exists
+          if (field.type === "file" && !document.querySelector('a[href^="/uploads/"]')) {
             isValid = field.files.length > 0;
             message = "File dokumentasi wajib diunggah";
           } else if (field.value.trim() === "") {
@@ -521,21 +496,9 @@
       }
     
       function validateSumberDana() {
-        const radioChecked = document.querySelector('input[name="sumber_dana_radio"]:checked');
-        const textInput = document.querySelector('input[name="sumber_dana_text"]');
-        const errorDiv = document.querySelector('input[name="sumber_dana_radio"]').closest(".bg-gray-50").querySelector(".error-message");
-        let valid = true, msg = "";
-        if (!radioChecked) {
-          valid = false; msg = "Pilih sumber dana";
-        } else if (radioChecked.value === "lainnya" && textInput.value.trim() === "") {
-          valid = false; msg = "Isi sumber dana lainnya";
-        }
-        if (!valid) {
-          errorDiv.textContent = msg; errorDiv.classList.remove("hidden");
-        } else {
-          errorDiv.classList.add("hidden");
-        }
-        return valid;
+        const sumberDanaInput = document.getElementById('sumber_dana');
+        if (!sumberDanaInput) return true;
+        return validateField(sumberDanaInput);
       }
     
       function validateAllFields() {
@@ -548,8 +511,16 @@
         return allValid;
       }
     
+      // Add blur and input event listeners for validation
+      document.querySelectorAll('input[required], textarea[required]').forEach(field => {
+        field.addEventListener('blur', () => validateField(field));
+        field.addEventListener('input', () => {
+          if (field.classList.contains('border-red-500')) validateField(field);
+        });
+      });
+    
       // ===================================================================
-      // 🔸 Submit Form - LOGIKA BARU
+      // Submit Form Logic
       // ===================================================================
       const form = document.getElementById("laporanForm");
       const submitBtn = document.getElementById("submitBtn");
@@ -592,9 +563,9 @@
         });
       }
       
-      // 1. Saat form disubmit (tombol Kirim utama diklik)
+      // Saat form disubmit (tombol Kirim utama diklik)
       form.addEventListener("submit", (e) => {
-        e.preventDefault(); // Selalu cegah pengiriman langsung
+        e.preventDefault();
         
         // Lakukan validasi terlebih dahulu
         if (validateAllFields()) {
@@ -607,12 +578,12 @@
         }
       });
     
-      // 2. Saat tombol "Ya, Kirim" di dalam modal diklik
+      // Saat tombol "Ya, Kirim" di dalam modal diklik
       document.getElementById("confirmSubmitBtn").addEventListener("click", () => {
-        hideModal("confirmSubmitModal"); // Sembunyikan modal konfirmasi
-        performSubmit(); // Jalankan fungsi pengiriman data
+        hideModal("confirmSubmitModal");
+        performSubmit();
       });
     });
-    </script>
+  </script>
 </body>
 </html>
