@@ -56,6 +56,8 @@ exports.getKelolaEvaluasi = async (req, res) => {
     const user = req.session.user;
     const idDivisi = user?.id_divisi || null;
 
+    // KUNCI PERBAIKAN: Query ini menggunakan INNER JOIN dengan subquery untuk
+    // mendapatkan evaluasi terbaru. Metode ini sangat kompatibel dengan berbagai versi database.
     const [rows] = await db.query(
       `
       SELECT 
@@ -66,11 +68,19 @@ exports.getKelolaEvaluasi = async (req, res) => {
         d.nama_divisi,
         l.id_laporan
       FROM Evaluasi e
+      -- Filter untuk memastikan hanya evaluasi TERBARU (ID tertinggi) per laporan yang diambil
+      INNER JOIN (
+        SELECT MAX(id_evaluasi) as max_id
+        FROM Evaluasi
+        GROUP BY id_laporan
+      ) latest_eval ON e.id_evaluasi = latest_eval.max_id
+      -- Lanjutkan JOIN ke tabel lain seperti biasa
       JOIN Laporan l ON e.id_laporan = l.id_laporan
       JOIN Program_kerja p ON l.id_ProgramKerja = p.id_ProgramKerja
       LEFT JOIN User u ON e.pemberi_evaluasi = u.id_anggota
       LEFT JOIN divisi d ON l.id_divisi = d.id_divisi
-      WHERE l.id_divisi = ?
+      -- Terapkan filter akhir SETELAH mendapatkan data evaluasi terbaru
+      WHERE l.id_divisi = ? AND e.status_konfirmasi = 'Revisi'
       ORDER BY e.tanggal_evaluasi DESC
       `,
       [idDivisi]
@@ -85,7 +95,7 @@ exports.getKelolaEvaluasi = async (req, res) => {
     const unreadCount = await getUnreadCount(idDivisi);
 
     res.render("HMSI/kelolaEvaluasi", {
-      title: "Telah Dievaluasi",
+      title: "Laporan Revisi",
       user,
       activeNav: "kelolaEvaluasi",
       evaluasi,
@@ -98,7 +108,6 @@ exports.getKelolaEvaluasi = async (req, res) => {
     res.status(500).send("Gagal mengambil data evaluasi");
   }
 };
-
 // =====================================================
 // 📄 Detail evaluasi
 // =====================================================
