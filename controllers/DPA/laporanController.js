@@ -30,6 +30,23 @@ function getMimeFromFile(filename) {
 }
 
 // =====================================================
+// Helper: format tanggal (Bahasa Indonesia Sederhana)
+// =====================================================
+function formatTanggal(dateValue) {
+  if (!dateValue || dateValue === "0000-00-00") return "-";
+  const d = new Date(dateValue);
+  if (isNaN(d.getTime())) return "-";
+  
+  // Format: "Minggu, 12 Oktober 2025"
+  return d.toLocaleDateString("id-ID", {
+    weekday: "long",  // Nama hari lengkap
+    day: "numeric",   // Tanggal
+    month: "long",    // Nama bulan lengkap
+    year: "numeric"   // Tahun
+  });
+}
+
+// =====================================================
 // 📑 Daftar laporan BELUM DIEVALUASI (Hanya yang belum pernah dievaluasi)
 // =====================================================
 exports.getAllLaporanDPA = async (req, res) => {
@@ -53,25 +70,14 @@ exports.getAllLaporanDPA = async (req, res) => {
       ORDER BY l.tanggal DESC
     `);
 
-    const laporan = rows.map((r) => {
-      let tanggalFormatted = "-";
-      if (r.tanggal && r.tanggal !== "0000-00-00") {
-        const d = new Date(r.tanggal);
-        if (!isNaN(d.getTime())) {
-          tanggalFormatted = d.toLocaleDateString("id-ID", {
-            day: "2-digit", month: "short", year: "numeric",
-          });
-        }
-      }
-      return {
-        id_laporan: r.id_laporan,
-        judul_laporan: r.judul_laporan,
-        namaProker: r.namaProker || "-",
-        divisi: r.nama_divisi || "Tidak Diketahui",
-        tanggalFormatted,
-        status: "Belum Dievaluasi",
-      };
-    });
+    const laporan = rows.map((r) => ({
+      id_laporan: r.id_laporan,
+      judul_laporan: r.judul_laporan,
+      namaProker: r.namaProker || "-",
+      divisi: r.nama_divisi || "Tidak Diketahui",
+      tanggalFormatted: formatTanggal(r.tanggal),
+      status: "Belum Dievaluasi",
+    }));
 
     res.render("dpa/kelolaLaporan", {
       title: "Laporan Belum Dievaluasi",
@@ -112,16 +118,6 @@ exports.getLaporanDiterima = async (req, res) => {
     `);
 
     const laporan = rows.map((r) => {
-      let tanggalFormatted = "-";
-      if (r.tanggal && r.tanggal !== "0000-00-00") {
-        const d = new Date(r.tanggal);
-        if (!isNaN(d.getTime())) {
-          tanggalFormatted = d.toLocaleDateString("id-ID", {
-            day: "2-digit", month: "short", year: "numeric",
-          });
-        }
-      }
-      
       // ✅ DIPERBAIKI: Status dinamis sesuai data dari database
       const status = r.status_konfirmasi === 'Selesai' ? 'Diterima' : 'Revisi';
 
@@ -130,7 +126,7 @@ exports.getLaporanDiterima = async (req, res) => {
         judul_laporan: r.judul_laporan,
         namaProker: r.namaProker || "-",
         divisi: r.nama_divisi || "Tidak Diketahui",
-        tanggalFormatted,
+        tanggalFormatted: formatTanggal(r.tanggal),
         status, // Kirim status yang benar ke view
       };
     });
@@ -170,15 +166,8 @@ exports.getDetailLaporanDPA = async (req, res) => {
     if (!rows.length) return res.status(404).send("Laporan tidak ditemukan");
     const laporan = rows[0];
 
-    laporan.tanggalFormatted = "-";
-    if (laporan.tanggal) {
-      const parsed = new Date(laporan.tanggal);
-      if (!isNaN(parsed.getTime())) {
-        laporan.tanggalFormatted = parsed.toLocaleDateString("id-ID", {
-          day: "2-digit", month: "short", year: "numeric",
-        });
-      }
-    }
+    // Format tanggal pelaksanaan laporan
+    laporan.tanggalFormatted = formatTanggal(laporan.tanggal);
     laporan.divisi = laporan.nama_divisi || "Tidak Diketahui";
 
     const [evaluasiRows] = await db.query(`
@@ -190,6 +179,11 @@ exports.getDetailLaporanDPA = async (req, res) => {
     `, [idLaporan]);
 
     const evaluasi = evaluasiRows.length ? evaluasiRows[0] : null;
+
+    // Format tanggal evaluasi jika ada
+    if (evaluasi && evaluasi.tanggal_evaluasi) {
+      evaluasi.tanggal_evaluasi = formatTanggal(evaluasi.tanggal_evaluasi);
+    }
 
     laporan.dokumentasi_mime = getMimeFromFile(laporan.dokumentasi);
     
@@ -234,16 +228,7 @@ exports.getFormEvaluasi = async (req, res) => {
     if (!rows.length) return res.status(404).send("Laporan tidak ditemukan");
     const laporan = rows[0];
 
-    let tanggalFormatted = "-";
-    if (laporan.tanggal) {
-      const d = new Date(laporan.tanggal);
-      if (!isNaN(d.getTime())) {
-        tanggalFormatted = d.toLocaleDateString("id-ID", {
-          day: "2-digit", month: "short", year: "numeric",
-        });
-      }
-    }
-    laporan.tanggalFormatted = tanggalFormatted;
+    laporan.tanggalFormatted = formatTanggal(laporan.tanggal);
     laporan.dokumentasi_mime = getMimeFromFile(laporan.dokumentasi);
 
     const [evaluasiRows] = await db.query(`
@@ -335,20 +320,10 @@ exports.getAllEvaluasiDPA = async (req, res) => {
       ORDER BY e.tanggal_evaluasi DESC
     `);
 
-    const evaluasi = rows.map((r) => {
-      let tanggalFormatted = "-";
-      if (r.tanggal_evaluasi && r.tanggal_evaluasi !== "0000-00-00") {
-        const d = new Date(r.tanggal_evaluasi);
-        if (!isNaN(d.getTime())) {
-          tanggalFormatted = d.toLocaleDateString("id-ID", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric",
-          });
-        }
-      }
-      return { ...r, tanggalFormatted };
-    });
+    const evaluasi = rows.map((r) => ({
+      ...r,
+      tanggalFormatted: formatTanggal(r.tanggal_evaluasi)
+    }));
 
     res.render("dpa/kelolaEvaluasi", {
       title: "Kelola Evaluasi",
