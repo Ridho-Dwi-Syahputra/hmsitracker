@@ -190,6 +190,7 @@
             Komentar Tambahan
           </h3>
 
+          <!-- fixed spacing & empty textarea -->
           <% if (evaluasi.komentar_hmsi) { %>
             <div class="mt-2 px-4 py-3 border rounded-xl bg-orange-50 text-gray-700">
               <%= evaluasi.komentar_hmsi %>
@@ -216,10 +217,10 @@
             </div>
           <% } else { %>
             <!-- Form komentar (hanya tampil jika status bukan Selesai) -->
-            <form id="commentForm" action="/hmsi/kelola-evaluasi/<%= evaluasi.id_evaluasi %>/komentar" method="POST">
+            <form id="commentForm" action="/hmsi/kelola-evaluasi/<%= evaluasi.id_evaluasi %>/komentar" method="POST" class="mt-4">
               <textarea name="komentar_hmsi" id="komentarTextarea" rows="3" 
                 placeholder="Tulis komentar tambahan Anda di sini..."
-                class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400 hover:border-gray-400 transition-all"><%= evaluasi.komentar_hmsi || '' %></textarea>
+                class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400 hover:border-gray-400 transition-all"></textarea>
               <div class="error-message text-red-500 text-xs mt-1 hidden"></div>
               
               <div class="flex justify-between items-center gap-3 pt-4 border-t">
@@ -391,20 +392,19 @@
 
     // Modal event listeners
     document.getElementById('closeSuccessModal').addEventListener('click', () => {
-  hideModal('successModal');
+      hideModal('successModal');
 
-  // Tunggu modal tertutup rapi
-  setTimeout(() => {
-    // 1️⃣ Reload dulu (efek refresh ringan)
-    window.location.reload();
+      // Tunggu modal tertutup rapi
+      setTimeout(() => {
+        // 1️⃣ Reload dulu (efek refresh ringan)
+        window.location.reload();
 
-    // 2️⃣ Setelah reload selesai, otomatis redirect
-    setTimeout(() => {
-      window.location.href = '/hmsi/kelola-evaluasi';
-    }, 500); // jeda 0.5 detik biar reload sempat terjadi
-  }, 300);
-});
-
+        // 2️⃣ Setelah reload selesai, otomatis redirect
+        setTimeout(() => {
+          window.location.href = '/hmsi/kelola-evaluasi';
+        }, 500); // jeda 0.5 detik biar reload sempat terjadi
+      }, 300);
+    });
 
     document.getElementById('closeErrorModal').addEventListener('click', () => {
       hideModal('errorModal');
@@ -541,20 +541,19 @@
           // Hide loading modal first
           PopupMessage.hideLoading(() => {
             if (response.ok) {
-  clearCommentForm();
-  PopupMessage.showSuccess(
-    'Komentar Berhasil Disimpan!', 
-    'Komentar tambahan Anda telah berhasil ditambahkan ke evaluasi ini.',
-    'OK',
-    () => {
-      // Setelah OK diklik → arahkan ke daftar evaluasi
-      setTimeout(() => {
-        window.location.href = '/hmsi/kelola-evaluasi';
-      }, 400);
-    }
-  );
-}
-
+              clearCommentForm();
+              PopupMessage.showSuccess(
+                'Komentar Berhasil Disimpan!', 
+                'Komentar tambahan Anda telah berhasil ditambahkan ke evaluasi ini.',
+                'OK',
+                () => {
+                  // Setelah OK diklik → arahkan ke daftar evaluasi
+                  setTimeout(() => {
+                    window.location.href = '/hmsi/kelola-evaluasi';
+                  }, 400);
+                }
+              );
+            }
           });
         })
         .catch(error => {

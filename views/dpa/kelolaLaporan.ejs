@@ -13,9 +13,8 @@
     .table-fixed th:nth-child(2) { width: 25%; }
     .table-fixed th:nth-child(3) { width: 18%; }
     .table-fixed th:nth-child(4) { width: 12%; }
-    .table-fixed th:nth-child(5) { width: 12%; }
-    .table-fixed th:nth-child(6) { width: 13%; }
-    .table-fixed th:nth-child(7) { width: 80px; }
+    .table-fixed th:nth-child(5) { width: 13%; }
+    .table-fixed th:nth-child(6) { width: 80px; }
     .text-ellipsis { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   </style>
 </head>
@@ -35,8 +34,10 @@
 
       <div class="p-6 sm:p-8">
 
+        <!-- 🔍 Filter Bar -->
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6 flex-wrap">
 
+          <!-- Pencarian -->
           <div class="flex-1">
             <div class="relative">
               <input id="searchInput" type="text" placeholder="Cari laporan..."
@@ -47,23 +48,7 @@
             </div>
           </div>
 
-          <div class="relative">
-            <button id="statusDropdownBtn"
-              class="flex items-center justify-between gap-2 px-4 py-3 border border-gray-300 rounded-xl text-sm bg-white
-                      hover:border-orange-500 hover:shadow-md focus:ring-2 focus:ring-orange-500 transition-all duration-200">
-              <span id="statusDropdownLabel">Semua Status</span>
-              <i class="fa-solid fa-chevron-down text-orange-500"></i>
-            </button>
-            <div id="statusDropdownMenu"
-              class="hidden absolute right-0 mt-2 w-48 bg-white border border-orange-200 rounded-lg shadow-lg z-10">
-              <ul class="text-sm text-gray-700">
-                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="all">Semua Status</button></li>
-                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="Belum Dievaluasi">Belum Dievaluasi</button></li>
-                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="Revisi">Revisi</button></li>
-              </ul>
-            </div>
-          </div>
-
+          <!-- Filter Divisi -->
           <div class="relative">
             <button id="divisiDropdownBtn"
               class="flex items-center justify-between gap-2 px-4 py-3 border border-gray-300 rounded-xl text-sm bg-white
@@ -85,6 +70,7 @@
             </div>
           </div>
 
+          <!-- Filter Program Kerja (Dinamis) -->
           <div class="relative hidden" id="prokerFilterContainer">
             <button id="prokerDropdownBtn"
               class="flex items-center justify-between gap-2 px-4 py-3 border border-gray-300 rounded-xl text-sm bg-white
@@ -101,6 +87,7 @@
           </div>
         </div>
 
+        <!-- 🔸 Tabel Laporan -->
         <% if (!laporan || laporan.length === 0) { %>
           <div class="flex flex-col items-center space-y-4 py-20 text-center">
             <i class="fa-solid fa-folder-open text-4xl text-gray-300 mb-3"></i>
@@ -117,7 +104,6 @@
                   <th class="py-3 px-4 font-semibold border border-orange-200">Program Kerja</th>
                   <th class="py-3 px-4 font-semibold border border-orange-200">Divisi</th>
                   <th class="py-3 px-4 font-semibold border border-orange-200">Tanggal Upload</th>
-                  <th class="py-3 px-4 font-semibold border border-orange-200">Status</th>
                   <th class="py-3 px-4 font-semibold border border-orange-200">Aksi</th>
                 </tr>
               </thead>
@@ -134,13 +120,6 @@
                     <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= l.divisi || '-' %></td>
                     <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= l.tanggalFormatted %></td>
                     <td class="py-3 px-4 border border-orange-100">
-                      <% if (l.status === "Revisi") { %>
-                        <span class="px-3 py-1 bg-red-100 text-red-700 rounded-lg text-xs font-semibold whitespace-nowrap">Revisi</span>
-                      <% } else { %>
-                        <span class="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg text-xs font-semibold whitespace-nowrap">Belum Dievaluasi</span>
-                      <% } %>
-                    </td>
-                    <td class="py-3 px-4 border border-orange-100">
                       <div class="flex justify-center">
                         <a href="/dpa/laporan/<%= l.id_laporan %>" 
                           class="text-orange-500 hover:text-orange-700 transition transform hover:scale-110 p-1" title="Detail">
@@ -154,6 +133,7 @@
             </table>
           </div>
 
+          <!-- 📄 Pagination -->
           <div class="flex justify-center items-center gap-2 mt-6" id="pagination">
             <button id="prevPage" class="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 disabled:opacity-50">Prev</button>
             <span id="pageInfo" class="text-gray-700"></span>
@@ -169,9 +149,6 @@
       const searchInput = document.getElementById("searchInput");
       const tbody = document.getElementById("laporanTable");
       let rows = Array.from(tbody?.querySelectorAll("tr") || []);
-      const statusBtn = document.getElementById("statusDropdownBtn");
-      const statusMenu = document.getElementById("statusDropdownMenu");
-      const statusLabel = document.getElementById("statusDropdownLabel");
       const divisiBtn = document.getElementById("divisiDropdownBtn");
       const divisiMenu = document.getElementById("divisiDropdownMenu");
       const divisiLabel = document.getElementById("divisiDropdownLabel");
@@ -183,13 +160,14 @@
 
       const rowsPerPage = 10;
       let currentPage = 1;
-      
+
+      // Tutup dropdown saat klik di luar
       document.addEventListener("click", (e) => {
-        if (!statusBtn.contains(e.target)) statusMenu.classList.add("hidden");
         if (!divisiBtn.contains(e.target)) divisiMenu.classList.add("hidden");
         if (!prokerBtn.contains(e.target)) prokerMenu.classList.add("hidden");
       });
-      [statusBtn, divisiBtn, prokerBtn].forEach(btn => {
+
+      [divisiBtn, prokerBtn].forEach(btn => {
         btn.addEventListener("click", e => {
           e.stopPropagation();
           const menu = btn.nextElementSibling;
@@ -197,7 +175,8 @@
           menu.classList.toggle("hidden");
         });
       });
-      
+
+      // Relasi Divisi → Proker
       const divisiToProker = {};
       rows.forEach(row => {
         const div = row.dataset.divisi;
@@ -206,16 +185,8 @@
         if (!divisiToProker[div]) divisiToProker[div] = new Set();
         divisiToProker[div].add(prok);
       });
-      
-      statusMenu.querySelectorAll("button").forEach(btn => {
-        btn.addEventListener("click", () => {
-          statusLabel.textContent = btn.dataset.value === "all" ? "Semua Status" : btn.dataset.value;
-          statusMenu.classList.add("hidden");
-          currentPage = 1;
-          filterRows();
-        });
-      });
-      
+
+      // Filter Divisi dan Proker
       divisiMenu.querySelectorAll("button").forEach(btn => {
         btn.addEventListener("click", () => {
           const selectedDiv = btn.dataset.value;
@@ -244,24 +215,23 @@
           filterRows();
         });
       });
-      
+
+      // 🔎 Filter dan pagination
       function filterRows() {
         const searchValue = searchInput.value.toLowerCase();
-        const selectedStatus = statusLabel.textContent.trim();
         const selectedDivisi = divisiLabel.textContent.trim();
         const selectedProker = prokerLabel.textContent.trim();
+
         rows.forEach(row => {
           const judul = row.cells[1]?.innerText.toLowerCase() || "";
           const program = row.cells[2]?.innerText.trim() || "";
-          const status = row.cells[5]?.innerText.trim() || "";
           const divisi = row.cells[3]?.innerText.trim() || "";
 
           const matchSearch = judul.includes(searchValue) || program.toLowerCase().includes(searchValue);
-          const matchStatus = selectedStatus === "Semua Status" || status === selectedStatus;
           const matchDivisi = selectedDivisi === "Semua Divisi" || divisi === selectedDivisi;
           const matchProker = selectedProker === "Semua Program Kerja" || program === selectedProker;
 
-          row.dataset.visible = (matchSearch && matchStatus && matchDivisi && matchProker) ? "true" : "false";
+          row.dataset.visible = (matchSearch && matchDivisi && matchProker) ? "true" : "false";
         });
         paginate();
       }

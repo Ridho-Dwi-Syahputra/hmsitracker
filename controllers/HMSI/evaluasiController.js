@@ -12,16 +12,19 @@
 const db = require("../../config/db");
 
 // =====================================================
-// Helper: format tanggal
+// Helper: format tanggal (Bahasa Indonesia Sederhana)
 // =====================================================
 function formatTanggal(dateValue) {
   if (!dateValue || dateValue === "0000-00-00") return "-";
   const d = new Date(dateValue);
   if (isNaN(d.getTime())) return "-";
+  
+  // Format: "Minggu, 12 Oktober 2025"
   return d.toLocaleDateString("id-ID", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
+    weekday: "long",  // Nama hari lengkap
+    day: "numeric",   // Tanggal
+    month: "long",    // Nama bulan lengkap
+    year: "numeric"   // Tahun
   });
 }
 
