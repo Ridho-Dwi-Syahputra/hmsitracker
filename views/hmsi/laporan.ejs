@@ -32,13 +32,6 @@
       <div class="p-6 sm:p-8">
         <%- include('../partials/alert', { errorMsg: errorMsg, successMsg: successMsg }) %>
 
-        <div class="relative mb-6">
-          <input id="searchInput" type="text" placeholder="Cari berdasarkan judul, program kerja, atau divisi..."
-            class="w-full pl-10 pr-4 py-3 border rounded-xl text-sm transition-all duration-300
-                   border-gray-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/50">
-          <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-        </div>
-
         <% if (!laporan || laporan.length === 0) { %>
           <div class="text-center py-20">
             <div class="inline-block bg-gray-100 rounded-full p-4 mb-4">
@@ -51,33 +44,45 @@
           </div>
         <% } else { %>
 
-          <div class="overflow-x-auto rounded-xl border">
-            <table class="min-w-full text-sm text-center">
-              <thead class="bg-gray-50 text-gray-600">
+           <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+            <div class="relative w-full md:w-2/3">
+              <input id="searchInput" type="text" placeholder="Cari berdasarkan judul, program kerja, atau divisi..."
+                     class="w-full pl-10 pr-4 py-3 border rounded-xl text-sm
+                            border-gray-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-500
+                            focus:bg-orange-50 focus:text-orange-700
+                            placeholder-gray-400 focus:placeholder-orange-400
+                            transition-all duration-300">
+              <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto bg-white-50 p-2 shadow-sm rounded-xl">
+            <table class="min-w-full text-sm text-center border border-orange-200 rounded-xl overflow-hidden border-separate border-spacing-0">
+              <thead class="bg-orange-100 text-gray-700">
                 <tr>
-                  <th class="py-3 px-4 font-medium">No</th>
-                  <th class="py-3 px-4 font-medium text-left cursor-pointer" data-sort="judul_laporan">
+                  <th class="py-3 px-4 font-semibold border border-orange-200">No</th>
+                  <th class="py-3 px-4 font-semibold border border-orange-200 text-left cursor-pointer" data-sort="judul_laporan">
                     Judul Laporan <i class="fa-solid fa-sort text-gray-400 ml-1"></i>
                   </th>
-                  <th class="py-3 px-4 font-medium cursor-pointer" data-sort="namaProker">
+                  <th class="py-3 px-4 font-semibold border border-orange-200 cursor-pointer" data-sort="namaProker">
                     Program Kerja <i class="fa-solid fa-sort text-gray-400 ml-1"></i>
                   </th>
-                  <th class="py-3 px-4 font-medium">Divisi</th>
-                  <th class="py-3 px-4 font-medium">Tanggal Upload</th>
-                  <th class="py-3 px-4 font-medium">Aksi</th>
+                  <th class="py-3 px-4 font-semibold border border-orange-200">Divisi</th>
+                  <th class="py-3 px-4 font-semibold border border-orange-200">Tanggal Upload</th>
+                  <th class="py-3 px-4 font-semibold border border-orange-200">Aksi</th>
                 </tr>
               </thead>
-              <tbody id="laporanTable" class="divide-y">
+              <tbody id="laporanTable">
                 <% laporan.forEach(function(l, i) { %>
-                  <tr class="hover:bg-orange-50/50 transition" data-visible="true">
-                    <td class="py-3 px-4 text-gray-500"><%= i + 1 %></td>
-                    <td class="py-3 px-4 font-medium text-gray-800 text-left"><%= l.judul_laporan %></td>
-                    <td class="py-3 px-4 text-gray-600"><%= l.namaProker || '-' %></td>
-                    <td class="py-3 px-4 text-gray-600"><%= l.nama_divisi || '-' %></td>
-                    <td class="py-3 px-4 text-gray-600"><%= l.tanggalFormatted || '-' %></td>
-                    <td class="py-3 px-4">
+                  <tr class="hover:bg-orange-50 transition" data-visible="true">
+                    <td class="py-3 px-4 border border-orange-100"><%= i + 1 %></td>
+                    <td class="py-3 px-4 text-gray-800 font-medium border border-orange-100 text-left"><%= l.judul_laporan %></td>
+                    <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= l.namaProker || '-' %></td>
+                    <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= l.nama_divisi || '-' %></td>
+                    <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= l.tanggalFormatted || '-' %></td>
+                    <td class="py-3 px-4 border border-orange-100">
                       <a href="/hmsi/laporan/<%= l.id %>" class="text-orange-500 hover:text-orange-700 transition transform hover:scale-110" title="Lihat Detail Laporan">
-                        <i class="fa-solid fa-eye text-base"></i>
+                        <i class="fa-solid fa-eye text-lg"></i>
                       </a>
                     </td>
                   </tr>
@@ -86,10 +91,10 @@
             </table>
           </div>
 
-          <div class="flex justify-center items-center gap-2 mt-6">
-            <button id="prevPage" class="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 font-medium">Sebelumnya</button>
-            <span id="pageInfo" class="text-sm text-gray-700"></span>
-            <button id="nextPage" class="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 font-medium">Berikutnya</button>
+          <div class="flex justify-center items-center gap-2 mt-6" id="pagination">
+            <button id="prevPage" class="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 disabled:opacity-50">Prev</button>
+            <span id="pageInfo" class="text-gray-700"></span>
+            <button id="nextPage" class="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 disabled:opacity-50">Next</button>
           </div>
         <% } %>
       </div>
@@ -139,44 +144,57 @@
 
           rows.forEach(r => tbody.appendChild(r));
           currentPage = 1;
-          paginate();
+          filterAndPaginate();
         });
       });
 
-      const filterRows = () => {
+      const filterAndPaginate = () => {
         const query = (searchInput?.value || '').toLowerCase();
-        rows.forEach(row => {
+        
+        const visibleRows = rows.filter(row => {
           const rowText = (row.innerText || '').toLowerCase();
-          row.dataset.visible = rowText.includes(query) ? 'true' : 'false';
+          return rowText.includes(query);
         });
-        currentPage = 1;
-        paginate();
-      };
 
-      const paginate = () => {
-        const visibleRows = rows.filter(r => r.dataset.visible !== 'false');
-        const totalPages = Math.max(1, Math.ceil(visibleRows.length / rowsPerPage));
-        currentPage = Math.max(1, Math.min(currentPage, totalPages));
+        const totalPages = Math.ceil(visibleRows.length / rowsPerPage) || 1;
+        if (currentPage > totalPages) currentPage = totalPages;
 
         rows.forEach(r => r.style.display = 'none');
-        const pageRows = visibleRows.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
-        
-        pageRows.forEach(r => {
-            r.style.display = '';
-        });
 
+        const start = (currentPage - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+        visibleRows.slice(start, end).forEach(r => r.style.display = '');
+        
         document.getElementById('pageInfo').textContent = `Halaman ${currentPage} dari ${totalPages}`;
         document.getElementById('prevPage').disabled = currentPage === 1;
-        document.getElementById('nextPage').disabled = currentPage === totalPages;
+        document.getElementById('nextPage').disabled = currentPage === totalPages || totalPages === 0;
       };
 
-      document.getElementById('prevPage')?.addEventListener('click', () => { if (currentPage > 1) { currentPage--; paginate(); } });
-      document.getElementById('nextPage')?.addEventListener('click', () => { if (currentPage < Math.ceil(rows.filter(r => r.dataset.visible !== 'false').length / rowsPerPage)) { currentPage++; paginate(); } });
-      searchInput?.addEventListener('input', filterRows);
+      document.getElementById('prevPage')?.addEventListener('click', () => {
+        if (currentPage > 1) {
+          currentPage--;
+          filterAndPaginate();
+        }
+      });
+      
+      document.getElementById('nextPage')?.addEventListener('click', () => {
+        const query = (searchInput?.value || '').toLowerCase();
+        const visibleRows = rows.filter(row => (row.innerText || '').toLowerCase().includes(query));
+        const totalPages = Math.ceil(visibleRows.length / rowsPerPage);
+        if (currentPage < totalPages) {
+          currentPage++;
+          filterAndPaginate();
+        }
+      });
+      
+      searchInput?.addEventListener('input', () => {
+        currentPage = 1;
+        filterAndPaginate();
+      });
       
       if (rows.length > 0) {
         rows.forEach(r => r.dataset.visible = 'true');
-        paginate();
+        filterAndPaginate();
       }
     });
   </script>
