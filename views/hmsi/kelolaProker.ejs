@@ -77,7 +77,7 @@
     </div>
   </div>
 
-  <!-- Cannot Edit Modal -->
+  <!-- ✅ PERBAIKAN: Modal untuk proker yang tidak dapat diubah/dihapus -->
   <div id="cannotEditModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
     <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="cannotEditModalContent">
       <div class="text-center">
@@ -87,7 +87,7 @@
           </svg>
         </div>
         <h3 class="text-xl font-bold text-gray-900 mb-2">Tidak Dapat Diubah</h3>
-        <p class="text-gray-600 mb-6">Program kerja dengan status "Selesai" atau "Gagal" tidak dapat diubah atau dihapus.</p>
+        <p class="text-gray-600 mb-6">Program kerja dengan status "Selesai" atau "Tidak Selesai" tidak dapat diubah atau dihapus.</p>
         <button id="closeCannotEditModal" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-3 px-6 rounded-xl transition-colors duration-200">
           Mengerti
         </button>
@@ -137,6 +137,7 @@
               <span id="dropdownLabel">Semua Status</span>
               <i class="fa-solid fa-chevron-down text-orange-500"></i>
             </button>
+            <!-- ✅ PERBAIKAN: Filter dropdown dengan status yang benar -->
             <div id="dropdownMenu" 
               class="hidden absolute right-0 mt-2 w-48 bg-white border border-orange-200 rounded-lg shadow-lg z-10">
               <ul class="text-sm text-gray-700">
@@ -144,7 +145,7 @@
                 <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="Belum Dimulai">Belum Dimulai</button></li>
                 <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="Sedang Berjalan">Sedang Berjalan</button></li>
                 <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="Selesai">Selesai</button></li>
-                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="Gagal">Gagal</button></li>
+                <li><button class="w-full text-left px-4 py-2 hover:bg-orange-100" data-value="Tidak Selesai">Tidak Selesai</button></li>
               </ul>
             </div>
           </div>
@@ -177,7 +178,8 @@
               </thead>
               <tbody id="programTable">
                 <% programs.forEach((proker, index) => { 
-                  const isDisabled = proker.status === 'Selesai' || proker.status === 'Gagal';
+                  // ✅ PERBAIKAN: Validasi status yang benar (Selesai atau Tidak Selesai)
+                  const isDisabled = proker.status === 'Selesai' || proker.status === 'Tidak Selesai';
                 %>
                   <tr class="hover:bg-orange-50 transition" data-visible="true">
                     <td class="py-3 px-4 border border-orange-100"><%= index + 1 %></td>
@@ -185,13 +187,14 @@
                     <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= proker.divisi %></td>
                     <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= proker.penanggungJawab %></td>
                     <td class="py-3 px-4 border border-orange-100">
+                      <!-- ✅ PERBAIKAN: Tampilan badge status yang benar -->
                       <% if (proker.status === "Belum Dimulai") { %>
                         <span class="px-3 py-1 text-xs rounded-full bg-yellow-100 text-yellow-700 font-medium"><%= proker.status %></span>
                       <% } else if (proker.status === "Sedang Berjalan") { %>
                         <span class="px-3 py-1 text-xs rounded-full bg-blue-100 text-blue-700 font-medium"><%= proker.status %></span>
                       <% } else if (proker.status === "Selesai") { %>
                         <span class="px-3 py-1 text-xs rounded-full bg-green-100 text-green-700 font-medium"><%= proker.status %></span>
-                      <% } else if (proker.status === "Gagal") { %>
+                      <% } else if (proker.status === "Tidak Selesai") { %>
                         <span class="px-3 py-1 text-xs rounded-full bg-red-100 text-red-700 font-medium"><%= proker.status %></span>
                       <% } else { %>
                         <span class="px-3 py-1 text-xs rounded-full bg-gray-100 text-gray-600 font-medium"><%= proker.status %></span>
@@ -199,18 +202,17 @@
                     </td>
                     <td class="py-3 px-4 flex justify-center gap-4 border border-orange-100">
                       <% if (isDisabled) { %>
-                        <!-- Disabled Edit Button -->
+                        <!-- ✅ PERBAIKAN: Tombol disabled dengan onclick handler untuk modal -->
                         <button type="button" 
-                                class="text-gray-300 cursor-not-allowed" 
+                                class="cannot-edit-btn text-gray-300 cursor-not-allowed" 
                                 title="Tidak dapat diubah"
-                                disabled>
+                                onclick="showModal('cannotEditModal')">
                           <i class="fa-solid fa-pen-to-square text-lg"></i>
                         </button>
-                        <!-- Disabled Delete Button -->
                         <button type="button" 
-                                class="text-gray-300 cursor-not-allowed" 
+                                class="cannot-edit-btn text-gray-300 cursor-not-allowed" 
                                 title="Tidak dapat dihapus"
-                                disabled>
+                                onclick="showModal('cannotEditModal')">
                           <i class="fa-solid fa-trash text-lg"></i>
                         </button>
                       <% } else { %>
@@ -252,7 +254,9 @@
   <%- include('../partials/footer') %>
 
   <script>
-    // Modal functions
+    // =====================================================
+    // ✅ MODAL FUNCTIONS - Dihoisting ke global scope
+    // =====================================================
     function showModal(modalId) {
       const modal = document.getElementById(modalId);
       const content = document.getElementById(modalId + 'Content');
@@ -277,7 +281,9 @@
       }, 300);
     }
 
-    // Delete functionality
+    // =====================================================
+    // DELETE FUNCTIONALITY
+    // =====================================================
     let currentDeleteId = null;
     let currentDeleteAction = null;
 
@@ -359,7 +365,9 @@
       }
     });
 
-    // Filter & Pagination
+    // =====================================================
+    // FILTER, SEARCH, SORT & PAGINATION
+    // =====================================================
     document.addEventListener("DOMContentLoaded", () => {
       const searchInput = document.getElementById("searchInput");
       const dropdownButton = document.getElementById("dropdownButton");
@@ -372,10 +380,12 @@
       const rowsPerPage = 10;
       let currentPage = 1;
 
+      // Dropdown toggle
       dropdownButton?.addEventListener("click", () => {
         dropdownMenu.classList.toggle("hidden");
       });
 
+      // Dropdown filter selection
       dropdownMenu?.querySelectorAll("button").forEach(btn => {
         btn.addEventListener("click", () => {
           statusValue = btn.dataset.value;
@@ -385,7 +395,7 @@
         });
       });
 
-      // Sorting logic: clickable th[data-sort]
+      // ✅ Sorting logic: clickable th[data-sort]
       const sortHeaders = document.querySelectorAll('th[data-sort]');
       let currentSort = { index: null, asc: true };
 
@@ -427,6 +437,7 @@
         });
       });
 
+      // Filter function
       function filterRows() {
         const searchValue = (searchInput?.value || '').toLowerCase();
         rows.forEach(row => {
@@ -443,6 +454,7 @@
         paginate();
       }
 
+      // Pagination function
       function paginate() {
         let visibleRows = rows.filter(row => row.dataset.visible === "true");
         let totalPages = Math.ceil(visibleRows.length / rowsPerPage);
@@ -460,13 +472,17 @@
         document.getElementById("nextPage").disabled = currentPage === totalPages || totalPages === 0;
       }
 
+      // Pagination buttons
       document.getElementById("prevPage")?.addEventListener("click", () => { currentPage--; paginate(); });
       document.getElementById("nextPage")?.addEventListener("click", () => { currentPage++; paginate(); });
+      
+      // Search input
       searchInput?.addEventListener("input", () => {
         currentPage = 1;
         filterRows();
       });
 
+      // Initial load
       if (rows.length > 0) filterRows();
     });
   </script>

@@ -22,7 +22,7 @@ function formatTanggal(dateValue) {
 }
 
 // =====================================================
-// helper: hitung status otomatis (sinkron HMSI)
+// helper: hitung status otomatis (DIPERBAIKI - tanpa auto "Selesai")
 // =====================================================
 function calculateStatus(start, end, status_db = null) {
   // 🔹 Jika status sudah final, gunakan status dari DB
@@ -30,14 +30,18 @@ function calculateStatus(start, end, status_db = null) {
     return status_db;
   }
   
+  // 🔹 Jika status dari DB adalah "Sedang Berjalan", tetap gunakan itu
+  if (status_db === "Sedang Berjalan") {
+    return status_db;
+  }
+  
   const today = new Date();
   const startDate = start ? new Date(start) : null;
-  const endDate = end ? new Date(end) : null;
 
+  // 🔹 Hanya cek apakah proker sudah dimulai atau belum
   if (startDate && today < startDate) return "Belum Dimulai";
-  if (startDate && endDate && today >= startDate && today <= endDate)
-    return "Sedang Berjalan";
-  if (endDate && today > endDate) return "Selesai";
+  if (startDate && today >= startDate) return "Sedang Berjalan";
+  
   return "Belum Dimulai";
 }
 
@@ -143,9 +147,9 @@ exports.getDetailProkerDPA = async (req, res) => {
 
     const r = rows[0];
 
-    // 🔹 Hitung status otomatis bila belum final
+    // 🔹 Hitung status otomatis bila belum final (tanpa auto "Selesai")
     let status = r.status_db;
-    if (!status || !["Belum Dimulai", "Sedang Berjalan", "Selesai", "Tidak Selesai"].includes(status)) {
+    if (!status || !["Selesai", "Tidak Selesai"].includes(status)) {
       status = calculateStatus(r.tanggal_mulai, r.tanggal_selesai, r.status_db);
     }
 
@@ -184,7 +188,7 @@ exports.getDetailProkerDPA = async (req, res) => {
 };
 
 // =====================================================
-// 🔄 Ubah status Proker (khusus DPA)
+// 🔄 Ubah status Proker (khusus DPA) - DENGAN VALIDASI LAPORAN
 // =====================================================
 exports.updateStatusProker = async (req, res) => {
   try {
@@ -193,7 +197,7 @@ exports.updateStatusProker = async (req, res) => {
 
     console.log("📝 Request update status - ID:", id, "Status:", status);
 
-    // ✅ Validasi status yang diperbolehkan (GANTI "Gagal" → "Tidak Selesai")
+    // ✅ Validasi status yang diperbolehkan
     const validStatus = ["Belum Dimulai", "Sedang Berjalan", "Selesai", "Tidak Selesai"];
     if (!validStatus.includes(status)) {
       return res.status(400).json({
@@ -233,6 +237,28 @@ exports.updateStatusProker = async (req, res) => {
         success: false,
         message: "Status program kerja sudah final dan tidak dapat diubah kembali.",
       });
+    }
+
+    // 🔹 VALIDASI BARU: Jika status yang diminta adalah "Selesai", cek apakah ada laporan yang diterima
+    if (status === "Selesai") {
+      const [laporanRows] = await db.query(
+        `
+        SELECT COUNT(*) AS total
+        FROM Laporan l
+        JOIN Evaluasi e ON e.id_laporan = l.id_laporan
+        WHERE l.id_ProgramKerja = ? AND e.status_konfirmasi = 'Selesai'
+        `,
+        [id]
+      );
+
+      const totalLaporanDiterima = laporanRows[0].total;
+
+      if (totalLaporanDiterima < 1) {
+        return res.status(400).json({
+          success: false,
+          message: "Belum ada laporan yang diterima pada proker ini.",
+        });
+      }
     }
 
     // ✅ Update status di database
@@ -279,6 +305,44 @@ exports.updateStatusProker = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Gagal mengubah status program kerja: " + err.message,
+    });
+  }
+};
+
+// =====================================================
+// 🔍 CEK LAPORAN PENDING (untuk validasi sebelum ubah status)
+// =====================================================
+exports.checkLaporanPending = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Cek apakah ada laporan dengan status selain 'Selesai'
+    const [rows] = await db.query(
+      `
+      SELECT COUNT(*) AS pending_count
+      FROM Laporan l
+      LEFT JOIN Evaluasi e ON e.id_laporan = l.id_laporan
+      WHERE l.id_ProgramKerja = ? 
+      AND (e.status_konfirmasi IS NULL OR e.status_konfirmasi != 'Selesai')
+      `,
+      [id]
+    );
+
+    const hasPending = rows[0].pending_count > 0;
+
+    res.json({
+      success: true,
+      hasPending: hasPending,
+      message: hasPending 
+        ? "Masih ada laporan belum diterima." 
+        : "Semua laporan sudah diterima."
+    });
+
+  } catch (err) {
+    console.error("❌ Error checkLaporanPending:", err.message);
+    res.status(500).json({
+      success: false,
+      message: "Gagal memeriksa status laporan: " + err.message
     });
   }
 };

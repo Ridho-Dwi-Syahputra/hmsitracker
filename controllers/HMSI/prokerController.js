@@ -1,6 +1,7 @@
 // =====================================================
 // controllers/hmsi/prokerController.js
 // Controller untuk Program Kerja (Proker) HMSI
+// ✅ DIPERBAIKI: Status langsung dari DB tanpa override otomatis
 // =====================================================
 
 const db = require("../../config/db");
@@ -58,25 +59,24 @@ function formatTanggal(dateValue) {
 }
 
 // =====================================================
-// helper: hitung status TANPA auto "Selesai"
-// Status hanya bisa diubah manual oleh admin/DPA
-// Default status: "Sedang Berjalan"
+// 🔹 PERBAIKAN UTAMA: Helper untuk status proker
+// Status HANYA diambil dari database, TANPA kalkulasi otomatis
+// Jika status_db kosong/null, default "Sedang Berjalan"
+// Status final (Selesai/Tidak Selesai) TIDAK BOLEH diubah
 // =====================================================
-function getStatusProker(status_db) {
-  // 🔹 PERUBAHAN UTAMA: Tidak ada kalkulasi otomatis berdasarkan tanggal
-  // Status hanya mengikuti nilai dari database
-  // Jika status_db kosong/null, default ke "Sedang Berjalan"
-  
-  if (!status_db || status_db.trim() === '') {
-    return "Sedang Berjalan";
+function getStatusFromDB(status_db) {
+  // ✅ Jika status dari database ada, gunakan itu (termasuk "Tidak Selesai")
+  if (status_db && status_db.trim() !== '') {
+    return status_db;
   }
   
-  // Status valid: "Belum Dimulai", "Sedang Berjalan", "Selesai", "Gagal"
-  return status_db;
+  // ✅ Jika kosong/null, default ke "Sedang Berjalan"
+  return "Sedang Berjalan";
 }
 
 // =====================================================
 // 📄 Ambil semua program kerja
+// ✅ DIPERBAIKI: Status langsung dari DB tanpa override
 // =====================================================
 exports.getAllProker = async (req, res) => {
   try {
@@ -98,6 +98,7 @@ exports.getAllProker = async (req, res) => {
     `;
     const params = [];
 
+    // 🔹 Filter hanya proker dari divisi user jika role HMSI
     if (user && user.role === "HMSI") {
       query += " WHERE u.id_divisi = ?";
       params.push(user.id_divisi);
@@ -109,14 +110,22 @@ exports.getAllProker = async (req, res) => {
 
     const programs = [];
     for (const r of rows) {
-      // 🔹 TIDAK ADA AUTO-UPDATE STATUS
-      // Status tetap sesuai database, tidak dikalkulasi ulang
-      const status = getStatusProker(r.status_db);
+      // ✅ PERBAIKAN: Status LANGSUNG dari database, TIDAK dikalkulasi ulang
+      const status = getStatusFromDB(r.status_db);
+
+      console.log(`📊 Proker: ${r.namaProker} | Status DB: ${r.status_db} | Status Final: ${status}`);
 
       programs.push({
-        ...r,
+        id: r.id,
+        namaProker: r.namaProker,
+        divisi: r.divisi || "Tidak Diketahui",
+        deskripsi: r.deskripsi,
+        tanggal_mulai: r.tanggal_mulai,
+        tanggal_selesai: r.tanggal_selesai,
+        penanggungJawab: r.penanggungJawab,
+        dokumen_pendukung: r.dokumen_pendukung,
         tanggalFormatted: formatTanggal(r.tanggal_mulai),
-        status,
+        status, // ✅ Status murni dari database
       });
     }
 
@@ -139,6 +148,7 @@ exports.getAllProker = async (req, res) => {
 
 // =====================================================
 // 📄 Detail Program Kerja
+// ✅ DIPERBAIKI: Status langsung dari DB tanpa override
 // =====================================================
 exports.getDetailProker = async (req, res) => {
   try {
@@ -153,6 +163,8 @@ exports.getDetailProker = async (req, res) => {
         p.Tanggal_selesai AS tanggal_selesai,
         p.Penanggung_jawab AS penanggungJawab,
         p.Dokumen_pendukung AS dokumen_pendukung,
+        p.Target_Kuantitatif,
+        p.Target_Kualitatif,
         p.Status AS status_db,
         u.id_divisi
       FROM Program_kerja p
@@ -167,21 +179,33 @@ exports.getDetailProker = async (req, res) => {
     const proker = rows[0];
     const user = req.session.user;
 
+    // 🔹 Validasi akses: HMSI hanya bisa akses proker divisinya sendiri
     if (user.role === "HMSI" && user.id_divisi !== proker.id_divisi) {
       return res.status(403).send("Akses ditolak ke proker divisi lain");
     }
 
-    // 🔹 TIDAK ADA AUTO-UPDATE STATUS
-    const status = getStatusProker(proker.status_db);
+    // ✅ PERBAIKAN: Status LANGSUNG dari database, TIDAK dikalkulasi ulang
+    const status = getStatusFromDB(proker.status_db);
+
+    console.log(`📊 Detail Proker: ${proker.namaProker} | Status DB: ${proker.status_db} | Status Final: ${status}`);
 
     res.render("hmsi/detailProker", {
       title: "Detail Program Kerja",
       user,
       activeNav: "Program Kerja",
       proker: {
-        ...proker,
+        id: proker.id,
+        namaProker: proker.namaProker,
+        divisi: proker.divisi || "Tidak Diketahui",
+        deskripsi: proker.deskripsi,
+        tanggal_mulai: proker.tanggal_mulai,
+        tanggal_selesai: proker.tanggal_selesai,
+        penanggungJawab: proker.penanggungJawab,
+        dokumen_pendukung: proker.dokumen_pendukung,
+        Target_Kuantitatif: proker.Target_Kuantitatif || "-",
+        Target_Kualitatif: proker.Target_Kualitatif || "-",
         tanggalFormatted: formatTanggal(proker.tanggal_mulai),
-        status,
+        status, // ✅ Status murni dari database
         dokumenMime: getMimeFromFile(proker.dokumen_pendukung),
       },
       errorMsg: null,
@@ -195,6 +219,7 @@ exports.getDetailProker = async (req, res) => {
 
 // =====================================================
 // ➕ Tambah Program Kerja
+// ✅ Status default: "Sedang Berjalan"
 // =====================================================
 exports.createProker = async (req, res) => {
   try {
@@ -247,8 +272,7 @@ exports.createProker = async (req, res) => {
 
     const dokumen = req.file ? req.file.filename : null;
     
-    // 🔹 PERUBAHAN UTAMA: Status default selalu "Sedang Berjalan"
-    // TIDAK ADA kalkulasi otomatis berdasarkan tanggal
+    // ✅ Status default selalu "Sedang Berjalan" untuk proker baru
     const status = "Sedang Berjalan";
     
     const idProker = uuidv4();
@@ -276,7 +300,7 @@ exports.createProker = async (req, res) => {
       ]
     );
 
-    // 🟢 Tambahkan notifikasi ke DPA (sertakan id_ProgramKerja)
+    // 🟢 Tambahkan notifikasi ke DPA
     const idNotif = uuidv4();
     const pesan = `Divisi ${user.nama_divisi || "HMSI"} menambahkan Program Kerja baru: "${namaProker}"`;
 
@@ -302,9 +326,9 @@ exports.createProker = async (req, res) => {
   }
 };
 
-
 // =====================================================
 // ✏️ Ambil data untuk Edit Program
+// ✅ Validasi status final sebelum edit
 // =====================================================
 exports.getEditProker = async (req, res) => {
   try {
@@ -314,6 +338,11 @@ exports.getEditProker = async (req, res) => {
     );
     if (!rows.length) return res.status(404).send("Program kerja tidak ditemukan");
     const proker = rows[0];
+
+    // ✅ Validasi: HMSI tidak boleh edit proker dengan status final
+    if (proker.Status === "Selesai" || proker.Status === "Tidak Selesai") {
+      return res.status(403).send('Program kerja dengan status "Selesai" atau "Tidak Selesai" tidak dapat diubah.');
+    }
 
     const formatDate = (v) => (!v ? "" : new Date(v).toISOString().split("T")[0]);
     proker.tanggal_mulaiFormatted = formatDate(proker.Tanggal_mulai);
@@ -335,6 +364,7 @@ exports.getEditProker = async (req, res) => {
 
 // =====================================================
 // 💾 Update Program Kerja
+// ✅ PERBAIKAN: Status TIDAK dikalkulasi ulang, tetap dari DB
 // =====================================================
 exports.updateProker = async (req, res) => {
   try {
@@ -373,12 +403,17 @@ exports.updateProker = async (req, res) => {
 
     const oldFile = existingRows[0].Dokumen_pendukung;
     const status_db = existingRows[0].Status;
+
+    // ✅ Validasi: HMSI tidak boleh edit proker dengan status final
+    if (status_db === "Selesai" || status_db === "Tidak Selesai") {
+      return res.status(403).send('Program kerja dengan status "Selesai" atau "Tidak Selesai" tidak dapat diubah.');
+    }
+
     const newFile = req.file ? req.file.filename : null;
     
-    // 🔹 PERUBAHAN UTAMA: Status TIDAK dikalkulasi ulang
-    // Status tetap mengikuti nilai database yang ada
-    // Jika kosong, default "Sedang Berjalan"
-    const status = getStatusProker(status_db);
+    // ✅ PERBAIKAN KRUSIAL: Status TETAP dari database, TIDAK diubah saat update
+    // Status hanya bisa diubah oleh DPA, bukan oleh HMSI
+    const status = getStatusFromDB(status_db);
 
     let query = `
       UPDATE Program_kerja SET 
@@ -402,7 +437,7 @@ exports.updateProker = async (req, res) => {
       targetKualitatif,
       user.id_anggota,
       user.id_divisi,
-      status,
+      status, // ✅ Status tetap dari DB, tidak dikalkulasi ulang
     ];
 
     if (newFile) {
@@ -435,7 +470,8 @@ exports.updateProker = async (req, res) => {
 };
 
 // =====================================================
-// ❌ Hapus Program Kerja (hapus juga semua laporan terkait)
+// ❌ Hapus Program Kerja
+// ✅ Validasi status final sebelum hapus
 // =====================================================
 exports.deleteProker = async (req, res) => {
   try {
@@ -443,12 +479,17 @@ exports.deleteProker = async (req, res) => {
     const id = req.params.id;
 
     const [rows] = await db.query(
-      "SELECT Nama_ProgramKerja, Dokumen_pendukung FROM Program_kerja WHERE id_ProgramKerja = ?",
+      "SELECT Nama_ProgramKerja, Dokumen_pendukung, Status FROM Program_kerja WHERE id_ProgramKerja = ?",
       [id]
     );
     if (!rows.length) return res.status(404).send("Program kerja tidak ditemukan");
 
-    const { Nama_ProgramKerja, Dokumen_pendukung } = rows[0];
+    const { Nama_ProgramKerja, Dokumen_pendukung, Status } = rows[0];
+
+    // ✅ Validasi: HMSI tidak boleh hapus proker dengan status final
+    if (Status === "Selesai" || Status === "Tidak Selesai") {
+      return res.status(403).send('Program kerja dengan status "Selesai" atau "Tidak Selesai" tidak dapat dihapus.');
+    }
 
     const [laporanRows] = await db.query(
       "SELECT dokumentasi FROM Laporan WHERE id_ProgramKerja = ?",
@@ -462,13 +503,10 @@ exports.deleteProker = async (req, res) => {
     // 🧹 Hapus laporan terkait
     await db.query("DELETE FROM Laporan WHERE id_ProgramKerja = ?", [id]);
 
-    // ❌ Jangan hapus notifikasi lama, biarkan histori
-    // await db.query("DELETE FROM Notifikasi WHERE id_ProgramKerja = ?", [id]);
-
     // 🗑️ Hapus dokumen pendukung proker
     if (Dokumen_pendukung) safeRemoveFile(Dokumen_pendukung);
 
-    // 🟢 Notifikasi ke DPA bahwa proker dihapus (sertakan id_ProgramKerja)
+    // 🟢 Notifikasi ke DPA bahwa proker dihapus
     const idNotif = uuidv4();
     const pesan = `Divisi ${user.nama_divisi || "HMSI"} menghapus Program Kerja: "${Nama_ProgramKerja}"`;
     await db.query(
