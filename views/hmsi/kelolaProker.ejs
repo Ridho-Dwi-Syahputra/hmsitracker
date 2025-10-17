@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title><%= title %></title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet"
@@ -10,13 +10,10 @@
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col">
 
-  <!-- Navbar -->
   <%- include('../partials/navbarHMSI', { user: user, unreadCount: unreadCount }) %>
 
-  <!-- Sidebar -->
   <%- include('../partials/sidebarHMSI', { user: user, activeNav: 'proker' }) %>
 
-  <!-- Delete Confirmation Modal -->
   <div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
     <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="deleteModalContent">
       <div class="text-center">
@@ -40,8 +37,6 @@
       </div>
     </div>
   </div>
-
-  <!-- Success Delete Modal -->
   <div id="successDeleteModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
     <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="successDeleteModalContent">
       <div class="text-center">
@@ -58,8 +53,6 @@
       </div>
     </div>
   </div>
-
-  <!-- Error Delete Modal -->
   <div id="errorDeleteModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
     <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="errorDeleteModalContent">
       <div class="text-center">
@@ -76,8 +69,6 @@
       </div>
     </div>
   </div>
-
-  <!-- Cannot Edit Modal -->
   <div id="cannotEditModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
     <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="cannotEditModalContent">
       <div class="text-center">
@@ -95,11 +86,9 @@
     </div>
   </div>
 
-  <!-- Wrapper -->
   <main class="lg:ml-80 px-6 pt-20 pb-8 flex-grow">
-    <div class="max-w-6xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-orange-200">
+    <div class="max-w-6xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-200">
 
-      <!-- Header Card -->
       <div class="bg-orange-500 text-white px-6 py-6 flex items-center justify-between">
         <div>
           <h1 class="text-2xl font-bold">Kelola Program Kerja</h1>
@@ -113,10 +102,8 @@
         </a>
       </div>
 
-      <!-- Body Card -->
       <div class="p-6 sm:p-8">
 
-        <!-- Search & Filter -->
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
           <div class="flex-1">
             <div class="relative">
@@ -129,7 +116,6 @@
               <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
             </div>
           </div>
-
           <div class="relative">
             <button id="dropdownButton" 
               class="flex items-center justify-between gap-2 px-4 py-3 border border-gray-300 rounded-xl text-sm bg-white
@@ -151,7 +137,6 @@
         </div>
 
         <% if (!programs || programs.length === 0) { %>
-          <!-- Empty State -->
           <div class="flex flex-col items-center space-y-4 py-20">
             <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
               <i class="fa-solid fa-folder-open text-2xl text-gray-400"></i>
@@ -162,29 +147,28 @@
             </div>
           </div>
         <% } else { %>
-          <!-- Tabel -->
-          <div class="overflow-x-auto bg-white-50 p-2 shadow-sm rounded-xl">
-            <table class="min-w-full text-sm text-center border border-orange-200 rounded-xl overflow-hidden border-separate border-spacing-0">
-              <thead class="bg-orange-100 text-gray-700">
+          <div class="overflow-x-auto rounded-xl border border-gray-200">
+            <table class="min-w-full text-sm text-center">
+              <thead class="bg-gray-50 text-gray-600 font-medium">
                 <tr>
-                  <th class="py-3 px-4 font-semibold border border-orange-200">No</th>
-                  <th class="py-3 px-4 font-semibold border border-orange-200 text-left cursor-pointer" data-sort="namaProker">Nama Program <i class="fa-solid fa-sort text-gray-400 ml-1"></i></th>
-                  <th class="py-3 px-4 font-semibold border border-orange-200 cursor-pointer" data-sort="divisi">Divisi <i class="fa-solid fa-sort text-gray-400 ml-1"></i></th>
-                  <th class="py-3 px-4 font-semibold border border-orange-200">Penanggung Jawab</th>
-                  <th class="py-3 px-4 font-semibold border border-orange-200 cursor-pointer" data-sort="status">Status <i class="fa-solid fa-sort text-gray-400 ml-1"></i></th>
-                  <th class="py-3 px-4 font-semibold border border-orange-200">Aksi</th>
+                  <th class="py-3 px-4">No</th>
+                  <th class="py-3 px-4 text-left cursor-pointer" data-sort="namaProker">Nama Program <i class="fa-solid fa-sort text-gray-400 ml-1"></i></th>
+                  <th class="py-3 px-4 cursor-pointer" data-sort="divisi">Divisi <i class="fa-solid fa-sort text-gray-400 ml-1"></i></th>
+                  <th class="py-3 px-4">Penanggung Jawab</th>
+                  <th class="py-3 px-4 cursor-pointer" data-sort="status">Status <i class="fa-solid fa-sort text-gray-400 ml-1"></i></th>
+                  <th class="py-3 px-4">Aksi</th>
                 </tr>
               </thead>
-              <tbody id="programTable">
+              <tbody id="programTable" class="divide-y divide-gray-200">
                 <% programs.forEach((proker, index) => { 
                   const isDisabled = proker.status === 'Selesai' || proker.status === 'Gagal';
                 %>
-                  <tr class="hover:bg-orange-50 transition" data-visible="true">
-                    <td class="py-3 px-4 border border-orange-100"><%= index + 1 %></td>
-                    <td class="py-3 px-4 font-medium text-gray-800 border border-orange-100 text-left"><%= proker.namaProker %></td>
-                    <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= proker.divisi %></td>
-                    <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= proker.penanggungJawab %></td>
-                    <td class="py-3 px-4 border border-orange-100">
+                  <tr class="hover:bg-orange-50/50 transition-colors" data-visible="true">
+                    <td class="py-3 px-4 text-gray-500"><%= index + 1 %></td>
+                    <td class="py-3 px-4 font-medium text-gray-800 text-left"><%= proker.namaProker %></td>
+                    <td class="py-3 px-4 text-gray-600"><%= proker.divisi %></td>
+                    <td class="py-3 px-4 text-gray-600"><%= proker.penanggungJawab %></td>
+                    <td class="py-3 px-4">
                       <% if (proker.status === "Belum Dimulai") { %>
                         <span class="px-3 py-1 text-xs rounded-full bg-yellow-100 text-yellow-700 font-medium"><%= proker.status %></span>
                       <% } else if (proker.status === "Sedang Berjalan") { %>
@@ -197,38 +181,20 @@
                         <span class="px-3 py-1 text-xs rounded-full bg-gray-100 text-gray-600 font-medium"><%= proker.status %></span>
                       <% } %>
                     </td>
-                    <td class="py-3 px-4 flex justify-center gap-4 border border-orange-100">
+                    <td class="py-3 px-4">
+                        <div class="flex justify-center gap-4">
                       <% if (isDisabled) { %>
-                        <!-- Disabled Edit Button -->
-                        <button type="button" 
-                                class="text-gray-300 cursor-not-allowed" 
-                                title="Tidak dapat diubah"
-                                disabled>
-                          <i class="fa-solid fa-pen-to-square text-lg"></i>
-                        </button>
-                        <!-- Disabled Delete Button -->
-                        <button type="button" 
-                                class="text-gray-300 cursor-not-allowed" 
-                                title="Tidak dapat dihapus"
-                                disabled>
-                          <i class="fa-solid fa-trash text-lg"></i>
-                        </button>
+                        <span class="text-gray-300 cursor-not-allowed" title="Tidak dapat diubah"><i class="fa-solid fa-pen-to-square text-lg"></i></span>
+                        <span class="text-gray-300 cursor-not-allowed" title="Tidak dapat dihapus"><i class="fa-solid fa-trash text-lg"></i></span>
                       <% } else { %>
-                        <!-- Active Edit Button -->
-                        <a href="/hmsi/proker/<%= proker.id %>/edit" 
-                           class="text-orange-500 hover:text-orange-700 transition transform hover:scale-110" 
-                           title="Edit">
+                        <a href="/hmsi/proker/<%= proker.id %>/edit" class="text-orange-500 hover:text-orange-700 transition transform hover:scale-110" title="Edit">
                           <i class="fa-solid fa-pen-to-square text-lg"></i>
                         </a>
-                        <!-- Active Delete Button -->
-                        <button type="button" 
-                                class="delete-btn text-orange-500 hover:text-orange-700 transition transform hover:scale-110" 
-                                title="Hapus"
-                                data-id="<%= proker.id %>"
-                                data-name="<%= proker.namaProker %>">
+                        <button type="button" class="delete-btn text-orange-500 hover:text-orange-700 transition transform hover:scale-110" title="Hapus" data-id="<%= proker.id %>" data-name="<%= proker.namaProker %>">
                           <i class="fa-solid fa-trash text-lg"></i>
                         </button>
                       <% } %>
+                        </div>
                     </td>
                   </tr>
                 <% }) %>
@@ -236,11 +202,10 @@
             </table>
           </div>
 
-          <!-- Pagination -->
           <div class="flex justify-center items-center gap-2 mt-6" id="pagination">
-            <button id="prevPage" class="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 disabled:opacity-50">Prev</button>
-            <span id="pageInfo" class="text-gray-700"></span>
-            <button id="nextPage" class="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 disabled:opacity-50">Next</button>
+            <button id="prevPage" class="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 font-medium">Sebelumnya</button>
+            <span id="pageInfo" class="text-sm text-gray-700"></span>
+            <button id="nextPage" class="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 font-medium">Berikutnya</button>
           </div>
         <% } %>
 

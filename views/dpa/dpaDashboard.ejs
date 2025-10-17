@@ -6,7 +6,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
 </head>
-<body class="bg-gray-100">
+<body class="bg-gray-50">
 
   <%- include('../partials/navbarDPA', { user: user, unreadCount: unreadCount }) %>
   <%- include('../partials/sidebarDPA', { user: user, activeNav: 'Dashboard' }) %>
@@ -35,7 +35,7 @@
               <p class="text-2xl font-bold text-amber-600"><%= laporanBelumEvaluasi %></p>
             </div>
             <div class="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
-              <i class="fa-solid fa-file-circle-question text-amber-600 text-xl"></i>
+               <i class="fa-solid fa-file-circle-question text-amber-600 text-xl"></i>
             </div>
           </div>
         </div>
@@ -51,14 +51,14 @@
             </div>
           </div>
         </div>
-        
+         
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
           <div class="flex items-center justify-between">
             <div>
               <p class="text-sm text-gray-600 mb-1">Program Selesai</p>
               <p class="text-2xl font-bold text-green-600"><%= prokerSelesai %></p>
             </div>
-            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+             <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
               <i class="fa-solid fa-check-circle text-green-600 text-xl"></i>
             </div>
           </div>
@@ -73,7 +73,7 @@
             <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
               <i class="fa-solid fa-tasks text-blue-600 text-xl"></i>
             </div>
-          </div>
+           </div>
         </div>
 
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
@@ -139,7 +139,59 @@
         </div>
       </div>
 
+      <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+          <i class="fa-solid fa-bolt text-gray-500 mr-3"></i>
+          Aksi Cepat
+        </h3>
+        <div class="space-y-3">
+
+          <a href="/dpa/kelolaLaporan" 
+             class="block p-4 rounded-xl border border-gray-200 bg-gray-50/50 hover:border-orange-500 hover:bg-orange-50 transition-all duration-200 group">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <i class="fa-solid fa-file-circle-question text-amber-600 text-lg"></i>
+                <div>
+                  <p class="font-semibold text-gray-700">Evaluasi Laporan</p>
+                  <p class="text-xs text-gray-500">Lihat laporan yang belum dievaluasi</p>
+                </div>
+              </div>
+              <i class="fa-solid fa-chevron-right text-gray-400 group-hover:text-orange-600 transition-colors"></i>
+            </div>
+          </a>
+
+          <a href="/dpa/laporanDiterima" 
+             class="block p-4 rounded-xl border border-gray-200 bg-gray-50/50 hover:border-orange-500 hover:bg-orange-50 transition-all duration-200 group">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <i class="fa-solid fa-check-double text-green-600 text-lg"></i>
+                <div>
+                  <p class="font-semibold text-gray-700">Laporan Terevaluasi</p>
+                  <p class="text-xs text-gray-500">Tinjau laporan Diterima & Revisi</p>
+                </div>
+              </div>
+              <i class="fa-solid fa-chevron-right text-gray-400 group-hover:text-orange-600 transition-colors"></i>
+            </div>
+          </a>
+
+          <a href="/dpa/lihatProker" 
+             class="block p-4 rounded-xl border border-gray-200 bg-gray-50/50 hover:border-orange-500 hover:bg-orange-50 transition-all duration-200 group">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <i class="fa-solid fa-tasks text-blue-600 text-lg"></i>
+                <div>
+                  <p class="font-semibold text-gray-700">Semua Program Kerja</p>
+                  <p class="text-xs text-gray-500">Lihat daftar lengkap proker HMSI</p>
+                </div>
+              </div>
+              <i class="fa-solid fa-chevron-right text-gray-400 group-hover:text-orange-600 transition-colors"></i>
+            </div>
+          </a>
+
+        </div>
       </div>
+
+    </div>
   </main>
 
   <%- include('../partials/footer') %>

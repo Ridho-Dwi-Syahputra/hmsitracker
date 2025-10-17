@@ -14,11 +14,11 @@
   <%- include('../partials/sidebarHMSI', { user: user, activeNav: 'kelolaEvaluasi' }) %>
 
   <main class="lg:ml-80 px-6 pt-20 pb-8 flex-grow">
-    <div class="max-w-6xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-orange-200">
+    <div class="max-w-6xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-200">
 
       <div class="bg-orange-500 text-white px-6 py-6 flex items-center justify-between">
         <div>
-          <h1 class="text-2xl font-bold">Laporan Revisi</h1>
+           <h1 class="text-2xl font-bold">Laporan Revisi</h1>
           <p class="text-sm text-orange-100">Daftar laporan yang membutuhkan revisi berdasarkan evaluasi DPA.</p>
         </div>
       </div>
@@ -37,49 +37,52 @@
         <% } else { %>
           <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
             <div class="relative w-full md:w-2/3">
-              <input id="searchInput" type="text" placeholder="Cari berdasarkan judul atau program kerja..."
+               <input id="searchInput" type="text" placeholder="Cari berdasarkan judul atau program kerja..."
                      class="w-full pl-10 pr-4 py-3 border rounded-xl text-sm
-                            border-gray-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-500
-                            focus:bg-orange-50 focus:text-orange-700
-                            placeholder-gray-400 focus:placeholder-orange-400
+                            border-gray-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/50
+                            placeholder-gray-400
                             transition-all duration-300">
               <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
             </div>
-          </div>
+           </div>
 
-          <div class="overflow-x-auto bg-white-50 p-2 shadow-sm rounded-xl">
-            <table class="min-w-full text-sm text-center border border-orange-200 rounded-xl overflow-hidden border-separate border-spacing-0">
-              <thead class="bg-orange-100 text-gray-700">
+          <div class="overflow-x-auto rounded-xl border border-gray-200">
+            <table class="min-w-full text-sm text-center">
+              <thead class="bg-gray-50 text-gray-600 font-medium">
                 <tr>
-                  <th class="py-3 px-4 font-semibold border border-orange-200">No</th>
-                  <th class="py-3 px-4 font-semibold border border-orange-200 text-left">Judul Laporan</th>
-                  <th class="py-3 px-4 font-semibold border border-orange-200">Program Kerja</th>
-                  <th class="py-3 px-4 font-semibold border border-orange-200">Status</th>
-                  <th class="py-3 px-4 font-semibold border border-orange-200">Tanggal Evaluasi</th>
-                  <th class="py-3 px-4 font-semibold border border-orange-200">Aksi</th>
+                  <th class="py-3 px-4">No</th>
+                  <th class="py-3 px-4 text-left">Judul Laporan</th>
+                  <th class="py-3 px-4">Program Kerja</th>
+                  <th class="py-3 px-4">Status</th>
+                  <th class="py-3 px-4">Tanggal Evaluasi</th>
+                  <th class="py-3 px-4">Aksi</th>
                 </tr>
               </thead>
-              <tbody id="evaluasiTable">
+              <tbody id="evaluasiTable" class="divide-y divide-gray-200">
                 <% evaluasi.forEach((e, index) => { %>
-                  <tr class="hover:bg-orange-50 transition">
-                    <td class="py-3 px-4 border border-orange-100"><%= index + 1 %></td>
-                    <td class="py-3 px-4 text-gray-800 font-medium border border-orange-100 text-left"><%= e.judul_laporan %></td>
-                    <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= e.Nama_ProgramKerja %></td>
-                    <td class="py-3 px-4 border border-orange-100">
+                  <tr class="hover:bg-orange-50/50 transition-colors">
+                    <td class="py-3 px-4 text-gray-500"><%= index + 1 %></td>
+                    
+                    <td class="py-3 px-4 text-gray-800 text-left"><%= e.judul_laporan %></td>
+                    
+                    <td class="py-3 px-4 text-gray-600"><%= e.Nama_ProgramKerja %></td>
+                    <td class="py-3 px-4">
                       <span class="px-3 py-1 text-xs rounded-full bg-red-100 text-red-700 font-medium">Revisi</span>
                     </td>
-                    <td class="py-3 px-4 text-gray-500 border border-orange-100"><%= e.tanggalFormatted %></td>
-                    <td class="py-3 px-4 border border-orange-100 flex items-center justify-center gap-3">
-                      <a href="/hmsi/kelola-evaluasi/<%= e.id_evaluasi %>"
-                         class="text-orange-500 hover:text-orange-700 transition transform hover:scale-110"
-                         title="Lihat Detail Evaluasi">
-                        <i class="fa-solid fa-eye text-lg"></i>
-                      </a>
-                      <a href="/hmsi/laporan/edit/<%= e.id_laporan %>"
-                         class="text-orange-500 hover:text-orange-700 transition transform hover:scale-110"
-                         title="Edit Laporan">
-                        <i class="fa-solid fa-pen-to-square text-lg"></i>
-                      </a>
+                    <td class="py-3 px-4 text-gray-500"><%= e.tanggalFormatted %></td>
+                    <td class="py-3 px-4">
+                        <div class="flex items-center justify-center gap-4">
+                            <a href="/hmsi/kelola-evaluasi/<%= e.id_evaluasi %>"
+                              class="text-orange-500 hover:text-orange-700 transition transform hover:scale-110"
+                              title="Lihat Detail Evaluasi">
+                                <i class="fa-solid fa-eye text-lg"></i>
+                            </a>
+                            <a href="/hmsi/laporan/edit/<%= e.id_laporan %>"
+                              class="text-orange-500 hover:text-orange-700 transition transform hover:scale-110"
+                              title="Edit Laporan untuk Revisi">
+                                <i class="fa-solid fa-pen-to-square text-lg"></i>
+                            </a>
+                        </div>
                     </td>
                   </tr>
                 <% }) %>
@@ -88,9 +91,9 @@
           </div>
 
           <div class="flex justify-center items-center gap-2 mt-6" id="pagination">
-            <button id="prevPage" class="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 disabled:opacity-50">Prev</button>
-            <span id="pageInfo" class="text-gray-700"></span>
-            <button id="nextPage" class="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 disabled:opacity-50">Next</button>
+            <button id="prevPage" class="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 font-medium">Sebelumnya</button>
+            <span id="pageInfo" class="text-sm text-gray-700"></span>
+            <button id="nextPage" class="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 font-medium">Berikutnya</button>
           </div>
         <% } %>
       </div>
@@ -106,21 +109,20 @@
       const rows = tbody ? Array.from(tbody.querySelectorAll("tr")) : [];
       const rowsPerPage = 10;
       let currentPage = 1;
-
+      
       function filterAndPaginate() {
         const searchValue = searchInput.value.toLowerCase();
-        
         const visibleRows = rows.filter(row => {
           const judul = row.cells[1]?.innerText.toLowerCase() || "";
           const program = row.cells[2]?.innerText.toLowerCase() || "";
           return judul.includes(searchValue) || program.includes(searchValue);
         });
-
+        
         const totalPages = Math.ceil(visibleRows.length / rowsPerPage);
         if (currentPage > totalPages) currentPage = totalPages || 1;
 
         rows.forEach(row => row.style.display = "none");
-
+        
         const start = (currentPage - 1) * rowsPerPage;
         const end = start + rowsPerPage;
         visibleRows.slice(start, end).forEach(row => row.style.display = "");
@@ -138,7 +140,6 @@
       });
       
       document.getElementById("nextPage")?.addEventListener("click", () => {
-        // We need to recalculate total pages in case of an active filter
         const visibleRows = rows.filter(row => (row.cells[1]?.innerText.toLowerCase() || "").includes(searchInput.value.toLowerCase()));
         const totalPages = Math.ceil(visibleRows.length / rowsPerPage);
         if (currentPage < totalPages) {
@@ -151,7 +152,7 @@
         currentPage = 1;
         filterAndPaginate();
       });
-
+      
       if (rows.length > 0) {
         filterAndPaginate();
       }
