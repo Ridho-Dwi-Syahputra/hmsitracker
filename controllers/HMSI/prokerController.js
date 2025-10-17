@@ -58,19 +58,21 @@ function formatTanggal(dateValue) {
 }
 
 // =====================================================
-// helper: hitung status otomatis (respect ke DPA)
+// helper: hitung status TANPA auto "Selesai"
+// Status hanya bisa diubah manual oleh admin/DPA
+// Default status: "Sedang Berjalan"
 // =====================================================
-function calculateStatusWithLock(start, end, status_db) {
-  if (status_db === "Selesai" || status_db === "Gagal") return status_db;
-
-  const today = new Date();
-  start = start ? new Date(start) : null;
-  end = end ? new Date(end) : null;
-
-  if (start && today < start) return "Belum Dimulai";
-  if (start && end && today >= start && today <= end) return "Sedang Berjalan";
-  if (end && today > end) return "Selesai";
-  return "Belum Dimulai";
+function getStatusProker(status_db) {
+  // 🔹 PERUBAHAN UTAMA: Tidak ada kalkulasi otomatis berdasarkan tanggal
+  // Status hanya mengikuti nilai dari database
+  // Jika status_db kosong/null, default ke "Sedang Berjalan"
+  
+  if (!status_db || status_db.trim() === '') {
+    return "Sedang Berjalan";
+  }
+  
+  // Status valid: "Belum Dimulai", "Sedang Berjalan", "Selesai", "Gagal"
+  return status_db;
 }
 
 // =====================================================
@@ -107,10 +109,9 @@ exports.getAllProker = async (req, res) => {
 
     const programs = [];
     for (const r of rows) {
-      const status = calculateStatusWithLock(r.tanggal_mulai, r.tanggal_selesai, r.status_db);
-      if (status !== r.status_db && !(r.status_db === "Selesai" || r.status_db === "Gagal")) {
-        await db.query("UPDATE Program_kerja SET Status=? WHERE id_ProgramKerja=?", [status, r.id]);
-      }
+      // 🔹 TIDAK ADA AUTO-UPDATE STATUS
+      // Status tetap sesuai database, tidak dikalkulasi ulang
+      const status = getStatusProker(r.status_db);
 
       programs.push({
         ...r,
@@ -170,10 +171,8 @@ exports.getDetailProker = async (req, res) => {
       return res.status(403).send("Akses ditolak ke proker divisi lain");
     }
 
-    const status = calculateStatusWithLock(proker.tanggal_mulai, proker.tanggal_selesai, proker.status_db);
-    if (status !== proker.status_db && !(proker.status_db === "Selesai" || proker.status_db === "Gagal")) {
-      await db.query("UPDATE Program_kerja SET Status=? WHERE id_ProgramKerja=?", [status, proker.id]);
-    }
+    // 🔹 TIDAK ADA AUTO-UPDATE STATUS
+    const status = getStatusProker(proker.status_db);
 
     res.render("hmsi/detailProker", {
       title: "Detail Program Kerja",
@@ -247,7 +246,11 @@ exports.createProker = async (req, res) => {
     }
 
     const dokumen = req.file ? req.file.filename : null;
-    const status = calculateStatusWithLock(tanggal_mulai, tanggal_selesai, null);
+    
+    // 🔹 PERUBAHAN UTAMA: Status default selalu "Sedang Berjalan"
+    // TIDAK ADA kalkulasi otomatis berdasarkan tanggal
+    const status = "Sedang Berjalan";
+    
     const idProker = uuidv4();
 
     // 🟢 Simpan ke database
@@ -371,7 +374,11 @@ exports.updateProker = async (req, res) => {
     const oldFile = existingRows[0].Dokumen_pendukung;
     const status_db = existingRows[0].Status;
     const newFile = req.file ? req.file.filename : null;
-    const status = calculateStatusWithLock(tanggal_mulai, tanggal_selesai, status_db);
+    
+    // 🔹 PERUBAHAN UTAMA: Status TIDAK dikalkulasi ulang
+    // Status tetap mengikuti nilai database yang ada
+    // Jika kosong, default "Sedang Berjalan"
+    const status = getStatusProker(status_db);
 
     let query = `
       UPDATE Program_kerja SET 
