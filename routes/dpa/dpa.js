@@ -17,7 +17,7 @@ const { requireLogin, requireRole } = require("../../middleware/auth");
 // IMPORT CONTROLLERS
 // =====================================================
 const dpaDashboardController = require("../../controllers/dpa/dpaDashboardController");
-const dpaProkerController = require("../../controllers/dpa/prokerController");
+const dpaProkerController = require("../../controllers/DPA/prokerController");
 const dpaLaporanController = require("../../controllers/dpa/laporanController");
 const dpaNotifikasiController = require("../../controllers/dpa/notifikasiController");
 const dpaProfileController = require("../../controllers/dpa/profileController");
@@ -64,6 +64,9 @@ router.post(
   requireRole(["DPA"]),
   dpaProkerController.updateStatusProker
 );
+
+// Route untuk cek laporan pending
+router.get("/proker/:id/checkLaporan", dpaProkerController.checkLaporanPending);
 
 // =====================================================
 // LAPORAN

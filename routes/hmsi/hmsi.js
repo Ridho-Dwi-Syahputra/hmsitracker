@@ -18,7 +18,7 @@ const rateLimiter = require("../../middleware/rateLimiter");
 // =====================================================
 // IMPORT CONTROLLERS
 // =====================================================
-const prokerCtrl = require("../../controllers/hmsi/prokerController");
+const prokerCtrl = require("../../controllers/HMSI/prokerController");
 const laporanCtrl = require("../../controllers/hmsi/laporanController");
 const evaluasiCtrl = require("../../controllers/hmsi/evaluasiController");
 const notifikasiCtrl = require("../../controllers/hmsi/notifikasiController");
