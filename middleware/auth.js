@@ -4,7 +4,7 @@
 // =====================================================
 
 // ==========================
-// 🔒 requireLogin
+// requireLogin
 // ==========================
 exports.requireLogin = (req, res, next) => {
   if (!req.session.user) {
@@ -14,7 +14,7 @@ exports.requireLogin = (req, res, next) => {
 };
 
 // ==========================
-// 🔓 checkNotLogin
+// checkNotLogin
 // (Opsional) untuk blokir user login buka halaman login lagi
 // ==========================
 exports.checkNotLogin = (req, res, next) => {
@@ -28,7 +28,7 @@ exports.checkNotLogin = (req, res, next) => {
 };
 
 // ==========================
-// 🧠 requireRole
+// requireRole
 // roles = array, contoh: ["HMSI"] atau ["Admin", "DPA"]
 // ==========================
 exports.requireRole = (roles) => {
@@ -39,7 +39,7 @@ exports.requireRole = (roles) => {
 
     const userRole = req.session.user.role;
     if (!roles.includes(userRole)) {
-      console.warn(`🚫 Akses ditolak: ${userRole} mencoba akses ${req.originalUrl}`);
+      console.warn(`Akses ditolak: ${userRole} mencoba akses ${req.originalUrl}`);
       return res.status(403).send("❌ Akses ditolak! Anda tidak memiliki izin.");
     }
 
