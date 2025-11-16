@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title><%= title %></title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+
+  <%- include('../partials/navbarHMSI', { user: user, unreadCount: unreadCount }) %>
+  <%- include('../partials/sidebarHMSI', { activeNav: 'laporan', user: user }) %>
+
+  <main class="lg:ml-80 px-6 pt-20 pb-8 flex-grow">
+    <div class="max-w-6xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-orange-200">
+
+      <div class="bg-orange-500 text-white px-6 py-6 flex items-center justify-between">
+        <div>
+          <h1 class="text-2xl font-bold"> Laporan Progress Program Kerja</h1>
+          <p class="text-sm text-orange-100">Daftar laporan yang menunggu evaluasi dari DPA</p>
+        </div>
+        <a href="/hmsi/laporan/tambah" 
+          class="flex items-center space-x-2 px-4 py-2 bg-white text-orange-600 rounded-lg font-semibold
+                 transition-all duration-200 hover:bg-orange-100 hover:scale-105 active:scale-95">
+          <i class="fa-solid fa-plus"></i>
+          <span>Tambah Laporan</span>
+        </a>
+      </div>
+
+      <div class="p-6 sm:p-8">
+        <%- include('../partials/alert', { errorMsg: errorMsg, successMsg: successMsg }) %>
+
+        <% if (!laporan || laporan.length === 0) { %>
+          <div class="text-center py-20">
+            <div class="inline-block bg-gray-100 rounded-full p-4 mb-4">
+              <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+              </svg>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-800">Belum Ada Laporan Diajukan</h3>
+            <p class="text-gray-500 mt-1">Klik tombol "Tambah Laporan" untuk membuat laporan baru.</p>
+          </div>
+        <% } else { %>
+
+           <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+            <div class="relative w-full md:w-2/3">
+              <input id="searchInput" type="text" placeholder="Cari berdasarkan judul, program kerja, atau divisi..."
+                     class="w-full pl-10 pr-4 py-3 border rounded-xl text-sm
+                            border-gray-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-500
+                            focus:bg-orange-50 focus:text-orange-700
+                            placeholder-gray-400 focus:placeholder-orange-400
+                            transition-all duration-300">
+              <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto bg-white-50 p-2 shadow-sm rounded-xl">
+            <table class="min-w-full text-sm text-center border border-orange-200 rounded-xl overflow-hidden border-separate border-spacing-0">
+              <thead class="bg-orange-100 text-gray-700">
+                <tr>
+                  <th class="py-3 px-4 font-semibold border border-orange-200">No</th>
+                  <th class="py-3 px-4 font-semibold border border-orange-200 text-left cursor-pointer" data-sort="judul_laporan">
+                    Judul Laporan <i class="fa-solid fa-sort text-gray-400 ml-1"></i>
+                  </th>
+                  <th class="py-3 px-4 font-semibold border border-orange-200 cursor-pointer" data-sort="namaProker">
+                    Program Kerja <i class="fa-solid fa-sort text-gray-400 ml-1"></i>
+                  </th>
+                  <th class="py-3 px-4 font-semibold border border-orange-200">Divisi</th>
+                  <th class="py-3 px-4 font-semibold border border-orange-200">Tanggal Upload</th>
+                  <th class="py-3 px-4 font-semibold border border-orange-200">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="laporanTable">
+                <% laporan.forEach(function(l, i) { %>
+                  <tr class="hover:bg-orange-50 transition" data-visible="true">
+                    <td class="py-3 px-4 border border-orange-100"><%= i + 1 %></td>
+                    <td class="py-3 px-4 text-gray-800 font-medium border border-orange-100 text-left"><%= l.judul_laporan %></td>
+                    <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= l.namaProker || '-' %></td>
+                    <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= l.nama_divisi || '-' %></td>
+                    <td class="py-3 px-4 text-gray-600 border border-orange-100"><%= l.tanggalFormatted || '-' %></td>
+                    <td class="py-3 px-4 border border-orange-100">
+                      <a href="/hmsi/laporan/<%= l.id %>" class="text-orange-500 hover:text-orange-700 transition transform hover:scale-110" title="Lihat Detail Laporan">
+                        <i class="fa-solid fa-eye text-lg"></i>
+                      </a>
+                    </td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="flex justify-center items-center gap-2 mt-6" id="pagination">
+            <button id="prevPage" class="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 disabled:opacity-50">Prev</button>
+            <span id="pageInfo" class="text-gray-700"></span>
+            <button id="nextPage" class="px-4 py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 disabled:opacity-50">Next</button>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </main>
+
+  <%- include('../partials/footer') %>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const searchInput = document.getElementById('searchInput');
+      const tbody = document.getElementById('laporanTable');
+      let rows = tbody ? Array.from(tbody.querySelectorAll('tr')) : [];
+
+      const rowsPerPage = 10;
+      let currentPage = 1;
+
+      const sortHeaders = document.querySelectorAll('th[data-sort]');
+      let currentSort = { key: null, asc: true };
+
+      sortHeaders.forEach(header => {
+        header.addEventListener('click', () => {
+          const key = header.dataset.sort;
+          if (currentSort.key === key) {
+            currentSort.asc = !currentSort.asc;
+          } else {
+            currentSort.key = key;
+            currentSort.asc = true;
+          }
+          
+          const sortIndex = Array.from(header.parentNode.children).indexOf(header);
+
+          sortHeaders.forEach(h => {
+            const i = h.querySelector('i');
+            if (i) i.className = 'fa-solid fa-sort text-gray-400 ml-1';
+          });
+          const icon = header.querySelector('i');
+          if (icon) icon.className = `fa-solid ${currentSort.asc ? 'fa-sort-up' : 'fa-sort-down'} text-orange-500 ml-1`;
+
+          rows.sort((a, b) => {
+            const aText = (a.cells[sortIndex]?.innerText || '').trim().toLowerCase();
+            const bText = (b.cells[sortIndex]?.innerText || '').trim().toLowerCase();
+            if (aText < bText) return currentSort.asc ? -1 : 1;
+            if (aText > bText) return currentSort.asc ? 1 : -1;
+            return 0;
+          });
+
+          rows.forEach(r => tbody.appendChild(r));
+          currentPage = 1;
+          filterAndPaginate();
+        });
+      });
+
+      const filterAndPaginate = () => {
+        const query = (searchInput?.value || '').toLowerCase();
+        
+        const visibleRows = rows.filter(row => {
+          const rowText = (row.innerText || '').toLowerCase();
+          return rowText.includes(query);
+        });
+
+        const totalPages = Math.ceil(visibleRows.length / rowsPerPage) || 1;
+        if (currentPage > totalPages) currentPage = totalPages;
+
+        rows.forEach(r => r.style.display = 'none');
+
+        const start = (currentPage - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+        visibleRows.slice(start, end).forEach(r => r.style.display = '');
+        
+        document.getElementById('pageInfo').textContent = `Halaman ${currentPage} dari ${totalPages}`;
+        document.getElementById('prevPage').disabled = currentPage === 1;
+        document.getElementById('nextPage').disabled = currentPage === totalPages || totalPages === 0;
+      };
+
+      document.getElementById('prevPage')?.addEventListener('click', () => {
+        if (currentPage > 1) {
+          currentPage--;
+          filterAndPaginate();
+        }
+      });
+      
+      document.getElementById('nextPage')?.addEventListener('click', () => {
+        const query = (searchInput?.value || '').toLowerCase();
+        const visibleRows = rows.filter(row => (row.innerText || '').toLowerCase().includes(query));
+        const totalPages = Math.ceil(visibleRows.length / rowsPerPage);
+        if (currentPage < totalPages) {
+          currentPage++;
+          filterAndPaginate();
+        }
+      });
+      
+      searchInput?.addEventListener('input', () => {
+        currentPage = 1;
+        filterAndPaginate();
+      });
+      
+      if (rows.length > 0) {
+        rows.forEach(r => r.dataset.visible = 'true');
+        filterAndPaginate();
+      }
+    });
+  </script>
+</body>
+</html>
