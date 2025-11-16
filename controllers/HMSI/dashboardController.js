@@ -5,19 +5,32 @@
 const db = require("../../config/db");
 
 
-function calculateStatusWithLock(start, end, status_db) {
-  if (status_db === "Selesai" || status_db === "Gagal") return status_db;
-
+function getDisplayStatus(start, end, status_db) {
+  //  Jika status sudah final (diisi DPA), gunakan status dari DB
+  if (status_db === "Selesai" || status_db === "Tidak Selesai" || status_db === "Gagal") {
+    return status_db;
+  }
+  
+  // Jika status dari DB adalah "Sedang Berjalan", tetap gunakan itu
+  if (status_db === "Sedang Berjalan") {
+    return status_db;
+  }
+  
   const today = new Date();
-  const s = start ? new Date(start) : null;
-  const e = end ? new Date(end) : null;
+  const startDate = start ? new Date(start) : null;
 
-  if (s && today < s) return "Belum Dimulai";
-  if (s && e && today >= s && today <= e) return "Sedang Berjalan";
-  if (e && today > e) return "Selesai";
+  // Hanya cek apakah proker sudah dimulai atau belum
+  if (startDate && today < startDate) return "Belum Dimulai";
+  if (startDate && today >= startDate) return "Sedang Berjalan";
+  
+  //  Default aman jika tidak ada tanggal mulai
   return "Belum Dimulai";
 }
 
+// =====================================================
+// GET: Statistik Dashboard
+// DIPERBAIKI: Hanya membaca data (READ-ONLY)
+// =====================================================
 exports.getDashboardStats = async (req, res) => {
   try {
     const user = req.session.user;
@@ -25,7 +38,7 @@ exports.getDashboardStats = async (req, res) => {
 
     const idDivisi = user.id_divisi || null;
     if (!idDivisi) {
-      console.warn(`⚠️ User ${user.nama} belum memiliki id_divisi.`);
+      console.warn(`User ${user.nama} belum memiliki id_divisi.`);
       return res.render("hmsi/hmsiDashboard", {
         title: "Dashboard HMSI",
         user,
@@ -58,17 +71,12 @@ exports.getDashboardStats = async (req, res) => {
 
     for (const r of rows) {
       totalProker++;
-      const status = calculateStatusWithLock(r.Tanggal_mulai, r.Tanggal_selesai, r.status_db);
+      
+      // Gunakan helper yang aman UNTUK TAMPILAN
+      const status = getDisplayStatus(r.Tanggal_mulai, r.Tanggal_selesai, r.status_db);
+
       if (status === "Selesai") prokerSelesai++;
       if (status === "Sedang Berjalan") prokerBerjalan++;
-
-      // Update status otomatis jika belum final
-      if (status !== r.status_db && !["Selesai", "Gagal"].includes(r.status_db)) {
-        await db.query(`UPDATE Program_kerja SET Status=? WHERE id_ProgramKerja=?`, [
-          status,
-          r.id,
-        ]);
-      }
     }
 
     // =====================================================
