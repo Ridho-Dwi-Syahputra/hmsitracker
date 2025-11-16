@@ -10,6 +10,9 @@ const flash = require("connect-flash");
 // Middleware custom
 const unreadNotif = require("./middleware/unreadNotif"); // ⬅️ Tambahan
 
+// Services
+const autoDeleteNotifikasi = require("./services/autoDeleteNotifikasi"); // ⬅️ Auto cleanup service
+
 // =====================================================
 // 2. Konfigurasi Dasar
 // =====================================================
@@ -87,8 +90,74 @@ const dpaRouter = require("./routes/dpa/dpa");
 app.use("/dpa", dpaRouter);
 
 // =====================================================
-// 6. Start Server
+// 5.1. Admin/Debug Routes (opsional untuk testing)
+// =====================================================
+if (process.env.NODE_ENV !== 'production') {
+  // Manual cleanup endpoint untuk testing
+  // Endpoint untuk pembersihan manual notifikasi dengan referensi tidak valid
+  app.get("/debug/cleanup-notifications", async (req, res) => {
+    try {
+      const result = await autoDeleteNotifikasi.manualCleanup();
+      res.json({ 
+        success: true, 
+        message: 'Pembersihan manual berhasil dijalankan',
+        result: result,
+        logFile: "logs/services/autoDeleteNotifikasi.log" 
+      });
+    } catch (error) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  // Endpoint untuk melihat notifikasi dengan referensi tidak valid (dry-run)
+  app.get("/debug/check-orphaned-notifications", async (req, res) => {
+    try {
+      const result = await autoDeleteNotifikasi.checkOrphanedNotifications();
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
+  // Endpoint untuk melihat status log file
+  app.get("/debug/log-status", (req, res) => {
+    try {
+      const logInfo = autoDeleteNotifikasi.getLogInfo();
+      res.json({ 
+        success: true, 
+        logInfo: logInfo,
+        logPath: "logs/services/autoDeleteNotifikasi.log"
+      });
+    } catch (error) {
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+}
+
+// =====================================================
+// 6. Auto Services
+// =====================================================
+
+// Start auto cleanup service untuk notifikasi orphaned
+autoDeleteNotifikasi.startAutoCleanup();
+
+// Graceful shutdown handling
+process.on('SIGINT', () => {
+  console.log('\n🛑 Shutting down server...');
+  autoDeleteNotifikasi.stopAutoCleanup();
+  process.exit(0);
+});
+
+process.on('SIGTERM', () => {
+  console.log('\n🛑 Shutting down server...');
+  autoDeleteNotifikasi.stopAutoCleanup();
+  process.exit(0);
+});
+
+// =====================================================
+// 7. Start Server
 // =====================================================
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}/auth/login`);
+  console.log(`📁 Auto-cleanup service logs: logs/services/autoDeleteNotifikasi.log`);
 });
