@@ -107,89 +107,91 @@ describe('Dashboard Controller', () => {
           id: 'proker-1',
           namaProker: 'Proker A',
           Tanggal_mulai: '2025-01-01',
-          Tanggal_selesai: '2025-12-31', // Proker sedang berjalan (tahun 2025)
-          status_db: 'Sedang Berjalan'
+          Tanggal_selesai: '2025-12-31',
+          status_db: 'Sedang Berjalan' // Status tidak akan diubah di dashboard (READ-ONLY)
         },
         {
-          id: 'proker-2',
+          id: 'proker-2', 
           namaProker: 'Proker B',
           Tanggal_mulai: '2023-01-01',
-          Tanggal_selesai: '2023-12-31', // Sudah selesai (tahun 2023)
-          status_db: 'Selesai' // Status final, tidak akan diupdate
+          Tanggal_selesai: '2023-12-31',
+          status_db: 'Selesai' // Status final
         },
         {
           id: 'proker-3',
-          namaProker: 'Proker C',
-          Tanggal_mulai: '2024-06-01',
-          Tanggal_selesai: '2024-08-31', // Sudah lewat tanggal selesai (2024)
-          status_db: 'Belum Dimulai' // Akan diupdate ke 'Selesai'
+          namaProker: 'Proker C', 
+          Tanggal_mulai: '2026-06-01', // Proker masa depan
+          Tanggal_selesai: '2026-08-31',
+          status_db: 'Belum Dimulai' // Status tidak akan diubah di dashboard
         }
       ];
 
       const mockLaporanData = [{ total: 15 }];
 
-      // Mock db queries - hanya 1 UPDATE query untuk proker yang perlu update statusnya
+      // Mock db queries - HANYA READ, TIDAK ADA UPDATE (controller sudah diperbaiki)
       db.query
         .mockResolvedValueOnce([mockProkerData]) // Query 1: SELECT Program_kerja
-        .mockResolvedValueOnce([]) // Query 2: UPDATE proker-3 (status berubah dari 'Belum Dimulai' ke 'Selesai')
-        .mockResolvedValueOnce([mockLaporanData]); // Query 3: SELECT laporan
+        .mockResolvedValueOnce([mockLaporanData]); // Query 2: SELECT laporan
 
       // Act
       await dashboardController.getDashboardStats(mockReq, mockRes);
 
       // Assert
-      expect(db.query).toHaveBeenCalledTimes(3); // 1 SELECT proker + 1 UPDATE + 1 SELECT laporan
+      expect(db.query).toHaveBeenCalledTimes(2); // Hanya 2 SELECT queries (READ-only)
       
       // Cek bahwa query proker dipanggil dengan id_divisi yang benar
       expect(db.query.mock.calls[0][0]).toContain('WHERE pk.id_divisi = ?');
       expect(db.query.mock.calls[0][1]).toEqual([10]);
 
-      // Cek ada UPDATE query untuk status yang berubah
-      expect(db.query.mock.calls[1][0]).toContain('UPDATE Program_kerja SET Status=?');
-      // expect(db.query.mock.calls[2][0]).toContain('UPDATE Program_kerja SET Status=?'); // Tidak ada UPDATE kedua
-
       // Cek query laporan
-      expect(db.query.mock.calls[2][0]).toContain('SELECT COUNT(*) AS total FROM Laporan WHERE id_divisi = ?');
-      expect(db.query.mock.calls[2][1]).toEqual([10]);
+      expect(db.query.mock.calls[1][0]).toContain('SELECT COUNT(*) AS total FROM Laporan WHERE id_divisi = ?');
+      expect(db.query.mock.calls[1][1]).toEqual([10]);
 
-      // Cek render dengan stats yang benar
+      // Cek render dengan stats yang benar (berdasarkan getDisplayStatus helper)
       expect(mockRender).toHaveBeenCalledWith('hmsi/hmsiDashboard', {
         title: 'Dashboard HMSI',
         user: mockReq.session.user,
         activeNav: 'Dashboard',
         totalProker: 3,
-        prokerSelesai: 2, // Proker B (sudah selesai) + Proker C (dihitung selesai karena tanggal lewat)
-        prokerBerjalan: 1, // Hanya Proker A (tahun 2025 masih berjalan)
+        prokerSelesai: 1, // Hanya Proker B yang status_db = "Selesai"
+        prokerBerjalan: 1, // Hanya Proker A yang status_db = "Sedang Berjalan"
         totalLaporan: 15,
         unreadCount: 5
       });
     });
 
     it('should handle proker data without status updates needed', async () => {
-      // Arrange - semua proker sudah memiliki status final atau status yang tepat
+      // Arrange - semua proker dengan berbagai status (dashboard tidak mengupdate status)
       const mockProkerData = [
         {
           id: 'proker-1',
           namaProker: 'Proker Final A',
           Tanggal_mulai: '2023-01-01',
           Tanggal_selesai: '2023-12-31',
-          status_db: 'Selesai' // Status final, tidak akan diupdate
+          status_db: 'Selesai' // Status final
         },
         {
           id: 'proker-2',
           namaProker: 'Proker Final B',
           Tanggal_mulai: '2024-01-01',
           Tanggal_selesai: '2024-12-31',
-          status_db: 'Gagal' // Status final, tidak akan diupdate
+          status_db: 'Gagal' // Status final
+        },
+        {
+          id: 'proker-3',
+          namaProker: 'Proker Running',
+          Tanggal_mulai: '2025-01-01',
+          Tanggal_selesai: '2025-12-31',
+          status_db: 'Sedang Berjalan' // Status sementara
         }
       ];
 
       const mockLaporanData = [{ total: 8 }];
 
-      // Mock db queries - tidak ada UPDATE karena semua status sudah final
+      // Mock db queries - HANYA READ, tidak ada UPDATE (controller sudah read-only)
       db.query
         .mockResolvedValueOnce([mockProkerData]) // Query 1: SELECT Program_kerja
-        .mockResolvedValueOnce([mockLaporanData]); // Query 2: SELECT laporan (tanpa UPDATE di antara)
+        .mockResolvedValueOnce([mockLaporanData]); // Query 2: SELECT laporan
 
       // Act
       await dashboardController.getDashboardStats(mockReq, mockRes);
@@ -205,14 +207,14 @@ describe('Dashboard Controller', () => {
       expect(db.query.mock.calls[1][0]).toContain('SELECT COUNT(*) AS total FROM Laporan WHERE id_divisi = ?');
       expect(db.query.mock.calls[1][1]).toEqual([10]);
 
-      // Cek render dengan stats yang benar
+      // Cek render dengan stats yang benar (berdasarkan status_db langsung)
       expect(mockRender).toHaveBeenCalledWith('hmsi/hmsiDashboard', {
         title: 'Dashboard HMSI',
         user: mockReq.session.user,
         activeNav: 'Dashboard',
-        totalProker: 2,
-        prokerSelesai: 1, // Hanya Proker A yang selesai
-        prokerBerjalan: 0, // Tidak ada proker berjalan (A=Selesai, B=Gagal)
+        totalProker: 3,
+        prokerSelesai: 1, // Hanya Proker A yang status_db = "Selesai"
+        prokerBerjalan: 1, // Hanya Proker Running yang status_db = "Sedang Berjalan"
         totalLaporan: 8,
         unreadCount: 5
       });
@@ -295,6 +297,61 @@ describe('Dashboard Controller', () => {
           unreadCount: 0 // Default ke 0 jika tidak ada
         })
       );
+    });
+
+    it('should handle status calculation with getDisplayStatus helper correctly', async () => {
+      // Arrange - test berbagai scenario status
+      const mockProkerData = [
+        {
+          id: 'proker-1',
+          namaProker: 'Proker Belum Mulai',
+          Tanggal_mulai: '2026-06-01', // Masa depan
+          Tanggal_selesai: '2026-08-31',
+          status_db: 'Belum Dimulai' // Status non-final, akan dihitung berdasarkan tanggal
+        },
+        {
+          id: 'proker-2',
+          namaProker: 'Proker Berjalan',
+          Tanggal_mulai: '2025-01-01', // Sudah mulai di tahun ini
+          Tanggal_selesai: '2025-12-31',
+          status_db: 'Belum Dimulai' // Status non-final, akan dihitung jadi "Sedang Berjalan"
+        },
+        {
+          id: 'proker-3',
+          namaProker: 'Proker Final Selesai',
+          Tanggal_mulai: '2024-01-01',
+          Tanggal_selesai: '2024-12-31',
+          status_db: 'Selesai' // Status final, tidak akan berubah
+        },
+        {
+          id: 'proker-4',
+          namaProker: 'Proker Running Status',
+          Tanggal_mulai: '2025-01-01',
+          Tanggal_selesai: '2025-12-31',
+          status_db: 'Sedang Berjalan' // Status sudah sesuai
+        }
+      ];
+
+      const mockLaporanData = [{ total: 12 }];
+
+      db.query
+        .mockResolvedValueOnce([mockProkerData])
+        .mockResolvedValueOnce([mockLaporanData]);
+
+      // Act
+      await dashboardController.getDashboardStats(mockReq, mockRes);
+
+      // Assert
+      expect(mockRender).toHaveBeenCalledWith('hmsi/hmsiDashboard', {
+        title: 'Dashboard HMSI',
+        user: mockReq.session.user,
+        activeNav: 'Dashboard',
+        totalProker: 4,
+        prokerSelesai: 1, // Hanya proker-3 yang status final "Selesai"
+        prokerBerjalan: 2, // proker-2 (dihitung berjalan) + proker-4 (sudah berjalan)
+        totalLaporan: 12,
+        unreadCount: 5
+      });
     });
 
   });

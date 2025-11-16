@@ -200,11 +200,12 @@ exports.getDetailProker = async (req, res) => {
         deskripsi: proker.deskripsi,
         tanggal_mulai: proker.tanggal_mulai,
         tanggal_selesai: proker.tanggal_selesai,
+        tanggalMulaiFormatted: formatTanggal(proker.tanggal_mulai),
+        tanggalSelesaiFormatted: formatTanggal(proker.tanggal_selesai),
         penanggungJawab: proker.penanggungJawab,
         dokumen_pendukung: proker.dokumen_pendukung,
         Target_Kuantitatif: proker.Target_Kuantitatif || "-",
         Target_Kualitatif: proker.Target_Kualitatif || "-",
-        tanggalFormatted: formatTanggal(proker.tanggal_mulai),
         status, // ✅ Status murni dari database
         dokumenMime: getMimeFromFile(proker.dokumen_pendukung),
       },

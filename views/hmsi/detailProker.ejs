@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title><%= title %></title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+
+  <!-- =====================================================
+       NAVBAR DAN SIDEBAR
+       Include navigasi dan sidebar HMSI
+       ===================================================== -->
+  <%- include('../partials/navbarHMSI', { user: user, unreadCount: typeof unreadCount !== 'undefined' ? unreadCount : 0 }) %>
+  <%- include('../partials/sidebarHMSI', { activeNav: activeNav, user: user }) %>
+
+  <!-- =====================================================
+       MAIN CONTENT AREA
+       Konten utama halaman detail program kerja (read-only)
+       ===================================================== -->
+  <main class="lg:ml-80 px-6 pt-20 pb-8 flex-grow">
+    <div class="max-w-5xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-200">
+
+      <!-- Header Section -->
+      <div class="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-6 flex items-center justify-between">
+        <div>
+          <h1 class="text-2xl font-bold">Detail Program Kerja</h1>
+          <p class="text-sm text-orange-100">Informasi lengkap program kerja HMSI</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-eye text-orange-100"></i>
+          <span class="text-sm text-orange-100">Mode Tampilan</span>
+        </div>
+      </div>
+
+      <!-- Body Content -->
+      <div class="p-6 sm:p-8 space-y-10">
+
+        <!-- =====================================================
+             REUSABLE COMPONENT: boxField()
+             Helper function untuk menampilkan field dengan konsisten
+             ===================================================== -->
+        <%
+        function boxField(label, value) {
+          const displayValue = value || '-';
+        %>
+          <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
+            <p class="font-medium text-gray-600 mb-2"><%= label %></p>
+            <div class="bg-white border border-gray-200 p-3 rounded-lg">
+              <p class="text-gray-800 whitespace-pre-line"><%= displayValue %></p>
+            </div>
+          </div>
+        <% } %>
+
+        <!-- =====================================================
+             SECTION: STATUS PROGRAM KERJA
+             Menampilkan status saat ini dengan badge warna
+             ===================================================== -->
+        <section>
+          <h4 class="text-lg font-semibold text-gray-700 mb-4">Status Program Kerja</h4>
+          <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
+            <p class="font-medium text-gray-600 mb-2">Status Saat Ini</p>
+            <div class="bg-white border border-gray-200 p-3 rounded-lg">
+              <% 
+              let statusColor = 'bg-gray-500';
+              let statusIcon = 'fa-clock';
+              
+              if (proker.status === 'Selesai') {
+                statusColor = 'bg-green-500';
+                statusIcon = 'fa-check-circle';
+              } else if (proker.status === 'Tidak Selesai') {
+                statusColor = 'bg-red-500';
+                statusIcon = 'fa-times-circle';
+              } else if (proker.status === 'Sedang Berjalan') {
+                statusColor = 'bg-orange-500';
+                statusIcon = 'fa-play-circle';
+              } else if (proker.status === 'Belum Dimulai') {
+                statusColor = 'bg-yellow-500';
+                statusIcon = 'fa-hourglass-start';
+              }
+              %>
+              <div class="inline-flex items-center gap-2 px-4 py-2 <%= statusColor %> text-white rounded-lg font-medium">
+                <i class="fa-solid <%= statusIcon %>"></i>
+                <span><%= proker.status || 'Belum Ditentukan' %></span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- =====================================================
+             SECTION: INFORMASI DASAR
+             Menampilkan informasi utama program kerja
+             ===================================================== -->
+        <section>
+          <h4 class="text-lg font-semibold text-gray-700 mb-4">Informasi Dasar</h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="md:col-span-2">
+              <%= boxField("Nama Program Kerja", proker.namaProker) %>
+            </div>
+            <%= boxField("Tanggal Mulai", proker.tanggalMulaiFormatted) %>
+            <%= boxField("Tanggal Selesai", proker.tanggalSelesaiFormatted) %>
+            <%= boxField("Divisi", proker.divisi) %>
+            <%= boxField("Penanggung Jawab", proker.penanggungJawab) %>
+            <div class="md:col-span-2">
+              <%= boxField("Deskripsi", proker.deskripsi) %>
+            </div>
+          </div>
+        </section>
+
+        <!-- =====================================================
+             SECTION: TARGET PENCAPAIAN
+             Menampilkan target kuantitatif dan kualitatif
+             ===================================================== -->
+        <section>
+          <h4 class="text-lg font-semibold text-gray-700 mb-4">Target Pencapaian</h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <%= boxField("Target Kuantitatif", proker.Target_Kuantitatif) %>
+            <%= boxField("Target Kualitatif", proker.Target_Kualitatif) %>
+          </div>
+        </section>
+
+        <!-- =====================================================
+             SECTION: DOKUMEN PENDUKUNG
+             Menampilkan file dokumen pendukung (PDF, gambar, dll)
+             ===================================================== -->
+        <section>
+          <h4 class="text-lg font-semibold text-gray-700 mb-4">Dokumen Pendukung</h4>
+          <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
+            <% if (proker.dokumen_pendukung) { %>
+              <div class="bg-white border border-gray-200 p-3 rounded-lg">
+                <% 
+                const files = proker.dokumen_pendukung.split(',');
+                files.forEach((file, index) => {
+                  const f = file.trim();
+                  const ext = f.split('.').pop().toLowerCase();
+                  const filePath = `/uploads/proker/${f}`;
+                %>
+                  <div class="<%= index > 0 ? 'mt-4' : '' %>">
+                    <% if (['jpg','jpeg','png','gif','webp'].includes(ext)) { %>
+                      <img src="<%= filePath %>" class="w-full max-h-96 object-contain rounded-lg" alt="Dokumen Pendukung"/>
+                    <% } else if (ext === 'pdf') { %>
+                      <embed src="<%= filePath %>" type="application/pdf" width="100%" height="500px" class="rounded-lg"/>
+                    <% } else { %>
+                      <div class="p-4 text-center bg-gray-50 rounded-lg">
+                        <i class="fa-solid fa-file text-4xl text-gray-400 mb-2"></i>
+                        <p class="text-gray-600 text-sm mb-2">File: <%= f %></p>
+                      </div>
+                    <% } %>
+                    <a href="<%= filePath %>" target="_blank"
+                      class="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition">
+                      <i class="fa-solid fa-download"></i> Download Dokumen
+                    </a>
+                  </div>
+                <% }) %>
+              </div>
+            <% } else { %>
+              <div class="bg-white border border-gray-200 p-3 rounded-lg">
+                <p class="text-gray-500 italic">Belum ada dokumen pendukung</p>
+              </div>
+            <% } %>
+          </div>
+        </section>
+
+        <!-- =====================================================
+             SECTION: INFORMASI READ-ONLY
+             Pesan bahwa HMSI hanya bisa melihat, tidak mengubah
+             ===================================================== -->
+        <section>
+          <div class="bg-orange-50 border border-orange-200 rounded-xl p-6">
+            <div class="flex items-start gap-4">
+              <div class="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                <i class="fa-solid fa-info-circle text-orange-600"></i>
+              </div>
+              <div class="flex-1">
+                <h5 class="text-lg font-semibold text-orange-800 mb-2">Informasi untuk HMSI</h5>
+                <p class="text-orange-700 mb-3">
+                  Sebagai anggota HMSI, Anda dapat melihat detail lengkap program kerja ini termasuk:
+                </p>
+                <ul class="text-orange-700 space-y-1 mb-4">
+                  <li class="flex items-center gap-2">
+                    <i class="fa-solid fa-check text-orange-600 text-sm"></i>
+                    <span>Status dan informasi dasar program kerja</span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <i class="fa-solid fa-check text-orange-600 text-sm"></i>
+                    <span>Target pencapaian kuantitatif dan kualitatif</span>
+                  </li>
+                  <li class="flex items-center gap-2">
+                    <i class="fa-solid fa-check text-orange-600 text-sm"></i>
+                    <span>Dokumen pendukung dan file terkait</span>
+                  </li>
+                </ul>
+                <div class="bg-orange-100 border border-orange-300 rounded-lg p-3">
+                  <p class="text-orange-800 text-sm">
+                    <i class="fa-solid fa-lock mr-2"></i>
+                    <strong>Catatan:</strong> Perubahan status program kerja hanya dapat dilakukan oleh DPA.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- =====================================================
+             SECTION: TOMBOL NAVIGASI
+             Tombol untuk kembali ke halaman sebelumnya
+             ===================================================== -->
+        <div class="pt-6 border-t">
+          <div class="flex gap-4 justify-between items-center">
+            <!-- Info Terakhir Diupdate -->
+            <div class="text-sm text-gray-500">
+              <i class="fa-solid fa-clock mr-1"></i>
+              Informasi ini selalu update dengan data terbaru
+            </div>
+            
+            <!-- Tombol Kembali -->
+            <a href="/hmsi/kelola-proker" 
+               class="inline-flex items-center gap-2 px-6 py-3 bg-orange-500 text-white rounded-xl text-sm font-semibold hover:bg-orange-600 transition transform hover:scale-105 active:scale-95">
+              <i class="fa-solid fa-arrow-left"></i>
+              <span>Kembali ke Kelola Proker</span>
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- =====================================================
+       JAVASCRIPT
+       Script untuk interaksi dan animasi halaman
+       ===================================================== -->
+  <script>
+    // =====================================================
+    // SMOOTH ANIMATIONS
+    // Animasi halus saat halaman dimuat
+    // =====================================================
+    document.addEventListener('DOMContentLoaded', function() {
+      // Animasi fade-in untuk konten utama
+      const mainContent = document.querySelector('main');
+      if (mainContent) {
+        mainContent.style.opacity = '0';
+        mainContent.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+          mainContent.style.transition = 'all 0.6s ease-out';
+          mainContent.style.opacity = '1';
+          mainContent.style.transform = 'translateY(0)';
+        }, 100);
+      }
+
+      // Animasi stagger untuk sections
+      const sections = document.querySelectorAll('section');
+      sections.forEach((section, index) => {
+        section.style.opacity = '0';
+        section.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+          section.style.transition = 'all 0.5s ease-out';
+          section.style.opacity = '1';
+          section.style.transform = 'translateY(0)';
+        }, 200 + (index * 100));
+      });
+    });
+
+    // =====================================================
+    // ENHANCED INTERACTIONS
+    // Interaksi tambahan untuk UX yang lebih baik
+    // =====================================================
+    
+    // Hover effect untuk dokumen images
+    document.addEventListener('DOMContentLoaded', function() {
+      const images = document.querySelectorAll('img[alt="Dokumen Pendukung"]');
+      images.forEach(img => {
+        img.addEventListener('mouseenter', function() {
+          this.style.transform = 'scale(1.02)';
+          this.style.transition = 'transform 0.3s ease';
+        });
+        
+        img.addEventListener('mouseleave', function() {
+          this.style.transform = 'scale(1)';
+        });
+      });
+    });
+
+    // Smooth scroll untuk internal links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      });
+    });
+
+    // Enhanced download button feedback
+    document.querySelectorAll('a[href*="/uploads/"]').forEach(link => {
+      link.addEventListener('click', function() {
+        const icon = this.querySelector('i');
+        if (icon) {
+          const originalClass = icon.className;
+          icon.className = 'fa-solid fa-spinner fa-spin';
+          
+          setTimeout(() => {
+            icon.className = 'fa-solid fa-check';
+            setTimeout(() => {
+              icon.className = originalClass;
+            }, 1000);
+          }, 500);
+        }
+      });
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+      // ESC untuk kembali
+      if (e.key === 'Escape') {
+        const backButton = document.querySelector('a[href="/hmsi/kelola-proker"]');
+        if (backButton) {
+          backButton.click();
+        }
+      }
+      
+      // Ctrl+P untuk print (disabled karena ini view mode)
+      if (e.ctrlKey && e.key === 'p') {
+        e.preventDefault();
+        alert('Print tidak tersedia dalam mode tampilan. Silakan download dokumen jika diperlukan.');
+      }
+    });
+
+    // Console info untuk developer
+    console.info('🔵 HMSI Detail Proker - Read-Only Mode');
+    console.info('📋 Status dapat dilihat tetapi tidak dapat diubah');
+    console.info('🔒 Perubahan status hanya dapat dilakukan oleh DPA');
+  </script>
+
+</body>
+</html>
