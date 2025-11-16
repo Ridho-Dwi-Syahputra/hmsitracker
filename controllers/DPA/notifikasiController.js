@@ -211,7 +211,7 @@ exports.readAndRedirect = async (req, res) => {
       if (laporanRows.length > 0) {
         // Data masih ada → redirect ke detail laporan
         dataExists = true;
-        redirectUrl = `/dpa/kelolaLaporan/${notif.id_laporan}`;
+        redirectUrl = `/dpa/laporan/${notif.id_laporan}`;
       } else {
         // Data sudah dihapus → tampilkan error
         errorTitle = "Laporan Dihapus";
@@ -228,7 +228,7 @@ exports.readAndRedirect = async (req, res) => {
       if (evaluasiRows.length > 0) {
         // Data masih ada → redirect ke detail laporan terkait
         dataExists = true;
-        redirectUrl = `/dpa/kelolaLaporan/${evaluasiRows[0].id_laporan}`;
+        redirectUrl = `/dpa/laporan/${evaluasiRows[0].id_laporan}`;
       } else {
         // Data sudah dihapus → tampilkan error
         errorTitle = "Komentar Tidak Tersedia";
