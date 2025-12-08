@@ -43,7 +43,7 @@ app.use(
     secret: process.env.SESSION_SECRET || "hmsi_secret_key",
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false }, // ⚠️ kalau sudah pakai https set true
+    cookie: { secure: false }, 
   })
 );
 

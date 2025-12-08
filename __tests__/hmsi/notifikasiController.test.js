@@ -67,7 +67,7 @@ describe('Notifikasi Controller', () => {
 
   describe('getAllNotifikasi', () => {
 
-    it('should fetch all notifications successfully', async () => {
+    it('seharusnya mengambil semua notifikasi dengan sukses', async () => {
       // Arrange
       const mockNotifikasiData = [
         {
@@ -139,7 +139,7 @@ describe('Notifikasi Controller', () => {
       });
     });
 
-    it('should handle unauthorized access', async () => {
+    it('seharusnya menangani akses yang tidak terotorisasi', async () => {
       // Arrange
       mockReq.session.user = null;
 
@@ -151,7 +151,7 @@ describe('Notifikasi Controller', () => {
       expect(mockSend).toHaveBeenCalledWith('Unauthorized');
     });
 
-    it('should handle non-HMSI user', async () => {
+    it('seharusnya menangani user yang bukan HMSI', async () => {
       // Arrange
       mockReq.session.user.role = 'DPA';
 
@@ -163,7 +163,7 @@ describe('Notifikasi Controller', () => {
       expect(mockSend).toHaveBeenCalledWith('Unauthorized');
     });
 
-    it('should handle user without id_divisi', async () => {
+    it('seharusnya menangani user tanpa id_divisi', async () => {
       // Arrange
       mockReq.session.user.id_divisi = null;
 
@@ -180,7 +180,7 @@ describe('Notifikasi Controller', () => {
       });
     });
 
-    it('should handle empty notifications', async () => {
+    it('seharusnya menangani notifikasi kosong', async () => {
       // Arrange
       db.query.mockResolvedValue([[]]);
 
@@ -197,7 +197,7 @@ describe('Notifikasi Controller', () => {
       });
     });
 
-    it('should handle database error', async () => {
+    it('seharusnya menangani error database', async () => {
       // Arrange
       db.query.mockRejectedValue(new Error('Database connection failed'));
 
@@ -213,14 +213,14 @@ describe('Notifikasi Controller', () => {
 
   describe('readAndRedirect', () => {
 
-    it('should mark notification as read and redirect to laporan detail', async () => {
+    it('seharusnya menandai notifikasi sebagai terbaca dan mengarahkan ke detail laporan', async () => {
       // Arrange
       mockReq.params.id = '1';
       
       const mockNotifikasi = [
         {
           id_notifikasi: 1,
-          jenis: 'evaluasi',
+          jenis: 'evaluasi', // Jenis evaluasi akan diarahkan ke laporan detail
           id_laporan: 5,
           status_baca: 0
         }
@@ -234,9 +234,9 @@ describe('Notifikasi Controller', () => {
       ];
 
       db.query
-        .mockResolvedValueOnce([mockNotifikasi]) // Get notification
-        .mockResolvedValueOnce([]) // Update status_baca
-        .mockResolvedValueOnce([mockLaporanData]); // Get laporan data
+        .mockResolvedValueOnce([mockNotifikasi]) // Panggil 1: Get notification
+        .mockResolvedValueOnce([]) // Panggil 2: Update status_baca
+        .mockResolvedValueOnce([mockLaporanData]); // Panggil 3: Get laporan data
 
       // Act
       await notifikasiController.readAndRedirect(mockReq, mockRes);
@@ -251,7 +251,7 @@ describe('Notifikasi Controller', () => {
       expect(mockRedirect).toHaveBeenCalledWith('/hmsi/laporan/5');
     });
 
-    it('should redirect to evaluasi detail for evaluasi notification', async () => {
+    it('seharusnya mengarahkan ke detail evaluasi untuk notifikasi evaluasi', async () => {
       // Arrange
       mockReq.params.id = '2';
       
@@ -289,7 +289,7 @@ describe('Notifikasi Controller', () => {
       expect(mockRedirect).toHaveBeenCalledWith('/hmsi/kelola-evaluasi/7');
     });
 
-    it('should handle notification not found', async () => {
+    it('seharusnya menangani notifikasi tidak ditemukan', async () => {
       // Arrange
       mockReq.params.id = '999';
       db.query.mockResolvedValue([[]]);
@@ -305,7 +305,7 @@ describe('Notifikasi Controller', () => {
       });
     });
 
-    it('should fallback to error page when laporan not found', async () => {
+    it('seharusnya kembali ke halaman error ketika data laporan tidak ditemukan (dihapus)', async () => {
       // Arrange
       mockReq.params.id = '3';
       
@@ -336,7 +336,7 @@ describe('Notifikasi Controller', () => {
       });
     });
 
-    it('should handle database error in readAndRedirect', async () => {
+    it('seharusnya menangani error database saat readAndRedirect', async () => {
       // Arrange
       mockReq.params.id = '1';
       db.query.mockRejectedValue(new Error('Database error'));
@@ -352,7 +352,7 @@ describe('Notifikasi Controller', () => {
       });
     });
 
-    it('should handle proker type notification', async () => {
+    it('seharusnya menangani notifikasi tipe proker', async () => {
       // Arrange
       mockReq.params.id = '3';
       
@@ -387,10 +387,10 @@ describe('Notifikasi Controller', () => {
 
   });
 
-  // Test untuk helper functions (opsional, tapi baik untuk coverage)
+  // Test untuk helper functions
   describe('deleteAllRelatedNotif', () => {
 
-    it('should delete related notifications successfully', async () => {
+    it('seharusnya menghapus notifikasi terkait laporan dengan sukses', async () => {
       // Arrange
       const entityId = 'test-laporan-id';
       const type = 'laporan';
@@ -407,7 +407,7 @@ describe('Notifikasi Controller', () => {
       );
     });
 
-    it('should handle proker type deletion', async () => {
+    it('seharusnya menangani penghapusan notifikasi tipe proker', async () => {
       // Arrange
       const entityId = 'test-proker-id';
       const type = 'proker';
@@ -428,7 +428,7 @@ describe('Notifikasi Controller', () => {
 
   describe('deleteOldProkerNotif', () => {
 
-    it('should delete old proker notifications', async () => {
+    it('seharusnya menghapus notifikasi proker lama', async () => {
       // Arrange
       const idProker = 'test-proker-id';
       db.query.mockResolvedValue([]);
@@ -443,15 +443,15 @@ describe('Notifikasi Controller', () => {
       );
     });
 
-    it('should handle database error in deleteOldProkerNotif', async () => {
+    it('seharusnya menangani error database saat hapus notifikasi proker lama', async () => {
       // Arrange
       const idProker = 'test-proker-id';
       db.query.mockRejectedValue(new Error('Delete failed'));
 
-      // Act (should not throw)
+      // Act (seharusnya tidak menghasilkan error)
       await notifikasiController.deleteOldProkerNotif(idProker);
 
-      // Assert (function handles error internally)
+      // Assert (fungsi menangani error secara internal)
       expect(db.query).toHaveBeenCalledTimes(1);
     });
 
