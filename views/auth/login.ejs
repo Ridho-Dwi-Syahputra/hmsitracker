@@ -34,10 +34,11 @@
 
       <!-- Error Message -->
       <% if (typeof errorMsg !== "undefined" && errorMsg) { %>
-        <div class="mb-4 p-3 text-sm text-red-700 bg-red-100 rounded-lg">
-          <%= errorMsg %>
-        </div>
-      <% } %>
+  <div class="error-msg mb-4 p-3 text-sm text-red-700 bg-red-100 rounded-lg">
+    <%= errorMsg %>
+  </div>
+<% } %>
+
 
       <!-- Form -->
       <form action="/auth/login" method="POST" class="space-y-6">
