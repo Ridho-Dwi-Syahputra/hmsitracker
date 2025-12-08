@@ -1,7 +1,7 @@
 const { test, expect } = require("@playwright/test");
 
 //
-// ✅ 1. Login berhasil
+// 1. Login berhasil
 //
 test("Admin berhasil login", async ({ page }) => {
 
@@ -17,7 +17,7 @@ test("Admin berhasil login", async ({ page }) => {
 
 
 //
-// ❌ 2. Login gagal - password salah
+// 2. Login gagal - password salah
 //
 test("Login gagal jika password salah", async ({ page }) => {
 
@@ -34,7 +34,7 @@ test("Login gagal jika password salah", async ({ page }) => {
 
 
 //
-// ❌ 3. Login gagal - email tidak ditemukan
+// 3. Login gagal - email tidak ditemukan
 //
 test("Login gagal jika email tidak terdaftar", async ({ page }) => {
 
@@ -50,7 +50,7 @@ test("Login gagal jika email tidak terdaftar", async ({ page }) => {
 
 
 //
-// ❌ 4. Login gagal - email kosong dan password kosong
+// 4. Login gagal - email kosong dan password kosong
 //
 test("Login gagal jika email dan password kosong", async ({ page }) => {
 
@@ -63,7 +63,7 @@ test("Login gagal jika email dan password kosong", async ({ page }) => {
 
 
 //
-// ❌ 5. Login gagal - hanya email terisi
+// 5. Login gagal - hanya email terisi
 //
 test("Login gagal jika password kosong", async ({ page }) => {
 
