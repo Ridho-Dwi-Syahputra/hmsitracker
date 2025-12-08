@@ -108,7 +108,7 @@ describe('Dashboard Controller', () => {
           namaProker: 'Proker A',
           Tanggal_mulai: '2025-01-01',
           Tanggal_selesai: '2025-12-31',
-          status_db: 'Sedang Berjalan' // Status tidak akan diubah di dashboard (READ-ONLY)
+          status_db: 'Sedang Berjalan' 
         },
         {
           id: 'proker-2', 
