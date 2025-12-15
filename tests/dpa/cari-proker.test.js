@@ -17,12 +17,13 @@ test.describe("Functional Testing - Cari Program Kerja (DPA)", () => {
   // Setup: Login sebelum setiap test
   test.beforeEach(async ({ page }) => {
     await loginAsDPA(page);
-    // Navigasi ke halaman Lihat Proker
-    await page.goto("http://localhost:3000/dpa/lihatProker");
-    // Tunggu halaman termuat - gunakan waitForLoadState yang lebih reliable
-    await page.waitForLoadState('networkidle');
+    // Navigasi ke halaman Lihat Proker dengan timeout lebih lama untuk Firefox
+    await page.goto("http://localhost:3000/dpa/lihatProker", { 
+      timeout: 60000,
+      waitUntil: 'domcontentloaded'  // Lebih cepat dari networkidle
+    });
     // Tunggu search input muncul dengan timeout lebih panjang
-    await page.waitForSelector("#searchInput", { timeout: 10000 }).catch(async () => {
+    await page.waitForSelector("#searchInput", { timeout: 20000 }).catch(async () => {
       // Jika gagal, coba screenshot untuk debugging
       await page.screenshot({ path: 'test-results/debug-lihat-proker.png' });
       console.log('❌ Failed to find #searchInput, current URL:', page.url());

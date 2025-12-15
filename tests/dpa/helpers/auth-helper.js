@@ -5,9 +5,11 @@
 async function loginAsDPA(page) {
   console.log('🔐 Starting login process...');
   
-  // Navigasi ke halaman login
-  await page.goto("http://localhost:3000/auth/login");
-  await page.waitForLoadState('networkidle');
+  // Navigasi ke halaman login dengan timeout dan waitUntil yang lebih cepat
+  await page.goto("http://localhost:3000/auth/login", {
+    timeout: 60000,
+    waitUntil: 'domcontentloaded'
+  });
   console.log('📄 Login page loaded');
 
   // Isi form login dengan kredensial DPA
@@ -20,10 +22,13 @@ async function loginAsDPA(page) {
   await page.click('button[type="submit"]');
   console.log('🖱️ Submit button clicked');
 
-  // Tunggu redirect ke dashboard DPA dengan timeout lebih panjang
-  await page.waitForURL(/.*dpa\/dashboard/, { timeout: 10000 }).catch(async (e) => {
-    console.log('❌ Login redirect failed, current URL:', page.url());
-    await page.screenshot({ path: 'test-results/debug-login.png' });
+  // Tunggu redirect ke dashboard DPA dengan timeout lebih panjang dan waitUntil domcontentloaded
+  await page.waitForURL("**/dpa/dashboard", { 
+    timeout: 60000,
+    waitUntil: 'domcontentloaded'
+  }).catch(async (e) => {
+    console.log("❌ Login redirect failed, current URL:", page.url());
+    await page.screenshot({ path: "test-results/debug-login.png" });
     throw e;
   });
   
