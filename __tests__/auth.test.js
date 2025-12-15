@@ -2,7 +2,7 @@
 
 const request = require('supertest');
 const express = require('express');
-const session = require('express-session'); // Untuk mock session
+const session = require('express-session'); 
 
 // Modul yang akan kita mock
 const db = require('../config/db');
@@ -21,25 +21,18 @@ jest.mock('bcryptjs');
 // ==========================================
 // 2. SETUP APLIKASI TES
 // ==========================================
-// Buat "aplikasi mini" Express hanya untuk tes ini
-// Tujuannya adalah agar router kita punya middleware yg dibutuhkan (session, json)
 const app = express();
 
-// Middleware yang dibutuhkan oleh router auth
-app.use(express.urlencoded({ extended: false })); // Untuk req.body dari form
-app.use(express.json()); // Untuk req.body
+app.use(express.urlencoded({ extended: false })); 
+app.use(express.json()); 
 app.use(session({
   secret: 'test-secret',
   resave: false,
   saveUninitialized: true,
 }));
 
-// Mock res.render, karena kita tidak pakai view engine di tes
-// Kita buat agar res.render mengembalikan JSON dari data yg di-pass
 app.use((req, res, next) => {
   res.render = jest.fn((view, data) => {
-    // Kirim status 200 (karena render biasanya 200)
-    // dan kirim 'data' sebagai JSON agar bisa kita cek
     res.status(200).json({ view, data });
   });
   next();
@@ -48,8 +41,6 @@ app.use((req, res, next) => {
 // Pasang router yang mau dites
 app.use('/auth', authRoutes);
 
-
-// =SI========================================
 // 3. TES SUITE
 // ==========================================
 describe('Auth Routes: POST /auth/login', () => {
@@ -69,7 +60,7 @@ describe('Auth Routes: POST /auth/login', () => {
       id_anggota: 1,
       nama: 'Test Admin',
       email: 'admin@test.com',
-      password: '$2b$hashedpassword', // Password hash
+      password: '$2b$hashedpassword', 
       role: 'Admin',
       id_divisi: null,
       foto_profile: null,
@@ -79,7 +70,6 @@ describe('Auth Routes: POST /auth/login', () => {
     // 2. Atur 'return value' dari Mocks
     // Saat db.query dipanggil, kembalikan mockUser
     db.query.mockResolvedValue([ [mockUser] ]); 
-    // Saat bcrypt.compare dipanggil, kembalikan 'true' (password cocok)
     bcrypt.compare.mockResolvedValue(true);
 
     // 3. Kirim Request
@@ -88,10 +78,10 @@ describe('Auth Routes: POST /auth/login', () => {
       .send({ email: 'admin@test.com', password: 'password123' }); // Kirim body
 
     // 4. Cek Hasil (Assertions)
-    expect(db.query).toHaveBeenCalledTimes(1); // Pastikan DB dipanggil
-    expect(bcrypt.compare).toHaveBeenCalledTimes(1); // Pastikan bcrypt dipanggil
-    expect(res.statusCode).toBe(302); // 302 adalah status 'Redirect'
-    expect(res.headers.location).toBe('/admin/dashboard'); // Cek tujuan redirect
+    expect(db.query).toHaveBeenCalledTimes(1); 
+    expect(bcrypt.compare).toHaveBeenCalledTimes(1); 
+    expect(res.statusCode).toBe(302); 
+    expect(res.headers.location).toBe('/admin/dashboard'); 
   });
 
   // ==========================
@@ -108,11 +98,10 @@ describe('Auth Routes: POST /auth/login', () => {
       .send({ email: 'salah@test.com', password: 'password123' });
 
     // 3. Cek Hasil
-    // (Ingat, mock res.render kita mengembalikan status 200 + JSON)
     expect(res.statusCode).toBe(200); 
-    expect(bcrypt.compare).not.toHaveBeenCalled(); // bcrypt.compare tidak boleh terpanggil
-    expect(res.body.view).toBe('auth/login'); // Cek view yg di-render
-    expect(res.body.data.errorMsg).toBe('Email atau password salah!'); // Cek pesannya
+    expect(bcrypt.compare).not.toHaveBeenCalled(); 
+    expect(res.body.view).toBe('auth/login'); 
+    expect(res.body.data.errorMsg).toBe('Email atau password salah!'); 
   });
 
   // ==========================

@@ -22,7 +22,7 @@ jest.mock("../../config/db", () => ({
 describe("Tes untuk DPA Dashboard Controller", () => {
   let mockReq;
   let mockRes;
-  let consoleErrorSpy; // Untuk memata-matai console.error
+  let consoleErrorSpy; 
 
   // 'beforeEach' berjalan sebelum setiap tes 'it(...)'
   beforeEach(() => {
@@ -40,19 +40,15 @@ describe("Tes untuk DPA Dashboard Controller", () => {
       },
     };
 
-    // Buat 'res' palsu (stub)
     mockRes = {
       render: jest.fn(),
       redirect: jest.fn(),
       status: jest.fn(() => mockRes), // '() => mockRes' penting agar bisa chaining
       send: jest.fn(),
     };
-    
-    // Mata-matai console.error dan sembunyikan outputnya saat tes
     consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
   });
-  
-  // 'afterEach' berjalan setelah setiap tes
+
   afterEach(() => {
     // Kembalikan console.error ke fungsi aslinya
     consoleErrorSpy.mockRestore();

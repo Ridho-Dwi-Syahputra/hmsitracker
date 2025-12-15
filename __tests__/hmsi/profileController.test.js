@@ -26,12 +26,6 @@ let mockRedirect;
 let mockStatus;
 let mockSend;
 
-// Bungkam console.log/warn/error
-beforeAll(() => {
-  jest.spyOn(console, 'log').mockImplementation(() => {});
-  jest.spyOn(console, 'warn').mockImplementation(() => {});
-  jest.spyOn(console, 'error').mockImplementation(() => {});
-});
 
 // Setup sebelum setiap test
 beforeEach(() => {
@@ -81,7 +75,7 @@ describe('Profile Controller', () => {
 
   describe('getProfile', () => {
 
-    it('should fetch user profile successfully', async () => {
+    it('seharusnya mengambil profil user dengan sukses', async () => {
       // Arrange
       const mockUserData = [
         {
@@ -113,7 +107,7 @@ describe('Profile Controller', () => {
       });
     });
 
-    it('should redirect to login if user not in session', async () => {
+    it('seharusnya mengarahkan ke halaman login jika user tidak ada di session', async () => {
       // Arrange
       mockReq.session.user = null;
 
@@ -125,7 +119,7 @@ describe('Profile Controller', () => {
       expect(db.query).not.toHaveBeenCalled();
     });
 
-    it('should handle user not found in database', async () => {
+    it('seharusnya mengembalikan 404 jika user tidak ditemukan di database', async () => {
       // Arrange
       db.query.mockResolvedValue([[]]);
 
@@ -137,7 +131,7 @@ describe('Profile Controller', () => {
       expect(mockSend).toHaveBeenCalledWith('User tidak ditemukan');
     });
 
-    it('should handle database error', async () => {
+    it('seharusnya menangani error database dan mengembalikan 500', async () => {
       // Arrange
       db.query.mockRejectedValue(new Error('Database error'));
 
@@ -153,7 +147,7 @@ describe('Profile Controller', () => {
 
   describe('getEditProfile', () => {
 
-    it('should render edit profile form successfully', async () => {
+    it('seharusnya me-render form edit profil dengan sukses', async () => {
       // Arrange
       const mockUserData = [
         {
@@ -183,7 +177,7 @@ describe('Profile Controller', () => {
       });
     });
 
-    it('should redirect to login if user not in session', async () => {
+    it('seharusnya mengarahkan ke halaman login jika user tidak ada di session', async () => {
       // Arrange
       mockReq.session.user = null;
 
@@ -206,7 +200,7 @@ describe('Profile Controller', () => {
       mockReq.flash = jest.fn();
     });
 
-    it('should update profile successfully without password', async () => {
+    it('seharusnya memperbarui profil dengan sukses tanpa mengubah password', async () => {
       // Arrange
       mockReq.body = {
         id_anggota: 1,
@@ -249,7 +243,7 @@ describe('Profile Controller', () => {
       expect(mockRedirect).toHaveBeenCalledWith('/hmsi/profile');
     });
 
-    it('should update profile with new photo', async () => {
+    it('seharusnya memperbarui profil dengan foto baru dan menghapus foto lama', async () => {
       // Arrange
       mockReq.body = {
         id_anggota: 1,
@@ -287,7 +281,7 @@ describe('Profile Controller', () => {
       expect(mockRedirect).toHaveBeenCalledWith('/hmsi/profile');
     });
 
-    it('should update profile with password change', async () => {
+    it('seharusnya memperbarui profil dengan perubahan password', async () => {
       // Arrange
       mockReq.body = {
         id_anggota: 1,
@@ -324,7 +318,7 @@ describe('Profile Controller', () => {
       expect(mockRedirect).toHaveBeenCalledWith('/hmsi/profile');
     });
 
-    it('should handle password mismatch', async () => {
+    it('seharusnya menangani password yang tidak cocok', async () => {
       // Arrange
       mockReq.body = {
         id_anggota: 1,
@@ -342,7 +336,7 @@ describe('Profile Controller', () => {
       expect(db.query).not.toHaveBeenCalled();
     });
 
-    it('should handle missing required fields', async () => {
+    it('seharusnya menangani field wajib yang hilang', async () => {
       // Arrange
       mockReq.body = {
         id_anggota: '',
@@ -358,7 +352,7 @@ describe('Profile Controller', () => {
       expect(db.query).not.toHaveBeenCalled();
     });
 
-    it('should redirect to login if no user in session', async () => {
+    it('seharusnya mengarahkan ke halaman login jika tidak ada user di session', async () => {
       // Arrange
       mockReq.session.user = null;
       mockReq.body = {
@@ -373,7 +367,7 @@ describe('Profile Controller', () => {
       expect(mockRedirect).toHaveBeenCalledWith('/auth/login');
     });
 
-    it('should handle database error', async () => {
+    it('seharusnya menangani error database dan mengarahkan ke form edit dengan pesan error', async () => {
       // Arrange
       mockReq.body = {
         id_anggota: 1,
@@ -390,7 +384,7 @@ describe('Profile Controller', () => {
       expect(mockRedirect).toHaveBeenCalledWith('/hmsi/profile/edit');
     });
 
-    it('should handle file deletion error gracefully', async () => {
+    it('seharusnya menangani error penghapusan file dengan elegan', async () => {
       // Arrange
       mockReq.body = {
         id_anggota: 1,

@@ -9,7 +9,6 @@ const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
 
 // 3. Beritahu Jest untuk me-mock dependensi ini
-// Setiap kali 'require' dipanggil di controller, Jest akan berikan versi palsu
 jest.mock('../../config/db');
 jest.mock('fs');
 jest.mock('uuid');
@@ -25,14 +24,8 @@ let mockRender;
 let mockRedirect;
 let mockStatus;
 let mockSend;
-let mockDownload; // <-- Ditambahkan untuk tes download
+let mockDownload; 
 
-// (Opsional tapi direkomendasikan) Bungkam console.log/warn/error
-beforeAll(() => {
-  jest.spyOn(console, 'log').mockImplementation(() => {});
-  jest.spyOn(console, 'warn').mockImplementation(() => {});
-  jest.spyOn(console, 'error').mockImplementation(() => {});
-});
 
 // 'beforeEach' dijalankan sebelum SETIAP tes ('it')
 beforeEach(() => {
@@ -44,14 +37,14 @@ beforeEach(() => {
   mockRedirect = jest.fn();
   mockSend = jest.fn();
   mockStatus = jest.fn(() => ({ send: mockSend })); // Ini untuk .status(403).send(...)
-  mockDownload = jest.fn(); // <-- Ditambahkan
+  mockDownload = jest.fn();
 
   mockRes = {
     render: mockRender,
     redirect: mockRedirect,
     status: mockStatus,
     send: mockSend,
-    download: mockDownload, // <-- Ditambahkan
+    download: mockDownload, 
   };
 
   // 6. Buat objek req palsu (default)
@@ -59,9 +52,9 @@ beforeEach(() => {
     session: {
       user: {
         id_anggota: 1,
-        id_divisi: 10, // Divisi BPH (misalnya)
+        id_divisi: 10, 
         role: 'HMSI',
-        nama_divisi: 'BPH',
+        nama_divisi: 'Eksternal',
       },
     },
     params: {},
@@ -82,7 +75,7 @@ describe('Proker Controller', () => {
   // ==========================
   describe('getAllProker', () => {
     
-    it('should fetch prokers for user division and render view', async () => {
+    it('seharusnya mengambil semua proker divisi user dan me-render view', async () => {
       // 1. Arrange (Persiapan)
       const mockProkerData = [
         { id: 1, namaProker: 'Proker A', status_db: 'Sedang Berjalan' },
@@ -90,7 +83,7 @@ describe('Proker Controller', () => {
         { id: 3, namaProker: 'Proker C', status_db: null }, // Tes helper getStatusFromDB
       ];
       
-      // ✅ PERBAIKAN: Hapus satu lapisan array [ ]
+      // Atur mock db.query
       db.query.mockResolvedValue([ mockProkerData ]);
 
       // 2. Act (Panggil fungsi)
@@ -128,7 +121,7 @@ describe('Proker Controller', () => {
   // ==========================
   describe('createProker', () => {
 
-    it('should create proker and notification, then redirect', async () => {
+    it('seharusnya membuat proker dan notifikasi, lalu mengarahkan (redirect)', async () => {
       // 1. Arrange
       mockReq.body = {
         namaProker: 'Proker Baru',
@@ -144,7 +137,7 @@ describe('Proker Controller', () => {
       // Atur mock UUID agar bisa ditebak
       uuidv4.mockReturnValue('mock-uuid-12345');
       // Atur mock db.query (kita asumsikan sukses, jadi tidak perlu return value)
-      db.query.mockResolvedValue([[]]); // Cukup mockResolvedValue() jika tidak ada [rows]
+      db.query.mockResolvedValue([[]]); 
 
       // 2. Act
       await prokerController.createProker(mockReq, mockRes);
@@ -165,11 +158,10 @@ describe('Proker Controller', () => {
           1, // id_anggota
           10, // id_divisi
           'dokumen-baru.pdf', // Dokumen
-          'Sedang Berjalan', // Status (default)
+          'Sedang Berjalan', // Status 
         ]
       );
 
-      // ✅ PERBAIKAN: Sesuaikan parameter notifikasi (4, bukan 6)
       // Cek panggilan INSERT ke Notifikasi
       expect(db.query).toHaveBeenCalledWith(
         expect.stringContaining('INSERT INTO Notifikasi'),
@@ -186,17 +178,16 @@ describe('Proker Controller', () => {
       expect(mockRedirect).toHaveBeenCalledWith('/hmsi/kelola-proker?success=Program Kerja berhasil ditambahkan');
     });
 
-    it('should re-render form with error if tanggal is invalid', async () => {
+    it('seharusnya me-render ulang form dengan error jika tanggal tidak valid', async () => {
       // 1. Arrange
-      // ✅ PERBAIKAN: Lengkapi semua field wajib
       mockReq.body = {
         namaProker: 'Proker Gagal',
-        deskripsi: 'Deskripsi lengkap', // <-- DILENGKAPI
+        deskripsi: 'Deskripsi lengkap', 
         tanggal_mulai: '2025-01-10',
         tanggal_selesai: '2025-01-01', // Tanggal selesai < tanggal mulai
-        penanggungJawab: 'PJ Lengkap', // <-- DILENGKAPI
-        targetKuantitatif: '100', // <-- DILENGKAPI
-        targetKualitatif: 'Baik', // <-- DILENGKAPI
+        penanggungJawab: 'PJ Lengkap', 
+        targetKuantitatif: '100', 
+        targetKualitatif: 'Baik', 
       };
       
       // 2. Act
@@ -220,7 +211,7 @@ describe('Proker Controller', () => {
   // ==========================
   describe('deleteProker', () => {
 
-    it('should return 403 (Forbidden) if proker status is "Selesai"', async () => {
+    it('seharusnya mengembalikan 403 jika status proker "Selesai" (tidak boleh dihapus)', async () => {
       // 1. Arrange
       mockReq.params.id = 'proker-selesai';
       const mockProkerSelesai = {
@@ -244,7 +235,7 @@ describe('Proker Controller', () => {
       expect(fs.unlinkSync).not.toHaveBeenCalled();
     });
 
-    it('should delete proker, reports, files, and redirect if status is valid', async () => {
+    it('seharusnya menghapus proker, laporan, file, dan mengarahkan jika status valid', async () => {
       // 1. Arrange
       mockReq.params.id = 'proker-valid';
       const mockProkerValid = {
@@ -263,7 +254,7 @@ describe('Proker Controller', () => {
         .mockResolvedValueOnce([ mockLaporanTerkait ]) // Panggilan 2: SELECT Laporan
         .mockResolvedValue([[]]); // Panggilan 3, 4, 5 (DELETE Laporan, INSERT Notif, DELETE Proker)
 
-      // Atur mock fs (pura-pura file ada)
+      // Atur mock fs 
       fs.existsSync.mockReturnValue(true);
       // Atur mock uuid untuk notifikasi
       uuidv4.mockReturnValue('mock-uuid-delete');
@@ -289,24 +280,19 @@ describe('Proker Controller', () => {
     });
   });
 
-  // ========================================================
-  //  TES BARU DITAMBAHKAN DI BAWAH INI 
-  // ========================================================
-
   // ==========================
   // TES FUNGSI: getDetailProker
   // ==========================
   describe('getDetailProker', () => {
 
-    it('should render detail proker if user is authorized', async () => {
+    it('seharusnya me-render detail proker jika user memiliki izin', async () => {
       // 1. Arrange
       mockReq.params.id = 'proker-1';
       const mockProker = {
         id: 'proker-1',
         namaProker: 'Proker Detail',
         id_divisi: 10, // Divisi user adalah 10 (dari mockReq)
-        status_db: 'Selesai',
-        // ... field lain
+        status_db: 'Selesai'
       };
       db.query.mockResolvedValue([ [mockProker] ]);
 
@@ -326,7 +312,7 @@ describe('Proker Controller', () => {
       );
     });
 
-    it('should return 403 (Forbidden) if user requests proker from other division', async () => {
+    it('seharusnya mengembalikan 403 jika user mengakses proker divisi lain', async () => {
       // 1. Arrange
       mockReq.params.id = 'proker-lain';
       const mockProkerLain = {
@@ -343,7 +329,7 @@ describe('Proker Controller', () => {
       expect(mockSend).toHaveBeenCalledWith(expect.stringContaining('Akses ditolak'));
     });
 
-    it('should return 404 (Not Found) if proker does not exist', async () => {
+    it('seharusnya mengembalikan 404 jika proker tidak ditemukan', async () => {
       // 1. Arrange
       mockReq.params.id = 'proker-404';
       db.query.mockResolvedValue([ [] ]); // Mock DB return array kosong
@@ -362,7 +348,7 @@ describe('Proker Controller', () => {
   // ==========================
   describe('getEditProker', () => {
     
-    it('should render edit form if proker status is valid', async () => {
+    it('seharusnya me-render form edit jika status proker valid', async () => {
       // 1. Arrange
       mockReq.params.id = 'proker-valid';
       const mockProker = { 
@@ -381,7 +367,7 @@ describe('Proker Controller', () => {
       );
     });
 
-    it('should return 403 (Forbidden) if proker status is "Selesai"', async () => {
+    it('seharusnya mengembalikan 403 jika status proker "Selesai" (tidak boleh diubah)', async () => {
       // 1. Arrange
       mockReq.params.id = 'proker-selesai';
       const mockProker = { Status: 'Selesai' }; // Status final
@@ -407,17 +393,17 @@ describe('Proker Controller', () => {
       Status: 'Sedang Berjalan', // Status valid
     };
 
-    it('should update proker (no new file) and redirect', async () => {
+    it('seharusnya memperbarui proker (tanpa file baru) dan mengarahkan', async () => {
       // 1. Arrange
       mockReq.params.id = 'proker-1';
       mockReq.body = { 
         namaProker: 'Proker Update', 
-        deskripsi: 'Deskripsi Update', // <-- Tambahkan field wajib
+        deskripsi: 'Deskripsi Update', 
         tanggal_mulai: '2025-01-01', 
         tanggal_selesai: '2025-01-10',
-        penanggungJawab: 'PJ Update', // <-- Tambahkan field wajib
-        targetKuantitatif: '100', // <-- Tambahkan field wajib
-        targetKualitatif: 'Baik', // <-- Tambahkan field wajib
+        penanggungJawab: 'PJ Update', 
+        targetKuantitatif: '100', 
+        targetKualitatif: 'Baik', 
       };
       mockReq.file = null; // Tidak ada file baru
       
@@ -448,17 +434,17 @@ describe('Proker Controller', () => {
       expect(mockRedirect).toHaveBeenCalledWith(expect.stringContaining('berhasil diperbarui'));
     });
 
-    it('should update proker (with new file) and remove old file', async () => {
+    it('seharusnya memperbarui proker (dengan file baru) dan menghapus file lama', async () => {
       // 1. Arrange
       mockReq.params.id = 'proker-1';
       mockReq.body = { 
         namaProker: 'Proker Update', 
-        deskripsi: 'Deskripsi Update', // <-- Tambahkan field wajib
+        deskripsi: 'Deskripsi Update', 
         tanggal_mulai: '2025-01-01', 
         tanggal_selesai: '2025-01-10',
-        penanggungJawab: 'PJ Update', // <-- Tambahkan field wajib
-        targetKuantitatif: '100', // <-- Tambahkan field wajib
-        targetKualitatif: 'Baik', // <-- Tambahkan field wajib
+        penanggungJawab: 'PJ Update', 
+        targetKuantitatif: '100', 
+        targetKualitatif: 'Baik', 
       };
       mockReq.file = { filename: 'file-baru.pdf' }; // Ada file baru
       
@@ -488,7 +474,7 @@ describe('Proker Controller', () => {
       expect(mockRedirect).toHaveBeenCalledWith(expect.stringContaining('berhasil diperbarui'));
     });
 
-    it('should return 403 (Forbidden) if updating a "Selesai" proker', async () => {
+    it('seharusnya mengembalikan 403 jika memperbarui proker dengan status "Selesai"', async () => {
       // 1. Arrange
       mockReq.params.id = 'proker-selesai';
       const mockProkerSelesai = { Status: 'Selesai' }; // Status final
@@ -499,6 +485,11 @@ describe('Proker Controller', () => {
       mockReq.body = { 
         tanggal_mulai: '2025-01-01', 
         tanggal_selesai: '2025-01-10',
+        namaProker: 'Test', // Tambahkan field wajib
+        deskripsi: 'Test', // Tambahkan field wajib
+        penanggungJawab: 'Test', // Tambahkan field wajib
+        targetKuantitatif: 'Test', // Tambahkan field wajib
+        targetKualitatif: 'Test', // Tambahkan field wajib
       };
 
       // 2. Act
@@ -517,7 +508,7 @@ describe('Proker Controller', () => {
   // ==========================
   describe('downloadDokumenPendukung', () => {
 
-    it('should download the file if it exists', async () => {
+    it('seharusnya mengunduh file jika ditemukan', async () => {
       // 1. Arrange
       mockReq.params.id = 'proker-1';
       db.query.mockResolvedValue([ [{ Dokumen_pendukung: 'file-ada.pdf' }] ]);
@@ -535,7 +526,7 @@ describe('Proker Controller', () => {
       );
     });
 
-    it('should return 404 if file not found in DB', async () => {
+    it('seharusnya mengembalikan 404 jika file tidak ditemukan di DB', async () => {
       // 1. Arrange
       mockReq.params.id = 'proker-2';
       // Mock proker ada, tapi Dokumen_pendukung = null
@@ -549,7 +540,7 @@ describe('Proker Controller', () => {
       expect(mockSend).toHaveBeenCalledWith(expect.stringContaining('Dokumen pendukung tidak ditemukan'));
     });
 
-    it('should return 404 if file not found on server (fs)', async () => {
+    it('seharusnya mengembalikan 404 jika file tidak ditemukan di server', async () => {
       // 1. Arrange
       mockReq.params.id = 'proker-3';
       db.query.mockResolvedValue([ [{ Dokumen_pendukung: 'file-hilang.pdf' }] ]);
@@ -564,4 +555,4 @@ describe('Proker Controller', () => {
     });
   });
 
-}); // <- Ini adalah penutup dari 'describe('Proker Controller')'
+}); 

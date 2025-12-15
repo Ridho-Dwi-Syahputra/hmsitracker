@@ -22,7 +22,7 @@ function formatTanggal(dateValue) {
 }
 
 // =====================================================
-// 📄 Ambil semua notifikasi untuk HMSI sesuai divisi
+// Ambil semua notifikasi untuk HMSI sesuai divisi
 // =====================================================
 exports.getAllNotifikasi = async (req, res) => {
   try {
@@ -43,7 +43,6 @@ exports.getAllNotifikasi = async (req, res) => {
       });
     }
 
-    // --- KODE BARU DIMULAI DI SINI (QUERY TELAH DIUBAH) ---
     const [rows] = await db.query(
       `
       SELECT 

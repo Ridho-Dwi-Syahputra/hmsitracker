@@ -20,7 +20,7 @@ function readMsgs(req, key) {
 }
 
 // =====================================================
-// 📄 GET: Halaman profil HMSI
+// GET: Halaman profil HMSI
 // =====================================================
 exports.getProfile = async (req, res) => {
   try {
@@ -60,7 +60,7 @@ exports.getProfile = async (req, res) => {
 };
 
 // =====================================================
-// 📄 GET: Halaman edit profil HMSI
+// GET: Halaman edit profil HMSI
 // =====================================================
 exports.getEditProfile = async (req, res) => {
   try {
@@ -100,7 +100,7 @@ exports.getEditProfile = async (req, res) => {
 };
 
 // =====================================================
-// 💾 POST: Simpan perubahan profil HMSI
+//  POST: Simpan perubahan profil HMSI
 // =====================================================
 exports.postEditProfile = async (req, res) => {
   try {
@@ -140,7 +140,7 @@ exports.postEditProfile = async (req, res) => {
       return res.redirect("/hmsi/profile/edit");
     }
 
-    // 🔹 Siapkan query update
+    // Siapkan query update
     let query = "UPDATE user SET id_anggota = ?, nama = ?, foto_profile = ?";
     const values = [id_anggota, nama, foto_profile];
 

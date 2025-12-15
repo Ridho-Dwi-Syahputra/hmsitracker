@@ -57,7 +57,7 @@ router.get(
   dpaProkerController.getDetailProkerDPA
 );
 
-// 🔄 Update Status Proker (DPA → tandai Selesai / Gagal)
+// Update Status Proker (DPA → tandai Selesai / Gagal)
 router.post(
   "/proker/:id/status",
   requireLogin,
@@ -79,7 +79,7 @@ router.get(
   dpaLaporanController.getAllLaporanDPA
 );
 
-// ✅ BARU: Halaman untuk laporan yang SUDAH dievaluasi (Diterima)
+// BARU: Halaman untuk laporan yang SUDAH dievaluasi (Diterima)
 router.get(
   "/laporanDiterima",
   requireLogin,

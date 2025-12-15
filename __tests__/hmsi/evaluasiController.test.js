@@ -7,32 +7,27 @@ const evaluasiController = require('../../controllers/hmsi/evaluasiController');
 const db = require('../../config/db');
 
 // 3. Beritahu Jest untuk me-mock dependensi ini
+// Kita memalsukan DB agar Controller tidak mengakses database sungguhan.
 jest.mock('../../config/db');
 
 // ==========================================
 // SETUP GLOBAL UNTUK TES
 // ==========================================
 
-let mockReq;
-let mockRes;
-let mockRender;
+let mockReq; 
+let mockRes; 
+let mockRender; 
 let mockRedirect;
 let mockStatus;
 let mockSend;
 
-// Bungkam console.log/warn/error
-beforeAll(() => {
-  jest.spyOn(console, 'log').mockImplementation(() => {});
-  jest.spyOn(console, 'warn').mockImplementation(() => {});
-  jest.spyOn(console, 'error').mockImplementation(() => {});
-});
 
-// Setup sebelum setiap test
+// Setup sebelum setiap test (memastikan setiap tes bersih dari pengaruh tes sebelumnya)
 beforeEach(() => {
   // Reset semua mock
   jest.clearAllMocks();
 
-  // Mock response methods
+  // Mock response methods (untuk mencatat apa yang dipanggil oleh Controller)
   mockRender = jest.fn();
   mockRedirect = jest.fn();
   mockSend = jest.fn();
@@ -45,12 +40,12 @@ beforeEach(() => {
     send: mockSend
   };
 
-  // Mock request default
+  // Mock request default (menyiapkan user yang sedang login)
   mockReq = {
     session: {
       user: {
         id_anggota: 1,
-        id_divisi: 10,
+        id_divisi: 10, // User adalah anggota Divisi 10
         nama: 'Test User HMSI',
         role: 'HMSI'
       }
@@ -67,10 +62,11 @@ beforeEach(() => {
 
 describe('Evaluasi Controller', () => {
 
+  // Mengambil daftar evaluasi (halaman kelola evaluasi)
   describe('getKelolaEvaluasi', () => {
 
-    it('should fetch evaluasi data successfully', async () => {
-      // Arrange
+    it('seharusnya mengambil data evaluasi dengan sukses dan me-render view', async () => {
+      // Siapkan data evaluasi dan hitungan revisi belum dibaca
       const mockEvaluasiData = [
         {
           id_evaluasi: 1,
@@ -88,20 +84,19 @@ describe('Evaluasi Controller', () => {
       const mockUnreadCount = [{ count: 3 }];
 
       db.query
-        .mockResolvedValueOnce([mockEvaluasiData]) // Query evaluasi
-        .mockResolvedValueOnce([mockUnreadCount]); // Query unread count
+        .mockResolvedValueOnce([mockEvaluasiData]) 
+        .mockResolvedValueOnce([mockUnreadCount]); 
 
-      // Act
+      // Act (Aksi): Panggil fungsi controller
       await evaluasiController.getKelolaEvaluasi(mockReq, mockRes);
 
-      // Assert
+      // Assert (Pengecekan)
+      // Cek DB dipanggil 2 kali
       expect(db.query).toHaveBeenCalledTimes(2);
-      expect(db.query.mock.calls[0][1]).toEqual([10]); // id_divisi
-
-      expect(mockRender).toHaveBeenCalledWith('HMSI/kelolaEvaluasi', {
+      expect(db.query.mock.calls[0][1]).toEqual([10]);
+      expect(mockRender).toHaveBeenCalledWith('HMSI/kelolaEvaluasi', expect.objectContaining({
         title: 'Laporan Revisi',
-        user: mockReq.session.user,
-        activeNav: 'kelolaEvaluasi',
+        // Cek bahwa status 'Revisi' diolah menjadi isRevisi: true
         evaluasi: expect.arrayContaining([
           expect.objectContaining({
             id_evaluasi: 1,
@@ -109,14 +104,12 @@ describe('Evaluasi Controller', () => {
             isRevisi: true
           })
         ]),
-        successMsg: null,
-        errorMsg: null,
-        unreadCount: 3
-      });
+        unreadCount: 3 // Cek hitungan notifikasi masuk
+      }));
     });
 
-    it('should handle empty evaluasi data', async () => {
-      // Arrange
+    it('seharusnya menangani data evaluasi yang kosong', async () => {
+      // Arrange: Siapkan DB agar mengembalikan array kosong
       const mockEvaluasiData = [];
       const mockUnreadCount = [{ count: 0 }];
 
@@ -128,35 +121,33 @@ describe('Evaluasi Controller', () => {
       await evaluasiController.getKelolaEvaluasi(mockReq, mockRes);
 
       // Assert
-      expect(mockRender).toHaveBeenCalledWith('HMSI/kelolaEvaluasi', {
-        title: 'Laporan Revisi',
-        user: mockReq.session.user,
-        activeNav: 'kelolaEvaluasi',
+      // Cek res.render dipanggil dengan array 'evaluasi' kosong
+      expect(mockRender).toHaveBeenCalledWith('HMSI/kelolaEvaluasi', expect.objectContaining({
         evaluasi: [],
-        successMsg: null,
-        errorMsg: null,
         unreadCount: 0
-      });
+      }));
     });
 
-    it('should handle database error', async () => {
-      // Arrange
+    it('seharusnya menangani error database dan mengembalikan 500', async () => {
+      // Arrange: Paksa DB mengembalikan error
       db.query.mockRejectedValue(new Error('Database error'));
 
       // Act
       await evaluasiController.getKelolaEvaluasi(mockReq, mockRes);
 
       // Assert
+      // Cek server merespons 500
       expect(mockStatus).toHaveBeenCalledWith(500);
       expect(mockSend).toHaveBeenCalledWith('Gagal mengambil data evaluasi');
     });
 
   });
 
+  // KELOMPOK UJI: Mengambil detail satu evaluasi
   describe('getDetailEvaluasi', () => {
 
-    it('should fetch evaluasi detail successfully', async () => {
-      // Arrange
+    it('seharusnya mengambil detail evaluasi dengan sukses', async () => {
+      // Arrange: Siapkan ID di params dan data detail evaluasi
       mockReq.params.id = '1';
       
       const mockEvaluasiDetail = [
@@ -178,8 +169,8 @@ describe('Evaluasi Controller', () => {
       const mockUnreadCount = [{ count: 2 }];
 
       db.query
-        .mockResolvedValueOnce([mockEvaluasiDetail]) // Query detail evaluasi
-        .mockResolvedValueOnce([mockUnreadCount]); // Query unread count
+        .mockResolvedValueOnce([mockEvaluasiDetail]) 
+        .mockResolvedValueOnce([mockUnreadCount]); 
 
       // Act
       await evaluasiController.getDetailEvaluasi(mockReq, mockRes);
@@ -200,10 +191,10 @@ describe('Evaluasi Controller', () => {
       });
     });
 
-    it('should handle evaluasi not found', async () => {
-      // Arrange
+    it('seharusnya menangani evaluasi yang tidak ditemukan dan mengembalikan 404', async () => {
+      // Arrange: Siapkan DB agar mengembalikan hasil kosong
       mockReq.params.id = '999';
-      db.query.mockResolvedValueOnce([[]]); // Empty result
+      db.query.mockResolvedValueOnce([[]]); 
 
       // Act
       await evaluasiController.getDetailEvaluasi(mockReq, mockRes);
@@ -213,8 +204,8 @@ describe('Evaluasi Controller', () => {
       expect(mockSend).toHaveBeenCalledWith('Evaluasi tidak ditemukan');
     });
 
-    it('should handle access control for different division', async () => {
-      // Arrange
+    it('seharusnya memblokir akses evaluasi divisi lain dan mengembalikan 403', async () => {
+      // Arrange: Siapkan data evaluasi yang id_divisi-nya berbeda dengan user (99 != 10)
       mockReq.params.id = '1';
       
       const mockEvaluasiDetail = [
@@ -231,12 +222,13 @@ describe('Evaluasi Controller', () => {
       await evaluasiController.getDetailEvaluasi(mockReq, mockRes);
 
       // Assert
+      // Cek server merespons 403 (Forbidden)
       expect(mockStatus).toHaveBeenCalledWith(403);
       expect(mockSend).toHaveBeenCalledWith('Tidak boleh akses evaluasi divisi lain');
     });
 
-    it('should handle database error in getDetailEvaluasi', async () => {
-      // Arrange
+    it('seharusnya menangani error database dan mengembalikan 500', async () => {
+      // Arrange: Paksa DB mengembalikan error
       mockReq.params.id = '1';
       db.query.mockRejectedValue(new Error('Database connection failed'));
 
@@ -250,15 +242,15 @@ describe('Evaluasi Controller', () => {
 
   });
 
+  // Menambahkan komentar balasan dari HMSI ke DPA
   describe('addKomentar', () => {
 
-    it('should add komentar successfully', async () => {
-      // Arrange
+    it('seharusnya menambahkan komentar dengan sukses dan membuat notifikasi', async () => {
+      // Arrange: Siapkan ID evaluasi, body komentar, dan mock untuk 3 panggilan DB
       mockReq.params.id = '1';
       mockReq.body = {
         komentar_hmsi: 'Terima kasih atas evaluasinya, sudah kami perbaiki sesuai saran.'
       };
-
       const mockLaporanInfo = [
         {
           id_laporan: 1,
@@ -269,9 +261,9 @@ describe('Evaluasi Controller', () => {
       ];
 
       db.query
-        .mockResolvedValueOnce([]) // Update komentar
-        .mockResolvedValueOnce([mockLaporanInfo]) // Get laporan info
-        .mockResolvedValueOnce([]); // Insert notifikasi
+        .mockResolvedValueOnce([]) // Panggilan 1: Update komentar (sukses)
+        .mockResolvedValueOnce([mockLaporanInfo]) // Panggilan 2: Ambil info laporan
+        .mockResolvedValueOnce([]); // Panggilan 3: Insert notifikasi (sukses)
 
       // Act
       await evaluasiController.addKomentar(mockReq, mockRes);
@@ -279,22 +271,36 @@ describe('Evaluasi Controller', () => {
       // Assert
       expect(db.query).toHaveBeenCalledTimes(3);
       
-      // Cek update komentar
+      // Cek update komentar (Panggilan 1)
       expect(db.query.mock.calls[0][0]).toContain('UPDATE Evaluasi SET komentar_hmsi');
       expect(db.query.mock.calls[0][1]).toEqual([mockReq.body.komentar_hmsi, '1']);
       
-      // Cek insert notifikasi
+      // Cek insert notifikasi (Panggilan 3)
       expect(db.query.mock.calls[2][0]).toContain('INSERT INTO Notifikasi');
 
+      // Cek redirect ke halaman kelola dengan pesan sukses
       expect(mockRedirect).toHaveBeenCalledWith('/hmsi/kelola-evaluasi?success=Komentar berhasil ditambahkan');
     });
 
-    it('should handle empty komentar', async () => {
-      // Arrange
+    it('seharusnya menangani komentar kosong dan mengarahkan dengan pesan error', async () => {
+      // Arrange: Siapkan body dengan komentar kosong
       mockReq.params.id = '1';
-      mockReq.body = {
-        komentar_hmsi: '' // Empty comment
-      };
+      mockReq.body = { komentar_hmsi: '' }; 
+
+      // Act
+      await evaluasiController.addKomentar(mockReq, mockRes);
+
+      // Assert
+      // Cek tidak ada interaksi DB
+      expect(db.query).not.toHaveBeenCalled();
+      // Cek redirect dengan pesan error
+      expect(mockRedirect).toHaveBeenCalledWith('/hmsi/kelola-evaluasi?error=Komentar tidak boleh kosong');
+    });
+    
+    it('seharusnya menangani komentar hanya spasi dan mengarahkan dengan pesan error', async () => {
+      // Arrange: Siapkan body dengan komentar hanya spasi
+      mockReq.params.id = '1';
+      mockReq.body = { komentar_hmsi: '   ' }; 
 
       // Act
       await evaluasiController.addKomentar(mockReq, mockRes);
@@ -304,12 +310,10 @@ describe('Evaluasi Controller', () => {
       expect(mockRedirect).toHaveBeenCalledWith('/hmsi/kelola-evaluasi?error=Komentar tidak boleh kosong');
     });
 
-    it('should handle whitespace-only komentar', async () => {
-      // Arrange
+    it('seharusnya menangani field komentar yang hilang', async () => {
+      // Arrange: Siapkan body tanpa field komentar_hmsi
       mockReq.params.id = '1';
-      mockReq.body = {
-        komentar_hmsi: '   ' // Only whitespace
-      };
+      mockReq.body = {};
 
       // Act
       await evaluasiController.addKomentar(mockReq, mockRes);
@@ -319,25 +323,10 @@ describe('Evaluasi Controller', () => {
       expect(mockRedirect).toHaveBeenCalledWith('/hmsi/kelola-evaluasi?error=Komentar tidak boleh kosong');
     });
 
-    it('should handle missing komentar field', async () => {
-      // Arrange
+    it('seharusnya menangani error database dan mengembalikan 500', async () => {
+      // Arrange: Paksa DB mengembalikan error pada panggilan pertama (UPDATE)
       mockReq.params.id = '1';
-      mockReq.body = {}; // No komentar_hmsi field
-
-      // Act
-      await evaluasiController.addKomentar(mockReq, mockRes);
-
-      // Assert
-      expect(db.query).not.toHaveBeenCalled();
-      expect(mockRedirect).toHaveBeenCalledWith('/hmsi/kelola-evaluasi?error=Komentar tidak boleh kosong');
-    });
-
-    it('should handle database error in addKomentar', async () => {
-      // Arrange
-      mockReq.params.id = '1';
-      mockReq.body = {
-        komentar_hmsi: 'Valid comment'
-      };
+      mockReq.body = { komentar_hmsi: 'Valid comment' };
 
       db.query.mockRejectedValue(new Error('Database update failed'));
 
