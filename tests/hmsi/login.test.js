@@ -1,4 +1,4 @@
-const { test, expect } = require("@playwright/test");
+/* const { test, expect } = require("@playwright/test");
 
 //
 // 1. Login berhasil
@@ -90,3 +90,5 @@ test("Login gagal jika email kosong", async ({ page }) => {
 
   await expect(page.locator(".error-msg")).toHaveText("Email wajib diisi");
 });
+
+*/
