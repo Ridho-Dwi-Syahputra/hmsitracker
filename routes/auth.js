@@ -90,18 +90,18 @@ router.post("/login", async (req, res) => {
     // =====================================================
     if (user.role === "HMSI" && !user.id_divisi) {
       console.warn(
-        `⚠️ HMSI "${user.nama}" login tanpa id_divisi! Beberapa fitur mungkin tidak berfungsi.`
+        `HMSI "${user.nama}" login tanpa id_divisi! Beberapa fitur mungkin tidak berfungsi.`
       );
     }
 
     console.log(
-      `✅ Login sukses: ${user.nama} (${user.role}${
+      `Login sukses: ${user.nama} (${user.role}${
         user.nama_divisi ? " - " + user.nama_divisi : ""
       })`
     );
 
     // =====================================================
-    // 🚦 Redirect berdasarkan role
+    // Redirect berdasarkan role
     // =====================================================
     switch (user.role) {
       case "Admin":
@@ -115,7 +115,7 @@ router.post("/login", async (req, res) => {
         return res.redirect("/");
     }
   } catch (err) {
-    console.error("❌ [auth.js] Error saat login:", err.message);
+    console.error(" [auth.js] Error saat login:", err.message);
     res.render("auth/login", {
       errorMsg: "Terjadi kesalahan server. Silakan coba lagi nanti.",
     });
@@ -127,7 +127,7 @@ router.post("/login", async (req, res) => {
 // =====================================================
 router.get("/logout", (req, res) => {
   req.session.destroy((err) => {
-    if (err) console.error("⚠️ Error saat destroy session:", err.message);
+    if (err) console.error(" Error saat destroy session:", err.message);
     res.redirect("/auth/login");
   });
 });

@@ -1,7 +1,7 @@
 /* const { test, expect } = require("@playwright/test");
 
 //
-// 1. Login berhasil
+//   1. Login berhasil
 //
 test("Admin berhasil login", async ({ page }) => {
 
@@ -28,7 +28,6 @@ test("Login gagal jika password salah", async ({ page }) => {
 
   await page.click('button[type="submit"]');
 
-  // Sesuaikan dengan elemen error-mu
   await expect(page.locator(".error-msg")).toHaveText("Email atau password salah");
 });
 
@@ -69,7 +68,7 @@ test("Login gagal jika password kosong", async ({ page }) => {
 
   await page.goto("http://localhost:3000/auth/login");
 
-  await page.fill('input[name="email"]', "ridhooo@example.com");
+  await page.fill('input[name="email"]', "email@example.com");
 
   await page.click('button[type="submit"]');
 
@@ -78,7 +77,7 @@ test("Login gagal jika password kosong", async ({ page }) => {
 
 
 //
-// ❌ 6. Login gagal - hanya password terisi
+// 6. Login gagal - hanya password terisi
 //
 test("Login gagal jika email kosong", async ({ page }) => {
 
