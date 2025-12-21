@@ -69,9 +69,9 @@ app.use(unreadNotif); // ⬅️ Sekarang unreadCount otomatis ada di semua view
 const authRouter = require("./routes/auth");
 app.use("/auth", authRouter);
 
-// // Default / Home
-// const indexRouter = require("./routes/index");
-// app.use("/", indexRouter);
+// Default / Home
+const indexRouter = require("./routes/index");
+app.use("/", indexRouter);
 
 // User Management
 const usersRouter = require("./routes/users");
