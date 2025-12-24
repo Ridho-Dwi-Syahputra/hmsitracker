@@ -1,0 +1,17 @@
+node_modules/
+.env
+.git/
+*.log
+logs/
+__tests__/
+tests/
+*.test.js
+*.spec.js
+jest.config.js
+jest.setup.js
+babel.config.js
+playwright.config.js
+.vscode/
+.idea/
+*.md
+!README.md

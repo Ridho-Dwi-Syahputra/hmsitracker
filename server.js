@@ -157,7 +157,10 @@ process.on('SIGTERM', () => {
 // =====================================================
 // 7. Start Server
 // =====================================================
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}/auth/login`);
+const HOST = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
+
+app.listen(PORT, HOST, () => {
+  console.log(`🚀 Server running on http://${HOST}:${PORT}/auth/login`);
   console.log(`📁 Auto-cleanup service logs: logs/services/autoDeleteNotifikasi.log`);
+  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
 });
