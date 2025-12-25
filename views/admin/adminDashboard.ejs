@@ -2,105 +2,109 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Admin | HMSI Tracker</title>
-    <link rel="icon" type="image/png" href="/images/HMSI_Tracker.png">
-    <link rel="apple-touch-icon" href="/images/HMSI_Tracker.png">
+    <title>Dashboard Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
         crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
-<body class="bg-orange-50 min-h-screen flex flex-col">
+<body class="bg-gray-50">
 
-    <%- include('../partials/navbarAdmin', { user: user }) %>
+  <%- include('../partials/navbarAdmin', { user: user }) %>
+  <%- include('../partials/sidebarAdmin', { user: user, activeNav: activeNav }) %>
 
-    <%- include('../partials/sidebarAdmin', { user: user, activeNav: activeNav }) %>
+  <main class="lg:ml-80 px-6 pt-20 pb-24">
 
-    <main class="lg:ml-72 px-6 pt-20 pb-8 flex-grow">
+    <div class="max-w-6xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-orange-200 mb-8">
+      <div class="bg-orange-500 text-white px-6 py-8 flex items-center justify-between">
+        <div>
+          <h1 class="text-3xl font-bold mb-2">
+            Selamat Datang, <%= user.name || user.nama %> 👋
+          </h1>
+          <p class="text-orange-100 text-lg">
+            Dashboard Admin – Ringkasan sistem HMSI Tracker
+          </p>
+        </div>
+        <div class="hidden md:block">
+          <i class="fa-solid fa-chart-line text-6xl text-orange-200"></i>
+        </div>
+      </div>
+    </div>
 
-        <div class="max-w-5xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden border border-orange-200 mb-10">
-            <div class="bg-orange-500 text-white px-8 py-8 flex items-center justify-between">
-                <div>
-                    <h1 class="text-3xl font-bold mb-2">Selamat Datang, <%= user.name || user.nama %> 👋</h1>
-                    <p class="text-orange-100 text-lg">Ringkasan informasi sistem HMSI Tracker.</p>
-                </div>
-                <div class="hidden md:block">
-                    <i class="fa-solid fa-chart-line text-6xl text-orange-200 opacity-80"></i>
-                </div>
+    <div class="max-w-6xl mx-auto mb-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-orange-200">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-600 mb-1">Total User</p>
+              <p class="text-2xl font-bold text-gray-800">
+                <%= dashboardData.totalUsers %>
+              </p>
             </div>
+            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+              <i class="fa-solid fa-users text-blue-600 text-xl"></i>
+            </div>
+          </div>
         </div>
 
-        <div class="max-w-5xl mx-auto">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-                <div class="lg:col-span-1 space-y-6">
-                    <h2 class="text-xl font-semibold text-gray-700 px-1">Ringkasan Sistem</h2>
-
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 flex items-center justify-between">
-                        <div>
-                            <p class="text-sm text-gray-500 mb-1">Total User Terdaftar</p>
-                            <p class="text-4xl font-bold text-gray-800"><%= dashboardData.totalUsers %></p>
-                        </div>
-                        <div class="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center">
-                            <i class="fa-solid fa-users text-blue-600 text-2xl"></i>
-                        </div>
-                    </div>
-
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 flex items-center justify-between">
-                        <div>
-                            <p class="text-sm text-gray-500 mb-1">Total Divisi Aktif</p>
-                            <p class="text-4xl font-bold text-green-800"><%= dashboardData.totalDivisi %></p>
-                        </div>
-                        <div class="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center">
-                            <i class="fa-solid fa-sitemap text-green-600 text-2xl"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="lg:col-span-2">
-                    <h2 class="text-xl font-semibold text-gray-700 mb-6 px-1">Aksi Cepat</h2>
-                    <div class="space-y-6">
-
-                        <a href="/admin/kelola-user" 
-                           class="group block bg-white p-6 rounded-2xl shadow-sm border-l-4 border-orange-200 hover:border-orange-500 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 ease-in-out relative">
-                            <div class="flex items-center gap-5">
-                                <div class="w-14 h-14 bg-orange-100 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
-                                    <i class="fa-solid fa-users-cog text-orange-600 text-2xl"></i>
-                                </div>
-                                <div>
-                                    <h3 class="font-bold text-gray-800 text-lg">Kelola Pengguna</h3>
-                                    <p class="text-sm text-gray-500 mt-1">Lihat, tambah, atau perbarui data anggota dan pengurus.</p>
-                                </div>
-                            </div>
-                            <span class="absolute top-1/2 right-6 -translate-y-1/2 text-gray-300 opacity-0 group-hover:opacity-100 group-hover:translate-x-0 -translate-x-4 transition-all duration-300">
-                                <i class="fa-solid fa-arrow-right"></i>
-                            </span>
-                        </a>
-
-                        <a href="/admin/kelola-divisi" 
-                           class="group block bg-white p-6 rounded-2xl shadow-sm border-l-4 border-teal-200 hover:border-teal-500 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 ease-in-out relative">
-                            <div class="flex items-center gap-5">
-                                <div class="w-14 h-14 bg-teal-100 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
-                                    <i class="fa-solid fa-puzzle-piece text-teal-600 text-2xl"></i>
-                                </div>
-                                <div>
-                                    <h3 class="font-bold text-gray-800 text-lg">Kelola Divisi</h3>
-                                    <p class="text-sm text-gray-500 mt-1">Atur semua divisi yang terdaftar dalam sistem.</p>
-                                </div>
-                            </div>
-                            <span class="absolute top-1/2 right-6 -translate-y-1/2 text-gray-300 opacity-0 group-hover:opacity-100 group-hover:translate-x-0 -translate-x-4 transition-all duration-300">
-                                <i class="fa-solid fa-arrow-right"></i>
-                            </span>
-                        </a>
-
-                    </div>
-                </div>
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-orange-200">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm text-gray-600 mb-1">Total Divisi</p>
+              <p class="text-2xl font-bold text-green-600">
+                <%= dashboardData.totalDivisi %>
+              </p>
             </div>
+            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+              <i class="fa-solid fa-sitemap text-green-600 text-xl"></i>
+            </div>
+          </div>
         </div>
-    </main>
 
-    <%- include('../partials/footer') %>
+      </div>
+    </div>
+
+    <div class="max-w-6xl mx-auto">
+      <div class="bg-white rounded-2xl border border-orange-200 shadow-sm p-6 inline-block">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+          <i class="fa-solid fa-bolt text-orange-500 mr-2"></i>
+          Aksi Cepat
+        </h3>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 w-fit">
+
+          <a href="/admin/kelola-divisi"
+             class="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:border-teal-300 hover:bg-teal-50 transition w-fit">
+            <i class="fa-solid fa-puzzle-piece text-teal-500"></i>
+            <span class="text-sm font-medium text-gray-700 whitespace-nowrap">
+              Kelola Divisi
+            </span>
+          </a>
+
+          <a href="/admin/kelola-role"
+             class="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition w-fit">
+            <i class="fa-solid fa-user-tag text-purple-500"></i>
+            <span class="text-sm font-medium text-gray-700 whitespace-nowrap">
+              Kelola Role
+            </span>
+          </a>
+
+          <a href="/admin/profile"
+             class="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition w-fit">
+            <i class="fa-solid fa-user text-blue-500"></i>
+            <span class="text-sm font-medium text-gray-700 whitespace-nowrap">
+              Profil Admin
+            </span>
+          </a>
+
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <%- include('../partials/footer') %>
 
 </body>
 </html>

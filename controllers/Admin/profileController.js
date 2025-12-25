@@ -10,7 +10,7 @@ const fs = require("fs");
 const bcrypt = require("bcryptjs");
 
 // =====================================================
-// 📄 GET: Halaman profil admin
+//  GET: Halaman profil admin
 // =====================================================
 exports.getProfile = async (req, res) => {
   try {

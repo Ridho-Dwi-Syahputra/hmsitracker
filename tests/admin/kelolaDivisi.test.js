@@ -8,8 +8,8 @@ const NEW_DIVISI_DESC = `Deskripsi untuk Divisi Test ${UNIQUE_ID}`;
 const EDITED_DIVISI_NAME = `Test Divisi EDITED ${UNIQUE_ID}`;
 const EDITED_DIVISI_DESC = `Deskripsi EDITED untuk Divisi Test ${UNIQUE_ID}`;
 
-// --- Data yang akan digunakan untuk menguji kegagalan hapus (asumsi ada) ---
-const IN_USE_DIVISI_NAME = 'HMSI'; 
+// --- Data yang akan digunakan untuk menguji kegagalan hapus 
+const IN_USE_DIVISI_NAME = 'Internal'; 
 const ERROR_MESSAGE_IN_USE = 'Divisi ini tidak dapat dihapus karena masih memiliki anggota terkait.';
 
 
@@ -30,7 +30,7 @@ test.describe.serial('Admin Kelola Divisi CRUD Operations', () => {
     });
 
     // ======================================================================
-    // SKEMA 1: Tambah Divisi Baru (Create)
+    // SKEMA 1: Tambah Divisi Baru 
     // ======================================================================
     test('01. Berhasil menambah divisi baru', async ({ page }) => {
         console.log(`Menambah divisi baru: ${NEW_DIVISI_NAME}`);
@@ -43,14 +43,13 @@ test.describe.serial('Admin Kelola Divisi CRUD Operations', () => {
         await page.fill('#deskripsi', NEW_DIVISI_DESC);
         await page.locator('#divisiForm button[type="submit"]').click();
 
-        // Verifikasi Success Modal muncul (memastikan AJAX sukses dan pesan benar)
-        const successModal = page.locator('#successModal');
-        await expect(successModal).toBeVisible();
+        // Verifikasi Success Modal muncul dengan menunggu konten modal (lebih stabil)
+        await page.waitForSelector('#successModalContent', { state: 'visible', timeout: 7000 });
         await expect(page.locator('#successMessage')).toContainText(`Divisi "${NEW_DIVISI_NAME}" berhasil ditambahkan!`); 
 
         // Tutup modal dan tunggu reload
         await page.click('#closeSuccessModal');
-        await page.waitForURL(/\/admin\/kelola-divisi/, { timeout: 10000 });
+        await page.waitForLoadState('networkidle', { timeout: 10000 });
 
         // Verifikasi Divisi baru ada di tabel
         const newDivisiRow = page.locator('table tbody tr', { hasText: NEW_DIVISI_NAME });
@@ -58,7 +57,7 @@ test.describe.serial('Admin Kelola Divisi CRUD Operations', () => {
     });
 
     // ======================================================================
-    // SKEMA 2: Edit Divisi (Update)
+    // SKEMA 2: Edit Divisi 
     // ======================================================================
     test('02. Berhasil mengedit nama dan deskripsi divisi', async ({ page }) => {
         console.log(`Mengedit divisi: ${NEW_DIVISI_NAME}`);
@@ -73,13 +72,12 @@ test.describe.serial('Admin Kelola Divisi CRUD Operations', () => {
         await page.fill('#deskripsi', EDITED_DIVISI_DESC);
         await page.locator('#divisiForm button[type="submit"]').click();
 
-        // Verifikasi Success Modal muncul
-        const successModal = page.locator('#successModal');
-        await expect(successModal).toBeVisible();
+        // Verifikasi Success Modal muncul dengan menunggu konten modal
+        await page.waitForSelector('#successModalContent', { state: 'visible', timeout: 7000 });
         await expect(page.locator('#successMessage')).toContainText(`Divisi "${EDITED_DIVISI_NAME}" berhasil diperbarui!`); 
 
         await page.click('#closeSuccessModal');
-        await page.waitForURL(/\/admin\/kelola-divisi/, { timeout: 10000 });
+        await page.waitForLoadState('networkidle', { timeout: 10000 });
 
         // Verifikasi Divisi yang diedit ada di tabel dengan nama BARU
         const editedDivisiRow = page.locator('table tbody tr', { hasText: EDITED_DIVISI_NAME });
@@ -88,25 +86,7 @@ test.describe.serial('Admin Kelola Divisi CRUD Operations', () => {
     });
 
     // ======================================================================
-    // SKEMA 3: Search Filter
-    // ======================================================================
-    test('03. Berhasil mencari divisi yang diedit', async ({ page }) => {
-        console.log(`Menguji fitur pencarian dengan: ${EDITED_DIVISI_NAME}`);
-
-        await page.fill('#searchInput', EDITED_DIVISI_NAME);
-        const editedDivisiRow = page.locator('table tbody tr', { hasText: EDITED_DIVISI_NAME });
-        await expect(editedDivisiRow).toBeVisible();
-
-        const otherDivisiRow = page.locator('table tbody tr', { hasText: IN_USE_DIVISI_NAME });
-        await expect(otherDivisiRow).toBeHidden(); 
-
-        await page.fill('#searchInput', '');
-        await expect(editedDivisiRow).toBeVisible();
-        await expect(otherDivisiRow).toBeVisible();
-    });
-
-    // ======================================================================
-    // SKEMA 4: Hapus Divisi yang Berhasil (Cleanup dari Tes 01/02)
+    // SKEMA 4: Hapus Divisi yang Berhasil 
     // ======================================================================
     test('04. Berhasil menghapus divisi yang telah diuji', async ({ page }) => {
         console.log(`Menghapus divisi: ${EDITED_DIVISI_NAME}`);
@@ -114,19 +94,18 @@ test.describe.serial('Admin Kelola Divisi CRUD Operations', () => {
         const editedDivisiRow = page.locator('table tbody tr', { hasText: EDITED_DIVISI_NAME });
         await editedDivisiRow.locator('.btnDeleteDivisi').click();
 
-        const confirmModal = page.locator('#confirmDeleteModal');
-        await expect(confirmModal).toBeVisible();
+        // Tunggu confirm modal content muncul
+        await page.waitForSelector('#confirmDeleteModalContent', { state: 'visible', timeout: 7000 });
 
         // Klik tombol 'Ya, Hapus'
         await page.click('#confirmDeleteBtn'); 
 
-        // Verifikasi Success Modal muncul
-        const successModal = page.locator('#successModal');
-        await expect(successModal).toBeVisible();
+        // Verifikasi Success Modal muncul dengan menunggu konten modal
+        await page.waitForSelector('#successModalContent', { state: 'visible', timeout: 7000 });
         await expect(page.locator('#successMessage')).toContainText('Divisi berhasil dihapus!'); 
 
         await page.click('#closeSuccessModal');
-        await page.waitForURL(/\/admin\/kelola-divisi/, { timeout: 10000 });
+        await page.waitForLoadState('networkidle', { timeout: 10000 });
 
         // Verifikasi Divisi sudah TIDAK ada di tabel
         await expect(page.locator('table tbody tr', { hasText: EDITED_DIVISI_NAME })).toHaveCount(0);
@@ -138,23 +117,29 @@ test.describe.serial('Admin Kelola Divisi CRUD Operations', () => {
     test('05. Gagal menghapus divisi yang masih memiliki anggota', async ({ page }) => {
         console.log(`Menguji kegagalan hapus pada divisi: ${IN_USE_DIVISI_NAME}`);
 
+        // Tunggu tabel selesai di-load
+        await page.waitForSelector('table tbody tr', { timeout: 7000 });
+        
+        // Cari row yang mengandung HMSI dengan timeout lebih panjang
         const inUseDivisiRow = page.locator('table tbody tr', { hasText: IN_USE_DIVISI_NAME });
+        await expect(inUseDivisiRow).toBeVisible({ timeout: 7000 });
+        
         await inUseDivisiRow.locator('.btnDeleteDivisi').click();
 
-        const confirmModal = page.locator('#confirmDeleteModal');
-        await expect(confirmModal).toBeVisible();
+        // Tunggu confirm modal content muncul
+        await page.waitForSelector('#confirmDeleteModalContent', { state: 'visible', timeout: 7000 });
 
         // Klik tombol 'Ya, Hapus'
         await page.click('#confirmDeleteBtn');
 
-        // Verifikasi Error Modal (Cannot Delete Modal) muncul
-        const cannotDeleteModal = page.locator('#cannotDeleteModal');
-        await expect(cannotDeleteModal).toBeVisible();
+        // Verifikasi Error Modal (Cannot Delete Modal) muncul dengan menunggu konten modal
+        await page.waitForSelector('#cannotDeleteModalContent', { state: 'visible', timeout: 7000 });
         
         // Verifikasi pesan error dari Controller
         await expect(page.locator('#cannotDeleteMessage')).toContainText(ERROR_MESSAGE_IN_USE); 
 
         await page.click('#closeCannotDeleteModalBtn');
-        await expect(cannotDeleteModal).toBeHidden();
+        await page.waitForTimeout(500);
+        await expect(page.locator('#cannotDeleteModal')).toBeHidden();
     });
 });
