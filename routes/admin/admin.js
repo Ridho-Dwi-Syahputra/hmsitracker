@@ -12,11 +12,10 @@ const path = require("path");
 const { requireLogin, requireRole } = require("../../middleware/auth");
 
 // 📦 Controller
-const keuanganController = require("../../controllers/admin/keuanganController");
 const profileController = require("../../controllers/admin/profileController");
 const userController = require("../../controllers/admin/userController");
 const divisiController = require("../../controllers/admin/divisiController");
-const adminDashboardController = require("../../controllers/admin/adminDashboardController"); // 🆕 Ditambahkan kembali
+const adminDashboardController = require("../../controllers/admin/adminDashboardController");
 
 // =====================================================
 // 🏠 Dashboard Admin
@@ -27,64 +26,6 @@ router.get(
     requireRole(["Admin"]),
     // Menggunakan controller eksternal yang baru diimpor
     adminDashboardController.getDashboard
-);
-
-// =====================================================
-// 💰 Kelola Kas / Pemasukan
-// =====================================================
-
-// 📄 List pemasukan
-router.get(
-    "/keuangan",
-    requireLogin,
-    requireRole(["Admin"]),
-    keuanganController.getPemasukan
-);
-
-// ➕ Tambah pemasukan
-router.get(
-    "/keuangan/tambah",
-    requireLogin,
-    requireRole(["Admin"]),
-    keuanganController.getTambahPemasukan
-);
-router.post(
-    "/keuangan/tambah",
-    requireLogin,
-    requireRole(["Admin"]),
-    keuanganController.postTambahPemasukan
-);
-
-// ✏️ Edit pemasukan
-router.get(
-    "/keuangan/edit/:id",
-    requireLogin,
-    requireRole(["Admin"]),
-    keuanganController.getEditPemasukan
-);
-router.post(
-    "/keuangan/edit/:id",
-    requireLogin,
-    requireRole(["Admin"]),
-    keuanganController.postEditPemasukan
-);
-
-// 🗑️ Hapus pemasukan
-router.post(
-    "/keuangan/delete/:id",
-    requireLogin,
-    requireRole(["Admin"]),
-    keuanganController.deletePemasukan
-);
-
-// =====================================================
-// 💸 Pengeluaran Kas
-// =====================================================
-router.get(
-    "/pengeluaran",
-    requireLogin,
-    requireRole(["Admin"]),
-    keuanganController.getPengeluaran
 );
 
 // =====================================================

@@ -78,7 +78,24 @@ router.post("/login", async (req, res) => {
       foto_profile: user.foto_profile || null,
     };
 
-    // Redirect role
+    // =====================================================
+    // ⚙️ Validasi HMSI tanpa divisi (untuk debugging)
+    // =====================================================
+    if (user.role === "HMSI" && !user.id_divisi) {
+      console.warn(
+        `⚠️ HMSI "${user.nama}" login tanpa id_divisi! Beberapa fitur mungkin tidak berfungsi.`
+      );
+    }
+
+    console.log(
+      `✅ Login sukses: ${user.nama} (${user.role}${
+        user.nama_divisi ? " - " + user.nama_divisi : ""
+      })`
+    );
+
+    // =====================================================
+    // 🚦 Redirect berdasarkan role
+    // =====================================================
     switch (user.role) {
       case "Admin":
         return res.redirect("/admin/dashboard");
@@ -91,8 +108,9 @@ router.post("/login", async (req, res) => {
     }
   } catch (err) {
     console.error("❌ [auth.js] Error saat login:", err.message);
-    req.flash("error", "Terjadi kesalahan server. Silakan coba lagi.");
-    return res.redirect("/auth/login");
+    res.render("auth/login", {
+      errorMsg: "Terjadi kesalahan server. Silakan coba lagi nanti.",
+    });
   }
 });
 
@@ -101,7 +119,7 @@ router.post("/login", async (req, res) => {
 // =====================================================
 router.get("/logout", (req, res) => {
   req.session.destroy((err) => {
-    if (err) console.error("⚠️ Error saat destroy session:", err.message);
+    if (err) console.error(" Error saat destroy session:", err.message);
     res.redirect("/auth/login");
   });
 });

@@ -4,7 +4,8 @@ const router = express.Router();
 const db = require('../config/db');
 
 router.get('/', (req, res) => {
-  res.render('index', { title: 'HMSI Tracker' });
+  // Redirect langsung ke halaman login
+  res.redirect('/auth/login');
 });
 
 router.get('/dbtest', async (req, res) => {

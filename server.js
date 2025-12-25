@@ -69,9 +69,9 @@ app.use(unreadNotif); // ⬅️ Sekarang unreadCount otomatis ada di semua view
 const authRouter = require("./routes/auth");
 app.use("/auth", authRouter);
 
-// // Default / Home
-// const indexRouter = require("./routes/index");
-// app.use("/", indexRouter);
+// Default / Home
+const indexRouter = require("./routes/index");
+app.use("/", indexRouter);
 
 // User Management
 const usersRouter = require("./routes/users");
@@ -157,7 +157,10 @@ process.on('SIGTERM', () => {
 // =====================================================
 // 7. Start Server
 // =====================================================
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}/auth/login`);
+const HOST = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
+
+app.listen(PORT, HOST, () => {
+  console.log(`🚀 Server running on http://${HOST}:${PORT}/auth/login`);
   console.log(`📁 Auto-cleanup service logs: logs/services/autoDeleteNotifikasi.log`);
+  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
 });
