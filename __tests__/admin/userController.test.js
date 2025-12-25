@@ -4,7 +4,7 @@
 // =====================================================
 
 // 1. Impor controller (sesuaikan path jika perlu)
-const controller = require('../../controllers/Admin/userController');
+const controller = require('../../controllers/admin/userController');
 
 // 2. Impor & Mock dependensi
 const db = require('../../config/db');

@@ -4,7 +4,7 @@
 // =====================================================
 
 // Impor controller yang akan diuji
-const controller = require('../../controllers/Admin/divisiController');
+const controller = require('../../controllers/admin/divisiController');
 
 // Impor mock db. Kita akan mock implementasinya
 const db = require('../../config/db');

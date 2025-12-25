@@ -6,7 +6,7 @@ const db = require("../../config/db");
 
 // 2. Impor FUNGSI YANG MAU DIUJI
 // Path-nya ../../controllers/ karena kita ada di __tests__/admin/
-const { getDashboard } = require("../../controllers/Admin/adminDashboardController");
+const { getDashboard } = require("../../controllers/admin/adminDashboardController");
 
 // =====================================================
 // MOCK SEMUA DEPENDENSI EKSTERNAL

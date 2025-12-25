@@ -5,7 +5,7 @@
 
 // 1. Impor controller yang akan diuji
 // PASTIKAN path ini sesuai dengan struktur folder Anda
-const controller = require('../../controllers/Admin/profileController');
+const controller = require('../../controllers/admin/profileController');
 
 // 2. Impor modul yang perlu di-mock
 const db = require('../../config/db');
