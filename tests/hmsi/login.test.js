@@ -81,9 +81,9 @@ test("Login gagal jika password kosong", async ({ page }) => {
 
 
 //
-// ❌ 6. Login gagal - hanya password terisi
+// ❌ 6. Login gagal - hanya password terisi (email kosong)
 //
-test("Login gagal jika email kosong", async ({ page }) => {
+test("Login gagal jika hanya password terisi", async ({ page }) => {
 
   await page.goto("http://localhost:3000/auth/login");
 

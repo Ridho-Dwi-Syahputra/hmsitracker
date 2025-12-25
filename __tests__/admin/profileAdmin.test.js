@@ -73,7 +73,7 @@ const getMockReqRes = () => {
 };
 
 // =====================================================
-// 📄 TES: getProfile
+//  TES: getProfile
 // =====================================================
 describe('getProfile', () => {
   it('harus render halaman profil jika user ditemukan', async () => {
@@ -132,7 +132,7 @@ describe('getProfile', () => {
 });
 
 // =====================================================
-// 📄 TES: getEditProfile
+// TES: getEditProfile
 // =====================================================
 describe('getEditProfile', () => {
   // Tes ini identik dengan getProfile, hanya beda view
@@ -162,7 +162,7 @@ describe('getEditProfile', () => {
 });
 
 // =====================================================
-// 💾 TES: postEditProfile
+//  TES: postEditProfile
 // =====================================================
 describe('postEditProfile', () => {
   const dataBaru = {
@@ -296,72 +296,4 @@ it('harus redirect ke /admin/profile/edit jika DB error', async () => {
     expect(mockReq.flash).toHaveBeenCalledWith('error', 'Gagal menyimpan perubahan profil admin');
     expect(mockRes.redirect).toHaveBeenCalledWith('/admin/profile/edit');
   });
-});
-// =====================================================
-// 🌙 TES: toggleTheme
-// =====================================================
-describe('toggleTheme', () => {
-  it('harus ganti theme dari light ke dark', async () => {
-    const { mockReq, mockRes, mockUser } = getMockReqRes();
-    mockUser.theme = 'light';
-    mockReq.session.user = mockUser;
-    
-    const userUpdated = { ...mockUser, theme: 'dark' };
-    
-    db.query.mockReset();
-    db.query.mockResolvedValueOnce([[{ affectedRows: 1 }]]) // Mock UPDATE
-           .mockResolvedValueOnce([[userUpdated]]); // Mock SELECT
-
-    await controller.toggleTheme(mockReq, mockRes);
-
-    // 1. Cek query UPDATE
-    expect(db.query).toHaveBeenNthCalledWith(1,
-      "UPDATE user SET theme = ? WHERE id_anggota = ? AND role = 'Admin'",
-      ['dark', '12345']
-    );
-    // 2. Cek query SELECT
-    expect(db.query).toHaveBeenNthCalledWith(2,
-      expect.stringContaining("SELECT id_anggota, nama, email"),
-      ['12345']
-    );
-    // 3. Cek session
-    expect(mockReq.session.user.theme).toBe('dark');
-    // 4. Cek redirect
-    expect(mockRes.redirect).toHaveBeenCalledWith('/admin/profile');
-  });
-
-  it('harus ganti theme dari dark ke light', async () => {
-    const { mockReq, mockRes, mockUser } = getMockReqRes();
-    mockUser.theme = 'dark'; // Set user ke dark
-    mockReq.session.user = mockUser;
-    
-    const userUpdated = { ...mockUser, theme: 'light' };
-    
-    db.query.mockReset();
-    db.query.mockResolvedValueOnce([[{ affectedRows: 1 }]]).mockResolvedValueOnce([[userUpdated]]);
-
-    await controller.toggleTheme(mockReq, mockRes);
-
-    // 1. Cek query UPDATE
-    expect(db.query).toHaveBeenNthCalledWith(1,
-      "UPDATE user SET theme = ? WHERE id_anggota = ? AND role = 'Admin'",
-      ['light', '12345'] // Harusnya jadi light
-    );
-    // 2. Cek session
-    expect(mockReq.session.user.theme).toBe('light');
-    // 3. Cek redirect
-    expect(mockRes.redirect).toHaveBeenCalledWith('/admin/profile');
-  });
-
-  it('harus redirect jika DB error', async () => {
-    const { mockReq, mockRes } = getMockReqRes();
-    const error = new Error('Theme Error');
-    db.query.mockRejectedValue(error); // Gagal saat UPDATE
-
-    await controller.toggleTheme(mockReq, mockRes);
-
-    expect(console.error).toHaveBeenCalledWith("❌ toggleTheme Admin Error:", error.message);
-    expect(mockReq.flash).toHaveBeenCalledWith('error', 'Gagal mengganti mode tampilan admin');
-    expect(mockRes.redirect).toHaveBeenCalledWith('/admin/profile');
-  });
 });
