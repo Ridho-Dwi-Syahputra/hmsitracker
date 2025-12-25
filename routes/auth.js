@@ -18,7 +18,7 @@ router.get("/login", (req, res) => {
     if (role === "HMSI") return res.redirect("/hmsi/dashboard");
   }
 
-  res.render("auth/login", { errorMsg: null });
+  res.render("auth/login"); // errorMsg diambil dari res.locals.errorMsg
 });
 
 // =====================================================
@@ -28,9 +28,6 @@ router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    // =====================================================
-    // 🔍 Ambil user berdasarkan email + data divisi
-    // =====================================================
     const [rows] = await db.query(
       `
       SELECT 
@@ -51,15 +48,13 @@ router.post("/login", async (req, res) => {
     );
 
     if (!rows.length) {
-      console.warn(`⚠️ Login gagal: email tidak ditemukan (${email})`);
-      return res.render("auth/login", { errorMsg: "Email atau password salah!" });
+      req.flash("error", "Email atau password salah!");
+      return res.redirect("/auth/login");
     }
 
     const user = rows[0];
 
-    // =====================================================
-    // 🔐 Verifikasi password (hash bcrypt / fallback plaintext)
-    // =====================================================
+    // Verifikasi password
     let isMatch = false;
     if (user.password?.startsWith("$2b$")) {
       isMatch = await bcrypt.compare(password, user.password);
@@ -68,13 +63,11 @@ router.post("/login", async (req, res) => {
     }
 
     if (!isMatch) {
-      console.warn(`⚠️ Login gagal: password salah untuk ${email}`);
-      return res.render("auth/login", { errorMsg: "Email atau password salah!" });
+      req.flash("error", "Email atau password salah!");
+      return res.redirect("/auth/login");
     }
 
-    // =====================================================
-    // 🧠 Simpan ke session (dengan fallback jika divisi null)
-    // =====================================================
+    // Simpan session
     req.session.user = {
       id_anggota: user.id_anggota,
       nama: user.nama,
@@ -85,24 +78,7 @@ router.post("/login", async (req, res) => {
       foto_profile: user.foto_profile || null,
     };
 
-    // =====================================================
-    // ⚙️ Validasi HMSI tanpa divisi (untuk debugging)
-    // =====================================================
-    if (user.role === "HMSI" && !user.id_divisi) {
-      console.warn(
-        `⚠️ HMSI "${user.nama}" login tanpa id_divisi! Beberapa fitur mungkin tidak berfungsi.`
-      );
-    }
-
-    console.log(
-      `✅ Login sukses: ${user.nama} (${user.role}${
-        user.nama_divisi ? " - " + user.nama_divisi : ""
-      })`
-    );
-
-    // =====================================================
-    // 🚦 Redirect berdasarkan role
-    // =====================================================
+    // Redirect role
     switch (user.role) {
       case "Admin":
         return res.redirect("/admin/dashboard");
@@ -111,14 +87,12 @@ router.post("/login", async (req, res) => {
       case "HMSI":
         return res.redirect("/hmsi/dashboard");
       default:
-        console.warn(`⚠️ Role tidak dikenali: ${user.role}`);
         return res.redirect("/");
     }
   } catch (err) {
     console.error("❌ [auth.js] Error saat login:", err.message);
-    res.render("auth/login", {
-      errorMsg: "Terjadi kesalahan server. Silakan coba lagi nanti.",
-    });
+    req.flash("error", "Terjadi kesalahan server. Silakan coba lagi.");
+    return res.redirect("/auth/login");
   }
 });
 
