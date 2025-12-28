@@ -101,12 +101,13 @@ exports.getAllProkerDPA = async (req, res) => {
     });
   } catch (err) {
     console.error("❌ Error getAllProkerDPA:", err.message);
+    console.error("Stack trace:", err.stack);
     res.render("dpa/lihatProker", {
       title: "Daftar Program Kerja",
       user: req.session.user || { name: "Dummy User" },
       activeNav: "Daftar Program Kerja",
       programs: [],
-      errorMsg: "Gagal memuat daftar program kerja.",
+      errorMsg: `Gagal memuat daftar program kerja: ${err.message}`,
       successMsg: null,
     });
   }

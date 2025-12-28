@@ -79,6 +79,8 @@ exports.getAllNotifikasi = async (req, res) => {
       `
     );
 
+    console.log(`✅ DPA notifikasi retrieved: ${rows.length} rows`);
+
     // 🔹 Mapping data notifikasi dengan link & label yang sesuai
     const notifikasi = rows.map((r) => {
       let linkUrl = "#";
@@ -124,7 +126,12 @@ exports.getAllNotifikasi = async (req, res) => {
     });
   } catch (err) {
     console.error("❌ getAllNotifikasi error:", err.message);
-    res.status(500).send("Gagal mengambil notifikasi");
+    console.error("Stack trace:", err.stack);
+    console.error("User context:", {
+      id_anggota: req.session.user?.id_anggota,
+      role: req.session.user?.Kategori_Anggota
+    });
+    res.status(500).send(`Gagal mengambil notifikasi: ${err.message}`);
   }
 };
 

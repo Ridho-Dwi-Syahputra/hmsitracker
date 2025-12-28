@@ -106,7 +106,9 @@ exports.getAllNotifikasi = async (req, res) => {
     });
   } catch (err) {
     console.error("❌ getAllNotifikasi HMSI error:", err.message);
-    res.status(500).send("Gagal mengambil notifikasi HMSI");
+    console.error("📍 Stack:", err.stack);
+    console.error("📍 User ID Divisi:", req.session.user?.id_divisi);
+    res.status(500).send(`Gagal mengambil notifikasi HMSI: ${err.message}`);
   }
 };
 

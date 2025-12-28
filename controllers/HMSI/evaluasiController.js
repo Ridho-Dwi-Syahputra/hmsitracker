@@ -108,7 +108,9 @@ exports.getKelolaEvaluasi = async (req, res) => {
     });
   } catch (err) {
     console.error("❌ Error getKelolaEvaluasi:", err.message);
-    res.status(500).send("Gagal mengambil data evaluasi");
+    console.error("📍 Stack:", err.stack);
+    console.error("📍 User ID Divisi:", req.session.user?.id_divisi);
+    res.status(500).send(`Gagal mengambil data evaluasi: ${err.message}`);
   }
 };
 // =====================================================

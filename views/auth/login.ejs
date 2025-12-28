@@ -36,7 +36,7 @@
       </div>
 
       <!-- Error Message -->
-      <% if (typeof errorMsg !== "undefined" && errorMsg) { %>
+      <% if (typeof errorMsg !== "undefined" && errorMsg && errorMsg.length > 0 && errorMsg[0]) { %>
         <div class="mb-4 p-3 text-sm text-red-700 bg-red-100 rounded-lg">
           <%= errorMsg %>
         </div>

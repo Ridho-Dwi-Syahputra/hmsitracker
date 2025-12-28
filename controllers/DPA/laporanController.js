@@ -79,6 +79,8 @@ exports.getAllLaporanDPA = async (req, res) => {
       status: "Belum Dievaluasi",
     }));
 
+    console.log(`✅ DPA laporan retrieved: ${laporan.length} rows`);
+
     res.render("dpa/kelolaLaporan", {
       title: "Laporan Belum Dievaluasi",
       user: req.session.user,
@@ -89,7 +91,8 @@ exports.getAllLaporanDPA = async (req, res) => {
     });
   } catch (err) {
     console.error("❌ Error getAllLaporanDPA:", err.message);
-    res.status(500).send("Gagal mengambil laporan");
+    console.error("Stack trace:", err.stack);
+    res.status(500).send(`Gagal mengambil laporan: ${err.message}`);
   }
 };
 

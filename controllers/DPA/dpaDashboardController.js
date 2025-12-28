@@ -100,6 +100,12 @@ exports.getDpaDashboardStats = async (req, res) => {
     });
   } catch (error) {
     console.error("❌ Error saat mengambil statistik DPA:", error.message);
-    res.status(500).send("Terjadi kesalahan pada server. Cek log untuk detail.");
+    console.error("Stack trace:", error.stack);
+    console.error("User context:", {
+      id_anggota: user?.id_anggota,
+      username: user?.username,
+      role: user?.Kategori_Anggota
+    });
+    res.status(500).send(`Terjadi kesalahan pada server: ${error.message}`);
   }
 };

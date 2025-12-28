@@ -88,7 +88,9 @@ exports.getAllLaporan = async (req, res) => {
     });
   } catch (err) {
     console.error("❌ getAllLaporan error:", err.message);
-    res.status(500).json({ success: false, error: "Gagal mengambil data laporan" });
+    console.error("📍 Stack:", err.stack);
+    console.error("📍 User ID Divisi:", req.session.user?.id_divisi);
+    res.status(500).json({ success: false, error: `Gagal mengambil data laporan: ${err.message}` });
   }
 };
 
