@@ -8,10 +8,6 @@ const db = require("../../config/db");
 // Path-nya ../../controllers/ karena kita ada di __tests__/admin/
 const { getDashboard } = require("../../controllers/admin/adminDashboardController");
 
-// =====================================================
-// MOCK SEMUA DEPENDENSI EKSTERNAL
-// =====================================================
-
 // 3. Mock 'db'
 jest.mock("../../config/db", () => ({
   query: jest.fn(),

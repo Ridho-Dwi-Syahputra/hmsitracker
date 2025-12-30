@@ -22,12 +22,31 @@ router.get("/login", (req, res) => {
 });
 
 // =====================================================
-// POST: Proses Login
+// POST: Proses Login (diekspos untuk unit test)
 // =====================================================
-router.post("/login", async (req, res) => {
+async function postLogin(req, res) {
   const { email, password } = req.body;
+  const emailTrim = email?.trim();
+  const passwordTrim = password?.trim();
 
   try {
+    // Validasi form dasar sesuai ekspektasi UI
+    if (!emailTrim) {
+      if (typeof req.flash === "function") {
+        req.flash("error", "Email wajib diisi");
+        return res.redirect("/auth/login");
+      }
+      return res.render("auth/login", { errorMsg: "Email wajib diisi" });
+    }
+
+    if (!passwordTrim) {
+      if (typeof req.flash === "function") {
+        req.flash("error", "Password wajib diisi");
+        return res.redirect("/auth/login");
+      }
+      return res.render("auth/login", { errorMsg: "Password wajib diisi" });
+    }
+
     const [rows] = await db.query(
       `
       SELECT 
@@ -44,12 +63,15 @@ router.post("/login", async (req, res) => {
       WHERE u.email = ?
       LIMIT 1
       `,
-      [email]
+      [emailTrim]
     );
 
     if (!rows.length) {
-      req.flash("error", "Email atau password salah!");
-      return res.redirect("/auth/login");
+      if (typeof req.flash === "function") {
+        req.flash("error", "Email atau password salah");
+        return res.redirect("/auth/login");
+      }
+      return res.render("auth/login", { errorMsg: "Email atau password salah" });
     }
 
     const user = rows[0];
@@ -57,14 +79,17 @@ router.post("/login", async (req, res) => {
     // Verifikasi password
     let isMatch = false;
     if (user.password?.startsWith("$2b$")) {
-      isMatch = await bcrypt.compare(password, user.password);
+      isMatch = await bcrypt.compare(passwordTrim, user.password);
     } else {
-      isMatch = password === user.password;
+      isMatch = passwordTrim === user.password;
     }
 
     if (!isMatch) {
-      req.flash("error", "Email atau password salah!");
-      return res.redirect("/auth/login");
+      if (typeof req.flash === "function") {
+        req.flash("error", "Email atau password salah");
+        return res.redirect("/auth/login");
+      }
+      return res.render("auth/login", { errorMsg: "Email atau password salah" });
     }
 
     // Simpan session
@@ -112,7 +137,9 @@ router.post("/login", async (req, res) => {
       errorMsg: "Terjadi kesalahan server. Silakan coba lagi nanti.",
     });
   }
-});
+}
+
+router.post("/login", postLogin);
 
 // =====================================================
 // GET: Logout
@@ -125,3 +152,4 @@ router.get("/logout", (req, res) => {
 });
 
 module.exports = router;
+module.exports.__testables = { postLogin };

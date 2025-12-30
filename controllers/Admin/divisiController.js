@@ -5,7 +5,7 @@
 const db = require("../../config/db");
 
 // =====================================================
-// 📄 GET - Daftar Divisi (Non-AJAX, tetap render EJS)
+// GET - Daftar Divisi (Non-AJAX, tetap render EJS)
 // =====================================================
 exports.getKelolaDivisi = async (req, res) => {
   try {
@@ -25,7 +25,7 @@ exports.getKelolaDivisi = async (req, res) => {
 };
 
 // =====================================================
-// ➕ POST - Tambah Divisi (AJAX)
+// POST - Tambah Divisi (Non-AJAX, gunakan flash + redirect)
 // =====================================================
 exports.addDivisi = async (req, res) => {
   try {
@@ -33,15 +33,15 @@ exports.addDivisi = async (req, res) => {
     const namaTrim = nama_divisi?.trim();
 
     if (!namaTrim) {
-      // Mengembalikan status 400 untuk validasi gagal
-      return res.status(400).json({ success: false, message: "Nama divisi wajib diisi!" });
+      req.flash("error", "Nama divisi wajib diisi!");
+      return res.redirect("/admin/kelola-divisi");
     }
 
     // Cek duplikasi nama
     const [cekNama] = await db.query("SELECT id_divisi FROM divisi WHERE nama_divisi = ?", [namaTrim]);
     if (cekNama.length > 0) {
-      // Mengembalikan status 409 (Conflict) untuk duplikasi
-      return res.status(409).json({ success: false, message: `Divisi "${namaTrim}" sudah ada!` });
+      req.flash("error", `Divisi "${namaTrim}" sudah ada!`);
+      return res.redirect("/admin/kelola-divisi");
     }
 
     await db.query(
@@ -49,17 +49,17 @@ exports.addDivisi = async (req, res) => {
       [namaTrim, deskripsi?.trim() || null]
     );
 
-    // Mengembalikan status 200 OK untuk sukses
-    return res.status(200).json({ success: true, message: `Divisi "${namaTrim}" berhasil ditambahkan!` });
+    req.flash("success", `Divisi "${namaTrim}" berhasil ditambahkan!`);
+    return res.redirect("/admin/kelola-divisi");
   } catch (err) {
     console.error("❌ [divisiController.addDivisi] Error:", err);
-    // Mengembalikan status 500 untuk error server
-    return res.status(500).json({ success: false, message: "Terjadi kesalahan saat menambahkan divisi!" });
+    req.flash("error", "Terjadi kesalahan saat menambahkan divisi!");
+    return res.redirect("/admin/kelola-divisi");
   }
 };
 
 // =====================================================
-// ✏️ POST - Update Divisi (AJAX)
+// POST - Update Divisi (Non-AJAX, gunakan flash + redirect)
 // =====================================================
 exports.updateDivisi = async (req, res) => {
   try {
@@ -67,8 +67,8 @@ exports.updateDivisi = async (req, res) => {
     const namaTrim = nama_divisi?.trim();
 
     if (!namaTrim) {
-      // Mengembalikan status 400 untuk validasi gagal
-      return res.status(400).json({ success: false, message: "Nama divisi tidak boleh kosong!" });
+      req.flash("error", "Nama divisi tidak boleh kosong!");
+      return res.redirect("/admin/kelola-divisi");
     }
 
     // Cek apakah nama baru sudah digunakan divisi lain
@@ -77,8 +77,8 @@ exports.updateDivisi = async (req, res) => {
       [namaTrim, id_divisi]
     );
     if (cekDuplikat.length > 0) {
-      // Mengembalikan status 409 (Conflict) untuk duplikasi
-      return res.status(409).json({ success: false, message: `Divisi dengan nama "${namaTrim}" sudah digunakan!` });
+      req.flash("error", `Divisi dengan nama "${namaTrim}" sudah digunakan!`);
+      return res.redirect("/admin/kelola-divisi");
     }
 
     await db.query(
@@ -86,17 +86,17 @@ exports.updateDivisi = async (req, res) => {
       [namaTrim, deskripsi?.trim() || null, id_divisi]
     );
 
-    // Mengembalikan status 200 OK untuk sukses
-    return res.status(200).json({ success: true, message: `Divisi "${namaTrim}" berhasil diperbarui!` });
+    req.flash("success", `Divisi "${namaTrim}" berhasil diperbarui!`);
+    return res.redirect("/admin/kelola-divisi");
   } catch (err) {
     console.error("❌ [divisiController.updateDivisi] Error:", err);
-    // Mengembalikan status 500 untuk error server
-    return res.status(500).json({ success: false, message: "Terjadi kesalahan saat memperbarui divisi!" });
+    req.flash("error", "Terjadi kesalahan saat memperbarui divisi!");
+    return res.redirect("/admin/kelola-divisi");
   }
 };
 
 // =====================================================
-// 🗑️ GET - Hapus Divisi (AJAX)
+// GET - Hapus Divisi (Non-AJAX, gunakan flash + redirect)
 // =====================================================
 exports.deleteDivisi = async (req, res) => {
   try {
@@ -104,21 +104,18 @@ exports.deleteDivisi = async (req, res) => {
 
     // Cek apakah divisi sedang digunakan oleh user
     const [usedByUser] = await db.query("SELECT COUNT(*) AS total FROM user WHERE id_divisi = ?", [id_divisi]);
-    if (usedByUser[0].total > 0) {
-      // Mengembalikan status 409 (Conflict) karena masih memiliki anggota
-      return res.status(409).json({ 
-        success: false, 
-        message: "Divisi ini tidak dapat dihapus karena masih memiliki anggota terkait." 
-      });
+    if (usedByUser[0]?.total > 0) {
+      req.flash("error", "Divisi ini tidak dapat dihapus karena masih digunakan oleh user!");
+      return res.redirect("/admin/kelola-divisi");
     }
 
     await db.query("DELETE FROM divisi WHERE id_divisi = ?", [id_divisi]);
 
-    // Mengembalikan status 200 OK untuk sukses
-    return res.status(200).json({ success: true, message: "Divisi berhasil dihapus!" });
+    req.flash("success", "Divisi berhasil dihapus!");
+    return res.redirect("/admin/kelola-divisi");
   } catch (err) {
     console.error("❌ [divisiController.deleteDivisi] Error:", err);
-    // Mengembalikan status 500 untuk error server
-    return res.status(500).json({ success: false, message: "Terjadi kesalahan saat menghapus divisi!" });
+    req.flash("error", "Terjadi kesalahan saat menghapus divisi!");
+    return res.redirect("/admin/kelola-divisi");
   }
 };

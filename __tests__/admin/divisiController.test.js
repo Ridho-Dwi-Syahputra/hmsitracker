@@ -47,7 +47,7 @@ const getMockReqRes = () => {
 };
 
 // =====================================================
-// 📄 TES: getKelolaDivisi
+// TES: getKelolaDivisi
 // =====================================================
 describe('getKelolaDivisi', () => {
   it('harus me-render halaman dengan daftar divisi', async () => {
@@ -95,7 +95,7 @@ describe('getKelolaDivisi', () => {
 });
 
 // =====================================================
-// ➕ TES: addDivisi
+// TES: addDivisi
 // =====================================================
 describe('addDivisi', () => {
   it('harus menambahkan divisi baru dan redirect', async () => {
@@ -183,7 +183,7 @@ describe('addDivisi', () => {
 });
 
 // =====================================================
-// ✏️ TES: updateDivisi
+// TES: updateDivisi
 // =====================================================
 describe('updateDivisi', () => {
   it('harus meng-update divisi dan redirect', async () => {
@@ -271,7 +271,7 @@ describe('updateDivisi', () => {
 });
 
 // =====================================================
-// 🗑️ TES: deleteDivisi
+// TES: deleteDivisi
 // =====================================================
 describe('deleteDivisi', () => {
   it('harus menghapus divisi jika tidak digunakan', async () => {

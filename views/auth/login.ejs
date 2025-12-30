@@ -36,9 +36,15 @@
       </div>
 
       <!-- Error Message -->
+<<<<<<< HEAD
       <% if (typeof errorMsg !== "undefined" && errorMsg && errorMsg.length > 0 && errorMsg[0]) { %>
         <div class="mb-4 p-3 text-sm text-red-700 bg-red-100 rounded-lg">
           <%= errorMsg %>
+=======
+      <% if (typeof errorMsg !== "undefined" && errorMsg && (Array.isArray(errorMsg) ? errorMsg.length : true)) { %>
+        <div class="error-msg mb-4 p-3 text-sm text-red-700 bg-red-100 rounded-lg">
+          <%= Array.isArray(errorMsg) ? errorMsg[0] : errorMsg %>
+>>>>>>> e4dfd8e (dd)
         </div>
       <% } %>
 

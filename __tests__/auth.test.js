@@ -1,114 +1,78 @@
-// __tests__/auth.test.js
+// __tests__/auth.test.js 
 
-const request = require('supertest');
-const express = require('express');
-const session = require('express-session'); 
-
-// Modul yang akan kita mock
+// Mock dependency
 const db = require('../config/db');
 const bcrypt = require('bcryptjs');
 
-// Router yang akan kita tes
-const authRoutes = require('../routes/auth');
-
-// ==========================================
-// 1. MOCK DEPENDENCY
-// ==========================================
-// Kita mock seluruh modul 'db' dan 'bcryptjs'
 jest.mock('../config/db');
 jest.mock('bcryptjs');
 
-// ==========================================
-// 2. SETUP APLIKASI TES
-// ==========================================
-const app = express();
+// Import handler yang diekspos untuk unit test
+const { __testables } = require('../routes/auth');
+const { postLogin } = __testables;
 
-app.use(express.urlencoded({ extended: false })); 
-app.use(express.json()); 
-app.use(session({
-  secret: 'test-secret',
-  resave: false,
-  saveUninitialized: true,
-}));
+// Helper untuk membuat mock req/res
+function createMockReqRes() {
+  const req = {
+    body: {},
+    session: {},
+    flash: jest.fn(),
+  };
+  const res = {
+    render: jest.fn(),
+    redirect: jest.fn(),
+  };
+  return { req, res };
+}
 
-app.use((req, res, next) => {
-  res.render = jest.fn((view, data) => {
-    res.status(200).json({ view, data });
-  });
-  next();
-});
-
-// Pasang router yang mau dites
-app.use('/auth', authRoutes);
-
-// 3. TES SUITE
-// ==========================================
-describe('Auth Routes: POST /auth/login', () => {
-
-  // Bersihkan semua mock setelah setiap tes
-  // agar tes satu tidak memengaruhi tes lain
+describe('Auth: postLogin (unit)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  // ==========================
-  // TES CASE 1: LOGIN SUKSES
-  // ==========================
-  it('should login user and redirect to /admin/dashboard for Admin', async () => {
-    // 1. Persiapan Mock Data
+  it('login sukses: redirect sesuai role', async () => {
+    const { req, res } = createMockReqRes();
+    req.body = { email: 'admin@test.com', password: 'password123' };
+
     const mockUser = {
       id_anggota: 1,
       nama: 'Test Admin',
       email: 'admin@test.com',
-      password: '$2b$hashedpassword', 
+      password: '$2b$hashedpassword',
       role: 'Admin',
       id_divisi: null,
       foto_profile: null,
       nama_divisi: null,
     };
 
-    // 2. Atur 'return value' dari Mocks
-    // Saat db.query dipanggil, kembalikan mockUser
-    db.query.mockResolvedValue([ [mockUser] ]); 
+    db.query.mockResolvedValue([[mockUser]]);
     bcrypt.compare.mockResolvedValue(true);
 
-    // 3. Kirim Request
-    const res = await request(app)
-      .post('/auth/login')
-      .send({ email: 'admin@test.com', password: 'password123' }); // Kirim body
+    await postLogin(req, res);
 
-    // 4. Cek Hasil (Assertions)
-    expect(db.query).toHaveBeenCalledTimes(1); 
-    expect(bcrypt.compare).toHaveBeenCalledTimes(1); 
-    expect(res.statusCode).toBe(302); 
-    expect(res.headers.location).toBe('/admin/dashboard'); 
+    expect(db.query).toHaveBeenCalledTimes(1);
+    expect(bcrypt.compare).toHaveBeenCalledTimes(1);
+    expect(res.redirect).toHaveBeenCalledWith('/admin/dashboard');
+    expect(req.session.user).toBeDefined();
   });
 
-  // ==========================
-  // TES CASE 2: EMAIL TIDAK DITEMUKAN
-  // ==========================
-  it('should return 200 and render login with error if email not found', async () => {
-    // 1. Atur Mock
-    // Kembalikan array kosong, seolah-olah user tidak ada
-    db.query.mockResolvedValue([ [] ]);
+  it('email tidak ditemukan: flash + redirect ke /auth/login', async () => {
+    const { req, res } = createMockReqRes();
+    req.body = { email: 'unknown@test.com', password: 'x' };
 
-    // 2. Kirim Request
-    const res = await request(app)
-      .post('/auth/login')
-      .send({ email: 'salah@test.com', password: 'password123' });
+    db.query.mockResolvedValue([[]]);
 
-    // 3. Cek Hasil
-    expect(res.statusCode).toBe(200); 
-    expect(bcrypt.compare).not.toHaveBeenCalled(); 
-    expect(res.body.view).toBe('auth/login'); 
-    expect(res.body.data.errorMsg).toBe('Email atau password salah!'); 
+    await postLogin(req, res);
+
+    expect(bcrypt.compare).not.toHaveBeenCalled();
+    expect(req.flash).toHaveBeenCalledWith('error', 'Email atau password salah');
+    expect(res.redirect).toHaveBeenCalledWith('/auth/login');
   });
 
-  // ==========================
-  // TES CASE 3: PASSWORD SALAH
-  // ==========================
-  it('should return 200 and render login with error if password mismatch', async () => {
-    // 1. Persiapan Mock Data
+  it('password salah: flash + redirect ke /auth/login', async () => {
+    const { req, res } = createMockReqRes();
+    req.body = { email: 'admin@test.com', password: 'SALAH' };
+
     const mockUser = {
       id_anggota: 1,
       nama: 'Test Admin',
@@ -117,41 +81,121 @@ describe('Auth Routes: POST /auth/login', () => {
       role: 'Admin',
     };
 
-    // 2. Atur Mock
-    db.query.mockResolvedValue([ [mockUser] ]);
-    // Saat bcrypt.compare dipanggil, kembalikan 'false' (password salah)
+    db.query.mockResolvedValue([[mockUser]]);
     bcrypt.compare.mockResolvedValue(false);
 
-    // 3. Kirim Request
-    const res = await request(app)
-      .post('/auth/login')
-      .send({ email: 'admin@test.com', password: 'passwordSALAH' });
+    await postLogin(req, res);
 
-    // 4. Cek Hasil
-    expect(res.statusCode).toBe(200);
     expect(db.query).toHaveBeenCalledTimes(1);
     expect(bcrypt.compare).toHaveBeenCalledTimes(1);
-    expect(res.body.view).toBe('auth/login');
-    expect(res.body.data.errorMsg).toBe('Email atau password salah!');
+    expect(req.flash).toHaveBeenCalledWith('error', 'Email atau password salah');
+    expect(res.redirect).toHaveBeenCalledWith('/auth/login');
   });
 
-  // ==========================
-  // TES CASE 4: DATABASE ERROR
-  // ==========================
-  it('should render login with server error on database failure', async () => {
-    // 1. Atur Mock
-    // Kita buat db.query melempar (throw) error
+  it('error database: render login dengan pesan server error', async () => {
+    const { req, res } = createMockReqRes();
+    req.body = { email: 'admin@test.com', password: 'password123' };
+
     db.query.mockRejectedValue(new Error('Koneksi DB Gagal'));
 
-    // 2. Kirim Request
-    const res = await request(app)
-      .post('/auth/login')
-      .send({ email: 'admin@test.com', password: 'password123' });
+    await postLogin(req, res);
 
-    // 4. Cek Hasil
-    expect(res.statusCode).toBe(200);
-    expect(res.body.view).toBe('auth/login');
-    expect(res.body.data.errorMsg).toContain('Terjadi kesalahan server');
+    expect(res.render).toHaveBeenCalledWith('auth/login', expect.objectContaining({
+      errorMsg: expect.stringContaining('Terjadi kesalahan server'),
+    }));
+    expect(res.redirect).not.toHaveBeenCalled();
   });
 
+  it('login sukses: redirect ke /dpa/dashboard untuk role DPA', async () => {
+    const { req, res } = createMockReqRes();
+    req.body = { email: 'dpa@test.com', password: 'password123' };
+
+    const mockUser = {
+      id_anggota: 2,
+      nama: 'Test DPA',
+      email: 'dpa@test.com',
+      password: '$2b$hashedpassword',
+      role: 'DPA',
+      id_divisi: null,
+      foto_profile: null,
+      nama_divisi: null,
+    };
+
+    db.query.mockResolvedValue([[mockUser]]);
+    bcrypt.compare.mockResolvedValue(true);
+
+    await postLogin(req, res);
+
+    expect(res.redirect).toHaveBeenCalledWith('/dpa/dashboard');
+    expect(req.session.user).toBeDefined();
+  });
+
+  it('login sukses: HMSI tanpa id_divisi set nama_divisi default dan warning', async () => {
+    const { req, res } = createMockReqRes();
+    req.body = { email: 'hmsi@test.com', password: 'password123' };
+
+    const mockUser = {
+      id_anggota: 3,
+      nama: 'Anggota HMSI',
+      email: 'hmsi@test.com',
+      password: '$2b$hashedpassword',
+      role: 'HMSI',
+      id_divisi: null,
+      foto_profile: null,
+      nama_divisi: null,
+    };
+
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+    db.query.mockResolvedValue([[mockUser]]);
+    bcrypt.compare.mockResolvedValue(true);
+
+    await postLogin(req, res);
+
+    expect(res.redirect).toHaveBeenCalledWith('/hmsi/dashboard');
+    expect(req.session.user).toBeDefined();
+    expect(req.session.user.nama_divisi).toBe('Tidak Ada Divisi');
+    expect(warnSpy).toHaveBeenCalled();
+
+    warnSpy.mockRestore();
+  });
+
+  it('login sukses: password plain text (non-bcrypt) divalidasi tanpa bcrypt', async () => {
+    const { req, res } = createMockReqRes();
+    req.body = { email: 'plain@test.com', password: 'plainpass' };
+
+    const mockUser = {
+      id_anggota: 4,
+      nama: 'User Plain',
+      email: 'plain@test.com',
+      password: 'plainpass', // bukan hash bcrypt
+      role: 'Admin',
+      id_divisi: null,
+      nama_divisi: null,
+    };
+
+    db.query.mockResolvedValue([[mockUser]]);
+
+    await postLogin(req, res);
+
+    expect(bcrypt.compare).not.toHaveBeenCalled();
+    expect(res.redirect).toHaveBeenCalledWith('/admin/dashboard');
+    expect(req.session.user).toBeDefined();
+  });
+
+  it('email tidak ditemukan tanpa req.flash: render login dengan pesan', async () => {
+    const { req, res } = createMockReqRes();
+    req.body = { email: 'unknown@test.com', password: 'x' };
+    // Hilangkan flash agar cabang render dijalankan
+    req.flash = undefined;
+
+    db.query.mockResolvedValue([[]]);
+
+    await postLogin(req, res);
+
+    expect(res.render).toHaveBeenCalledWith('auth/login', expect.objectContaining({
+      errorMsg: 'Email atau password salah',
+    }));
+    expect(res.redirect).not.toHaveBeenCalled();
+  });
 });
